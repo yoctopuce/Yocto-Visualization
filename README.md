@@ -11,7 +11,7 @@ configurable by the user. Available widgets are:
 
 ![Screenshot example](https://www.yoctopuce.com/pubarchive/2017-04/widgets_1.png)
 
-You will find more information about this application on [Yoctopuce website] (https://www.yoctopuce.com/EN/article/new-stuff/yocto-visualization-a-free-visualizazion-app).
+You will find more information about this application on [Yoctopuce website] (https://www.yoctopuce.com).
 If you are not much into programming and are only interested in installing Yocto-visualisation,  here is the [windows installer](https://www.yoctopuce.com/FR/downloads/YoctoVisualization.zip) .   
 
 
