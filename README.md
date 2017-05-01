@@ -28,7 +28,7 @@ It might work with previous versions of VisualStudio, but not without pain.
  
 
 ## IMPORTANT
-This work is based on the {Livecharts](https://lvcharts.net) library, specifically
+This work is based on the [Livecharts](https://lvcharts.net) library, specifically
 *LiveCharts* and  *LiveCharts.Geared*. *LiveCharts* is free, but
 *LiveCharts.Geared* is not. If you open this project, it will start your *LiveCharts.Geared*
 trial period. After a while, you might have to buy a licence, which is reasonably
