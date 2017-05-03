@@ -25,7 +25,7 @@ It might work with previous versions of VisualStudio, but not without pain.
 - The application is based on the YSensor generic class. Any past, present and future Yoctopuce sensor compatible with this class will work with this application.
 - The editing principle is [C# reflection](https://msdn.microsoft.com/en-us/library/mt656691.aspx) associated with a *propertyGrid* component 
 - The most interesting file is *properties.cs*, basically it's the list of all customizable properties in the widgets. This is the place for adding/removing 
-  customizable properties. Default values a defined there as well.
+  customizable properties. Default values are defined there as well.
  
 
 ## IMPORTANT
