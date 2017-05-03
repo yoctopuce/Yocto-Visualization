@@ -101,7 +101,7 @@ namespace YoctoVisualisation
     bool dataLoggerFeature = false;
     private readonly Mutex dataMutex = new Mutex();
 
-
+    ulong lastGetunit = 0;
     int recordedDataLoadProgress = 0;
     YDataSet recordedData = null;
     bool loadFailed = false;
@@ -326,11 +326,15 @@ namespace YoctoVisualisation
         try
         {
           recordedDataLoadProgress = recordedData.loadMore();
+         
         }
         catch (Exception) { loadFailed = true; return; }
 
+        Thread.Sleep(50); // gives a chance to other theads to get the lock on the device.
+
         if (globalDataLoadProgress != (int)(recordedDataLoadProgress))
         {
+          
           globalDataLoadProgress = (int)(recordedDataLoadProgress);
           ((BackgroundWorker)sender).ReportProgress(globalDataLoadProgress);
         }
@@ -381,10 +385,6 @@ namespace YoctoVisualisation
       if (count > 0)
         if (curData[count - 1].DateTime > lastDataTimeStamp)
           lastDataTimeStamp = curData[count - 1].DateTime;
-
-
-
-
     }
 
 
@@ -463,8 +463,24 @@ namespace YoctoVisualisation
 
     public string get_unit()
     {
-      if (sensor.isOnline())
-      { unit = sensor.get_unit(); }
+    
+      if ((lastGetunit <= 0) || (YAPI.GetTickCount() - lastGetunit > 5000))
+      {
+        if (online)
+        {
+          bool ison = sensor.isOnline();
+         
+          if (ison)
+          {
+
+            unit = sensor.get_unit();
+            lastGetunit = YAPI.GetTickCount();
+          }
+          else online = false;
+        }
+      }
+     
+
       return unit;
 
     }
