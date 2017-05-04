@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 27191 2017-04-20 17:02:22Z seb $
+ * $Id: yocto_api.cs 27326 2017-05-03 13:09:37Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -72,6 +72,7 @@ using yUrlRef = System.Int16;
 
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 [Serializable]
 public class YAPI_Exception : Exception
@@ -1093,7 +1094,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "27243";
+    public const string YOCTO_API_BUILD_NO = "27333";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -2065,9 +2066,14 @@ public class YAPI
             int replysize = 0;
             byte[] fullrequest = null;
             YRETCODE res;
-
-            lock (_lock) {
-
+            bool enter;
+            do {
+                enter = Monitor.TryEnter(_lock);
+                if (!enter) {
+                    Thread.Sleep(50);
+                }
+            } while (!enter);
+            try {
                 res = HTTPRequestPrepare(request_org, ref fullrequest, ref errmsg);
                 if (YAPI.YISERR(res))
                     return res;
@@ -2097,6 +2103,10 @@ public class YAPI
                     Marshal.Copy(preply, reply, 0, replysize);
                 }
                 res = SafeNativeMethods._yapiHTTPRequestSyncDone(ref iohdl, buffer);
+            }
+            finally {
+
+                Monitor.Exit(_lock);
             }
             errmsg = buffer.ToString();
             return res;

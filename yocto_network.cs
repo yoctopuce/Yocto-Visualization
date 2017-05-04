@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_network.cs 27191 2017-04-20 17:02:22Z seb $
+ * $Id: yocto_network.cs 27273 2017-04-25 15:38:05Z seb $
  *
  * Implements yFindNetwork(), the high-level API for Network functions
  *
@@ -1768,7 +1768,7 @@ public class YNetwork : YFunction
     public virtual string ping(string host)
     {
         byte[] content;
-        
+
         content = this._download("ping.txt?host="+host);
         return YAPI.DefaultEncoding.GetString(content);
     }

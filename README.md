@@ -1,4 +1,4 @@
-# Yocto-Visualisation
+# Yocto-Visualization
 
 This C#.Net application will allow you to visualize data from any [Yoctopuce](https://www.yoctopuce.com) sensor.
 Both USB and networked sensors are supported. Sensors datalogger are supported
@@ -11,21 +11,21 @@ configurable by the user. Available widgets are:
 
 ![Screenshot example](https://www.yoctopuce.com/pubarchive/2017-04/widgets_1.png)
 
-You will find more information about this application on [Yoctopuce website](https://www.yoctopuce.com).
-If you are not much into programming and are only interested in installing Yocto-visualisation,  here is the [windows installer](https://www.yoctopuce.com/FR/downloads/YoctoVisualization.zip) .   
+You will find more information about this application on [Yoctopuce website](https://www.yoctopuce.com/EN/article/yocto-visualization-a-free-visualization-app).
+If you are not much into programming and are only interested in installing Yocto-Yisualization,  here is the [Windows installer](https://www.yoctopuce.com/FR/downloads/YoctoVisualization.zip) .   
 
 
 ## Source code installation
-Unzip the files wherever you want and open the project with at least VisualStudio 
-2015.  The *Livecharts* library  used by the project should install automatically.
-It might work with previous versions of VisualStudio, but not without pain.
+Unzip the files wherever you want and open the *.sln* project solution with at least VisualStudio 
+2015.  The *Livecharts* library  used by the project should install automatically, if not 
+do a "*Restore NuGet packages*" on the solution node in the *solution explorer*.  That project might 
+work with previous versions of VisualStudio, but not without pain.
  
 
 ## What you need to know
-- The application is based on the YSensor generic class. Any past, present and future Yoctopuce sensor compatible with this class will work with this application.
+- The application is based on the Yoctopuce YSensor generic class. Any past, present and future Yoctopuce sensor compatible with this class will work with this application.
 - The editing principle is [C# reflection](https://msdn.microsoft.com/en-us/library/mt656691.aspx) associated with a *propertyGrid* component 
-- The most interesting file is *properties.cs*, basically it's the list of all customizable properties in the widgets. This is the place for adding/removing 
-  customizable properties. Default values are defined there as well.
+- The most interesting file is *properties.cs*, basically it's the list of all customizable properties in the widgets. This is the place for adding / removing / customize properties. Default values are defined there as well.
  
 
 ## IMPORTANT
