@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 27326 2017-05-03 13:09:37Z seb $
+ * $Id: yocto_api.cs 27416 2017-05-11 09:58:11Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -1094,7 +1094,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "27333";
+    public const string YOCTO_API_BUILD_NO = "27439";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -4334,7 +4334,7 @@ public class YDataStream
             this._nRows = 0;
             return YAPI.SUCCESS;
         }
-        
+
         udat = YAPI._decodeWords(this._parent._json_get_string(sdata));
         this._values.Clear();
         idx = 0;
@@ -4371,7 +4371,7 @@ public class YDataStream
                 }
             }
         }
-        
+
         this._nRows = this._values.Count;
         return YAPI.SUCCESS;
     }
@@ -5147,7 +5147,7 @@ public class YDataSet
         int minCol;
         int avgCol;
         int maxCol;
-        
+
         if (progress != this._progress) {
             return this._progress;
         }
@@ -5183,7 +5183,7 @@ public class YDataSet
         } else {
             maxCol = 0;
         }
-        
+
         for (int ii = 0; ii < dataRows.Count; ii++) {
             if ((tim >= this._startTime) && ((this._endTime == 0) || (tim <= this._endTime))) {
                 this._measures.Add(new YMeasure(tim - itv, tim, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
@@ -5473,7 +5473,7 @@ public class YDataSet
         int minCol;
         int avgCol;
         int maxCol;
-        
+
         startUtc = (long) Math.Round(measure.get_startTimeUTC());
         stream = null;
         for (int ii = 0; ii < this._streams.Count; ii++) {
@@ -5505,7 +5505,7 @@ public class YDataSet
         } else {
             maxCol = 0;
         }
-        
+
         for (int ii = 0; ii < dataRows.Count; ii++) {
             if ((tim >= this._startTime) && ((this._endTime == 0) || (tim <= this._endTime))) {
                 measures.Add(new YMeasure(tim - itv, tim, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
@@ -8033,7 +8033,7 @@ public class YModule : YFunction
     {
         string serial;
         byte[] settings;
-        
+
         serial = this.get_serialNumber();
         settings = this.get_allSettings();
         if ((settings).Length == 0) {
@@ -8099,7 +8099,7 @@ public class YModule : YFunction
         string ext_settings;
         List<string> filelist = new List<string>();
         List<string> templist = new List<string>();
-        
+
         settings = this._download("api.json");
         if ((settings).Length == 0) {
             return settings;
@@ -8155,7 +8155,7 @@ public class YModule : YFunction
         int ofs;
         int size;
         url = "api/" + funcId + ".json?command=Z";
-        
+
         this._download(url);
         // add records in growing resistance value
         values = this._json_get_array(YAPI.DefaultEncoding.GetBytes(jsonExtra));
@@ -8271,7 +8271,7 @@ public class YModule : YFunction
         int count;
         int i;
         string fid;
-        
+
         count  = this.functionCount();
         i = 0;
         while (i < count) {
@@ -8305,7 +8305,7 @@ public class YModule : YFunction
         int i;
         string ftype;
         List<string> res = new List<string>();
-        
+
         count = this.functionCount();
         i = 0;
         while (i < count) {
@@ -8659,7 +8659,7 @@ public class YModule : YFunction
             old_jpath_len.Add((jpath).Length);
             old_val_arr.Add(value);
         }
-        
+
         actualSettings = this._download("api.json");
         actualSettings = this._flattenJsonStruct(actualSettings);
         new_dslist = this._json_get_array(actualSettings);
@@ -8933,7 +8933,7 @@ public class YModule : YFunction
     public virtual string get_lastLogs()
     {
         byte[] content;
-        
+
         content = this._download("logs.txt");
         return YAPI.DefaultEncoding.GetString(content);
     }
@@ -8985,7 +8985,7 @@ public class YModule : YFunction
         string subdevice_list;
         List<string> subdevices = new List<string>();
         string serial;
-        
+
         serial = this.get_serialNumber();
         fullsize = 0;
         yapi_res = SafeNativeMethods._yapiGetSubdevices(new StringBuilder(serial), smallbuff, 1024, ref fullsize, errmsg);
@@ -9031,7 +9031,7 @@ public class YModule : YFunction
         int pathsize;
         int yapi_res;
         string serial;
-        
+
         serial = this.get_serialNumber();
         // retrieve device object
         pathsize = 0;
@@ -9061,7 +9061,7 @@ public class YModule : YFunction
         int pathsize;
         int yapi_res;
         string serial;
-        
+
         serial = this.get_serialNumber();
         // retrieve device object
         pathsize = 0;
@@ -9288,7 +9288,7 @@ public class YModule : YFunction
      *   the index of the function for which the information is desired, starting at 0 for the first function.
      * </param>
      * <returns>
-     *   a the type of the function
+     *   a string corresponding to the type of the function
      * </returns>
      * <para>
      *   On failure, throws an exception or returns an empty string.
@@ -9328,13 +9328,14 @@ public class YModule : YFunction
      * <summary>
      *   Retrieves the base type of the <i>n</i>th function on the module.
      * <para>
+     *   For instance, the base type of all measuring functions is "Sensor".
      * </para>
      * </summary>
      * <param name="functionIndex">
      *   the index of the function for which the information is desired, starting at 0 for the first function.
      * </param>
      * <returns>
-     *   a the base type of the function
+     *   a string corresponding to the base type of the function
      * </returns>
      * <para>
      *   On failure, throws an exception or returns an empty string.
@@ -10345,7 +10346,7 @@ public class YSensor : YFunction
     public virtual int startDataLogger()
     {
         byte[] res;
-        
+
         res = this._download("api/dataLogger/recording?recording=1");
         if (!((res).Length>0)) { this._throw( YAPI.IO_ERROR, "unable to start datalogger"); return YAPI.IO_ERROR; }
         return YAPI.SUCCESS;
@@ -10364,7 +10365,7 @@ public class YSensor : YFunction
     public virtual int stopDataLogger()
     {
         byte[] res;
-        
+
         res = this._download("api/dataLogger/recording?recording=0");
         if (!((res).Length>0)) { this._throw( YAPI.IO_ERROR, "unable to stop datalogger"); return YAPI.IO_ERROR; }
         return YAPI.SUCCESS;
@@ -10412,7 +10413,7 @@ public class YSensor : YFunction
     {
         string funcid;
         string funit;
-        
+
         funcid = this.get_functionId();
         funit = this.get_unit();
         return new YDataSet(this, funcid, funit, startTime, endTime);
@@ -10496,7 +10497,7 @@ public class YSensor : YFunction
     {
         string rest_val;
         int res;
-        
+
         lock (_thisLock) {
             rest_val = this._encodeCalibrationPoints(rawValues, refValues);
             res = this._setAttr("calibrationParam", rest_val);

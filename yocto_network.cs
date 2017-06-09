@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_network.cs 27273 2017-04-25 15:38:05Z seb $
+ * $Id: yocto_network.cs 27416 2017-05-11 09:58:11Z seb $
  *
  * Implements yFindNetwork(), the high-level API for Network functions
  *
@@ -1717,6 +1717,28 @@ public class YNetwork : YFunction
     public virtual int useDHCP(string fallbackIpAddr, int fallbackSubnetMaskLen, string fallbackRouter)
     {
         return this.set_ipConfig("DHCP:"+ fallbackIpAddr+"/"+Convert.ToString( fallbackSubnetMaskLen)+"/"+fallbackRouter);
+    }
+
+    /**
+     * <summary>
+     *   Changes the configuration of the network interface to enable the use of an
+     *   IP address received from a DHCP server.
+     * <para>
+     *   Until an address is received from a DHCP
+     *   server, the module uses an IP of the network 169.254.0.0/16 (APIPA).
+     *   Remember to call the <c>saveToFlash()</c> method and then to reboot the module to apply this setting.
+     * </para>
+     * </summary>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> when the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int useDHCPauto()
+    {
+        return this.set_ipConfig("DHCP:");
     }
 
     /**

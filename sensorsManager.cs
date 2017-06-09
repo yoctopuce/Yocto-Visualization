@@ -391,14 +391,22 @@ namespace YoctoVisualisation
           throw new Exception("Timestamp inconsistency");
       }
 
-      // merge with data cache
+     
+
+
 
       if (previewMinData.Count > 0)
       {
         globalDataLoadProgress = 100;
         int index = 0;
         dataMutex.WaitOne();
-        while ((index < minData.Count) && (minData[index].DateTime < firstLiveDataTimeStamp)) index++;
+
+        double lastPreviewTimeStamp = previewMinData[previewMinData.Count - 1].DateTime;
+
+
+        while ((index < minData.Count) && (minData[index].DateTime < lastPreviewTimeStamp)) index++;
+
+
         minData.RemoveRange(0, index);
         curData.RemoveRange(0, index);
         maxData.RemoveRange(0, index);
@@ -828,15 +836,13 @@ namespace YoctoVisualisation
     public static void run()
     {
       string errmsg = "";
-   // ulong s = YAPI.GetTickCount();
+
       if (counter == 0)
       {
         YAPI.UpdateDeviceList(ref errmsg);
 
       }
       else YAPI.HandleEvents(ref errmsg);
-   // ulong e = YAPI.GetTickCount();
-   // if ((e - s) > 500) Console.WriteLine("oops " + (e - s).ToString() + "/" + counter.ToString());
       counter = (counter + 1) % 20;
     }
 
