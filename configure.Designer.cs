@@ -164,9 +164,9 @@
       this.label1.AutoSize = true;
       this.label1.Location = new System.Drawing.Point(12, 9);
       this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(345, 13);
+      this.label1.Size = new System.Drawing.Size(351, 13);
       this.label1.TabIndex = 7;
-      this.label1.Text = "Chose if you want to use local  devices through USB  and/or VirtualHub";
+      this.label1.Text = "Choose if you want to use local  devices through USB  and/or VirtualHub";
       // 
       // label2
       // 
