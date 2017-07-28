@@ -183,7 +183,7 @@ namespace YoctoVisualisation
         friendlyname = s.get_friendlyName();
         configureSensor();
         online = true;
-        loadDatalogger();
+      //  loadDatalogger();  // will be done automatically at device arrival
 
       }
 
@@ -204,7 +204,14 @@ namespace YoctoVisualisation
     protected void preload_DoWork(object sender, DoWorkEventArgs e)
     {
       recordedData = sensor.get_recordedData(0, 0);
-      recordedDataLoadProgress = recordedData.loadMore();
+      
+      try
+      {
+        recordedDataLoadProgress = recordedData.loadMore();
+      }
+      catch (Exception ex) { LogManager.Log(hwdName + ": load more caused an exception " + ex.ToString()); }
+
+      
       globalDataLoadProgress = recordedDataLoadProgress;
 
       List<YMeasure> measures = recordedData.get_preview();
@@ -296,52 +303,61 @@ namespace YoctoVisualisation
 
     protected void preload_Completed(object sender, RunWorkerCompletedEventArgs e)
     {
+     
 
       LogManager.Log(hwdName + " : datalogger preloading completed");
+     
       int RangeTo = -1;
-      if (previewMinData.Count <= 0) return;
-      if (firstLiveDataTimeStamp > 0)
-      {
-        while ((RangeTo < previewMinData.Count - 1) && (previewMinData[RangeTo + 1].DateTime < firstLiveDataTimeStamp)) RangeTo++;
-      }
-      else RangeTo = previewMinData.Count - 1;
-
-      if (RangeTo < 0) return;
-
-      firstDataloggerTimeStamp = previewMinData[0].DateTime;
+      if (previewMinData == null) return;
 
 
-      previewMinData = previewMinData.GetRange(0, RangeTo);
-      previewCurData = previewCurData.GetRange(0, RangeTo);
-      previewMaxData = previewMaxData.GetRange(0, RangeTo);
-      dataMutex.WaitOne();
-      minData = previewMinData.Union(minData).ToList();
-      curData = previewCurData.Union(curData).ToList();
-      maxData = previewMinData.Union(maxData).ToList();
-      dataMutex.ReleaseMutex();
+     if (previewMinData.Count <= 0) return;
 
-      preloadDone = true;
+      
+          if (firstLiveDataTimeStamp > 0)
+          {
+            while ((RangeTo < previewMinData.Count - 1) && (previewMinData[RangeTo + 1].DateTime < firstLiveDataTimeStamp)) RangeTo++;
+          }
+          else RangeTo = previewMinData.Count - 1;
 
-      int count = curData.Count;
-      if (count > 0)
-        if (curData[count - 1].DateTime > lastDataTimeStamp)
-          lastDataTimeStamp = curData[count - 1].DateTime;
+          if (RangeTo < 0) return;
 
-      foreach (Form f in FormsToNotify)
-        if (f is GraphForm)
-          ((GraphForm)f).SensorNewDataBlock(this, 0, RangeTo - 1, 0, true);
+          firstDataloggerTimeStamp = previewMinData[0].DateTime;
 
-      if (recordedDataLoadProgress < 100)
-      {
-        LogManager.Log(hwdName + " : start datalogger loading");
-        loadProcess.RunWorkerAsync(null);
 
-      }
+          previewMinData = previewMinData.GetRange(0, RangeTo);
+          previewCurData = previewCurData.GetRange(0, RangeTo);
+          previewMaxData = previewMaxData.GetRange(0, RangeTo);
+          dataMutex.WaitOne();
+          minData = previewMinData.Union(minData).ToList();
+          curData = previewCurData.Union(curData).ToList();
+          maxData = previewMinData.Union(maxData).ToList();
+          dataMutex.ReleaseMutex();
 
+          preloadDone = true;
+
+
+          int count = curData.Count;
+          if (count > 0)
+            if (curData[count - 1].DateTime > lastDataTimeStamp)
+              lastDataTimeStamp = curData[count - 1].DateTime;
+
+          foreach (Form f in FormsToNotify)
+            if (f is GraphForm)
+              ((GraphForm)f).SensorNewDataBlock(this, 0, RangeTo - 1, 0, true);
+
+          if (recordedDataLoadProgress < 100)
+          {
+            LogManager.Log(hwdName + " : start datalogger loading");
+            loadProcess.RunWorkerAsync(null);
+
+          }
+          
     }
 
     protected void load_DoWork(object sender, DoWorkEventArgs e)
     {
+     
       while (recordedDataLoadProgress < 100)
       {
         if ((((BackgroundWorker)sender).CancellationPending == true))
@@ -751,7 +767,7 @@ namespace YoctoVisualisation
         if (fbasetype == "Sensor")
         {
           string hwdID = serial + "." + fid;
-          LogManager.Log("New sensor found: " + hwdID);
+          LogManager.Log("New sensor arrival: " + hwdID);
           bool found = false;
           foreach (CustomYSensor alreadyThereSensor in sensorList)
           {
@@ -767,7 +783,7 @@ namespace YoctoVisualisation
             YSensor s = YSensor.FindSensor(serial + "." + fid);
             string hwd = s.get_hardwareId();
             sensorList.Add(new CustomYSensor(s, hwd));
-            // LogManager.Log(" Added to list");
+             LogManager.Log(" Added to list");
           }
         }
       }
