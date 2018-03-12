@@ -69,7 +69,21 @@ namespace YoctoVisualisation
   public class GaugeFormProperties : GenericProperties
   {
     public GaugeFormProperties(XmlNode initData, Form owner) : base(initData, owner)
-    { }
+    { PropagateDataSourceChange(); }
+
+    private void PropagateDataSourceChange()
+    {
+      ((gaugeForm)ownerForm).SourceChanged(_DataSource_source);
+      foreach (var p in this.GetType().GetProperties())
+      {
+        string name = p.Name;
+        if (name.StartsWith("DataSource_AlarmSection"))
+        {
+          // setBrowsableProperty(p.Name, IsDataSourceAssigned()); does not work :-(
+          ((AlarmSection)(p.GetValue(this, null))).setDataSource(_DataSource_source);
+        }
+      }
+    }
 
     private bool _SolidGauge_Uses360Mode = false;
     [DisplayName("360 mode"),
@@ -182,19 +196,24 @@ namespace YoctoVisualisation
       return !(_DataSource_source is NullYSensor);
     }
 
+ 
+
 
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
     [TypeConverter(typeof(SensorConverter)),
       DisplayName("Sensor"),
       CategoryAttribute("Data source"),
       DescriptionAttribute("Yoctopuce sensor feeding the gauge.")]
+
+
     public CustomYSensor DataSource_source
     {
       get { return _DataSource_source; }
       set
       {
         _DataSource_source = value;
-        ((gaugeForm)ownerForm).SourceChanged(value);
+        PropagateDataSourceChange();
+        
 
       }
     }
@@ -223,7 +242,32 @@ namespace YoctoVisualisation
       set { _DataSource_precision = value; }
     }
 
+    private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 1"),
+     NotSavedInXMLAttribute(true),
+     CategoryAttribute("Data source"),
 
+     DescriptionAttribute("Alarm 1 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection0
+    {
+      get { return _DataSource_AlarmSection0; }
+      set { _DataSource_AlarmSection0 = value; }
+    }
+
+
+
+    private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 2"),
+     CategoryAttribute("Data source"),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 2 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection1
+    {
+      get { return _DataSource_AlarmSection1; }
+      set { _DataSource_AlarmSection1 = value; }
+    }
   }
 
   //****************************
@@ -233,7 +277,21 @@ namespace YoctoVisualisation
   public class AngularGaugeFormProperties : GenericProperties
   {
     public AngularGaugeFormProperties(XmlNode initData, Form owner) : base(initData, owner)
-    { }
+    { PropagateDataSourceChange(); }
+
+    private void PropagateDataSourceChange()
+    {
+      ((angularGaugeForm)ownerForm).SourceChanged(_DataSource_source);
+      foreach (var p in this.GetType().GetProperties())
+      {
+        string name = p.Name;
+        if (name.StartsWith("DataSource_AlarmSection"))
+        {
+          // setBrowsableProperty(p.Name, IsDataSourceAssigned()); does not work :-(
+          ((AlarmSection)(p.GetValue(this, null))).setDataSource(_DataSource_source);
+        }
+      }
+    }
 
     public override bool IsDataSourceAssigned()
     {
@@ -251,7 +309,7 @@ namespace YoctoVisualisation
       set
       {
         _DataSource_source = value;
-        ((angularGaugeForm)ownerForm).SourceChanged(value);
+        PropagateDataSourceChange();
 
       }
     }
@@ -388,7 +446,32 @@ namespace YoctoVisualisation
       set { _AngularGauge_Sections2 = value; }
     }
 
+    private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 1"),
+     NotSavedInXMLAttribute(true),
+     CategoryAttribute("Data source"),
 
+     DescriptionAttribute("Alarm 1 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection0
+    {
+      get { return _DataSource_AlarmSection0; }
+      set { _DataSource_AlarmSection0 = value; }
+    }
+
+
+
+    private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 2"),
+     CategoryAttribute("Data source"),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 2 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection1
+    {
+      get { return _DataSource_AlarmSection1; }
+      set { _DataSource_AlarmSection1 = value; }
+    }
 
   }
 
@@ -441,7 +524,24 @@ namespace YoctoVisualisation
   public class digitalDisplayFormProperties : GenericProperties
   {
     public digitalDisplayFormProperties(XmlNode initData, Form owner) : base(initData, owner)
-    { }
+    {
+      PropagateDataSourceChange();
+
+    }
+
+    private void PropagateDataSourceChange()
+    {
+      ((digitalDisplayForm)ownerForm).SourceChanged(_DataSource_source);
+      foreach (var p in this.GetType().GetProperties())
+      {
+        string name = p.Name;
+        if (name.StartsWith("DataSource_AlarmSection"))
+        { 
+          // setBrowsableProperty(p.Name, IsDataSourceAssigned()); does not work :-(
+          ((AlarmSection)(p.GetValue(this, null))).setDataSource(_DataSource_source);
+        }
+      }
+    }
 
     public override bool IsDataSourceAssigned()
     {
@@ -451,15 +551,16 @@ namespace YoctoVisualisation
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
     [TypeConverter(typeof(SensorConverter)),
       DisplayName("Sensor"),
-     CategoryAttribute("Data source"),
-     DescriptionAttribute("Yoctopuce sensor feeding the display.")]
+      CategoryAttribute("Data source"),
+      
+      DescriptionAttribute("Yoctopuce sensor feeding the display.")]
     public CustomYSensor DataSource_source
     {
       get { return _DataSource_source; }
       set
       {
         _DataSource_source = value;
-        ((digitalDisplayForm)ownerForm).SourceChanged(value);
+        PropagateDataSourceChange();
 
       }
     }
@@ -486,11 +587,39 @@ namespace YoctoVisualisation
       get { return _DataSource_precision; }
       set { _DataSource_precision = value; }
     }
+    
+    private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 1"),
+     NotSavedInXMLAttribute(true),
+     CategoryAttribute("Data source"),
+    
+     DescriptionAttribute("Alarm 1 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection0
+    {
+      get { return _DataSource_AlarmSection0; }
+      set { _DataSource_AlarmSection0 = value; }
+    }
 
+    
+
+    private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 2"),
+     CategoryAttribute("Data source"),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 2 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection1
+    {
+      get { return _DataSource_AlarmSection1; }
+      set { _DataSource_AlarmSection1 = value; }
+    }
+    
 
     private Font _Label_Font = new Font("Arial", 48, System.Drawing.FontStyle.Regular);
     [DisplayName("Font"),
      CategoryAttribute("Display"),
+    
      DescriptionAttribute("Display font")]
     public Font Label_Font
     {
@@ -542,8 +671,7 @@ namespace YoctoVisualisation
     }
 
 
-
-
+  
 
   }
 
@@ -710,6 +838,97 @@ namespace YoctoVisualisation
 
 
   }
+
+  /****************************************
+   * Alarm section
+   */
+
+
+  public class AlarmSection
+  {
+
+    
+    CustomYSensor _sensor = sensorsManager.getNullSensor();
+    int _index = 0;
+
+    public AlarmSection(int index)
+    {
+      _index = index;
+    }
+
+    [DisplayName("Data source type"),
+    TypeConverter(typeof(AlamSourceTypeConverter)),
+    NotSavedInXMLAttribute(true),
+    DescriptionAttribute("Alarm sensor data source (Average, minimum or maximimum value during last interval)")]
+    public int source
+    {
+      get
+      {
+        return _sensor.getAlarmSource(_index);
+      }
+      set
+      {
+        _sensor.setAlarmSource(_index, value);
+      }
+    }
+
+
+    [DisplayName("Test Condition"),
+     TypeConverter(typeof(AlamTriggerTypeConverter)),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm trigger condition")]
+    public int condition
+    {
+      get {
+        return _sensor.getAlarmCondition(_index); 
+      }
+      set {
+        _sensor.setAlarmCondition(_index,value); }
+    }
+
+    public void setDataSource(CustomYSensor sensor)
+    {
+      _sensor = sensor;
+    }
+
+   
+    [DisplayName("Test Value"),
+      NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Value for the Alarm trigger")]
+    public double value
+    {
+      get {
+        return _sensor.getAlarmValue(_index);
+      }
+      set {
+        _sensor.setAlarmValue(_index, value); }
+    }
+
+   
+    [DisplayName("Trigger action"),
+      NotSavedInXMLAttribute(true),
+     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $HWDID$, $NAME$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$.")]
+    public string commandLine
+    {
+      get {
+         return _sensor.getAlarmCommandline(_index); 
+      }
+      set { _sensor.setAlarmCommandline(_index, value); }
+    }
+
+   
+    [DisplayName("Trigger delay"),
+      NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Minimum delay, in seconds, between two alarms. Think carefully and make sure you won't create alarm storms.")]
+    public int delay
+    {
+      get {
+         return _sensor.getAlarmDelay(_index); 
+      }
+      set { _sensor.setAlarmDelay(_index,value); }
+    }
+  }
+
   /****************************************
    * Y axis section
    */
@@ -920,14 +1139,31 @@ namespace YoctoVisualisation
     public ChartSerie(Color defaultColor)
     {
       _Stroke = defaultColor;
+     
     }
 
     public void Init(Form owner, int serieIndex)
     {
       ownerForm = owner;
       index = serieIndex;
-
+      PropagateDataSourceChange(_DataSource_source);
     }
+
+    private void PropagateDataSourceChange(CustomYSensor value)
+    {
+      ((GraphForm)ownerForm).SourceChanged(index, value);
+      foreach (var p in this.GetType().GetProperties())
+      {
+        string name = p.Name;
+        if (name.StartsWith("DataSource_AlarmSection"))
+        {
+          // setBrowsableProperty(p.Name, IsDataSourceAssigned()); does not work :-(
+          ((AlarmSection)(p.GetValue(this, null))).setDataSource(_DataSource_source);
+        }
+      }
+    }
+
+
 
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
     [TypeConverter(typeof(SensorConverter)),
@@ -939,8 +1175,8 @@ namespace YoctoVisualisation
       set
       {
         _DataSource_source = value;
-        if (ownerForm != null)
-          ((GraphForm)ownerForm).SourceChanged(index, value);
+        if (ownerForm != null) PropagateDataSourceChange(_DataSource_source);
+          
 
       }
     }
@@ -960,7 +1196,7 @@ namespace YoctoVisualisation
 
     private int _DataType = 0;
     [DisplayName("Sensor data"),
-     TypeConverter(typeof(AvgMinMaxConverter))
+     TypeConverter(typeof(AvgMinMaxConverter)),
      DescriptionAttribute("Which data for sensor are displayed on the graph. Min and Max are available only for frequencies <1Hz")]
     public int DataSource_datatype
     {
@@ -973,7 +1209,32 @@ namespace YoctoVisualisation
       }
     }
 
+    
+    private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 1"),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 1 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection0
+    {
+      get { return _DataSource_AlarmSection0; }
+      set { _DataSource_AlarmSection0 = value; }
+    }
 
+
+
+    private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
+    [TypeConverter(typeof(AlarmSectionParamConverter)),
+     DisplayName("Sensor value alarm 2"),   
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 2 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection1
+    {
+      get { return _DataSource_AlarmSection1; }
+      set { _DataSource_AlarmSection1 = value; }
+    }
+    
+    
 
     [DisplayName("Sensor recording"),
      TypeConverter(typeof(YesNoConverter)),
@@ -1016,8 +1277,7 @@ namespace YoctoVisualisation
     }
 
     private int _ScalesYAt = 0;
-    [TypeConverter(typeof(YAxisChooserConverter))
-
+    [TypeConverter(typeof(YAxisChooserConverter)),
       DisplayName("Y axis"),
       DescriptionAttribute("Choose which Y axis the data with be scaled to.")]
     public int ScalesYAt
@@ -1026,6 +1286,7 @@ namespace YoctoVisualisation
       set { _ScalesYAt = value; }
     }
 
+  
 
   }
 

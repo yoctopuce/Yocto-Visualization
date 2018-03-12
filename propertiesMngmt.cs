@@ -37,8 +37,8 @@
  *  BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF
  *  WARRANTY, OR OTHERWISE.
  */
- 
- 
+
+
 
 using LiveCharts.WinForms;
 using LiveCharts.Wpf;
@@ -47,6 +47,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
@@ -168,6 +169,7 @@ namespace YoctoVisualisation
     }
   }
 
+ 
 
 
   public class YesNoConverter : StringConverter
@@ -219,6 +221,171 @@ namespace YoctoVisualisation
       return base.ConvertFrom(context, culture, value);
     }
   }
+
+  public class AlarmSectionParamConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(ChartSerie)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String))
+      {
+
+        string cmd = ((AlarmSection)value).commandLine;
+        if (cmd.Trim() == "") cmd = "do nothing";
+        int isrc = ((AlarmSection)value).source;
+        string src = isrc == 1 ? "MIN" : isrc == 2 ? "MAX" : "AVG";
+
+        switch (((AlarmSection)value).condition)
+        { case 1 :  return "if "+ src + " > " + ((AlarmSection)value).value.ToString()+" then "+ cmd;
+          case 2 :  return "if " + src + " >= " + ((AlarmSection)value).value.ToString() + " then " + cmd;
+          case 3 :  return "if " + src + " = " + ((AlarmSection)value).value.ToString() + " then " + cmd;
+          case 4 :  return "if " + src + " <= " + ((AlarmSection)value).value.ToString() + " then " + cmd;
+          case 5 :  return "if " + src + " < " + ((AlarmSection)value).value.ToString() + " then " + cmd;
+
+
+          default :  return "Disabled";
+         } 
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
+  public class AlamSourceTypeConverter : StringConverter
+  {
+    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+    { return true; }
+
+    public override StandardValuesCollection
+                     GetStandardValues(ITypeDescriptorContext context)
+    { return new StandardValuesCollection(new string[] { "Average value", "Min value", "Max value" }); }
+
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(int)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context,
+                                CultureInfo culture,
+                                object value,
+                                System.Type destinationType)
+    {
+      if ((destinationType == typeof(System.String)) && (value is int))
+      {
+
+
+        switch ((int)value)
+        {
+          case 1: return "Min value";
+          case 2: return "Max value";
+         
+          default: return "Average value";
+        }
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+
+    public override bool CanConvertFrom(ITypeDescriptorContext context,
+                              System.Type sourceType)
+    {
+      if (sourceType == typeof(string)) return true;
+
+      return base.CanConvertFrom(context, sourceType);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context,
+                              CultureInfo culture, object value)
+    {
+      if (value is String)
+      {
+        if (((string)value).ToUpper().IndexOf("MIN") >= 0) return 1;
+        if (((string)value).ToUpper().IndexOf("MAX") >= 0) return 2;
+       
+
+
+        return 0;
+      }
+
+      return base.ConvertFrom(context, culture, value);
+    }
+
+  }
+
+
+  public class AlamTriggerTypeConverter : StringConverter
+  {
+   
+
+    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+    { return true; }
+
+    public override StandardValuesCollection
+                     GetStandardValues(ITypeDescriptorContext context)
+    { return new StandardValuesCollection(new string[] { "Disabled", ">", ">=", "=", "<=","<" }); }
+
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(int)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context,
+                                CultureInfo culture,
+                                object value,
+                                System.Type destinationType)
+    {
+      if ((destinationType == typeof(System.String)) && (value is int))
+      {
+         
+
+        switch ((int)value)
+        {
+          case 1: return ">";
+          case 2: return ">=";
+          case 3: return "=";
+          case 4: return "<=";
+          case 5: return "<";
+          default: return "Disabled";
+        }
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+
+    public override bool CanConvertFrom(ITypeDescriptorContext context,
+                              System.Type sourceType)
+    {
+      if (sourceType == typeof(string)) return true;
+
+      return base.CanConvertFrom(context, sourceType);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context,
+                              CultureInfo culture, object value)
+    {
+      if (value is String)
+      {
+        if (((string)value).ToUpper().IndexOf(">=") >= 0) return 2;
+        if (((string)value).ToUpper().IndexOf("<=") >= 0) return 4;
+        if (((string)value).ToUpper().IndexOf("=") >= 0) return 3;
+        if (((string)value).ToUpper().IndexOf(">") >= 0) return 1;
+        if (((string)value).ToUpper().IndexOf("<") >= 0) return 5;
+
+
+        return 0;
+      }
+
+      return base.ConvertFrom(context, culture, value);
+    }
+  }
+
 
 
   public class AvgMinMaxConverter : StringConverter
@@ -671,6 +838,32 @@ namespace YoctoVisualisation
 
     public abstract bool IsDataSourceAssigned();
 
+
+
+
+
+  
+    /// <summary>
+    /// Set the Browsable property.
+    /// NOTE: Be sure to decorate the property with [Browsable(true)]
+    /// </summary>
+    /// <param name="PropertyName">Name of the variable</param>
+    /// <param name="bIsBrowsable">Browsable Value</param>
+    public  void setBrowsableProperty(string strPropertyName, bool bIsBrowsable)
+    {
+      // Get the Descriptor's Properties
+      PropertyDescriptor theDescriptor = TypeDescriptor.GetProperties(this.GetType())[strPropertyName];
+
+      // Get the Descriptor's "Browsable" Attribute
+      BrowsableAttribute theDescriptorBrowsableAttribute = (BrowsableAttribute)theDescriptor.Attributes[typeof(BrowsableAttribute)];
+      FieldInfo isBrowsable = theDescriptorBrowsableAttribute.GetType().GetField("Browsable", BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Instance);
+
+      // Set the Descriptor's "Browsable" Attribute
+      isBrowsable.SetValue(theDescriptorBrowsableAttribute, bIsBrowsable);
+    }
+
+
+
     public GenericProperties(XmlNode initData, Form Owner)
     {
       ownerForm = Owner;
@@ -1071,6 +1264,9 @@ namespace YoctoVisualisation
 
     public void ApplyProperties(object rootSource, object rootTarget, string fullpropname, object sourceValue, List<String> path)
     {
+     if (sourceValue is AlarmSection)  return;  // dirty hack: alarms are no handled through reflexion
+
+
       if (!IsStructured(sourceValue))
       {
         newSetProperty(rootTarget, this, fullpropname, path);

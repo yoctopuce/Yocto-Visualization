@@ -82,14 +82,14 @@ namespace YoctoVisualisation
 
     public void showWindow(GenericProperties prop, SetValueCallBack valueCallBack, bool ForceToTshow)
     {
-
-      setCallback = valueCallBack;
       try
       {
+        setCallback = valueCallBack;
+     
         propertyGrid1.SelectedObject = prop;
         Text = "Properties of " + prop.Form_Text;
       }
-      catch { }
+      catch (Exception e){ LogManager.Log("Properties Windows error: " + e.Message); }
 
       if (ForceToTshow) Show();
 

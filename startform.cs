@@ -76,32 +76,42 @@ namespace YoctoVisualisation
       LogManager.LogNoTS("-log                     Automatically open log window");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.Log("Current config file is " + constants.configfile);
-      LogManager.Log("Yoctopuce API verion is " + YAPI.GetAPIVersion());
-    
+      LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
+
 
 
 
 
       if (File.Exists(constants.configfile))
-      {
-        XmlDocument doc = new XmlDocument();
-         doc.Load(constants.configfile);
-        foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+      { try
         {
-          switch (node.Name)
-          {
-            case "GraphForm": NewGraphForm(node); MustHide = true; break;
-            case "GaugeForm": NewSolidGaugeForm(node); MustHide = true; break;
-            case "angularGaugeForm": NewAngularGaugeForm(node); MustHide = true; break;
-            case "digitalDisplayForm": NewDigitalDisplayForm(node); MustHide = true; break;
-            case "Config": configWindow.Init(node);break;
-            case "PropertiesForm": propnode = node; break;
+          XmlDocument doc = new XmlDocument();
+          doc.Load(constants.configfile);
 
+          // sensor config must be loaded first
+          foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+             if (node.Name == "Sensors")
+               sensorsManager.setKnownSensors(node);
+
+
+          foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+          {
+            switch (node.Name)
+            {
+              case "GraphForm": NewGraphForm(node); MustHide = true; break;
+              case "GaugeForm": NewSolidGaugeForm(node); MustHide = true; break;
+              case "angularGaugeForm": NewAngularGaugeForm(node); MustHide = true; break;
+              case "digitalDisplayForm": NewDigitalDisplayForm(node); MustHide = true; break;
+              case "Config": configWindow.Init(node); break;
+              case "PropertiesForm": propnode = node; break;
+            
+            }
 
           }
-
         }
-      } else configWindow.DefaultInit();
+        catch (Exception e) { LogManager.Log("Cannot load config file " + constants.configfile + ": " + e.Message); }
+
+        } else configWindow.DefaultInit();
       propWindow = new PropertiesForm(propnode);
 
       configWindow.CheckInit();
@@ -295,6 +305,9 @@ namespace YoctoVisualisation
         if (f is digitalDisplayForm) XmlConfigFile += ((digitalDisplayForm)f).getConfigData();
       }
       XmlConfigFile += propWindow.getConfigData();
+      XmlConfigFile += sensorsManager.getXMLSensorsConfig();
+
+
       XmlConfigFile += "</ROOT>\n";
       try
       {

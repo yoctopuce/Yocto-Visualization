@@ -45,6 +45,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Threading;
+using System.Xml;
+using System.Diagnostics;
 
 namespace YoctoVisualisation
 {
@@ -92,6 +94,42 @@ namespace YoctoVisualisation
     }
   }
 
+  public class AlarmConverter : TypeConverter
+  {
+    public override bool GetStandardValuesSupported(
+                          ITypeDescriptorContext context)
+    {
+      return true;
+    }
+
+
+    public override StandardValuesCollection
+                     GetStandardValues(ITypeDescriptorContext context)
+    {
+
+      return new StandardValuesCollection(sensorsManager.sensorList);
+
+    }
+
+
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+    {
+      if (sourceType == typeof(string))
+      {
+        return true;
+      }
+      return base.CanConvertFrom(context, sourceType);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+    {
+     
+      return base.ConvertFrom(context, culture, value);
+    }
+  }
+
+
+
 
   public class TimedSensorValue
   {
@@ -99,9 +137,11 @@ namespace YoctoVisualisation
     public double Value { get; set; }
   }
 
+
+
   public class NullYSensor : CustomYSensor
   {
-    public NullYSensor() : base(null, "")
+    public NullYSensor() : base(null, "",null)
     {
       hwdName = "NOTAREALSENSOR";
       friendlyname = "NOTAREALSENSOR";
@@ -115,7 +155,154 @@ namespace YoctoVisualisation
     public new YSensor get_sensor() { return null; }
     public override string ToString() { return "(none)"; }
 
+    public override void setAlarmCondition(int index, int condition) {  }
+    public override int getAlarmCondition(int index) { return 0; }
+    public override void setAlarmValue(int index,double value) {  }
+    public override double getAlarmValue(int index) { return 0; }
+    public override void setAlarmDelay(int index, int value) {  }
+    public override int getAlarmDelay(int index) { return 0; }
+    public override void setAlarmCommandline(int index, string value) {  }
+    public override  string getAlarmCommandline(int index) {  return ""; }
+
+
+
   }
+
+  public class AlarmSettings
+  { int index;
+    int Condition = 0;
+    int Source = 0;
+    double Value = 0;
+    int Delay = 15;
+    string Commandline = "";
+    CustomYSensor parent;
+    DateTime lastAlarm = DateTime.MinValue;
+
+
+    static void ExecuteCommand(string source, string command)
+    {
+      var processInfo = new ProcessStartInfo("cmd.exe", "/c " + command);
+      processInfo.CreateNoWindow = true;
+      processInfo.UseShellExecute = false;
+      processInfo.RedirectStandardError = true;
+      processInfo.RedirectStandardOutput = true;
+
+      var process = Process.Start(processInfo);
+
+      process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
+          LogManager.Log(source+" output :" + e.Data);
+      process.BeginOutputReadLine();
+
+      process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) =>
+          LogManager.Log(source + " error : " + e.Data);
+      process.BeginErrorReadLine();
+
+      process.WaitForExit();
+
+      Console.WriteLine(source + " ExitCode: " + process.ExitCode.ToString());
+      process.Close();
+
+   
+      
+    }
+
+
+
+    public AlarmSettings(int index, CustomYSensor owner, XmlNode xmldata)
+    {
+      this.index = index;
+      parent = owner;
+      if (xmldata != null)
+      {
+        Source = int.Parse(xmldata.Attributes["Source"].InnerText);
+        Condition = int.Parse(xmldata.Attributes["Condition"].InnerText);
+        Value = double.Parse(xmldata.Attributes["Value"].InnerText);
+        Commandline = xmldata.Attributes["Cmd"].InnerText;
+        Delay = int.Parse(xmldata.Attributes["Delay"].InnerText);
+
+
+      }
+
+    }
+
+    public AlarmSettings(int index, CustomYSensor owner) 
+      : this(index, owner, null) { }
+   
+
+    public string getXmlData()
+    { return "<Alarm "
+            + "Source=\"" + Source.ToString() + "\" "
+            + "Condition=\"" + Condition.ToString() + "\" "
+            + "Value=\"" + Value.ToString() + "\" "
+            + "Cmd=\"" + System.Security.SecurityElement.Escape(Commandline) + "\" "
+            + "Delay=\"" + Delay.ToString() + "\"/>\n";
+
+    }
+
+  
+
+    public  void setCondition( int condition) { this.Condition = condition; }
+    public  int getCondition() { return this.Condition; }
+    public void setSource(int source) { this.Source = source; }
+    public int getSource() { return this.Source; }
+    public  void setValue( double value) { this.Value = value; }
+    public  double getValue() { return this.Value; }
+    public  void setDelay( int value) { this.Delay = value; }
+    public  int getDelay() { return this.Delay; }
+    public  void setCommandline( string value) { this.Commandline = value; }
+    public  string getCommandline() { return this.Commandline; }
+
+    public void check(YMeasure m )
+    { bool alarm = false;
+      string reason = "";
+      string src = "";
+      double SensorValue = 0;
+     
+      switch (Source)
+      {
+        case 1:  src = "MIN"; SensorValue = m.get_minValue(); break;
+        case 2:  src = "MAX"; SensorValue = m.get_maxValue();  break;
+        default: src = "AVG"; SensorValue = m.get_averageValue();  break;
+
+      }
+
+      switch (Condition)
+        { default : return;  // alarm disabled
+          case 1: reason = ">";  if  (SensorValue > Value) alarm = true;break;
+          case 2: reason = ">="; if (SensorValue >= Value) alarm = true; break;
+          case 3: reason = "="; if (SensorValue == Value) alarm = true; break;
+          case 4: reason = "<="; if (SensorValue <= Value) alarm = true; break;
+          case 5: reason = "<"; if (SensorValue < Value) alarm = true; break;
+      }
+      if (!alarm) return;
+      if (((DateTime.Now - lastAlarm).Seconds) < Delay) return;
+
+      string source = "ALARM " + (index + 1).ToString();
+      LogManager.Log(source+" on " + parent.get_hardwareId() + "/" + parent.get_friendlyName() + " (" + SensorValue.ToString() + reason + Value.ToString() + ")");
+     
+      string Execute = Commandline;
+      Execute = Execute.Replace("$SENSORVALUE$", SensorValue.ToString());
+      Execute = Execute.Replace("$HWDID$", parent.get_hardwareId());
+      Execute = Execute.Replace("$NAME$", parent.get_friendlyName());
+      Execute = Execute.Replace("$CONDITION$", reason);
+      Execute = Execute.Replace("$DATATYPE$", src);
+      Execute = Execute.Replace("$TRIGGER$", Value.ToString());
+      Execute = Execute.Replace("$NOW$", DateTime.Now.ToString("yyyy/MM/dd h:mm:ss.ff"));
+
+
+
+      new Thread(() =>
+      {
+        Thread.CurrentThread.IsBackground = true;
+        ExecuteCommand(source,Execute);
+       }).Start();
+
+     
+      lastAlarm = DateTime.Now;
+    }
+
+  }
+
 
   public class CustomYSensor
   {
@@ -131,6 +318,8 @@ namespace YoctoVisualisation
     bool loadDone = false;
     bool dataLoggerFeature = false;
     private readonly Mutex dataMutex = new Mutex();
+
+    
 
     ulong lastGetunit = 0;
     int recordedDataLoadProgress = 0;
@@ -152,8 +341,10 @@ namespace YoctoVisualisation
     BackgroundWorker predloadProcess;
     BackgroundWorker loadProcess;
 
+    List<AlarmSettings> Alarms = new List<AlarmSettings>();
 
-    public CustomYSensor(YSensor s, string name)
+
+    public CustomYSensor(YSensor s, string name, XmlNode SensorLocalConfig)
     {
       FormsToNotify = new List<Form>();
 
@@ -186,12 +377,59 @@ namespace YoctoVisualisation
       //  loadDatalogger();  // will be done automatically at device arrival
 
       }
+      if (SensorLocalConfig != null)
+      {
+        int index = 0;
+        foreach (XmlNode n in SensorLocalConfig)
+        {
+          
+          if (n.Name == "Alarm")
+          {
+            checkAlarmIndex(index);
+            Alarms[index] =new AlarmSettings(index, this, n);
+            index++;
 
+          }
 
+        }
+      }
 
     }
 
-    public int getGetaLoadProgress() { return globalDataLoadProgress; }
+    private void checkAlarmIndex(int index)
+      {  while (Alarms.Count < index + 1) Alarms.Add(new AlarmSettings(Alarms.Count,    this));
+     
+      }
+
+    public int getAlarmCount()
+    {
+      return Alarms.Count;
+    }
+
+
+
+    public virtual void setAlarmCondition(int index,int condition) { checkAlarmIndex(index); this.Alarms[index].setCondition( condition);  }
+    public virtual int getAlarmCondition(int index) { checkAlarmIndex(index); return this.Alarms[index].getCondition(); }
+    public virtual void setAlarmSource(int index, int source) { checkAlarmIndex(index); this.Alarms[index].setSource(source); }
+    public virtual int getAlarmSource(int index) { checkAlarmIndex(index); return this.Alarms[index].getSource(); }
+
+    public virtual void setAlarmValue(int index, double value) { checkAlarmIndex(index); this.Alarms[index].setValue(value); }
+    public virtual double getAlarmValue(int index) { checkAlarmIndex(index); return this.Alarms[index].getValue(); }
+    public virtual void setAlarmDelay(int index, int value) { checkAlarmIndex(index); this.Alarms[index].setDelay( value); }
+    public virtual int getAlarmDelay(int index) { checkAlarmIndex(index); return this.Alarms[index].getDelay(); }
+    public virtual void setAlarmCommandline(int index, string value) { checkAlarmIndex(index); this.Alarms[index].setCommandline(  value); }
+    public virtual string getAlarmCommandline(int index) { checkAlarmIndex(index);  return this.Alarms[index].getCommandline(); }
+
+    public string GetXmlData()
+    { string res =  "<Sensor ID=\"" + get_hardwareId() + "\">\n";
+      for (int i = 0; i < getAlarmCount(); i++)
+        res = res + Alarms[i].getXmlData();
+      res = res + "</Sensor>\n";
+      return res;
+    }
+
+
+  public int getGetaLoadProgress() { return globalDataLoadProgress; }
 
 
     public double get_firstLiveDataTimeStamp()
@@ -653,6 +891,10 @@ namespace YoctoVisualisation
         minData.Add(new TimedSensorValue { DateTime = t, Value = M.get_minValue() });
         maxData.Add(new TimedSensorValue { DateTime = t, Value = M.get_maxValue() });
         dataMutex.ReleaseMutex();
+
+        for (int i = 0; i < Alarms.Count; i++)
+          Alarms[i].check(M);
+
       }
 
       foreach (Form f in FormsToNotify)
@@ -722,15 +964,36 @@ namespace YoctoVisualisation
   public static class sensorsManager
   {
     private static int counter = 0;
-
-
-
-
-
-
-
-    public static List<CustomYSensor> sensorList;
+    public static List<CustomYSensor> sensorList;  // actual list of sensors
     public static CustomYSensor NullSensor;
+    private static XmlNode KnownSensors = null;  // sensors list picked up from xml config file
+    public static string  getXMLSensorsConfig()
+    {
+      string res = "<Sensors>\n";
+      foreach (CustomYSensor s in sensorList)
+        if (!(s is NullYSensor))
+             res = res + s.GetXmlData();   
+      res =res+"</Sensors>\n";
+      return res;
+
+    }
+
+    public static void setKnownSensors(XmlNode sensorXMLList)
+    {
+      KnownSensors = sensorXMLList;
+
+    }
+
+    public static XmlNode FindSensorLastLocalConfig(string hwdId)
+    {
+      XmlNode SensorConfig = null;
+      if (KnownSensors != null)
+        foreach (XmlNode node in KnownSensors)
+          if (node.Name == "Sensor")
+            if (node.Attributes["ID"].InnerText == hwdId)
+              SensorConfig = node;
+      return SensorConfig;
+    }
 
     public static void deviceArrival(YModule m)
     {
@@ -782,7 +1045,9 @@ namespace YoctoVisualisation
           {
             YSensor s = YSensor.FindSensor(serial + "." + fid);
             string hwd = s.get_hardwareId();
-            sensorList.Add(new CustomYSensor(s, hwd));
+         
+
+            sensorList.Add(new CustomYSensor(s, hwd, FindSensorLastLocalConfig(hwd)));
              LogManager.Log(" Added to list");
           }
         }
@@ -818,7 +1083,7 @@ namespace YoctoVisualisation
           if (alreadyThereSensor.get_hardwareId() == hwdID) return alreadyThereSensor;
 
       YSensor s = YSensor.FindSensor(hwdID);
-      CustomYSensor cs = new CustomYSensor(s, hwdID);
+      CustomYSensor cs = new CustomYSensor(s, hwdID, FindSensorLastLocalConfig(hwdID));
       sensorList.Add(cs);
       return cs;
     }
@@ -835,12 +1100,6 @@ namespace YoctoVisualisation
       NullSensor = new NullYSensor();
       sensorList = new List<CustomYSensor>();
       sensorList.Add(NullSensor);
-
-
-
-
-
-
       YAPI.RegisterDeviceArrivalCallback(deviceArrival);
       YAPI.RegisterDeviceRemovalCallback(deviceRemoval);
 
