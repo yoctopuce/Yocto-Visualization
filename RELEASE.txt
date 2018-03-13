@@ -1,1 +1,1 @@
-- Minor fix
+- Minor fixes
