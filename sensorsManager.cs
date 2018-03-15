@@ -287,6 +287,7 @@ namespace YoctoVisualisation
       Execute = Execute.Replace("$CONDITION$", reason);
       Execute = Execute.Replace("$DATATYPE$", src);
       Execute = Execute.Replace("$TRIGGER$", Value.ToString());
+      Execute = Execute.Replace("$UNIT$", parent.get_unit());
       Execute = Execute.Replace("$NOW$", DateTime.Now.ToString("yyyy/MM/dd h:mm:ss.ff"));
 
 

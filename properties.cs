@@ -568,6 +568,7 @@ namespace YoctoVisualisation
     [DisplayName("Sensor freq"),
      TypeConverter(typeof(FrequencyConverter)),
      NotSavedInXMLAttribute(true),
+     CategoryAttribute("Data source"),
      DescriptionAttribute("Sensor data acquisition frequency. Note that modifying this setting will affect the device configuration.")]
 
     public string DataSource_freq
@@ -907,7 +908,7 @@ namespace YoctoVisualisation
    
     [DisplayName("Trigger action"),
       NotSavedInXMLAttribute(true),
-     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $HWDID$, $NAME$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$.")]
+     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $HWDID$, $NAME$, $UNIT$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$.")]
     public string commandLine
     {
       get {
