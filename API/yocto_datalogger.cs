@@ -1,12 +1,12 @@
-﻿
-/*
- *   Yocto-Visualization, a free application to visualize Yoctopuce Sensors.
- * 
- *  Application entry point
- * 
- *  - - - - - - - - - License information: - - - - - - - - -
+/********************************************************************
  *
- *  Copyright (C) 2017 and beyond by Yoctopuce Sarl, Switzerland.
+ * $Id: yocto_datalogger.cs 28120 2017-07-25 07:06:32Z seb $
+ *
+ * High-level programming interface, common to all modules
+ *
+ * - - - - - - - - - License information: - - - - - - - - -
+ *
+ *  Copyright (C) 2011 and beyond by Yoctopuce Sarl, Switzerland.
  *
  *  Yoctopuce Sarl (hereafter Licensor) grants to you a perpetual
  *  non-exclusive license to use, modify, copy and integrate this
@@ -34,39 +34,11 @@
  *  CONTRIBUTION, OR OTHER SIMILAR COSTS, WHETHER ASSERTED ON THE
  *  BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF
  *  WARRANTY, OR OTHERWISE.
- * 
- */
+ *
+ *********************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace YoctoVisualisation
-{
-  static class Program
-  {
-    /// <summary>
-    /// The main entry point for the application.
-    /// </summary>
-    [STAThread]
-    static void Main(String[] args)
-    {
-      string errmsg = "";
-      constants.init(args);
-      YAPI.RegisterLogFunction(LogManager.APIlog);
-      int res = yAPI.FILE_NOT_FOUND;
-    
-      res = YAPI.InitAPI(0, ref errmsg);
- 
-      if (res == YAPI.SUCCESS)
-      {
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(new StartForm());
-      }
-      else MessageBox.Show("Init error: " + errmsg);
-    }
-  }
-}
+
+// DataLogger class has been moved to yocto_api.cs
+

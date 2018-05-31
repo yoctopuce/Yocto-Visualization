@@ -287,7 +287,6 @@ namespace YoctoVisualisation
       Execute = Execute.Replace("$CONDITION$", reason);
       Execute = Execute.Replace("$DATATYPE$", src);
       Execute = Execute.Replace("$TRIGGER$", Value.ToString());
-      Execute = Execute.Replace("$UNIT$", parent.get_unit());
       Execute = Execute.Replace("$NOW$", DateTime.Now.ToString("yyyy/MM/dd h:mm:ss.ff"));
 
 
@@ -765,9 +764,12 @@ namespace YoctoVisualisation
          
           if (ison)
           {
-
-            unit = sensor.get_unit();
-            lastGetunit = YAPI.GetTickCount();
+            try
+            {
+              unit = sensor.get_unit();
+              lastGetunit = YAPI.GetTickCount();
+            }
+            catch (Exception e) { LogManager.Log("Get unit Error: " + e.Message); }
           }
           else online = false;
         }
@@ -998,61 +1000,65 @@ namespace YoctoVisualisation
 
     public static void deviceArrival(YModule m)
     {
-      int count = m.functionCount();
-      string serial = m.get_serialNumber();
-      LogManager.Log("Device Arrival " + serial);
-      bool recording = false;
-      // first loop to find network and datalogger settings
-      for (var i = 0; i < count; i++)
+      try
       {
-        string ftype = m.functionType(i);
-        string fid = m.functionId(i);
-
-        if (ftype == "Network")
+        int count = m.functionCount();
+        string serial = m.get_serialNumber();
+        LogManager.Log("Device Arrival " + serial);
+        bool recording = false;
+        // first loop to find network and datalogger settings
+        for (var i = 0; i < count; i++)
         {
-          YNetwork net = YNetwork.FindNetwork(serial + "." + fid);
-          StartForm.NetworkArrival(net);
-        }
-        else if (ftype == "Datalogger")
-        {
-          YDataLogger dlog = YDataLogger.FindDataLogger(serial + "." + fid);
-          int state = dlog.get_recording();
+          string ftype = m.functionType(i);
+          string fid = m.functionId(i);
 
-          if ((state == YDataLogger.RECORDING_ON) || (state == YDataLogger.RECORDING_PENDING))
-            recording = true;
-        }
-      }
-
-      // second loop to register all Sensors
-      for (var i = 0; i < count; i++)
-      {
-        string fbasetype = m.functionBaseType(i);
-        string fid = m.functionId(i);
-        if (fbasetype == "Sensor")
-        {
-          string hwdID = serial + "." + fid;
-          LogManager.Log("New sensor arrival: " + hwdID);
-          bool found = false;
-          foreach (CustomYSensor alreadyThereSensor in sensorList)
+          if (ftype == "Network")
           {
+            YNetwork net = YNetwork.FindNetwork(serial + "." + fid);
+            StartForm.NetworkArrival(net);
+          }
+          else if (ftype == "Datalogger")
+          {
+            YDataLogger dlog = YDataLogger.FindDataLogger(serial + "." + fid);
+            int state = dlog.get_recording();
 
-            if (alreadyThereSensor.get_hardwareId() == hwdID)
+            if ((state == YDataLogger.RECORDING_ON) || (state == YDataLogger.RECORDING_PENDING))
+              recording = true;
+          }
+        }
+
+        // second loop to register all Sensors
+        for (var i = 0; i < count; i++)
+        {
+          string fbasetype = m.functionBaseType(i);
+          string fid = m.functionId(i);
+          if (fbasetype == "Sensor")
+          {
+            string hwdID = serial + "." + fid;
+            LogManager.Log("New sensor arrival: " + hwdID);
+            bool found = false;
+            foreach (CustomYSensor alreadyThereSensor in sensorList)
             {
-              alreadyThereSensor.arrival(recording);
-              found = true;
+
+              if (alreadyThereSensor.get_hardwareId() == hwdID)
+              {
+                alreadyThereSensor.arrival(recording);
+                found = true;
+              }
+            }
+            if (!found)
+            {
+              YSensor s = YSensor.FindSensor(serial + "." + fid);
+              string hwd = s.get_hardwareId();
+
+
+              sensorList.Add(new CustomYSensor(s, hwd, FindSensorLastLocalConfig(hwd)));
+              LogManager.Log(" Added to list");
             }
           }
-          if (!found)
-          {
-            YSensor s = YSensor.FindSensor(serial + "." + fid);
-            string hwd = s.get_hardwareId();
-         
-
-            sensorList.Add(new CustomYSensor(s, hwd, FindSensorLastLocalConfig(hwd)));
-             LogManager.Log(" Added to list");
-          }
         }
       }
+      catch (Exception e) { LogManager.Log("Device Arrival Error: " + e.Message); }
     }
 
 

@@ -32,8 +32,6 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StartForm));
       this.label1 = new System.Windows.Forms.Label();
       this.YoctoTimer = new System.Windows.Forms.Timer(this.components);
-      this.label2 = new System.Windows.Forms.Label();
-      this.linkLabel1 = new System.Windows.Forms.LinkLabel();
       this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.showLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.button6 = new System.Windows.Forms.Button();
@@ -60,26 +58,6 @@
       this.YoctoTimer.Interval = 10;
       this.YoctoTimer.Tick += new System.EventHandler(this.YoctoTimer_Tick);
       // 
-      // label2
-      // 
-      this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(168, 472);
-      this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(221, 13);
-      this.label2.TabIndex = 7;
-      this.label2.Text = "This application is based on LiveCharts library";
-      // 
-      // linkLabel1
-      // 
-      this.linkLabel1.AutoSize = true;
-      this.linkLabel1.Location = new System.Drawing.Point(386, 472);
-      this.linkLabel1.Name = "linkLabel1";
-      this.linkLabel1.Size = new System.Drawing.Size(89, 13);
-      this.linkLabel1.TabIndex = 8;
-      this.linkLabel1.TabStop = true;
-      this.linkLabel1.Text = "www.lvcharts.net";
-      this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
-      // 
       // contextMenuStrip1
       // 
       this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -97,7 +75,7 @@
       // 
       // button6
       // 
-      this.button6.Image = global::YoctoVisualisation.Properties.Resources.rawdata;
+      this.button6.Image = global::YoctoVisualization.Properties.Resources.rawdata;
       this.button6.Location = new System.Drawing.Point(56, 268);
       this.button6.Name = "button6";
       this.button6.Size = new System.Drawing.Size(180, 180);
@@ -109,7 +87,7 @@
       // 
       // button5
       // 
-      this.button5.Image = global::YoctoVisualisation.Properties.Resources.digital;
+      this.button5.Image = global::YoctoVisualization.Properties.Resources.digital;
       this.button5.Location = new System.Drawing.Point(242, 268);
       this.button5.Name = "button5";
       this.button5.Size = new System.Drawing.Size(180, 180);
@@ -121,7 +99,7 @@
       // 
       // button4
       // 
-      this.button4.Image = global::YoctoVisualisation.Properties.Resources.new_angular;
+      this.button4.Image = global::YoctoVisualization.Properties.Resources.new_angular;
       this.button4.Location = new System.Drawing.Point(428, 268);
       this.button4.Name = "button4";
       this.button4.Size = new System.Drawing.Size(180, 180);
@@ -133,7 +111,7 @@
       // 
       // button3
       // 
-      this.button3.Image = global::YoctoVisualisation.Properties.Resources.new_solidgauge1;
+      this.button3.Image = global::YoctoVisualization.Properties.Resources.new_solidgauge1;
       this.button3.Location = new System.Drawing.Point(242, 82);
       this.button3.Name = "button3";
       this.button3.Size = new System.Drawing.Size(180, 180);
@@ -145,7 +123,7 @@
       // 
       // button2
       // 
-      this.button2.Image = global::YoctoVisualisation.Properties.Resources.new_graph;
+      this.button2.Image = global::YoctoVisualization.Properties.Resources.new_graph;
       this.button2.Location = new System.Drawing.Point(428, 82);
       this.button2.Name = "button2";
       this.button2.Size = new System.Drawing.Size(180, 180);
@@ -157,7 +135,7 @@
       // 
       // button1
       // 
-      this.button1.Image = global::YoctoVisualisation.Properties.Resources.configure1;
+      this.button1.Image = global::YoctoVisualization.Properties.Resources.configure1;
       this.button1.Location = new System.Drawing.Point(56, 82);
       this.button1.Name = "button1";
       this.button1.Size = new System.Drawing.Size(180, 180);
@@ -171,10 +149,8 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(668, 498);
+      this.ClientSize = new System.Drawing.Size(668, 473);
       this.ContextMenuStrip = this.contextMenuStrip1;
-      this.Controls.Add(this.linkLabel1);
-      this.Controls.Add(this.label2);
       this.Controls.Add(this.button6);
       this.Controls.Add(this.button5);
       this.Controls.Add(this.button4);
@@ -186,12 +162,11 @@
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "StartForm";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-      this.Text = "Yocto-Visualization";
+      this.Text = "Yocto-Visualization V2";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.startform_FormClosing);
       this.Load += new System.EventHandler(this.startform_Load);
       this.contextMenuStrip1.ResumeLayout(false);
       this.ResumeLayout(false);
-      this.PerformLayout();
 
         }
 
@@ -205,8 +180,6 @@
     private System.Windows.Forms.Button button4;
     private System.Windows.Forms.Button button5;
     private System.Windows.Forms.Button button6;
-    private System.Windows.Forms.Label label2;
-    private System.Windows.Forms.LinkLabel linkLabel1;
     private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
     private System.Windows.Forms.ToolStripMenuItem showLogsToolStripMenuItem;
   }

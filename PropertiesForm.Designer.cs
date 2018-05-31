@@ -37,12 +37,19 @@
       this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.propertyGrid1.BackColor = System.Drawing.SystemColors.Control;
+    
       this.propertyGrid1.Location = new System.Drawing.Point(3, 1);
       this.propertyGrid1.Name = "propertyGrid1";
       this.propertyGrid1.Size = new System.Drawing.Size(474, 431);
       this.propertyGrid1.TabIndex = 0;
       this.propertyGrid1.TabStop = false;
       this.propertyGrid1.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
+      this.propertyGrid1.SelectedGridItemChanged += new System.Windows.Forms.SelectedGridItemChangedEventHandler(this.propertyGrid1_SelectedGridItemChanged);
+      this.propertyGrid1.SelectedObjectsChanged += new System.EventHandler(this.propertyGrid1_SelectedObjectsChanged);
+      this.propertyGrid1.DoubleClick += new System.EventHandler(this.propertyGrid1_DoubleClick);
+      this.propertyGrid1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.propertyGrid1_MouseClick);
+      this.propertyGrid1.Validating += new System.ComponentModel.CancelEventHandler(this.propertyGrid1_Validating);
       // 
       // PropertiesForm
       // 

@@ -44,8 +44,7 @@ using System.Drawing;
 using System.Xml;
 using System.IO;
 using System.Windows.Forms;
-
-
+using YoctoVisualization;
 
 namespace YoctoVisualisation
 {
@@ -73,23 +72,53 @@ namespace YoctoVisualisation
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.LogNoTS("Optional command line parameters:");
       LogManager.LogNoTS("-config xmlFilePath      Create/Use alternate \"xmlFilePath\" configuration file.");
+      LogManager.LogNoTS("                         You can use configuration files from V1, but they will ");
+      LogManager.LogNoTS("                         be overwritten in V2 format.");
       LogManager.LogNoTS("-log                     Automatically open log window");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.Log("Current config file is " + constants.configfile);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
 
 
+      string cfgFile = constants.configfile;
+
+      if (!File.Exists(cfgFile) && !constants.configfileOveridden)
+      {
+        string alternateCfgFile = Path.GetDirectoryName(cfgFile) + "\\..\\..\\YoctoVisualization\\1.0.0.0\\config.xml";
+        if (File.Exists(alternateCfgFile))
+          if  (MessageBox.Show("No Yocto-Visualisation V2 configuration available, but a configuration file from version 1 was found, do you want to import it?", "Yocto-Visualisation V2",
+              MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+              MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
+          {
+            cfgFile = alternateCfgFile;
+          }
+
+      }
 
 
 
-      if (File.Exists(constants.configfile))
+        if (File.Exists(cfgFile))
       { try
         {
           XmlDocument doc = new XmlDocument();
-          doc.Load(constants.configfile);
+          doc.Load(cfgFile);
 
-          // sensor config must be loaded first
-          foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+          double version = 1;
+          XmlElement root = doc.DocumentElement;
+
+          if (root.Attributes != null
+             && root.Attributes["version"] != null)
+            version = Double.Parse(root.Attributes["version"].Value);
+              
+          if (version==1)
+          {
+            string configdata = XMLConfigTranslator.TranslateFromV1(doc);
+            doc = new XmlDocument();
+            doc.LoadXml(configdata);
+          }
+
+            // sensor config must be loaded first
+            foreach (XmlNode node in doc.DocumentElement.ChildNodes)
              if (node.Name == "Sensors")
                sensorsManager.setKnownSensors(node);
 
@@ -165,6 +194,12 @@ namespace YoctoVisualisation
           }
 
         }
+      }  else
+      {
+        f.Location = new Point( (Screen.FromControl(f).Bounds.Width - f.Size.Width)>>1 ,
+                                (Screen.FromControl(f).Bounds.Height- f.Size.Height)>> 1 );
+            
+
       }
     }
 
@@ -295,7 +330,7 @@ namespace YoctoVisualisation
 
     public void SaveConfig()
     {
-      string XmlConfigFile = "<?xml version=\"1.0\" ?>\n<ROOT>\n";
+      string XmlConfigFile = "<?xml version=\"1.0\" ?>\n<ROOT version='2'>\n";
       XmlConfigFile += configWindow.GetXMLConfiguration();
       foreach (Form f in formlist)
       {
@@ -381,10 +416,7 @@ namespace YoctoVisualisation
       ShowRawData();
     }
 
-    private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-      System.Diagnostics.Process.Start("https://lvcharts.net");
-    }
+  
 
     private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
     {

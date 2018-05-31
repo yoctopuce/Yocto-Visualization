@@ -47,7 +47,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Windows.Forms;
-using LiveCharts.Wpf;
+using YDataRendering;
+
 
 namespace YoctoVisualisation
 {
@@ -58,34 +59,65 @@ namespace YoctoVisualisation
     private StartForm mainForm;
     private formManager manager;
     private AngularGaugeFormProperties prop;
-    private int sectionCount = 0;
+  
+    private int zonesCount = 0;
+    private YAngularGauge _angularGauge;
+
+    private MessagePanel  noDataSourcepanel;
+
+  
+
+  public YAngularGauge angularGauge { get { return _angularGauge; } } 
+
+
 
     public angularGaugeForm(StartForm parent, XmlNode initData)
     {
-      // dirty way to find out how many axis  can be defined;    
+      zonesCount = 0;
       foreach (var p in typeof(AngularGaugeFormProperties).GetProperties())
       {
         string name = p.Name;
-        if (name.StartsWith("AngularGauge_Sections")) sectionCount++;
+        if (name.StartsWith("AngularGauge_zone")) zonesCount++;
 
       }
 
-
       InitializeComponent();
+      _angularGauge = new YAngularGauge(rendererCanvas, LogManager.Log);
+      _angularGauge.DisableRedraw();
+      _angularGauge.getCaptureParameters = constants.getCaptureParametersCallback;
+
+
+
+      noDataSourcepanel = _angularGauge.addMessagePanel();
+    
+      noDataSourcepanel.text = "No data source configured\n"
+              + " 1 - Make sure you have a Yoctopuce sensor connected.\n"
+              + " 2 - Do a right-click on this window.\n"
+              + " 3 - Choose \"Configure this gauge\" to bring up the properties editor.\n"
+              + " 4 - Choose a data source\n";
+     
+      for (int i = 0; i < zonesCount; i++) _angularGauge.AddZone();
       prop = new AngularGaugeFormProperties(initData, this);
       manager = new formManager(this, parent, initData, "gauge", prop);
       mainForm = parent;
-      initDataNode = initData;
-
-      for (int i = 0; i < sectionCount; i++)
-        angularGauge1.Sections.Add(new AngularSection());
+      initDataNode = initData;   
       prop.ApplyAllProperties(this);
-      prop.ApplyAllProperties(angularGauge1);
+      prop.ApplyAllProperties(_angularGauge);
+      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
+ 
+     
 
-      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration);
+      _angularGauge.AllowPrintScreenCapture = true;
+      _angularGauge.AllowRedraw();
 
 
     }
+
+    private void capture(object sender, EventArgs e)
+    {
+      _angularGauge.capture();
+    }
+
 
     private void angularGaugeForm_Load(object sender, EventArgs e)
     {
@@ -109,18 +141,10 @@ namespace YoctoVisualisation
           GenericProperties.newSetProperty(this, prop, fullpropname, path);
           break;
         case "AngularGauge":
-          GenericProperties.newSetProperty(angularGauge1, prop, fullpropname, path);
-          string SectionPrefix = "AngularGauge_Sections";
-          if ((fullpropname.StartsWith(SectionPrefix)) && (OriginalPropName == "Fill"))
-          {
-            int arrayIndex = int.Parse(fullpropname.Substring(SectionPrefix.Length));
-            double v = angularGauge1.Sections[arrayIndex].FromValue;
-            angularGauge1.Sections[arrayIndex].FromValue = v + 1;
-            angularGauge1.Sections[arrayIndex].FromValue = v; // force a redraw with new color
+     
+           GenericProperties.newSetProperty(_angularGauge, prop, fullpropname, path);
 
-          }
-
-
+     
 
           break;
         case "DataSource":
@@ -147,27 +171,23 @@ namespace YoctoVisualisation
       mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
     }
 
+    private void showStatus(string status)
+    {
+      if (status!="") _angularGauge.value = 0;
+      _angularGauge.showNeedle = status=="";
+      _angularGauge.statusLine = status;
 
+
+    }
 
     public void SourceChanged(CustomYSensor value)
     {
-      if (value is NullYSensor)
-      {
-        angularGauge1.Value = 0;
-        label1.Text = "N/A";
-        label1.Visible = true;
-        return;
-      }
-
-      if (!value.isOnline())
-
-      {
-        angularGauge1.Value = 0;
-        label1.Text = "OFFLINE";
-        label1.Visible = true;
-      }
-      else label1.Visible = false;
-
+      _angularGauge.DisableRedraw();
+      noDataSourcepanel.enabled = (value is NullYSensor);
+      if (value is NullYSensor) { showStatus("N/A"); _angularGauge.unit = ""; }  
+      else if (!value.isOnline()) showStatus("OFFLINE");
+      else { showStatus("");  _angularGauge.unit = value.get_unit(); }
+      _angularGauge.AllowRedraw();
       value.registerCallback(this);
 
     }
@@ -180,24 +200,19 @@ namespace YoctoVisualisation
 
       if (source == prop.DataSource_source)
       {
-        if (prop.DataSource_source is NullYSensor)
-        {
-          label1.Text = "N/A";
-          label1.Visible = true;
-          angularGauge1.Value = 0;
-          return;
-        }
+        _angularGauge.DisableRedraw();
+        if (prop.DataSource_source is NullYSensor) {  showStatus("N/A"); _angularGauge.unit = ""; }
+        else if (!prop.DataSource_source.isOnline()) showStatus("OFFLINE");
         else
-        if (!prop.DataSource_source.isOnline())
         {
-          angularGauge1.Value = 0;
-          label1.Text = "OFFLINE";
-          label1.Visible = true;
-          return;
+          _angularGauge.DisableRedraw();
+          showStatus("");
+          source.get_unit();  // make sure unit is in cache before ui is refresh (redraw might call value formater, which  will call get_unit) 
+          _angularGauge.unit = source.get_unit();
+          _angularGauge.value =  M.get_averageValue();
+          _angularGauge.AllowRedraw();
         }
-        label1.Visible = false;
-        angularGauge1.Value = source.isOnline() ? M.get_averageValue() : 0;
-
+        _angularGauge.AllowRedraw();
       }
     }
 
@@ -206,11 +221,21 @@ namespace YoctoVisualisation
       mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
     }
 
-    private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
-    {
+  
 
+    private void contextMenuStrip1_Opening_1(object sender, CancelEventArgs e)
+    {
+   
     }
 
+    private void angularGaugeForm_LocationChanged(object sender, EventArgs e)
+    {
+     
+    }
 
+    private void angularGaugeForm_Load_1(object sender, EventArgs e)
+    {
+      manager.initForm();
+    }
   }
 }

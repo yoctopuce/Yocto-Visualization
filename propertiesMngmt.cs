@@ -40,21 +40,30 @@
 
 
 
-using LiveCharts.WinForms;
-using LiveCharts.Wpf;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
+using YColors;
+using YDataRendering;
+
+using System.Drawing.Design;
 
 namespace YoctoVisualisation
 {
   public delegate bool PropFilter(string propNname);
+
+  
+
+  
+
 
   [AttributeUsage(AttributeTargets.All)]
   public class NotSavedInXMLAttribute : System.Attribute
@@ -69,84 +78,231 @@ namespace YoctoVisualisation
 
   }
 
+  public static class colorConverter
+   {  public static Color colorFromHex(string hex)
+      {
+        return Color.FromArgb( Convert.ToInt32(hex, 16));
+     
+      }
 
+    public static String colorToHex(Color c)
+    {
+      return c.ToArgb().ToString("X8");
+
+    }
+
+
+
+  }
 
   public class YAxisParamConverter : ExpandableObjectConverter
   {
     public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
     {
-      if (destinationType == typeof(YAxisParam)) return true;
+      //if (destinationType == typeof(YAxisParam)) return true;
       return base.CanConvertTo(context, destinationType);
     }
 
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
                                 object value, System.Type destinationType)
     {
-      if (destinationType == typeof(System.String) && value is YAxisParam)
+   /*   if (destinationType == typeof(System.String) && value is YAxisParam)
       {
         return "..";
-      }
+      }*/
       return base.ConvertTo(context, culture, value, destinationType);
     }
   }
 
-  public class XAxisParamConverter : ExpandableObjectConverter
+
+  
+
+  public class YAngularZoneConverter : ExpandableObjectConverter
   {
     public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
     {
-      if (destinationType == typeof(XAxisBasicParam)) return true;
+      if (destinationType == typeof(YAngularZone)) return true;
       return base.CanConvertTo(context, destinationType);
     }
 
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
                                 object value, System.Type destinationType)
     {
-      if (destinationType == typeof(System.String) && value is XAxisBasicParam)
-      {
-        return "..";
+      if (destinationType == typeof(System.String) && value is AngularZoneDescription)
+      { if (((AngularZoneDescription)value).visible)
+          return ((AngularZoneDescription)value).min.ToString() + ".." + ((AngularZoneDescription)value).max.ToString();
+        else return ("Disabled");
       }
       return base.ConvertTo(context, culture, value, destinationType);
     }
   }
 
-
-  public class YAngularSectionParamConverter : ExpandableObjectConverter
+  public class YZoneConverter : ExpandableObjectConverter
   {
     public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
     {
-      if (destinationType == typeof(YAngularSection)) return true;
+      if (destinationType == typeof(Zone)) return true;
       return base.CanConvertTo(context, destinationType);
     }
 
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
                                 object value, System.Type destinationType)
     {
-      if (destinationType == typeof(System.String) && value is YAngularSection)
+      if (destinationType == typeof(System.String) && value is ZoneDescription)
       {
-        return "..";
+        if (((ZoneDescription)value).visible)
+          return ((ZoneDescription)value).min.ToString() + ".." + ((ZoneDescription)value).max.ToString();
+        else return ("Disabled");
       }
       return base.ConvertTo(context, culture, value, destinationType);
     }
   }
 
-  public class YAxisSectionParamConverter : ExpandableObjectConverter
+
+
+
+  public class YFontDescriptionConverter : ExpandableObjectConverter
   {
     public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
     {
-      if (destinationType == typeof(YAxisSection)) return true;
+      if (destinationType == typeof(YFontParams)) return true;
       return base.CanConvertTo(context, destinationType);
     }
 
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
                                 object value, System.Type destinationType)
     {
-      if (destinationType == typeof(System.String) && value is YAxisSection)
+      if (destinationType == typeof(System.String) && value is YFontParams)
       {
         return "..";
       }
       return base.ConvertTo(context, culture, value, destinationType);
     }
   }
+
+
+  public class YLegendDescriptionConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(Legend)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String) && value is LegendDescription)
+      {
+        return ((LegendDescription)value).title;
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
+
+ 
+
+ public class XaxisDescriptionConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(XAxis)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String) && value is XaxisDescription)
+      {
+        return "..";
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
+  public class LegendPanelDescriptionConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(Navigator)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String) && value is LegendPanelDescription)
+      {
+        return ((LegendPanelDescription)value).enabled ? "Enabled" : "Disabled";
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
+  public class DataTrackerDescriptionConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(DataTracker)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String) && value is DataTrackerDescription)
+      {
+        return ((DataTrackerDescription)value).enabled ? "Enabled" : "Disabled";
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
+  public class NavigatorDescriptionConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(Navigator)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String) && value is NavigatorDescription)
+      {
+        return ((NavigatorDescription)value).enabled ? "Enabled" : "Disabled"; 
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
+  
+
+
+  public class YaxisDescriptionConverter : ExpandableObjectConverter
+  {
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(YAxis)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                object value, System.Type destinationType)
+    {
+      if (destinationType == typeof(System.String) && value is YaxisDescription)
+      {
+       return  ((YaxisDescription)value).visible ? ((YaxisDescription)value).position == YAxis.HrzPosition.LEFT ? "Left" : "Right" : "Hidden";
+
+
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+  }
+
 
 
 
@@ -163,63 +319,91 @@ namespace YoctoVisualisation
     {
       if (destinationType == typeof(System.String) && value is ChartSerie)
       {
-        return "..";
+
+        if  (((ChartSerie)value).DataSource_source is NullYSensor) return "No data source assigned";
+
+        return ((ChartSerie)value).DataSource_source.get_friendlyName();
+      
       }
       return base.ConvertTo(context, culture, value, destinationType);
     }
   }
 
- 
 
 
-  public class YesNoConverter : StringConverter
+  class SmartEnumConverter : EnumConverter  // thanks stackoverflow
+  {
+    private Type enumType;
+
+    public SmartEnumConverter(Type type) : base(type)
+    {
+      enumType = type;
+    }
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type destType)
+    {
+      return destType == typeof(string);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
+                                     object value, Type destType)
+    {
+      FieldInfo fi = enumType.GetField(Enum.GetName(enumType, value));
+      DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi,
+                                  typeof(DescriptionAttribute));
+      if (dna != null)
+        return dna.Description;
+      else
+        return value.ToString();
+    }
+
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type srcType)
+    {
+      return srcType == typeof(string);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture,
+                                       object value)
+    {
+      foreach (FieldInfo fi in enumType.GetFields())
+      {
+        DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi,
+                                    typeof(DescriptionAttribute));
+        if ((dna != null) && ((string)value == dna.Description))
+          return Enum.Parse(enumType, fi.Name);
+      }
+      return Enum.Parse(enumType, (string)value);
+    }
+  }
+
+
+
+
+  public class YesNoConverter : BooleanConverter
   {
 
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(new string[] { "Yes", "No" }); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(bool)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is bool)
+   
+      public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
       {
-
-        return (bool)value ? "Yes" : "No";
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        return (((string)value).ToUpper() == "YES");
+        if (value is bool && destinationType == typeof(string))
+        {
+          return values[(bool)value ? 1 : 0];
+        }
+        return base.ConvertTo(context, culture, value, destinationType);
       }
 
-      return base.ConvertFrom(context, culture, value);
-    }
+      public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+      {
+        string txt = value as string;
+        if (values[0] == txt) return false;
+        if (values[1] == txt) return true;
+        return base.ConvertFrom(context, culture, value);
+      }
+
+      private string[] values = new string[] { "No", "Yes" };
+    
+
+
   }
 
   public class AlarmSectionParamConverter : ExpandableObjectConverter
@@ -387,6 +571,78 @@ namespace YoctoVisualisation
   }
 
 
+  public class FontNameConverter : StringConverter
+  {
+
+    String[]  AvailableFontsList = null;
+
+    public FontNameConverter()
+    {
+      
+      InstalledFontCollection _fontsCollection = new InstalledFontCollection();
+      AvailableFontsList = new string[_fontsCollection.Families.Length] ;
+      int i = 0;
+      foreach (FontFamily font in _fontsCollection.Families)
+      {
+        AvailableFontsList[i++] = font.Name;
+      }
+    }
+
+
+    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+    { return true; }
+
+    public override StandardValuesCollection
+                     GetStandardValues(ITypeDescriptorContext context)
+    { return new StandardValuesCollection(AvailableFontsList); }
+
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
+    {
+      if (destinationType == typeof(string)) return true;
+      return base.CanConvertTo(context, destinationType);
+    }
+
+    public override object ConvertTo(ITypeDescriptorContext context,
+                                CultureInfo culture,
+                                object value,
+                                System.Type destinationType)
+    {
+      if ((destinationType == typeof(System.String)) && (value is string))
+      {
+        for (int i = 0; i < AvailableFontsList.Length; i++)
+          if (String.Compare((string)value, AvailableFontsList[i], StringComparison.OrdinalIgnoreCase) == 0)
+            return AvailableFontsList[i];
+       
+      }
+      return base.ConvertTo(context, culture, value, destinationType);
+    }
+
+    public override bool CanConvertFrom(ITypeDescriptorContext context,
+                              System.Type sourceType)
+    {
+      if (sourceType == typeof(string)) return false;
+
+      return base.CanConvertFrom(context, sourceType);
+    }
+
+    public override object ConvertFrom(ITypeDescriptorContext context,
+                              CultureInfo culture, object value)
+    {
+      if (value is String)
+      {
+        for (int i = 0; i < AvailableFontsList.Length; i++)
+          if (String.Compare((string)value, AvailableFontsList[i], StringComparison.OrdinalIgnoreCase) == 0)
+            return AvailableFontsList[i];
+      }
+
+      return base.ConvertFrom(context, culture, value);
+    }
+  }
+
+
+
+
 
   public class AvgMinMaxConverter : StringConverter
   {
@@ -490,34 +746,6 @@ namespace YoctoVisualisation
 
   }
 
-
-  public class AxisSeparatorConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context,
-                                 System.Type destinationType)
-    {
-      if (destinationType == typeof(AxisSeparator)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                               CultureInfo culture,
-                               object value,
-                               System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is AxisSeparator)
-        return ((AxisSeparator)value).IsEnabled ? "Enabled" : "Disabled";
-
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool GetStandardValuesExclusive(
-                           ITypeDescriptorContext context)
-    {
-      return true;
-    }
-
-  }
 
 
 
@@ -632,56 +860,7 @@ namespace YoctoVisualisation
 
 
 
-  public class YAxisPositionConverter : StringConverter
-  {
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(new string[] { "Left", "Right" }); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(LiveCharts.AxisPosition)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is LiveCharts.AxisPosition)
-      {
-        if ((LiveCharts.AxisPosition)value == LiveCharts.AxisPosition.RightTop) return "Right";
-        return "Left";
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        if ((string)value == "Right") return LiveCharts.AxisPosition.RightTop;
-        return LiveCharts.AxisPosition.LeftBottom;
-      }
-
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
+ 
 
 
   public class YAxisChooserConverter : StringConverter
@@ -900,63 +1079,63 @@ namespace YoctoVisualisation
                   loadProperties(node, Owner, target);
                 }
                 else
+                   if (p.PropertyType.IsEnum)
+                  {
+                      p.SetValue(o,  Enum.Parse(p.PropertyType,  node.Attributes["value"].InnerText,true),null); break;
+                 }
+                else
                   switch (p.PropertyType.ToString())
                   {
                     case "System.Boolean":
-                      p.SetValue(o, (node.Attributes["value"].InnerText.ToUpper() == "TRUE")); break;
+                      p.SetValue(o, (node.Attributes["value"].InnerText.ToUpper() == "TRUE"),null); break;
                     case "System.Double":
-                      p.SetValue(o, Convert.ToDouble(node.Attributes["value"].InnerText));
+                        p.SetValue(o, Convert.ToDouble(node.Attributes["value"].InnerText), null);
                       break;
                     case "System.Int32":
-                      p.SetValue(o, Int32.Parse(node.Attributes["value"].InnerText));
+                      p.SetValue(o, Int32.Parse(node.Attributes["value"].InnerText), null);
                       break;
                     case "System.String":
-                      p.SetValue(o, node.Attributes["value"].InnerText);
+                      p.SetValue(o, node.Attributes["value"].InnerText, null);
                       break;
-                    case "YoctoVisualisation.AxisSeparator":
-                      AxisSeparator sep = new AxisSeparator
-                                                (node.Attributes["value"].InnerText.ToUpper() == "ENABLED",
-                                                 float.Parse(node.Attributes["Thickness"].InnerText),
-                                                 (Color)ColorTranslator.FromHtml(node.Attributes["Color"].InnerText));
 
-
-                      p.SetValue(o, sep);
-                      break;
                     case "System.Drawing.Font":
                       System.Drawing.FontStyle style = System.Drawing.FontStyle.Regular;
                       var values = Enum.GetValues(typeof(System.Drawing.FontStyle));
                       string attr = node.Attributes["style"].InnerText;
                       foreach (var v in values)
                         if (attr.IndexOf(v.ToString()) >= 0) style |= (System.Drawing.FontStyle)v;
-                      p.SetValue(o, new Font(node.Attributes["value"].InnerText, float.Parse(node.Attributes["size"].InnerText), style));
+                      p.SetValue(o, new Font(node.Attributes["value"].InnerText, float.Parse(node.Attributes["size"].InnerText), style), null);
                       break;
                     case "System.Drawing.Color":
                       value = node.Attributes["value"].InnerText;
-                      p.SetValue(o, (Color)ColorTranslator.FromHtml(value));
+                      p.SetValue(o, colorConverter.colorFromHex(value), null);
                       break;
                     case "YoctoVisualisation.doubleNan":
                       value = node.Attributes["value"].InnerText;
-                      p.SetValue(o, new doubleNan(value));
+                      p.SetValue(o, new doubleNan(value), null);
                       break;
 
                     case "System.Windows.Media.FontFamily":
                       value = node.Attributes["value"].InnerText;
-                      p.SetValue(o, new System.Windows.Media.FontFamily(value));
+                      p.SetValue(o, new FontFamily(value),null);
                       break;
-                    case "LiveCharts.AxisPosition":
+
+                    case "YColors.YColor":
                       value = node.Attributes["value"].InnerText;
-                      p.SetValue(o, value == "RightTop" ? LiveCharts.AxisPosition.RightTop : LiveCharts.AxisPosition.LeftBottom);
+                      p.SetValue(o, YColor.fromString(value), null);
                       break;
+
+
                     case "YoctoVisualisation.CustomYSensor":
                       value = node.Attributes["value"].InnerText;
                       if ((value.ToUpper() != "NULL") && (value != ""))
 
                       {
                         CustomYSensor s = sensorsManager.AddNewSensor(value);
-                        p.SetValue(o, s);
+                        p.SetValue(o, s, null);
 
                       }
-                      else p.SetValue(o, sensorsManager.getNullSensor());
+                      else p.SetValue(o, sensorsManager.getNullSensor(), null);
 
                       break;
                     default:
@@ -978,67 +1157,78 @@ namespace YoctoVisualisation
       set { _Form_Text = value; }
     }
 
-    private Color _Form_BackColor = Color.FromArgb(0xff, 0xf0, 0xf0, 0xf0);
+    private YColor _Form_BackColor = YColor.FromArgb(0xff, 0xf0, 0xf0, 0xf0);
     [DisplayName("Background color"),
      CategoryAttribute("Window"),
-     DescriptionAttribute("Window background color")]
-    public Color Form_BackColor
+      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
+     TypeConverter(typeof(YColorConverter)),
+     DescriptionAttribute("Window background color." + GenericHints.ColorMsg)]
+    public YColor Form_BackColor
     {
       get { return _Form_BackColor; }
       set { _Form_BackColor = value; }
     }
 
-    public string getXml()
+    public string getXml(int deep)
     {
-      return getXml(this);
+      return getXml(deep,this);
     }
 
-    public string getXml(Object o)
+    public string getXml(int deep, Object o)
     {
       string res = "";
 
       string value = "";
       foreach (System.Reflection.PropertyInfo p in o.GetType().GetProperties())
       {
+
+        bool Mustsave = true;
+        object[] attrs = p.GetCustomAttributes(true);
+        foreach (object a in attrs)
+          if (a is NotSavedInXMLAttribute)
+            Mustsave = !((NotSavedInXMLAttribute)a).mustSave;
+
         var child = p.GetValue(o, null);
+
+
         if (IsStructured(child))
-        {
-          res = res + "<" + p.Name + ">\r\n"
-                      + getXml(child)
-                      + "</" + p.Name + ">\r\n";
-        }
+        { if (Mustsave)
+          {
+            res = res + new String(' ', 2 * deep) + "<" + p.Name + ">\r\n"
+                     + getXml(deep + 1, child)
+                     + new String(' ', 2 * deep) + "</" + p.Name + ">\r\n";
+          }
+         }
         else
         {
           string type = p.PropertyType.ToString();
 
-          bool Mustsave = true;
-          object[] attrs = p.GetCustomAttributes(true);
-          foreach (object a in attrs)
-            if (a is NotSavedInXMLAttribute)
-              Mustsave = !((NotSavedInXMLAttribute)a).mustSave;
+        
 
 
           if (Mustsave)
           {
+            if (p.PropertyType.IsEnum)
+            {
+               value = p.GetValue(o, null).ToString();
+
+            } 
+            else 
             switch (type)
             {
-              case "System.Drawing.Font":
-                Font f = (Font)p.GetValue(o, null);
-                value = f.Name + "\" size=\"" + f.Size.ToString() + "\" style=\"" + f.Style.ToString();
-                break;
+             
 
-              case "YoctoVisualisation.AxisSeparator":
-                AxisSeparator sep = (AxisSeparator)p.GetValue(o, null);
-                value = (sep.IsEnabled ? "Enabled" : "Disabled") + "\" Thickness=\"" + sep.StrokeThickness.ToString() + "\" Color=\"" + ColorTranslator.ToHtml(sep.Stroke);
-                break;
+             
               case "System.Boolean": value = (bool)p.GetValue(o, null) ? "TRUE" : "FALSE"; break;
               case "System.Double":
               case "System.Int32":
               case "System.Windows.Media.FontFamily":
               case "System.String": value = System.Security.SecurityElement.Escape(p.GetValue(o, null).ToString()); break;
-              case "System.Drawing.Color": value = ColorTranslator.ToHtml(((Color)p.GetValue(o, null))); break;
-              case "YoctoVisualisation.doubleNan": value = p.GetValue(o, null).ToString(); break;
-              case "LiveCharts.AxisPosition": value = p.GetValue(o, null).ToString(); break;
+              case "System.Drawing.Color": value = colorConverter.colorToHex(((Color)p.GetValue(o, null))); break;
+              case "YColors.YColor":
+              case "YoctoVisualisation.doubleNan":
+                  value = p.GetValue(o, null).ToString(); break;
+                  
               case "YoctoVisualisation.CustomYSensor":
                 CustomYSensor s = (CustomYSensor)p.GetValue(o, null);
                 value = ((s == null) || (s is NullYSensor)) ? "NULL" : s.get_hardwareId();
@@ -1046,7 +1236,7 @@ namespace YoctoVisualisation
               default:
                 throw new ArgumentException("XML generation : ubhandled type (" + type + ")");
             }
-            res = res + "<" + p.Name + " value=\"" + value + "\"/>\n";
+            res = res + new String(' ', 2 * deep) + "<" + p.Name + " value=\"" + value + "\"/>\n";
           }
         }
       }
@@ -1058,11 +1248,12 @@ namespace YoctoVisualisation
       if (o == null) return false;
       if (o is String) return false;
       if (o is System.Drawing.Color) return false;
-      if (o is System.Windows.Media.FontFamily) return false;
+      if (o is FontFamily) return false;
       if (o is Font) return false;
       if (o is bool) return false;
-      if (o is AxisSeparator) return false;
+     
       if (o is CustomYSensor) return false;
+      if (o is YColor) return false;
       if (o is doubleNan) return false;
       foreach (var p in o.GetType().GetProperties())
       { return true; }
@@ -1119,24 +1310,28 @@ namespace YoctoVisualisation
         if (index == "")
         {
 
-          FinalTarget = tinfo.GetValue(FinalTarget);
+          FinalTarget = tinfo.GetValue(FinalTarget,null);
         }
         else
         {
           object targetArray = tinfo.GetValue(FinalTarget, null);
           string targetTypename = targetArray.GetType().FullName;
-          if (targetArray is List<AngularSection>)
-            FinalTarget = ((List<AngularSection>)targetArray)[int.Parse(index)];
+          if (targetArray is List<YAngularZone>)
+            FinalTarget = ((List<YAngularZone>)targetArray)[int.Parse(index)];
           else
-         if (targetArray is AxesCollection)
-            FinalTarget = ((AxesCollection)targetArray)[int.Parse(index)];
+             if (targetArray is List<Zone>)
+            FinalTarget = ((List<Zone>)targetArray)[int.Parse(index)];
           else
-         if (targetArray is SectionsCollection)
-            FinalTarget = ((SectionsCollection)targetArray)[int.Parse(index)];
+          if (targetArray is List<XAxis>)
+            FinalTarget = ((List<XAxis>)targetArray)[int.Parse(index)];
           else
+          if (targetArray is List<YAxis>)
+            FinalTarget = ((List<YAxis>)targetArray)[int.Parse(index)];
+          else
+          if (targetArray is List<DataSerie>)
+            FinalTarget = ((List<DataSerie>)targetArray)[int.Parse(index)];
 
-         if (targetArray is LiveCharts.SeriesCollection)
-            FinalTarget = ((LiveCharts.SeriesCollection)targetArray)[int.Parse(index)];
+
           else
             FinalTarget = ((List<object>)targetArray)[int.Parse(index)];
         }
@@ -1146,12 +1341,12 @@ namespace YoctoVisualisation
       System.Reflection.PropertyInfo sinfo = null;
 
       sinfo = TerminalSource.GetType().GetProperty(propertySourceName);
-      TerminalSource = sinfo.GetValue(TerminalSource);
+      TerminalSource = sinfo.GetValue(TerminalSource,null);
 
       for (int i = 1; i < path.Count; i++)
       {
         sinfo = TerminalSource.GetType().GetProperty(path[i]);
-        TerminalSource = sinfo.GetValue(TerminalSource);
+        TerminalSource = sinfo.GetValue(TerminalSource,null);
 
 
       }
@@ -1178,15 +1373,15 @@ namespace YoctoVisualisation
       if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Color"))
       {
         Color c = (Color)TerminalSource;
-        System.Windows.Media.Color C2 = System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B);
-        tinfo.SetValue(FinalTarget, C2);
+        Color C2 = Color.FromArgb(c.A, c.R, c.G, c.B);
+        tinfo.SetValue(FinalTarget, C2,null);
       }
       else
 
       if ((stype == "YoctoVisualisation.doubleNan") && (ttype == "System.Double"))
       {
         doubleNan v = (doubleNan)TerminalSource;
-        tinfo.SetValue(FinalTarget, v.value);
+        tinfo.SetValue(FinalTarget, v.value, null);
       }
       else
       if ((stype == "YoctoVisualisation.doubleNan") && (ttype.StartsWith("System.Nullable")))
@@ -1202,7 +1397,7 @@ namespace YoctoVisualisation
       if ((stype == "System.String") && (ttype == "System.Windows.Media.FontFamily"))
       {
         string v = (string)TerminalSource;
-        tinfo.SetValue(FinalTarget, new System.Windows.Media.FontFamily(v));
+        tinfo.SetValue(FinalTarget, new FontFamily(v),null);
       }
 
 
@@ -1212,28 +1407,29 @@ namespace YoctoVisualisation
         Color c = (Color)TerminalSource;
         byte a = c.A;
         if (propertySourceName == "Graph2_ScrollBarFill") a = 80; // dirty hack to keep the navigator's cursor semi-transparent 
-        System.Windows.Media.Color C2 = System.Windows.Media.Color.FromArgb(a, c.R, c.G, c.B);
-        System.Windows.Media.SolidColorBrush b = new System.Windows.Media.SolidColorBrush(C2);
-        tinfo.SetValue(FinalTarget, b);
+        Color C2 = Color.FromArgb(a, c.R, c.G, c.B);
+       SolidBrush b = new SolidBrush(C2);
+        tinfo.SetValue(FinalTarget, b,null);
       }
       else
-
-       if ((stype == "YoctoVisualisation.AxisSeparator") && (ttype == "LiveCharts.Wpf.Separator"))
+      if ((stype == "YColors.YColor") && (ttype == "System.Drawing.Color"))
       {
-
-        AxisSeparator it = (AxisSeparator)TerminalSource;
-        System.Windows.Media.SolidColorBrush b = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(it.Stroke.R, it.Stroke.G, it.Stroke.B));
-
-        Axis a = (Axis)FinalTarget;
-        Separator sep = ((Separator)tinfo.GetValue(a, null));
-
-        sep.Stroke = b;
-        sep.StrokeThickness = it.StrokeThickness;
-        sep.IsEnabled = it.IsEnabled;
-
-
+          tinfo.SetValue(FinalTarget, ((YColor)TerminalSource).toColor(), null);
+      }
+      
+      else
+        if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush"))
+      {
+        Color c = (Color)TerminalSource;
+        byte a = c.A;
+       // if (propertySourceName == "Graph2_ScrollBarFill") a = 80; // dirty hack to keep the navigator's cursor semi-transparent 
+        Color C2 = Color.FromArgb(a, c.R, c.G, c.B);
+        SolidBrush b = new SolidBrush(C2);
+        tinfo.SetValue(FinalTarget, b,null);
       }
       else
+
+
       {
         tinfo.SetValue(FinalTarget, TerminalSource, null);
       }
@@ -1292,7 +1488,7 @@ namespace YoctoVisualisation
       {
         string fullpropname = p.Name;
         int index = fullpropname.IndexOf("_");
-        if (index < 0) throw new System.ArgumentException("invalid Propertiy name");
+        if (index < 0) throw new System.ArgumentException("invalid Property name");
         string propType = fullpropname.Substring(0, index);
         string propname = fullpropname.Substring(index + 1);
         // int arrayIndex = -1;
@@ -1304,37 +1500,20 @@ namespace YoctoVisualisation
         if ((target is Form) && (propType == "Form"))
           ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
 
-
-        if ((target is SolidGauge) && (propType == "SolidGauge"))
+        if ((target is YDigitalDisplay) && (propType == "display"))
           ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
 
-        if ((target is LiveCharts.WinForms.AngularGauge) && (propType == "AngularGauge"))
+
+        if ((target is YAngularGauge) && (propType == "AngularGauge"))
           ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
 
-        if ((target is LiveCharts.WinForms.CartesianChart) && (propType == "Graph"))
-          if ((string)((LiveCharts.WinForms.CartesianChart)target).Tag == "main")
-            ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+        if ((target is YSolidGauge) && (propType == "SolidGauge"))
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
 
-        if ((target is LiveCharts.WinForms.CartesianChart) && (propType == "Graph2"))
-
-          if ((string)((LiveCharts.WinForms.CartesianChart)target).Tag == "secondary")
-
-            ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
-
-        if ((target is LiveCharts.WinForms.CartesianChart) && (propType == "Graphs"))
-        {
-          if ((string)((LiveCharts.WinForms.CartesianChart)target).Tag == "main")
-            ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
-          else
-           if (GraphForm.AppliesToSecondaryGraph(propname))
-            ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+        if ((target is YGraph) && (propType == "Graph"))
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
 
         }
-
-
-
-
-      }
     }
   }
 

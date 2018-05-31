@@ -47,14 +47,52 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Windows.Forms;
 using System.IO;
+using YDataRendering;
 
 namespace YoctoVisualisation
 {
   class constants
   {
-    public static string configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
+    private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
+    private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
     public static bool OpenLogWindowAtStartUp = false;
+   
+  
+    public static YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
+    public static YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
+    public static string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+    public static int captureWidth  = 1024;
+    public static int captureHeight = 1024;
+    public static int captureDPI = 70;
+
+
+     public static  void getCaptureParametersCallback(YDataRenderer source,
+                                              out YDataRenderer.CaptureTargets pcaptureTarget,
+                                              out string pcaptureFolder,
+                                              out YDataRenderer.CaptureFormats pcaptureSizePolicy,
+                                              out int pcaptureDPI,
+                                              out int pcaptureWidth,
+                                              out int pcaptureHeight)
+      {
+      pcaptureTarget = captureTarget;
+      pcaptureFolder = captureFolder;
+      pcaptureSizePolicy = captureSizePolicy;
+      pcaptureDPI = captureDPI;
+      pcaptureWidth = captureWidth;
+      pcaptureHeight = captureHeight;
+
+    }
+
+
+
+
+
+    public static string configfile
+    { get { return _configfile; }  set { _configfile = value; _configfileOveridden = true; } }
+
+    public static bool configfileOveridden
+    { get { return _configfileOveridden; } } 
 
     public static void init(String[] args)
     {

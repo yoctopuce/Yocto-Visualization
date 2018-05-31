@@ -38,14 +38,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Windows.Forms;
+using YDataRendering;
 
 namespace YoctoVisualisation
 {
@@ -56,22 +52,45 @@ namespace YoctoVisualisation
     private StartForm mainForm;
     private formManager manager;
     private digitalDisplayFormProperties prop;
-
-
+    private YDigitalDisplay _display;
+    private MessagePanel noDataSourcepanel;
+    string unit = "";
+    public YDigitalDisplay display { get { return _display; } }
 
 
     public digitalDisplayForm(StartForm parent, XmlNode initData)
     {
       InitializeComponent();
+      _display = new YDigitalDisplay(rendererCanvas, LogManager.Log);
+      _display.getCaptureParameters = constants.getCaptureParametersCallback;
+      _display.DisableRedraw();
+      _display.valueFormater = valueFormater;
+      noDataSourcepanel = _display.addMessagePanel();
+      noDataSourcepanel.text = "No data source configured\n"
+            + " 1 - Make sure you have a Yoctopuce sensor connected.\n"
+            + " 2 - Do a right-click on this window.\n"
+            + " 3 - Choose \"Configure this digital display\" to bring up the properties editor.\n"
+            + " 4 - Choose a data source\n";
+     
+
       prop = new digitalDisplayFormProperties(initData, this);
       manager = new formManager(this, parent, initData, "digital display", prop);
       mainForm = parent;
       initDataNode = initData;
       prop.ApplyAllProperties(this);
-      prop.ApplyAllProperties(label1);
+      prop.ApplyAllProperties(_display);
 
-      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration);
+      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
+
+      _display.AllowPrintScreenCapture = true;
+      _display.AllowRedraw();
     }
+
+    private void capture(object sender, EventArgs e)
+    {
+      _display.capture();
+    }
+
 
     private void digitalDisplayForm_Load(object sender, EventArgs e)
     {
@@ -93,8 +112,8 @@ namespace YoctoVisualisation
         case "Form":
           GenericProperties.newSetProperty(this, prop, fullpropname, path);
           break;
-        case "Label":
-          GenericProperties.newSetProperty(label1, prop, fullpropname, path);
+        case "display":
+          GenericProperties.newSetProperty(_display, prop, fullpropname, path);
           break;
         case "DataSource":
           manager.AjustHint("");
@@ -126,50 +145,51 @@ namespace YoctoVisualisation
 
     public void SourceChanged(CustomYSensor value)
     {
+      noDataSourcepanel.enabled = (value is NullYSensor);
       SensorValuecallback(value, null);
 
-      if (value is NullYSensor) label1.Text = "N/A";
-      else if (!value.isOnline()) label1.Text = "OFFLINE";
+      if (value is NullYSensor) _display.alternateValue = "N/A";
+      else if (!value.isOnline()) _display.alternateValue = "OFFLINE";
 
       value.registerCallback(this);
 
     }
 
+    public string  valueFormater(YDataRenderer source, double value)
+    {
+      if (prop.DataSource_source is NullYSensor) return "N/A";
+      else if (!prop.DataSource_source.isOnline()) return  "OFFLINE";
+
+      string format = prop.DataSource_precision;
+      int p = format.IndexOf('.');
+      int n = 0;
+      if (p >= 0) n = format.Length - p - 1;
+      unit = prop.DataSource_source.get_unit();
+      return value.ToString("F" + n.ToString()) + unit;
+
+    }
+
+
     public void SensorValuecallback(CustomYSensor source, YMeasure M)
     {
       if (prop == null) return;
 
-      if (source == prop.DataSource_source)
+      if (prop.DataSource_source is NullYSensor) _display.alternateValue  = "N/A";
+      else if (!prop.DataSource_source.isOnline()) _display.alternateValue  = "OFFLINE";
+      else if (M == null)
       {
-        Color c = prop.Label_ForeColor;
-        string res = "";
-        if (prop.DataSource_source is NullYSensor) res = "N/A";
-        else if (!prop.DataSource_source.isOnline()) res = "OFFLINE";
-        else if (M == null)
-        {
-          string unit = prop.DataSource_source.get_unit();
-          res = "--" + unit;
-        }
-        else
-        {
-          string format = prop.DataSource_precision;
-          int p = format.IndexOf('.');
-          int n = 0;
-          if (p >= 0) n = format.Length - p - 1;
-          string unit = prop.DataSource_source.get_unit();
-          double v = M.get_averageValue();
-
-          if ((prop.Label_MinValue.value != Double.NaN) && (v < prop.Label_MinValue.value)) c = prop.Label_OORColor;
-          else if ((prop.Label_MaxValue.value != Double.NaN) && (v > prop.Label_MaxValue.value)) c = prop.Label_OORColor;
-
-
-          res = v.ToString("F" + n.ToString()) + unit;
-        }
-        label1.Text = res;
-        label1.ForeColor = c;
-
+       
+        _display.alternateValue = "--" + unit;
       }
-
+      else  if (source == prop.DataSource_source)
+      {
+        _display.DisableRedraw();
+        source.get_unit();  // make sure unit is in cache before ui is refresh (redraw might call value formater, which  will call get_unit) 
+        _display.alternateValue = null;
+         _display.value =  M.get_averageValue();
+        _display.AllowRedraw();
+      }
+  
     }
 
     private void digitalDisplayForm_Enter(object sender, EventArgs e)

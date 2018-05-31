@@ -38,14 +38,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using System.Xml;
 using System.Windows.Forms;
+using YDataRendering;
 
 namespace YoctoVisualisation
 {
@@ -59,14 +55,19 @@ namespace YoctoVisualisation
     private StartForm mainForm;
     private formManager manager;
     private GaugeFormProperties prop;
+    private YSolidGauge _solidGauge;
+    private MessagePanel noDataSourcepanel;
+    private YSolidGauge solidGauge { get { return _solidGauge; } }
 
-    public string valueformatter(double value)
+    public string valueformatter(YDataRenderer source,double value)
     {
+
+
+ 
       if (prop.DataSource_source is NullYSensor) return "N/A";
+      if (!prop.DataSource_source.isOnline())     return "OFFLINE";
 
-
-      if (!prop.DataSource_source.isOnline())
-        return "OFFLINE";
+    
 
       string format = prop.DataSource_precision;
       int p = format.IndexOf('.');
@@ -81,16 +82,36 @@ namespace YoctoVisualisation
     public gaugeForm(StartForm parent, XmlNode initData)
     {
       InitializeComponent();
+      _solidGauge = new YSolidGauge(rendererCanvas, YSolidGauge.DisplayMode.DISPLAY180, LogManager.Log);
+      _solidGauge.getCaptureParameters = constants.getCaptureParametersCallback;
+      _solidGauge.DisableRedraw();
+      _solidGauge.valueFormater = valueformatter;
+      noDataSourcepanel = _solidGauge.addMessagePanel();
+
+      noDataSourcepanel.text = "No data source configured\n"
+              + " 1 - Make sure you have a Yoctopuce sensor connected.\n"
+              + " 2 - Do a right-click on this window.\n"
+              + " 3 - Choose \"Configure this gauge\" to bring up the properties editor.\n"
+              + " 4 - Choose a data source\n";
+     
       prop = new GaugeFormProperties(initData, this);
       manager = new formManager(this, parent, initData, "gauge", prop);
       mainForm = parent;
       initDataNode = initData;
       prop.ApplyAllProperties(this);
-      prop.ApplyAllProperties(solidGauge1);
-      solidGauge1.LabelFormatter = value => valueformatter(value);
-      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration);
-
+      prop.ApplyAllProperties(_solidGauge);
+  
+      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration,capture);
+      _solidGauge.AllowPrintScreenCapture = true;
+      _solidGauge.AllowRedraw();
     }
+
+    private void capture(object sender, EventArgs e)
+    {
+      _solidGauge.capture();
+    }
+
+
 
     private void gaugeForm_Load(object sender, EventArgs e)
     {
@@ -117,7 +138,7 @@ namespace YoctoVisualisation
           GenericProperties.newSetProperty(this, prop, fullpropname, path);
           break;
         case "SolidGauge":
-          GenericProperties.newSetProperty(solidGauge1, prop, fullpropname, path);
+          GenericProperties.newSetProperty(_solidGauge, prop, fullpropname, path);
           break;
         case "DataSource":
           manager.AjustHint("");
@@ -134,23 +155,19 @@ namespace YoctoVisualisation
             + "</GaugeForm>\n";
     }
 
-
     private void showConfiguration(object sender, EventArgs e)
     {
       mainForm.ShowPropertyForm(this, prop, PropertyChanged, true);
     }
 
     private void switchConfiguration(object sender, EventArgs e)
-    { //MessageBox.Show("pouet");
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
+    {  mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
     }
-
-
-
 
     public void SourceChanged(CustomYSensor value)
     {
-      if (value is NullYSensor) solidGauge1.Value = 0;
+      noDataSourcepanel.enabled = (value is NullYSensor);
+      if (value is NullYSensor) _solidGauge.value = 0;
       else value.registerCallback(this);
 
     }
@@ -160,7 +177,7 @@ namespace YoctoVisualisation
       if (prop == null) return;
 
       if (source == prop.DataSource_source)
-        solidGauge1.Value = source.isOnline() ? M.get_averageValue() : 0;
+        _solidGauge.value = source.isOnline() ? M.get_averageValue() : 0;
     }
 
     private void gaugeForm_Enter(object sender, EventArgs e)
@@ -171,6 +188,11 @@ namespace YoctoVisualisation
     private void gaugeForm_Activated(object sender, EventArgs e)
     {
 
+    }
+
+    private void gaugeForm_Load_1(object sender, EventArgs e)
+    {
+      manager.initForm();
     }
   }
 

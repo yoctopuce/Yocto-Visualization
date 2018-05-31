@@ -1,10 +1,10 @@
 /*********************************************************************
  *
- * $Id: yocto_network.cs 27416 2017-05-11 09:58:11Z seb $
+ * $Id: yocto_network.cs 30462 2018-03-26 09:19:24Z mvuilleu $
  *
  * Implements yFindNetwork(), the high-level API for Network functions
  *
- * - - - - - - - - - License information: - - - - - - - - - 
+ * - - - - - - - - - License information: - - - - - - - - -
  *
  *  Copyright (C) 2011 and beyond by Yoctopuce Sarl, Switzerland.
  *
@@ -23,7 +23,7 @@
  *  obligations.
  *
  *  THE SOFTWARE AND DOCUMENTATION ARE PROVIDED 'AS IS' WITHOUT
- *  WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING 
+ *  WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING
  *  WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS
  *  FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO
  *  EVENT SHALL LICENSOR BE LIABLE FOR ANY INCIDENTAL, SPECIAL,
@@ -106,6 +106,8 @@ public class YNetwork : YFunction
     public const int CALLBACKENCODING_AZURE = 7;
     public const int CALLBACKENCODING_INFLUXDB = 8;
     public const int CALLBACKENCODING_MQTT = 9;
+    public const int CALLBACKENCODING_YOCTO_API_JZON = 10;
+    public const int CALLBACKENCODING_PRTG = 11;
     public const int CALLBACKENCODING_INVALID = -1;
     public const string CALLBACKCREDENTIALS_INVALID = YAPI.INVALID_STRING;
     public const int CALLBACKINITIALDELAY_INVALID = YAPI.INVALID_UINT;
@@ -705,6 +707,11 @@ public class YNetwork : YFunction
     public int set_userPassword(string newval)
     {
         string rest_val;
+        if (newval.Length > YAPI.HASH_BUF_SIZE)
+        {
+            _throw(YAPI.INVALID_ARGUMENT, "Password too long :" + newval);
+            return YAPI.INVALID_ARGUMENT;
+        }
         lock (_thisLock) {
             rest_val = newval;
             return _setAttr("userPassword", rest_val);
@@ -770,6 +777,11 @@ public class YNetwork : YFunction
     public int set_adminPassword(string newval)
     {
         string rest_val;
+        if (newval.Length > YAPI.HASH_BUF_SIZE)
+        {
+            _throw(YAPI.INVALID_ARGUMENT, "Password too long :" + newval);
+            return YAPI.INVALID_ARGUMENT;
+        }
         lock (_thisLock) {
             rest_val = newval;
             return _setAttr("adminPassword", rest_val);
@@ -1164,8 +1176,9 @@ public class YNetwork : YFunction
      *   <c>YNetwork.CALLBACKENCODING_JSON_ARRAY</c>, <c>YNetwork.CALLBACKENCODING_CSV</c>,
      *   <c>YNetwork.CALLBACKENCODING_YOCTO_API</c>, <c>YNetwork.CALLBACKENCODING_JSON_NUM</c>,
      *   <c>YNetwork.CALLBACKENCODING_EMONCMS</c>, <c>YNetwork.CALLBACKENCODING_AZURE</c>,
-     *   <c>YNetwork.CALLBACKENCODING_INFLUXDB</c> and <c>YNetwork.CALLBACKENCODING_MQTT</c> corresponding
-     *   to the encoding standard to use for representing notification values
+     *   <c>YNetwork.CALLBACKENCODING_INFLUXDB</c>, <c>YNetwork.CALLBACKENCODING_MQTT</c>,
+     *   <c>YNetwork.CALLBACKENCODING_YOCTO_API_JZON</c> and <c>YNetwork.CALLBACKENCODING_PRTG</c>
+     *   corresponding to the encoding standard to use for representing notification values
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YNetwork.CALLBACKENCODING_INVALID</c>.
@@ -1198,8 +1211,9 @@ public class YNetwork : YFunction
      *   <c>YNetwork.CALLBACKENCODING_JSON_ARRAY</c>, <c>YNetwork.CALLBACKENCODING_CSV</c>,
      *   <c>YNetwork.CALLBACKENCODING_YOCTO_API</c>, <c>YNetwork.CALLBACKENCODING_JSON_NUM</c>,
      *   <c>YNetwork.CALLBACKENCODING_EMONCMS</c>, <c>YNetwork.CALLBACKENCODING_AZURE</c>,
-     *   <c>YNetwork.CALLBACKENCODING_INFLUXDB</c> and <c>YNetwork.CALLBACKENCODING_MQTT</c> corresponding
-     *   to the encoding standard to use for representing notification values
+     *   <c>YNetwork.CALLBACKENCODING_INFLUXDB</c>, <c>YNetwork.CALLBACKENCODING_MQTT</c>,
+     *   <c>YNetwork.CALLBACKENCODING_YOCTO_API_JZON</c> and <c>YNetwork.CALLBACKENCODING_PRTG</c>
+     *   corresponding to the encoding standard to use for representing notification values
      * </param>
      * <para>
      * </para>
@@ -1619,6 +1633,13 @@ public class YNetwork : YFunction
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
+     * <para>
+     *   If a call to this object's is_online() method returns FALSE although
+     *   you are certain that the matching device is plugged, make sure that you did
+     *   call registerHub() at application initialization time.
+     * </para>
+     * <para>
+     * </para>
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the network interface
@@ -1819,6 +1840,33 @@ public class YNetwork : YFunction
 
     /**
      * <summary>
+     *   Setup periodic HTTP callbacks (simplifed function).
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="interval">
+     *   a string representing the callback periodicity, expressed in
+     *   seconds, minutes or hours, eg. "60s", "5m", "1h", "48h".
+     * </param>
+     * <param name="offset">
+     *   an integer representing the time offset relative to the period
+     *   when the callback should occur. For instance, if the periodicity is
+     *   24h, an offset of 7 will make the callback occur each day at 7AM.
+     * </param>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> when the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int set_periodicCallbackSchedule(string interval, int offset)
+    {
+        return this.set_callbackSchedule("every "+interval+"+"+Convert.ToString(offset));
+    }
+
+    /**
+     * <summary>
      *   Continues the enumeration of network interfaces started using <c>yFirstNetwork()</c>.
      * <para>
      * </para>
@@ -1841,7 +1889,7 @@ public class YNetwork : YFunction
 
     //--- (end of YNetwork implementation)
 
-    //--- (Network functions)
+    //--- (YNetwork functions)
 
     /**
      * <summary>
@@ -1887,5 +1935,5 @@ public class YNetwork : YFunction
 
 
 
-    //--- (end of Network functions)
+    //--- (end of YNetwork functions)
 }

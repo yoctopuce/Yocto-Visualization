@@ -39,14 +39,12 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using YoctoVisualisation.Properties;
+using YoctoVisualization.Properties;
+using YColors;
+ 
 
 namespace YoctoVisualisation
 {
@@ -62,28 +60,11 @@ namespace YoctoVisualisation
     private StartForm mainForm;
     private GenericProperties settings;
     private bool Closing = false;
-
+   
 
     public void AjustHint(string description)
     {
-      int panelWidth = 375;
-      int panelHeight = 100;
-
-      Panel panel = (Panel)myForm.Controls.Find("HintPanel", true)[0];
-      Label label = (Label)myForm.Controls.Find("HintLabel", true)[0];
-
-      if (description != "")
-      {
-        label.TextAlign = ContentAlignment.MiddleLeft;
-        label.Text = "No Data source configured.\n 1 - Make sure you have a Yoctopuce sensor connected\n 2 - Do a right click on this window\n 3 - Choose \"configure this " + description + "\" to bring up the properties editor\n 4 - Choose a data source.";
-        panel.Size = new Size(panelWidth, panelHeight);
-
-      }
-
-      panel.Location = new Point((myForm.ClientSize.Width - panelWidth) >> 1, (myForm.ClientSize.Height - panelHeight) >> 1);
-
-      panel.Visible = !settings.IsDataSourceAssigned();
-
+     
     }
 
 
@@ -96,17 +77,13 @@ namespace YoctoVisualisation
       myForm = form;
       form.FormClosing += targetFormClosing;
       form.Shown += target_Shown;
-      AjustHint(description);
-      form.SizeChanged += target_FormSizeChanged;
-
-
-    }
-
-    private void target_FormSizeChanged(object sender, EventArgs e)
-    {
-      AjustHint("");
+   
+      
+    
 
     }
+
+  
 
     private void target_Shown(object sender, EventArgs e)
     {
@@ -117,7 +94,7 @@ namespace YoctoVisualisation
 
 
 
-    public void configureContextMenu(Form parentForm, ContextMenuStrip menu, EventHandler ShowConfig, EventHandler SwitchConfig)
+    public void configureContextMenu(Form parentForm, ContextMenuStrip menu, EventHandler ShowConfig, EventHandler SwitchConfig, EventHandler Capture)
     {
       menu.Items.Add(new ToolStripMenuItem("Configure this " + this.formDesc, Resources.menu_configure_item, ShowConfig));
       menu.Items.Add(new ToolStripMenuItem("Delete this " + this.formDesc, Resources.deleted, deleteCurrentForm));
@@ -125,9 +102,9 @@ namespace YoctoVisualisation
       menu.Items.Add(new ToolStripMenuItem("Add a new solid gauge", Resources.menu_add_solidgauge, AddNewSolidGauge));
       menu.Items.Add(new ToolStripMenuItem("Add a new angular gauge", Resources.rmenu_add_gauge, AddNewAngularGauge));
       menu.Items.Add(new ToolStripMenuItem("Add a new digital display", Resources.menu_add_digital, AddNewDigitalDisplay));
-      menu.Items.Add(new ToolStripMenuItem("Add a new graph ", Resources.menu_add_graph, AddNewGraph));
-      menu.Items.Add(new ToolStripMenuItem("Show Raw data ", Resources.menu_rawdata, ShowRawData));
-
+      menu.Items.Add(new ToolStripMenuItem("Add a new graph", Resources.menu_add_graph, AddNewGraph));
+      menu.Items.Add(new ToolStripMenuItem("Show Raw data", Resources.menu_rawdata, ShowRawData));
+      menu.Items.Add(new ToolStripMenuItem("Snapshot", Resources.snapshot, Capture));
 
       menu.Items.Add(new ToolStripSeparator());
       menu.Items.Add(new ToolStripMenuItem("Configure USB / Network ", Resources.menu_configure, ConfigureUSBNet));
@@ -194,17 +171,17 @@ namespace YoctoVisualisation
 
     public string getConfigData()
     {
-      return "<location x='" + myForm.Location.X.ToString() + "' y='" + myForm.Location.Y.ToString() + "'/>\n"
-            + "<size     w='" + myForm.Size.Width.ToString() + "' h='" + myForm.Size.Height.ToString() + "'/>\n"
-            + settings.getXml();
+      return "  <location x='" + myForm.Location.X.ToString() + "' y='" + myForm.Location.Y.ToString() + "'/>\n"
+            +"  <size     w='" + myForm.Size.Width.ToString() + "' h='" + myForm.Size.Height.ToString() + "'/>\n"
+            + settings.getXml(1);
     }
 
     public void setData(System.Reflection.PropertyInfo info, object target, string propertyName, string value)
     {
       switch (info.PropertyType.ToString())
       {
-        case "System.Drawing.Color": info.SetValue(target, (Color)ColorTranslator.FromHtml(value)); break;
-        default: info.SetValue(target, value); break;
+        case "System.Drawing.Color": info.SetValue(target, YColor.fromString(value).toColor(),null); break;
+        default: info.SetValue(target, value,null); break;
       }
     }
 

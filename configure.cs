@@ -42,14 +42,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using YColors;
+using YDataRendering;
 
 namespace YoctoVisualisation
 {
@@ -200,16 +204,159 @@ namespace YoctoVisualisation
 
     public string GetXMLConfiguration()
     {
-      string res = "<Config>"
-         + "<UseUSB value=\"" + (useUSB.Checked ? "TRUE" : "FALSE") + "\"/>\n"
-         + "<UseVirtualHub value=\"" + (UseVirtualHub.Checked ? "TRUE" : "FALSE") + "\"/>\n"
-         + "<Hubs>\n";
+      string res = "<Config>\n"
+         + "  <UseUSB value=\"" + (useUSB.Checked ? "TRUE" : "FALSE") + "\"/>\n"
+         + "  <UseVirtualHub value=\"" + (UseVirtualHub.Checked ? "TRUE" : "FALSE") + "\"/>\n"
+         + "  <Hubs>\n";
       for (int i = 0; i < listView1.Items.Count; i++)
-        res += "<Hub addr=\"" + System.Security.SecurityElement.Escape(listView1.Items[i].Text) + "\"/>\n";
+        res += "    <Hub addr=\"" + System.Security.SecurityElement.Escape(listView1.Items[i].Text) + "\"/>\n";
 
-      res += "</Hubs>\n"
-          + "</Config>\n";
+      res += "  </Hubs>\n";
+
+      res += "  <Colors>\n";
+      List<YColor> c = ColorEditor.colorHistory;
+      for (int i = c.Count - 1; i >= 0; i--) 
+         res = res + "    <Color value=\"" + c[i].ToString() + "\"/>\n";
+      res += "  </Colors>\n";    
+      res += "  <Capture>\n";
+      res += "    <Target value= \"" + constants.captureTarget.ToString() + "\"/>\n";
+      res += "    <Size value= \"" + constants.captureSizePolicy.ToString() + "\"/>\n";
+      res += "    <Resolution value= \"" + constants.captureDPI.ToString() + "\"/>\n";
+      res += "    <Folder value= \"" + System.Security.SecurityElement.Escape(constants.captureFolder) + "\"/>\n";
+      res += "    <Width value= \"" + constants.captureWidth.ToString() + "\"/>\n";
+      res += "    <Height value= \"" + constants.captureHeight.ToString() + "\"/>\n";    
+      res += "  </Capture>\n";
+      res += "</Config>\n";
+
       return res;
+    }
+
+    public void InitColorHistory(XmlNode ColorsNode)
+    {
+      foreach (XmlNode node in ColorsNode.ChildNodes)
+      {
+        switch (node.Name)
+        {
+          case "Color":
+            ColorEditor.AddColorToHistory( YColor.fromString(node.Attributes["value"].InnerText));        
+            break;
+        }
+
+      }
+    }
+
+
+    public void InitCaptureParams(XmlNode ColorsNode)
+    { int value;
+      foreach (XmlNode node in ColorsNode.ChildNodes)
+      {
+        switch (node.Name)
+        {
+          case "Target":
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToClipBoard.ToString()) constants.captureTarget =YDataRenderer.CaptureTargets.ToClipBoard;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToPng.ToString()) constants.captureTarget =YDataRenderer.CaptureTargets.ToPng;
+            break;
+          case "Size":
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Fixed.ToString()) constants.captureSizePolicy =YDataRenderer.CaptureFormats.Fixed;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Keep.ToString()) constants.captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.FixedWidth.ToString()) constants.captureSizePolicy = YDataRenderer.CaptureFormats.FixedWidth;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.FixedHeight.ToString()) constants.captureSizePolicy =YDataRenderer.CaptureFormats.FixedHeight;
+            break;
+          case "Resolution":
+             value = 0;
+            if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
+              if (value > 0) constants.captureDPI = value;
+            break;
+          case "Width":
+            value = 0;
+            if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
+              if ((value >= 16) && (value <= 4096))  constants.captureWidth = value;
+            break;
+          case "Height":
+            value = 0;
+            if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
+              if ((value >= 16) && (value <= 4096)) constants.captureHeight = value;
+            break;
+          case "Folder":
+            constants.captureFolder = node.Attributes["value"].InnerText;
+            break;
+
+
+
+        }
+
+      }
+
+    }
+
+    public void updateCaptureUI()
+    {
+      targetFolder.Enabled = constants.captureTarget != YDataRenderer.CaptureTargets.ToClipBoard;
+      CaptureFolderbutton.Enabled = targetFolder.Enabled;
+      Color activeColor = SystemColors.ControlText;
+      Color inactiveColor = SystemColors.GrayText;
+
+      switch (sizePolicy.SelectedIndex)
+      {
+        case (int)YDataRendering.YDataRenderer.CaptureFormats.Fixed:
+          widthValue.Enabled = true;
+          widthLabel.ForeColor = activeColor;
+          widthUnit.ForeColor = activeColor;
+          heightValue.Enabled = true;
+          heightLabel.ForeColor = activeColor;
+          heightUnit.ForeColor = activeColor;
+          break;
+        case (int)YDataRendering.YDataRenderer.CaptureFormats.FixedHeight:
+          widthValue.Enabled = false;
+          widthLabel.ForeColor = inactiveColor;
+          widthUnit.ForeColor = inactiveColor;
+          heightValue.Enabled = true;
+          heightLabel.ForeColor = activeColor;
+          heightUnit.ForeColor = activeColor;
+          break;
+        case (int)YDataRendering.YDataRenderer.CaptureFormats.FixedWidth:
+          widthValue.Enabled = true;
+          widthLabel.ForeColor = activeColor;
+          widthUnit.ForeColor = activeColor;
+          heightValue.Enabled = false;
+          heightLabel.ForeColor = inactiveColor;
+          heightUnit.ForeColor = inactiveColor;
+          break;
+        case (int)YDataRendering.YDataRenderer.CaptureFormats.Keep:
+          widthValue.Enabled = false;
+          widthLabel.ForeColor = inactiveColor;
+          widthUnit.ForeColor = inactiveColor;
+          heightValue.Enabled = false;
+          heightLabel.ForeColor = inactiveColor;
+          heightUnit.ForeColor = inactiveColor;
+          break;
+      }
+
+      heightUnit.Text = "px (" + (25.4 * (double)constants.captureHeight / (constants.captureDPI)).ToString("0.#") + "mm)";
+      widthUnit.Text = "px (" + (25.4 * (double)constants.captureWidth / (constants.captureDPI)).ToString("0.#") + "mm)";
+   
+
+    }
+
+    public void initCaptureParameters()
+    {
+      ExportToClipboard.Checked = constants.captureTarget == YDataRenderer.CaptureTargets.ToClipBoard;
+      ExportToPNG.Checked = constants.captureTarget ==YDataRenderer.CaptureTargets.ToPng;
+      targetFolder.Text = constants.captureFolder;
+     
+      DpiTextBox.Text = constants.captureDPI.ToString();
+      int n = 0;
+      foreach (YDataRenderer.CaptureFormats v in Enum.GetValues(typeof(YDataRenderer.CaptureFormats)))
+      {
+        FieldInfo fi = typeof(YDataRenderer.CaptureFormats).GetField(Enum.GetName(typeof(YDataRenderer.CaptureFormats), v));
+        DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute));
+        sizePolicy.Items.Add(dna.Description);
+        if (constants.captureSizePolicy == v) sizePolicy.SelectedIndex = n;
+        n++;
+      }
+      widthValue.Text = constants.captureWidth.ToString();
+      heightValue.Text = constants.captureHeight.ToString();
+      updateCaptureUI();
     }
 
     public void DefaultInit()
@@ -218,6 +365,8 @@ namespace YoctoVisualisation
       AddHub("usb");
       UseVirtualHub.CheckedChanged += UseVirtualHub_CheckedChanged;
       useUSB.CheckedChanged += useUSB_CheckedChanged;
+
+   
     }
 
     public void Init(XmlNode initData)
@@ -230,9 +379,14 @@ namespace YoctoVisualisation
           case "UseUSB":
             useUSB.Checked = (node.Attributes["value"].InnerText.ToUpper() == "TRUE");
             if (useUSB.Checked) AddHub("usb");
-
-
             break;
+          case "Colors":
+            InitColorHistory(node);
+            break;
+          case "Capture":
+            InitCaptureParams(node);
+            break;
+
           case "UseVirtualHub":
             UseVirtualHub.Checked = (node.Attributes["value"].InnerText.ToUpper() == "TRUE");
             if (UseVirtualHub.Checked) AddHub("127.0.0.1");
@@ -251,6 +405,7 @@ namespace YoctoVisualisation
       }
       UseVirtualHub.CheckedChanged += UseVirtualHub_CheckedChanged;
       useUSB.CheckedChanged += useUSB_CheckedChanged;
+      initCaptureParameters();
     }
 
     public void NetworkArrival(YNetwork net)
@@ -367,6 +522,118 @@ namespace YoctoVisualisation
           string addr = listView1.SelectedItems[i].Text;
           System.Diagnostics.Process.Start("http://" + addr + ":4444");
         }
+    }
+
+    private void label10_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void label10_Click_1(object sender, EventArgs e)
+    {
+
+    }
+
+    private void sizePolicy_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      int n = 0;
+      foreach (YDataRenderer.CaptureFormats v in Enum.GetValues(typeof(YDataRenderer.CaptureFormats)))
+      {
+
+        if (sizePolicy.SelectedIndex == n)
+        {
+          constants.captureSizePolicy = v;
+         
+        }
+        n++;
+      }
+      updateCaptureUI();
+    }
+
+    private void ExportToClipboard_CheckedChanged(object sender, EventArgs e)
+    {
+      constants.captureTarget = ExportToClipboard.Checked ? YDataRendering.YDataRenderer.CaptureTargets.ToClipBoard : YDataRendering.YDataRenderer.CaptureTargets.ToPng;
+      updateCaptureUI();
+
+
+    }
+
+    private void CaptureFolderbutton_Click(object sender, EventArgs e)
+    {
+      if (Directory.Exists(targetFolder.Text)) folderBrowserDialog1.SelectedPath = targetFolder.Text;
+      folderBrowserDialog1.Description = "Choose where screenshots will be saved.";
+      folderBrowserDialog1.ShowDialog();
+      targetFolder.Text = folderBrowserDialog1.SelectedPath;
+
+    }
+
+    private void targetFolder_Leave(object sender, EventArgs e)
+    {
+      if (!Directory.Exists(targetFolder.Text)) MessageBox.Show("Folder " + targetFolder.Text + " does not exists,\nCapture operations are likely to fail.",
+                    "Parameter error", MessageBoxButtons.OK,
+                     MessageBoxIcon.Warning);
+
+      constants.captureFolder = targetFolder.Text;
+     
+    
+
+    
+    }
+
+    
+
+    private void DpiTextBox_Leave(object sender, EventArgs e)
+    {
+      int value;
+      if (Int32.TryParse(DpiTextBox.Text, out value))
+      {
+        if (value > 0) constants.captureDPI = value;
+        else MessageBox.Show("Resolution must be a stricly positive integer,\nchange will be ignored.",
+                   "Parameter error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+      }
+      else
+        MessageBox.Show("Invalide resolution value,\nchange will be ignored.",
+                     "Parameter error", MessageBoxButtons.OK,
+                      MessageBoxIcon.Warning);
+      updateCaptureUI();
+    }
+
+    private void widthValue_Leave(object sender, EventArgs e)
+    {
+      int value;
+      if (Int32.TryParse(widthValue.Text, out value))
+      {
+        if ((value >= 16) && (value <=4096))  constants.captureWidth = value;
+        else MessageBox.Show("Width must be in the 16..4096 range,\nchange will be ignored.",
+                   "Parameter error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+      }
+      else
+        MessageBox.Show("Invalide width value,\nchange will be ignored.",
+                     "Parameter error", MessageBoxButtons.OK,
+                      MessageBoxIcon.Warning);
+      updateCaptureUI();
+    }
+
+    private void heightValue_Leave(object sender, EventArgs e)
+    {
+      int value;
+      if (Int32.TryParse(heightValue.Text, out value))
+      {
+        if ((value >= 16) && (value <= 4096)) constants.captureHeight = value;
+        else MessageBox.Show("Height must be in the 16..4096 range,\nchange will be ignored.",
+                   "Parameter error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+      }
+      else
+        MessageBox.Show("Invalide height value,\nchange will be ignored.",
+                     "Parameter error", MessageBoxButtons.OK,
+                      MessageBoxIcon.Warning);
+      updateCaptureUI();
     }
   }
 }

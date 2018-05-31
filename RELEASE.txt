@@ -1,1 +1,1 @@
-- Add support for alerts
+- New Yocto-Visualization V2

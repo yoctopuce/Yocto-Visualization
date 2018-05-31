@@ -38,31 +38,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-
-using System.Windows.Data;
 using System.Windows.Forms;
-using LiveCharts;
-using LiveCharts.Configurations;
-using LiveCharts.Wpf;
-using LiveCharts.Defaults;
-using LiveCharts.Events;
-using System.Windows.Media;
-using LiveCharts.Geared;
-using Binding = System.Windows.Data.Binding;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using YoctoVisualisation.Properties;
+using YDataRendering;
+using YoctoVisualization.Properties;
 
 namespace YoctoVisualisation
 {
-
-
 
 
   public partial class GraphForm : Form
@@ -71,266 +54,125 @@ namespace YoctoVisualisation
 
     private StartForm mainForm;
     private formManager manager;
-    Double FirstLiveValue = 0;
+    //    Double FirstLiveValue = 0;
     private GraphFormProperties prop;
     public static int YAxisCount = 0;
-    static int SeriesCount = 0;
-    static int SectionCount = 0;
-    private double minDate = 0;
-    private double maxDate = 60;
-    private Axis _syncedAxis = new Axis();
-    List<Label> offlinelist = new List<Label>();
+    private int SeriesCount = 0;
 
-
-
-    public static bool AppliesToSecondaryGraph(string property)
-    {
-      if (property == "StrokeThickness") return false;
-      if (property == "ScalesYAt") return false;
-      return true;
-
-    }
-
+    private int ZoneCountPerYaxis = 0;
+    private MessagePanel noDataSourcepanel;
+    private MessagePanel offLineSourcesPanel;
+    private YGraph _cartesianChart;
+    public YGraph cartesianChart { get { return _cartesianChart; } }
+    private List<ChartSerie> seriesProperties;
+    String[] offlineMessages;
+    bool[] showOffline;
 
 
 
     public GraphForm(StartForm parent, XmlNode initData)
     {
       InitializeComponent();
+      seriesProperties = new List<ChartSerie>();
+      _cartesianChart = new YGraph(rendererCanvas, LogManager.Log);
+      _cartesianChart.getCaptureParameters = constants.getCaptureParametersCallback;
+      _cartesianChart.DisableRedraw();
+
+      noDataSourcepanel = _cartesianChart.addMessagePanel();
+      noDataSourcepanel.text = "No data source configured\n"
+              + " 1 - Make sure you have a Yoctopuce sensor connected.\n"
+              + " 2 - Do a right-click on this window.\n"
+              + " 3 - Choose \"Configure this graph\" to bring up the properties editor.\n"
+              + " 4 - Choose a data source\n";
+      
+      offLineSourcesPanel = _cartesianChart.addMessagePanel();
+      offLineSourcesPanel.bgColor = System.Drawing.Color.FromArgb(192, 255, 192, 192);
+      offLineSourcesPanel.borderColor = System.Drawing.Color.DarkRed;
+      offLineSourcesPanel.font.color = System.Drawing.Color.DarkRed;
+      offLineSourcesPanel.panelHrzAlign = MessagePanel.HorizontalAlign.RIGHT;
+      offLineSourcesPanel.panelVrtAlign = MessagePanel.VerticalAlign.TOP;
 
 
-      var dayConfig = Mappers.Xy<TimedSensorValue>()
-.X(dayModel => (double)dayModel.DateTime)
-.Y(dayModel => dayModel.Value);
 
-      // dirty way to find out how many Yaxis and series can be defined;
-      int YAC = 0;
-      int SC = 0;
-      int SCT = 0;
+
+
+      foreach (var p in typeof(YaxisDescription).GetProperties())
+      {
+        if (p.Name.StartsWith("zones")) ZoneCountPerYaxis++;
+      }
+
       foreach (var p in typeof(GraphFormProperties).GetProperties())
       {
         string name = p.Name;
-        if (name.StartsWith("Graph_AxisY")) YAC++;
-        if (name.StartsWith("Graphs_Series")) SC++;
+        if (name.StartsWith("Graph_series"))
+        {
+
+          SeriesCount++;
+        }
+        if (name.StartsWith("Graph_yAxes")) YAxisCount++;
+
+
       }
-
-      foreach (var p in typeof(YAxisParam).GetProperties())
-      {
-        string name = p.Name;
-        if (name.StartsWith("Sections")) SCT++;
-
-      }
-
-      YAxisCount = YAC;
-      SeriesCount = SC;
-      SectionCount = SCT;
-
       for (int i = 0; i < YAxisCount; i++)
       {
-        int n = i;
-        cartesianChart1.AxisY.Add(new Axis());
-        cartesianChart1.AxisY[i].LabelFormatter = value => YAxisLabelFormater(n, value);
-        for (int j = 0; j < SectionCount; j++)
-        {
-          cartesianChart1.AxisY[i].Sections.Add(new AxisSection());
-          cartesianChart1.AxisY[i].Sections[j].Value = 0;
-          cartesianChart1.AxisY[i].Sections[j].SectionWidth = 0;
-          cartesianChart1.AxisY[i].Sections[j].Fill = System.Windows.Media.Brushes.LightGreen;
-        }
-
-        cartesianChart2.AxisY.Add(new Axis()
-        {
-          ShowLabels = false
-
-        });
-
-
+        YAxis axis = _cartesianChart.addYAxis();
+        for (int j = 0; j < ZoneCountPerYaxis; j++) axis.AddZone();
       }
-
-
-      cartesianChart1.Series = new SeriesCollection(dayConfig);
-      cartesianChart2.Series = new SeriesCollection(dayConfig);
-      for (int i = 0; i < SeriesCount; i++)
-      {
-        Label t = new Label();
-        t.Size = new System.Drawing.Size(this.Width - 20, 16);
-        t.Location = new System.Drawing.Point(0, 10 + i * t.Size.Height);
-
-        t.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
-        t.TextAlign = ContentAlignment.TopRight;
-        t.AutoSize = false;
-
-        t.Text = "line" + i.ToString();
-        t.Visible = false;
-        this.Controls.Add(t);
-
-        this.Controls.SetChildIndex(t, 0);
-        offlinelist.Add(t);
-
-        cartesianChart1.Series.Add(
-
-                    new LineSeries
-                    {
-                      Values = new GearedValues<TimedSensorValue>(),
-                      Fill = System.Windows.Media.Brushes.Transparent,
-                      LineSmoothness = 0, //0: straight lines, 1: really smooth lines
-                      PointGeometry = Geometry.Parse(""),
-                      PointGeometrySize = 50,
-                      ScalesXAt = 0
-                    });
-
-
-
-
-        cartesianChart2.Series.Add(
-
-                  new LineSeries
-                  {
-                    Values = new GearedValues<TimedSensorValue>(),
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    LineSmoothness = 0, //0: straight lines, 1: really smooth lines
-                    PointGeometry = Geometry.Parse(""),
-                    PointGeometrySize = 50,
-                    StrokeThickness = 1,
-                    ScalesXAt = 0
-                  });
-
-
-      }
-
-      _syncedAxis.Separator = new Separator { IsEnabled = false };
-      _syncedAxis.RangeChanged += Axis_OnRangeChanged;
-      _syncedAxis.LabelFormatter = value => XAxisLabelFormater(value);
-
-      cartesianChart1.Zoom = ZoomingOptions.X;
-      // cartesianChart1.DisableAnimations = false;
-      cartesianChart1.Base.Hoverable = false;
-      cartesianChart1.Tag = "main";
-
-      cartesianChart2.Base.ScrollMode = ScrollMode.X;
-      cartesianChart2.DataTooltip = null;
-      cartesianChart2.Base.Hoverable = false;
-      cartesianChart2.DataTooltip = null;
-      cartesianChart2.DisableAnimations = true;
-      cartesianChart2.Tag = "secondary";
-      cartesianChart2.ScrollBarFill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(30, 200, 200, 200));
-
-
-
-      cartesianChart1.AxisX.Add(_syncedAxis);
-
-      //cartesianChart2.Base.MouseLeftButtonUp += zoomWindowMoved;
-      cartesianChart2.AxisX.Add(new Axis
-      {
-        LabelFormatter = value => XAxisLabelFormater(value)
-
-      });
-
-      cartesianChart2.AxisY.Add(new Axis { Separator = new Separator { IsEnabled = true }, ShowLabels = false });
-
-      var assistant = new BindingAssistant();
-      cartesianChart1.AxisX[0].SetBinding(Axis.MinValueProperty,
-      new Binding { Path = new PropertyPath("From"), Source = assistant, Mode = BindingMode.TwoWay });
-      cartesianChart1.AxisX[0].SetBinding(Axis.MaxValueProperty,
-          new Binding { Path = new PropertyPath("To"), Source = assistant, Mode = BindingMode.TwoWay });
-
-      cartesianChart2.Base.SetBinding(CartesianChart.ScrollHorizontalFromProperty,
-          new Binding { Path = new PropertyPath("From"), Source = assistant, Mode = BindingMode.TwoWay });
-      cartesianChart2.Base.SetBinding(CartesianChart.ScrollHorizontalToProperty,
-          new Binding { Path = new PropertyPath("To"), Source = assistant, Mode = BindingMode.TwoWay });
-
 
       prop = new GraphFormProperties(initData, this);
-      ApplyNavigatorVisibility();
+
+      for (int i = 0; i < SeriesCount; i++)
+      {
+        seriesProperties.Add((ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null));
+        _cartesianChart.addSerie();
+      }
+      _cartesianChart.yAxes[0].visible = true;
+
+      offlineMessages = new String[SeriesCount];
+      showOffline = new bool[SeriesCount];
+
       manager = new formManager(this, parent, initData, "graph", prop);
       mainForm = parent;
       initDataNode = initData;
       prop.ApplyAllProperties(this);
-      prop.ApplyAllProperties(cartesianChart1);
-      prop.ApplyAllProperties(cartesianChart2, AppliesToSecondaryGraph);
-      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration);
+      prop.ApplyAllProperties(_cartesianChart);
+      
+
+      manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
+
 
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
+        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
         s.Init(this, i);
         if (s.DataSource_source != null)
         {
           SourceChanged(i, s.DataSource_source);
 
-          if (s.DataSource_source.curData.Count > 0)
-          {
-            int last = s.DataSource_source.curData.Count - 1;
-            double min = s.DataSource_source.curData[0].DateTime;
-            if ((minDate == 0) || (minDate > min)) minDate = min;
-            if (maxDate < s.DataSource_source.curData[last].DateTime) maxDate = s.DataSource_source.curData[last].DateTime + 60;
-
-          }
         }
+
       }
-      cartesianChart1.AxisX[0].MinValue = now();
-      cartesianChart1.AxisX[0].MaxValue = cartesianChart1.AxisX[0].MinValue + prop.Graph_AxisX0.initialZoom;
-      cartesianChart1.AxisX[0].MinRange = 15;
-      cartesianChart2.AxisX[0].MinValue = cartesianChart1.AxisX[0].MinValue;
-      cartesianChart2.AxisX[0].MaxValue = cartesianChart1.AxisX[0].MaxValue;
-      cartesianChart2.AxisX[0].FontSize = 16;
 
-      SetXAxislabelsFormat(0, prop.Graph_AxisX0.initialZoom);
-      SetXAxislabelsFormat(1, prop.Graph_AxisX0.initialZoom);
 
+
+      _cartesianChart.AllowPrintScreenCapture = true;
+      _cartesianChart.AllowRedraw();
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Clear dataloggers", Resources.cleardatalogger, clearDataLogger));
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset dataview", Resources.resetdataview, resetDataView));
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
 
     }
 
-    private void AdjustXaxisRightLimit()
+
+    private void capture(object sender, EventArgs e)
     {
-
-      if (prop.Graph_showRecordedData)
-      {
-        double max = 0;
-        for (int i = 0; i < SeriesCount; i++)
-        {
-          ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
-          double smax = s.DataSource_source.get_lastDataTimeStamp();
-          if ((smax > 0) && (smax > max)) max = smax;
-        }
-        if (max > 0) cartesianChart2.AxisX[0].MaxValue = max;
-
-      }
+      _cartesianChart.capture();
     }
 
 
 
 
 
-    private void AdjustXaxisLeftLimit()
-    {
-
-      if (prop.Graph_showRecordedData)
-      {
-        double min = now();
-        for (int i = 0; i < SeriesCount; i++)
-        {
-          ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
-          double smin = s.DataSource_source.get_firstDataloggerTimeStamp();
-          if ((smin > 0) && (smin < min)) min = smin;
-        }
-        cartesianChart2.AxisX[0].MinValue = min;
-      }
-      else
-      {
-        double min = now();
-        for (int i = 0; i < SeriesCount; i++)
-        {
-          ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
-          double smin = s.DataSource_source.get_firstLiveDataTimeStamp();
-          if ((smin > 0) && (smin < min)) min = smin;
-        }
-        cartesianChart2.AxisX[0].MinValue = min;
-      }
-    }
 
     private void clearDataLogger(object sender, EventArgs e)
     {
@@ -341,7 +183,7 @@ namespace YoctoVisualisation
       List<YDataLogger> loggers = new List<YDataLogger>();
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
+        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
         CustomYSensor sensor = s.DataSource_source;
         if (!(sensor is NullYSensor))
         {
@@ -371,20 +213,14 @@ namespace YoctoVisualisation
 
     private void truncateView()
     {
-      FirstLiveValue = now();
+      //FirstLiveValue = now();
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
+        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
         SourceChanged(i, s.DataSource_source);
       }
 
-      cartesianChart1.AxisX[0].MinValue = now();
-      cartesianChart1.AxisX[0].MaxValue = cartesianChart1.AxisX[0].MinValue + prop.Graph_AxisX0.initialZoom;
-      cartesianChart1.AxisX[0].MinRange = 15;
-      cartesianChart2.AxisX[0].MinValue = cartesianChart1.AxisX[0].MinValue;
-      cartesianChart2.AxisX[0].MaxValue = cartesianChart1.AxisX[0].MaxValue;
-      SetXAxislabelsFormat(1, cartesianChart1.AxisX[0].MaxValue - cartesianChart1.AxisX[0].MinValue);
-      SetXAxislabelsFormat(2, cartesianChart2.AxisX[0].MaxValue - cartesianChart2.AxisX[0].MinValue);
+
 
 
     }
@@ -396,119 +232,17 @@ namespace YoctoVisualisation
       //prop.Graph_showRecordedData = false;
       //truncateView();
 
-      cartesianChart1.AxisX[0].MinValue = now();
-      cartesianChart1.AxisX[0].MaxValue = cartesianChart1.AxisX[0].MinValue + prop.Graph_AxisX0.initialZoom;
-      cartesianChart1.AxisX[0].MinRange = 15;
-      SetXAxislabelsFormat(1, cartesianChart1.AxisX[0].MaxValue - cartesianChart1.AxisX[0].MinValue);
+
     }
 
-    private void ApplyNavigatorVisibility()
-    {
-      if (prop.Graph_showNavigator)
-      {
-        cartesianChart2.Visible = true;
-        cartesianChart1.Height = ClientSize.Height - 32 - prop.Graph_navigatorHeight;
-        cartesianChart2.Location = new System.Drawing.Point(12, ClientSize.Height - 24 - prop.Graph_navigatorHeight);
-        cartesianChart2.Height = prop.Graph_navigatorHeight;
 
-      }
-      else
-      {
-        cartesianChart2.Visible = false;
-        cartesianChart1.Height = ClientSize.Height - 24;
-
-      }
-    }
 
     private double now()
     {
       return Math.Round((double)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds);
     }
 
-    private void setZoom(double zoomValue)
-    {
-      cartesianChart1.AxisX[0].MinValue = cartesianChart1.AxisX[0].MaxValue - zoomValue;
-    }
 
-    private void UpdateScrollBar()
-    {
-
-    }
-
-
-
-
-
-    private void Axis_OnRangeChanged(RangeChangedEventArgs eventargs)
-    {
-
-      SetXAxislabelsFormat(1, eventargs.Range);
-    }
-
-    private void SetXAxislabelsFormat(int graphsIndex, double currentRange)
-    {
-      Axis a = graphsIndex == 1 ? cartesianChart1.AxisX[0] : cartesianChart2.AxisX[0];
-
-      if (currentRange < 60)
-      {
-        a.LabelFormatter = x => constants.UnixTimeStampToDateTime(x).ToString("HH:mm:ss.ff");
-
-        return;
-      }
-
-      if (currentRange < 3600)
-      {
-        a.LabelFormatter = x => constants.UnixTimeStampToDateTime(x).ToString("HH:mm:ss");
-
-        return;
-      }
-
-      if (currentRange < 86400)
-      {
-        a.LabelFormatter = x => constants.UnixTimeStampToDateTime(x).ToString("HH:mm");
-
-        return;
-      }
-
-
-      if (currentRange < 7 * 86400)
-      {
-        a.LabelFormatter = x => constants.UnixTimeStampToDateTime(x).ToString("dd/MM  HH:mm");
-
-        return;
-      }
-
-
-
-      a.LabelFormatter = x => constants.UnixTimeStampToDateTime(x).ToString("dd/MM/yyy");
-
-
-    }
-
-
-    string YAxisLabelFormater(int axisIndex, double value)
-    {
-      YAxisParam axis = (YAxisParam)prop.GetType().GetProperty("Graph_AxisY" + axisIndex.ToString()).GetValue(prop, null);
-      string format = axis.Labels_precision;
-      int p = format.IndexOf('.');
-      int n = 0;
-      if (p >= 0) n = format.Length - p - 1;
-
-      return value.ToString("F" + n.ToString());
-
-
-
-
-
-    }
-
-    string XAxisLabelFormater(double value)
-    {
-
-      if (maxDate - minDate < 5 * 60) return constants.UnixTimeStampToDateTime(value).ToString("T");
-      else if (maxDate - minDate < 24 * 3600) return constants.UnixTimeStampToDateTime(value).ToString("t");
-      else return constants.UnixTimeStampToDateTime(value).ToString("g");
-    }
 
 
     private void GraphForm_Load(object sender, EventArgs e)
@@ -537,23 +271,12 @@ namespace YoctoVisualisation
           GenericProperties.newSetProperty(this, prop, fullpropname, path);
           break;
         case "Graph":
-          if (OriginalPropName == "initialZoom") setZoom(prop.Graph_AxisX0.initialZoom);
-          else if ((OriginalPropName == "Graph_navigatorHeight")
-                || (OriginalPropName == "Graph_showNavigator")) ApplyNavigatorVisibility();
-          else
+          GenericProperties.newSetProperty(_cartesianChart, prop, fullpropname, path);
+          break;
 
-            GenericProperties.newSetProperty(cartesianChart1, prop, fullpropname, path);
-          break;
-        case "Graph2":
-          GenericProperties.newSetProperty(cartesianChart2, prop, fullpropname, path);
-          break;
-        case "Graphs":
-          GenericProperties.newSetProperty(cartesianChart1, prop, fullpropname, path);
-          GenericProperties.newSetProperty(cartesianChart2, prop, fullpropname, path, AppliesToSecondaryGraph);
-          break;
-        case "DataSource":
-          manager.AjustHint("");
-          break;
+          //  case "DataSource":
+          //    manager.AjustHint("");
+          //    break;
       }
 
     }
@@ -571,106 +294,108 @@ namespace YoctoVisualisation
     }
 
     private void switchConfiguration(object sender, EventArgs e)
-    { //MessageBox.Show("pouet");
+    {
       mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
     }
     public int getSensorDataType(int index)
     {
-      ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + index.ToString()).GetValue(prop, null);
+      ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + index.ToString()).GetValue(prop, null);
       return s.DataSource_datatype;
     }
+
+
+    private List<pointXY[]> decomposeToSegments(List<TimedSensorValue> data, int start, int dataCount)
+    {
+      int n1 = start;
+      int n2 = 0;
+      List<pointXY[]> l = new List<pointXY[]>();
+
+      while (n1 < dataCount - 1)
+      {
+        double deltaT = data[n1 + 1].DateTime - data[n1].DateTime;
+        n2 = n1 + 1;
+        while ((n2 < dataCount - 1) && (data[n2].DateTime - data[n2 - 1].DateTime < 2 * deltaT)) n2++;
+        int count = n2 - n1;
+        if (count > 0)
+        {
+          pointXY[] p = new pointXY[count];
+          for (int i = 0; i < count; i++) p[i] = new YDataRendering.pointXY() { x = data[n1 + i].DateTime, y = data[n1 + i].Value };
+          l.Add(p);
+        }
+        n1 = n2;
+      }
+
+      return l;
+
+    }
+
 
     public void SourceChanged(int index, CustomYSensor value)
     {
       value.registerCallback(this);
 
+      _cartesianChart.DisableRedraw();
+      ChartSerie s;
 
-      cartesianChart1.Series[index].Values.Clear();
-      cartesianChart2.Series[index].Values.Clear();
+      bool noDataSource = true;
+      for (int i = 0; i < SeriesCount; i++)
+      { s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
+        if (!(s.DataSource_source is NullYSensor)) noDataSource = false;
+      }
+      noDataSourcepanel.enabled = noDataSource;
 
       if (value != null)
       {
         if (!(value is NullYSensor))
         {
           if (value.isOnline())
-            offlinelist[index].Visible = false;
+            showOffline[index] = false;
           else
           {
-            offlinelist[index].Text = value.get_friendlyName() + " is OFFLINE";
-            offlinelist[index].Visible = true;
+            offlineMessages[index] = value.get_friendlyName() + " is OFFLINE";
+            showOffline[index] = true;
+            LogManager.Log(value.get_friendlyName() + " is OFFLINE");
           }
         }
-        else offlinelist[index].Visible = false;
-
-        if (prop.Graph_showRecordedData)
-        {
-          if (value.curData.Count > 1)
-          {
-            cartesianChart2.AxisX[0].MinValue = value.curData[0].DateTime;
-            cartesianChart2.AxisX[0].MaxValue = value.curData[value.curData.Count-1].DateTime;
-          }
-
-          switch (getSensorDataType(index))
-          {
-            case 1:
-              cartesianChart1.Series[index].Values.AddRange(value.minData);
-
-              
-              cartesianChart2.Series[index].Values.AddRange(value.minData);
-              break;
-            case 2:
-              cartesianChart1.Series[index].Values.AddRange(value.maxData);
-              cartesianChart2.Series[index].Values.AddRange(value.maxData);
-              break;
-
-            default:
-              cartesianChart1.Series[index].Values.AddRange(value.curData);
-              cartesianChart2.Series[index].Values.AddRange(value.curData);
-              break;
-
-          }
-        }
-        else
-        {
-          int n = 0;
-          while ((n < value.curData.Count) && (value.curData[n].DateTime < FirstLiveValue)) n++;
-          if (n < value.curData.Count)
-          {
-            switch (getSensorDataType(index))
-            {
-              case 1:
-                cartesianChart1.Series[index].Values.AddRange(value.minData.GetRange(n, value.minData.Count - n));
-                cartesianChart2.Series[index].Values.AddRange(value.minData.GetRange(n, value.minData.Count - n));
-                break;
-
-              case 2:
-                cartesianChart1.Series[index].Values.AddRange(value.maxData.GetRange(n, value.maxData.Count - n));
-                cartesianChart2.Series[index].Values.AddRange(value.maxData.GetRange(n, value.maxData.Count - n));
-                break;
-
-              default:
-                cartesianChart1.Series[index].Values.AddRange(value.curData.GetRange(n, value.curData.Count - n));
-                cartesianChart2.Series[index].Values.AddRange(value.curData.GetRange(n, value.curData.Count - n));
-                break;
-
-
-            }
-
-          }
-        }
+        else showOffline[index] = false;
       }
+      else showOffline[index] = false;
+
+      updateOfflinePanel();
+
+
+      _cartesianChart.series[index].clear();
+      s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + index.ToString()).GetValue(prop, null);
+      List<TimedSensorValue> data;
+      switch (s.DataSource_datatype)
+      { case 1: data = value.minData; break;
+        case 2: data = value.maxData; break;
+        default: data = value.curData; break;
+
+
+      }
+
+
+      List<pointXY[]> l = decomposeToSegments(data, 0, data.Count);
+      for (int i = l.Count - 1; i >= 0; i--) _cartesianChart.series[index].InsertPoints(l[i]);
+
+
+      _cartesianChart.AllowRedraw();
+
+
     }
 
     public void showRecordedDatachanged()
     {
+
       if (prop == null) return;
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
+        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
         SourceChanged(i, s.DataSource_source);
       }
 
-      AdjustXaxisLeftLimit();
+
 
 
 
@@ -685,12 +410,12 @@ namespace YoctoVisualisation
       foreach (var p in typeof(GraphFormProperties).GetProperties())
       {
         string name = p.Name;
-        if (name.StartsWith("Graphs_Series"))
+        if (name.StartsWith("Graph_series"))
         {
           ChartSerie s = (ChartSerie)p.GetValue(prop, null);
           if (s.DataSource_source == Source)
           {
-            int index = int.Parse(name.Substring(13));
+            int index = int.Parse(name.Substring(12));
             SourceChanged(index, Source);
 
           }
@@ -712,7 +437,7 @@ namespace YoctoVisualisation
       foreach (var p in typeof(GraphFormProperties).GetProperties())
       {
         string name = p.Name;
-        if (name.StartsWith("Graphs_Series"))
+        if (name.StartsWith("Graph_series"))
         {
           ChartSerie s = (ChartSerie)p.GetValue(prop, null);
           if (!(s.DataSource_source is NullYSensor))
@@ -734,120 +459,108 @@ namespace YoctoVisualisation
 
     public void SensorNewDataBlock(CustomYSensor source, int sourceFromIndex, int sourcetoIndex, int targetIndex, bool fromDataLogger)
     {
+
+
+
       if ((fromDataLogger) && (!prop.Graph_showRecordedData)) return;
 
       if (prop == null) return;
+
+      List<pointXY[]> l;
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
+        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
         if (s.DataSource_source == source)
         {
+
+          int count = sourcetoIndex - sourceFromIndex + 1;
+          pointXY[] datablock = new pointXY[count];
+
 
           switch (s.DataSource_datatype)
           {
             case 1:
-              cartesianChart1.Series[i].Values.InsertRange(targetIndex, s.DataSource_source.minData.GetRange(sourceFromIndex, (sourcetoIndex - sourceFromIndex + 1)));
-              cartesianChart2.Series[i].Values.InsertRange(targetIndex, s.DataSource_source.minData.GetRange(sourceFromIndex, (sourcetoIndex - sourceFromIndex + 1)));
+
+              l = decomposeToSegments(s.DataSource_source.minData, sourceFromIndex, count);
+              for (int j = l.Count - 1; j >= 0; j--) _cartesianChart.series[i].InsertPoints(l[j]);
+
+
+
               break;
             case 2:
-              cartesianChart1.Series[i].Values.InsertRange(targetIndex, s.DataSource_source.maxData.GetRange(sourceFromIndex, (sourcetoIndex - sourceFromIndex + 1)));
-              cartesianChart2.Series[i].Values.InsertRange(targetIndex, s.DataSource_source.maxData.GetRange(sourceFromIndex, (sourcetoIndex - sourceFromIndex + 1)));
+
+              l = decomposeToSegments(s.DataSource_source.maxData, sourceFromIndex, count);
+              for (int j = l.Count - 1; j >= 0; j--) _cartesianChart.series[i].InsertPoints(l[j]);
+
+
+
               break;
             default:
-              cartesianChart1.Series[i].Values.InsertRange(targetIndex, s.DataSource_source.curData.GetRange(sourceFromIndex, (sourcetoIndex - sourceFromIndex + 1)));
-              cartesianChart2.Series[i].Values.InsertRange(targetIndex, s.DataSource_source.curData.GetRange(sourceFromIndex, (sourcetoIndex - sourceFromIndex + 1)));
+              l = decomposeToSegments(s.DataSource_source.curData, sourceFromIndex, count);
+              for (int j = l.Count - 1; j >= 0; j--) _cartesianChart.series[i].InsertPoints(l[j]);
+
+
               break;
-          }
-
-
-
-          for (int j = 0; j < cartesianChart1.Series[i].Values.Count - 1; j++)
-          {
-            if (cartesianChart1.Series[i].Values[j] == cartesianChart1.Series[i].Values[j + 1])
-              throw new Exception("Ooops, Twin value and index " + j.ToString());
           }
 
         }
       }
-      AdjustXaxisLeftLimit();
-      AdjustXaxisRightLimit();
-      SetXAxislabelsFormat(1, cartesianChart1.AxisX[0].MaxValue - cartesianChart1.AxisX[0].MinValue);
-      SetXAxislabelsFormat(2, cartesianChart2.AxisX[0].MaxValue - cartesianChart2.AxisX[0].MinValue);
+
     }
 
-    private void AdjustCartesianChart2AxisX(ChartSerie s)
+    public void updateOfflinePanel()
     {
-     
+      string message = "";
+      for (int i = 0; i < SeriesCount; i++)
+      { if (showOffline[i]) message = message + ((message != "") ? "\n" : "") + offlineMessages[i];
+
+      }
+      if (message == "" && offLineSourcesPanel.enabled) offLineSourcesPanel.enabled = false;
+      if (message != "" && ((offLineSourcesPanel.text != message) || (!offLineSourcesPanel.enabled))) { offLineSourcesPanel.text = message ; offLineSourcesPanel.enabled = true;}
+
 
     }
+
+
 
     public void SensorValuecallback(CustomYSensor source, YMeasure M)
     {
       if (prop == null) return;
 
-      if (FirstLiveValue == 0) FirstLiveValue = M.get_endTimeUTC();
+ //     if (FirstLiveValue == 0) FirstLiveValue = M.get_endTimeUTC();
 
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graphs_Series" + i.ToString()).GetValue(prop, null);
+        ChartSerie s = seriesProperties[i];
         if (s.DataSource_source == source)
         {
           if (!s.DataSource_source.isOnline())
           {
-            offlinelist[i].Text = s.DataSource_source.get_friendlyName() + " is OFFLINE";
-            offlinelist[i].Visible = true;
+            offlineMessages[i] = s.DataSource_source.get_friendlyName()+" is OFFLINE";
+            showOffline[i] = true;
+            updateOfflinePanel();
+
+
             return;
           }
 
-          offlinelist[i].Visible = false;
+          showOffline[i] = false;
+          updateOfflinePanel();
 
           int index = s.DataSource_source.curData.Count - 1;
 
+          
           switch (s.DataSource_datatype)
           {
-            case 1: cartesianChart1.Series[i].Values.Add(s.DataSource_source.minData[index]); break;
-            case 2: cartesianChart1.Series[i].Values.Add(s.DataSource_source.maxData[index]); break;
-            default: cartesianChart1.Series[i].Values.Add(s.DataSource_source.curData[index]); break;
+            case 1: _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.minData[index].DateTime, y = s.DataSource_source.minData[index].Value }); break;
+            case 2: _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.maxData[index].DateTime, y = s.DataSource_source.maxData[index].Value }); break;            
+            default:
+               _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.curData[index].DateTime, y = s.DataSource_source.curData[index].Value }); break;            
           }
-
-          if (index > 1)
-          { // ajust Maingraph scroll if aligned with right side
-            double lasGraphTime = Math.Round(cartesianChart1.AxisX[0].MaxValue);
-            double lastValueTime = Math.Round(s.DataSource_source.curData[index - 1].DateTime);
-            if (lasGraphTime == lastValueTime)
-            {
-              double delta = lasGraphTime - cartesianChart1.AxisX[0].MinValue;
-              cartesianChart1.AxisX[0].MaxValue = s.DataSource_source.curData[index].DateTime;
-              cartesianChart1.AxisX[0].MinValue = cartesianChart1.AxisX[0].MaxValue - delta;
-              AdjustXaxisRightLimit();
-              cartesianChart2.Base.ScrollHorizontalFrom = cartesianChart1.AxisX[0].MinValue;
-              cartesianChart2.Base.ScrollHorizontalTo = cartesianChart1.AxisX[0].MaxValue;
-              switch (s.DataSource_datatype)
-              {
-                case 1: cartesianChart2.Series[i].Values.Add(s.DataSource_source.minData[index]); break;
-                case 2: cartesianChart2.Series[i].Values.Add(s.DataSource_source.maxData[index]); break;
-                default: cartesianChart2.Series[i].Values.Add(s.DataSource_source.curData[index]); break;
-              }
-              return;
-            }
-          }
-          switch (s.DataSource_datatype)
-          {
-            case 1: cartesianChart2.Series[i].Values.Add(s.DataSource_source.minData[index]); break;
-            case 2: cartesianChart2.Series[i].Values.Add(s.DataSource_source.maxData[index]); break;
-            default: cartesianChart2.Series[i].Values.Add(s.DataSource_source.curData[index]); break;
-          }
-
-
-
-          AdjustXaxisRightLimit();
+          _cartesianChart.series[i].unit = s.DataSource_source.get_unit();
 
         }
       }
-
-
-
-
     }
 
 
@@ -857,48 +570,10 @@ namespace YoctoVisualisation
       mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
     }
 
-    private void cartesianChart2_DataClick(object sender, ChartPoint chartPoint)
+    private void GraphForm_Load_1(object sender, EventArgs e)
     {
-      return;
-    
-
-
+      manager.initForm();
     }
   }
-
-  public class BindingAssistant : INotifyPropertyChanged
-  {
-    private double _from;
-    private double _to;
-
-    public double From
-    {
-      get { return _from; }
-      set
-      {
-        _from = value;
-        OnPropertyChanged("From");
-      }
-    }
-
-    public double To
-    {
-      get { return _to; }
-      set
-      {
-        _to = value;
-        OnPropertyChanged("To");
-      }
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged(string propertyName = null)
-    {
-      if (PropertyChanged != null)
-        PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-  }
-
 
 }
