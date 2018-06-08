@@ -63,16 +63,17 @@ namespace YDataRendering
 
     public PointF[] path { get{ return _path; } }
 
+    
 
     double _width = 10;
-    public double width { get { return _width; }  set { _width = value;  _path = null; parent.redraw();  } }
+    public double width { get { return _width; }  set { _width = value;  _path = null; _parentRenderer.redraw();  } }
 
 
     double _outerRadius = 98;
-    public double outerRadius { get { return _outerRadius; } set { _outerRadius = Math.Max(0,Math.Min(100,value)); _path = null; parent.redraw(); } }
+    public double outerRadius { get { return _outerRadius; } set { _outerRadius = Math.Max(0,Math.Min(100,value)); _path = null; _parentRenderer.redraw(); } }
 
 
-    public YAngularZone(YDataRenderer parent) : base(parent)
+    public YAngularZone(YDataRenderer parent, Object directParent) : base(parent,directParent)
     {}
 
   }
@@ -81,6 +82,7 @@ namespace YDataRendering
   public class YAngularGauge : YDataRenderer
   {
 
+   
 
     protected Double _min = 0;
     public Double min { get { return _min; }
@@ -312,13 +314,13 @@ namespace YDataRendering
 
     public YAngularGauge(PictureBox ChartContainer, logFct logFunction) : base(ChartContainer, logFunction)
     {
-      this._graduationFont = new YFontParams(this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 15, null);
-      this._unitFont = new YFontParams(this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 20, null);
-      this._statusFont = new YFontParams(this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 15, null);
+      this._graduationFont = new YFontParams(this, this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 15, null);
+      this._unitFont = new YFontParams(this, this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 20, null);
+      this._statusFont = new YFontParams(this, this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 15, null);
       this.unitFont.color = Color.DarkGray;
       this.statusFont.color = Color.DarkGray;
       _zones = new List<YAngularZone>();
-      resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
+    
       AllowRedraw();
       Draw();
 
@@ -326,7 +328,7 @@ namespace YDataRendering
 
     protected override void clearCachedObjects()
     {
-      for (int i = 0; i < _zones.Count; i++) _zones[i].resetPath();
+      if (_zones!=null) for (int i = 0; i < _zones.Count; i++) _zones[i].resetPath();
       _path = null;
       _bgBrush = null;
 
@@ -341,7 +343,7 @@ namespace YDataRendering
     public YAngularZone AddZone()
     {
 
-      YAngularZone z = new YAngularZone(this);
+      YAngularZone z = new YAngularZone(this,this);
       _zones.Add(z);
       return z;
     }

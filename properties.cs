@@ -360,9 +360,10 @@ namespace YoctoVisualisation
   public class AngularGaugeFormProperties : GenericProperties
   {
     public AngularGaugeFormProperties(XmlNode initData, Form owner) : base(initData, owner)
-    { PropagateDataSourceChange(); }
+    { PropagateDataSourceChange();
+    }
 
-    private void PropagateDataSourceChange()
+    public  void PropagateDataSourceChange()
     {
       ((angularGaugeForm)ownerForm).SourceChanged(_DataSource_source);
       foreach (var p in this.GetType().GetProperties())
@@ -465,7 +466,7 @@ namespace YoctoVisualisation
     private double _AngularGauge_unitFactor = 1;
     [DisplayName("Unit factor"),
      CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Data  will be divided by this value before being displayed, this allow for simpler graduation marks.")]
+     DescriptionAttribute("Data  will be divided by this value before being displayed, this allows simpler graduation marks.")]
      public double AngularGauge_unitFactor
     {
         get { return _AngularGauge_unitFactor; }
@@ -1103,7 +1104,7 @@ namespace YoctoVisualisation
     private Double _hrzAlignmentOfset = 5.0;
     [DisplayName("Hrz alignment offset"),
     CategoryAttribute("Display"),
-    DescriptionAttribute("Horizontal alignment offset in percentage. No effect when chosen is CENTER")]
+    DescriptionAttribute("Horizontal alignment offset in percentage. No effect when chosen horizontal alignment is CENTER")]
     public double display_hrzAlignmentOfset
     {
       get { return _hrzAlignmentOfset; }
@@ -1115,7 +1116,7 @@ namespace YoctoVisualisation
     [DisplayName("Minimum value"),
      CategoryAttribute("Range Control"),
      TypeConverter(typeof(doubleNanConverter)),
-     DescriptionAttribute("Regular range minimum value. if value goes  outside this range, color will turn to \"Out of range Color\".Leave blank if you don't want to define such a range. ")]
+     DescriptionAttribute("Regular range minimum value. if value goes  outside regular  range, color will turn to \"Out of range Color\".Leave blank if you don't want to define such a range. ")]
     public doubleNan display_outOfRangeMin
     {
       get { return _outOfRangeMin; }
@@ -1126,7 +1127,7 @@ namespace YoctoVisualisation
     [DisplayName("Maximum value"),
      CategoryAttribute("Range Control"),
      TypeConverter(typeof(doubleNanConverter)),
-     DescriptionAttribute("Regular range maximxum value. if value is outside this range, color will turn to \"Out of range Color\". Leave blank if you don't want to define such a range. ")]
+     DescriptionAttribute("Regular range maximxum value. if value is outside regular range, color will turn to \"Out of range Color\". Leave blank if you don't want to define such a range. ")]
     public doubleNan display_outOfRangeMax
     {
       get { return _outOfRangeMax; }
@@ -1139,7 +1140,7 @@ namespace YoctoVisualisation
      CategoryAttribute("Range Control"),
       Editor(typeof(YColorEditor), typeof(UITypeEditor)),
        TypeConverter(typeof(YColorConverter)),
-     DescriptionAttribute("Display digits YColor when value is out of range." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Digits color when value is out of range." + GenericHints.ColorMsg)]
     public YColor display_outOfRangeColorColor
     {
       get { return _outOfRangeColor; }
@@ -1223,7 +1224,7 @@ namespace YoctoVisualisation
    
     [DisplayName("Trigger action"),
       NotSavedInXMLAttribute(true),
-     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $HWDID$, $NAME$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$.")]
+     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $HWDID$, $NAME$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$. You can check logs to find out if your alarm command line works.")]
     public string commandLine
     {
       get {
@@ -1385,7 +1386,7 @@ namespace YoctoVisualisation
 
     private string _legend = "";
     [DisplayName("Legend"),
-     DescriptionAttribute("Short descriptopn of the serie.")]
+     DescriptionAttribute("Short description of the serie.")]
     public string legend
     {
       get { return _legend; }
@@ -1429,13 +1430,13 @@ namespace YoctoVisualisation
     private bool _enabled = false;
     [DisplayName("Enabled"),
      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Should the legend panel be shown or not."+ GenericHints.BoolMsg)]
+     DescriptionAttribute("Should the legend panel be shown or not"+ GenericHints.BoolMsg)]
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
     private bool _overlap = false;
     [DisplayName("Overlap"),
      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Can the pan ovelap the graph data, or should we explicitely make space for it?." + GenericHints.BoolMsg)]
+     DescriptionAttribute("Can the panel ovelap the graph data, or should we explicitely make space for it?" + GenericHints.BoolMsg)]
     public bool overlap { get { return _overlap; } set { _overlap = value; } }
 
     private LegendPanel.Position _position = LegendPanel.Position.RIGHT;
@@ -1553,7 +1554,7 @@ namespace YoctoVisualisation
 
     private double _padding = 5;
     [DisplayName("Padding"),
-     DescriptionAttribute("Distance between the panel boirder and its contents ")]
+     DescriptionAttribute("Distance between the panel border and its contents ")]
     public double padding { get { return _padding; } set { _padding = value;  } }
 
     private int _detectionDistance = 50;
@@ -2267,7 +2268,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
       DisplayName("Data tracker"),
       ReadOnlyAttribute(true),
       CategoryAttribute("Graph"),
-      DescriptionAttribute("Show dynamic value labels while the mouse is moving over the data graphs. Expand for more.")]
+      DescriptionAttribute("Show dynamic value labels while the mouse is moving over the graph. Expand for more.")]
     public DataTrackerDescription Graph_dataTracker
     {
       get { return _Graph_dataTracker; }

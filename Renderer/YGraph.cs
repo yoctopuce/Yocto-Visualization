@@ -48,6 +48,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Drawing.Imaging;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace YDataRendering
 {
@@ -300,6 +301,9 @@ namespace YDataRendering
   {
     protected YGraph parent = null;
 
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
     public DataSerie(YGraph parent)
     {
       if (parent.yAxes.Count <= 0) throw new System.ArgumentException("Define at least one yAxis");
@@ -361,6 +365,15 @@ namespace YDataRendering
         return _navigatorpen;
       }
     }
+
+
+    private bool _visible = true;  // whet not visible, series is  not shown but still intervenne in Axis auto range calculus
+    public bool visible { get { return _visible; } set { _visible = value; parent.redraw(); } }
+
+
+    private bool _disabled = false;  // when series is disbales,rendering acts just like to series does not exists
+    public bool disabled { get { return _disabled; } set { _disabled = value; parent.redraw(); } }
+
 
 
     private Color _color = Color.Black;
@@ -554,45 +567,51 @@ namespace YDataRendering
 
   public class DataTracker
   {
-    private YDataRenderer parent = null;
+    private YDataRenderer _parentRenderer = null;
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
 
-    public DataTracker(YDataRenderer parent)
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+    public DataTracker(YDataRenderer parent, object directParent)
     {
-      this.parent = parent;
-      this._font = new YFontParams(parent, 8, null);
+      this._directParent = directParent;
+      this._parentRenderer = parent;
+      this._font = new YFontParams(parent, this, 8, null);
 
     }
 
     private bool _enabled = false;
-    public bool enabled { get { return _enabled; } set { _enabled = value; parent.redraw(); } }
+    public bool enabled { get { return _enabled; } set { _enabled = value; _parentRenderer.redraw(); } }
 
     private double _diameter = 5;
-    public double diameter { get { return _diameter; } set { _diameter = value; parent.redraw(); } }
+    public double diameter { get { return _diameter; } set { _diameter = value; _parentRenderer.redraw(); } }
 
     private double _handleLength = 25;
-    public double handleLength { get { return _handleLength; } set { _handleLength = value; parent.redraw(); } }
+    public double handleLength { get { return _handleLength; } set { _handleLength = value; _parentRenderer.redraw(); } }
 
     private int _detectionDistance = 50;
     public int detectionDistance { get { return _detectionDistance; } set { _detectionDistance = value;  } }
 
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; parent.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; parent.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; parent.redraw(); } }
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _padding = 10;
-    public double padding { get { return _padding; } set { _padding = value; parent.redraw(); } }
+    public double padding { get { return _padding; } set { _padding = value; _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; parent.redraw(); } }
+    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; _parentRenderer.redraw(); } }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; parent.redraw(); } }
+    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; _parentRenderer.redraw(); } }
 
 
 
@@ -629,46 +648,52 @@ namespace YDataRendering
 
   public class LegendPanel
   {
-    private YDataRenderer parent = null;
+    private YDataRenderer _parentRenderer = null;
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
+
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
 
     public enum Position {[Description("Left")]LEFT, [Description("Top-Left")]TOPLEFT, [Description("Top")]TOP, [Description("Top-Right")]TOPRIGHT, [Description("Right")]RIGHT, [Description("Bottom-Right")]BOTTOMRIGHT, [Description("Bottom")]BOTTOM, [Description("Bottom-Left")]BOTTOMLEFT };
 
 
-    public LegendPanel(YDataRenderer parent)
+    public LegendPanel(YDataRenderer parent, Object directParent)
     {
-      this.parent = parent;
-      this._font = new YFontParams(parent, 8, null);
+      _directParent = directParent;
+      _parentRenderer = parent;
+      _font = new YFontParams(parent, this, 8, null);
 
     }
 
     private bool _enabled = false;
-    public bool enabled { get { return _enabled; } set { _enabled = value; parent.redraw(); } }
+    public bool enabled { get { return _enabled; } set { _enabled = value; _parentRenderer.redraw(); } }
 
     private Position _position = Position.BOTTOM;
-    public Position position { get { return _position; } set { _position = value; parent.redraw(); } }
+    public Position position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
     private bool _overlap = false;
-    public bool  overlap { get { return _overlap; } set { _overlap = value; parent.redraw(); } }
+    public bool  overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.redraw(); } }
 
 
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; parent.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; parent.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; parent.redraw(); } }
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _padding = 10;
-    public double padding { get { return _padding; } set { _padding = value; parent.redraw(); } }
+    public double padding { get { return _padding; } set { _padding = value; _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; parent.redraw(); } }
+    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; _parentRenderer.redraw(); } }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; parent.redraw(); } }
+    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; _parentRenderer.redraw(); } }
 
 
 
@@ -704,7 +729,13 @@ namespace YDataRendering
 
   public class Navigator
   {
-    private YGraph parent = null;
+    private YGraph _parentRenderer = null;
+
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
 
     public enum YAxisHandling {[Description("Automatic")]AUTO, [Description("Inherit from main view")] INHERIT };
 
@@ -730,41 +761,42 @@ namespace YDataRendering
         if (value < 10) value = 10;
         if (value > 50) value = 50;
         _relativeheight = value;
-        parent.redraw();
+        _parentRenderer.redraw();
       }
     }
 
      
 
-    public Navigator(YGraph parent)
+    public Navigator(YGraph parent, Object directParent)
     {
-      this.parent = parent;
-      this._font = new YFontParams(parent, 8,null);
+      _directParent = directParent; 
+      _parentRenderer = parent;
+      _font = new YFontParams(parent, this, 8,null);
 
     }
 
     private bool _enabled = false;
-    public bool enabled { get { return _enabled; } set { _enabled = value; parent.redraw(); } }
+    public bool enabled { get { return _enabled; } set { _enabled = value; _parentRenderer.redraw(); } }
 
     private Color _bgColor1 = Color.FromArgb(255, 225, 225, 225);
-    public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; parent.redraw(); } }
+    public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; _parentRenderer.redraw(); } }
 
 
     private Color _cursorBorderColor = Color.FromArgb(255,  40, 40, 40);
-    public Color cursorBorderColor { get { return _cursorBorderColor; } set { _cursorBorderColor = value; _cursorBorderPen = null; parent.redraw(); } }
+    public Color cursorBorderColor { get { return _cursorBorderColor; } set { _cursorBorderColor = value; _cursorBorderPen = null; _parentRenderer.redraw(); } }
 
     
 
 
     private YAxisHandling _yAxisHandling = YAxisHandling.AUTO;
-    public YAxisHandling yAxisHandling { get { return _yAxisHandling; } set { _yAxisHandling = value; parent.redraw(); } }
+    public YAxisHandling yAxisHandling { get { return _yAxisHandling; } set { _yAxisHandling = value; _parentRenderer.redraw(); } }
 
     private Color _bgColor2 = Color.FromArgb(255, 255, 255, 255);
-    public Color bgColor2 { get { return _bgColor2; } set { _bgColor2 = value; parent.redraw(); } }
+    public Color bgColor2 { get { return _bgColor2; } set { _bgColor2 = value; _parentRenderer.redraw(); } }
 
 
     private Color _cursorColor = Color.FromArgb(100, 0, 255, 0);
-    public Color cursorColor { get { return _cursorColor; } set { _cursorColor = value; parent.redraw(); } }
+    public Color cursorColor { get { return _cursorColor; } set { _cursorColor = value; _parentRenderer.redraw(); } }
 
 
     private Brush _cursorBrush = null;
@@ -803,10 +835,10 @@ namespace YDataRendering
 
 
     private Color _xAxisColor = Color.Black;
-    public Color xAxisColor { get { return _xAxisColor; } set { _xAxisColor = value; _pen = null; parent.redraw(); } }
+    public Color xAxisColor { get { return _xAxisColor; } set { _xAxisColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _xAxisThickness = 1.0;
-    public double xAxisThickness { get { return _xAxisThickness; } set { _xAxisThickness = value; _pen = null; parent.redraw(); } }
+    public double xAxisThickness { get { return _xAxisThickness; } set { _xAxisThickness = value; _pen = null; _parentRenderer.redraw(); } }
 
 
     private Pen _borderPen = null;
@@ -820,10 +852,10 @@ namespace YDataRendering
     }
 
     private Color _borderColor = Color.DarkGray;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderPen = null; parent.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderPen = null; _parentRenderer.redraw(); } }
 
     private Double _borderThickness = 1.0;
-    public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; _borderPen = null; parent.redraw(); } }
+    public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; _borderPen = null; _parentRenderer.redraw(); } }
 
 
     private LinearGradientBrush _bgBrush = null;
@@ -894,16 +926,23 @@ namespace YDataRendering
   public class Legend
   {
 
-    protected YGraph parent = null;
+    protected YGraph _parentRenderer = null;
 
-    public Legend(YGraph parent)
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
+
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+    public Legend(YGraph parent,Object directParent)
     {
-      this.parent = parent;
-      this._font = new YFontParams(parent, 12,null);
+      _directParent = directParent;
+      _parentRenderer = parent;
+      _font = new YFontParams(parent, this, 12,null);
     }
 
     private String _title = "";
-    public string title { get { return _title; } set { _title = value; parent.redraw(); } }
+    public string title { get { return _title; } set { _title = value; _parentRenderer.redraw(); } }
 
 
 
@@ -915,14 +954,19 @@ namespace YDataRendering
 
   abstract public class GenericAxis
   {
-    protected YGraph parent = null;
+    protected YGraph _parentRenderer = null;
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
 
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
 
-    public GenericAxis(YGraph parent)
+    public GenericAxis(YGraph parent,Object directParent)
     {
-      this.parent = parent;
-      this._legend = new Legend(parent);
-      this._font = new YFontParams(parent);
+      _directParent = directParent;
+      _parentRenderer = parent;
+      _legend = new Legend(parent,this);
+      _font = new YFontParams(parent,this);
     }
 
 
@@ -953,33 +997,33 @@ namespace YDataRendering
     }
 
 
-    protected bool _visible = false;
-    public bool visible { get { return _visible; } set { _visible = value; parent.redraw(); } }
+    protected bool _visible = true;
+    public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
 
     protected Double _min = Double.NaN;
-    public Double min { get { return _min; } set { _min = value; parent.redraw(); } }
+    public Double min { get { return _min; } set { _min = value; _parentRenderer.redraw(); } }
 
     protected Double _max = Double.NaN;
-    public Double max { get { return _max; } set { _max = value; parent.redraw(); } }
+    public Double max { get { return _max; } set { _max = value; _parentRenderer.redraw(); } }
 
     protected Double _step = Double.NaN;
-    public Double step { get { return _step; } set { _step = value; parent.redraw(); } }
+    public Double step { get { return _step; } set { _step = value; _parentRenderer.redraw(); } }
 
     protected Double _thickness = 1.0;
-    public Double thickness { get { return _thickness; } set { _thickness = value; _pen = null; parent.redraw(); } }
+    public Double thickness { get { return _thickness; } set { _thickness = value; _pen = null; _parentRenderer.redraw(); } }
 
     protected Color _color = Color.Black;
-    public Color color { get { return _color; } set { _color = value; _pen = null; parent.redraw(); } }
+    public Color color { get { return _color; } set { _color = value; _pen = null; _parentRenderer.redraw(); } }
 
 
     protected bool _showGrid = false;
-    public bool showGrid { get { return _showGrid; } set { _showGrid = value; parent.redraw(); } }
+    public bool showGrid { get { return _showGrid; } set { _showGrid = value; _parentRenderer.redraw(); } }
 
     protected Color _gridColor = Color.FromArgb(50, 0, 0, 0);
-    public Color gridColor { get { return _gridColor; } set { _gridColor = value; _gridPen = null; parent.redraw(); } }
+    public Color gridColor { get { return _gridColor; } set { _gridColor = value; _gridPen = null; _parentRenderer.redraw(); } }
 
     protected Double _gridThickness = 1.0;
-    public Double gridThickness { get { return _gridThickness; } set { _gridThickness = value; _gridPen = null; parent.redraw(); } }
+    public Double gridThickness { get { return _gridThickness; } set { _gridThickness = value; _gridPen = null; _parentRenderer.redraw(); } }
 
 
     YFontParams _font = null;
@@ -1030,13 +1074,16 @@ namespace YDataRendering
     private List<Zone> _zones;
     public List<Zone> zones { get { return _zones; } }
 
+     NumberFormatInfo nfi ;
+   
 
 
-
-    public YAxis(YGraph parent) : base(parent)
+    public YAxis(YGraph parent, Object directParent) : base(parent, directParent)
     {
       _zones = new List<Zone>();
-    
+      nfi = new NumberFormatInfo();
+      nfi.NumberDecimalSeparator = ".";
+
     }
     
 
@@ -1048,7 +1095,7 @@ namespace YDataRendering
     public Zone AddZone()
     {
 
-      Zone z = new Zone(parent);
+      Zone z = new Zone(_parentRenderer,this);
       _zones.Add(z);
       return z;
     }
@@ -1056,7 +1103,7 @@ namespace YDataRendering
 
 
     private HrzPosition _position = HrzPosition.LEFT;
-    public HrzPosition position { get { return _position; } set { _position = value; parent.redraw(); } }
+    public HrzPosition position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
     public int innerWidth = 0;
 
@@ -1066,6 +1113,8 @@ namespace YDataRendering
 
 
     public StartStopStep startStopStep = new StartStopStep { start = 0, stop = 1, step = .1 };
+
+   
 
     public StartStopStep computeStartAndStep(MinMaxHandler.MinMax M)
     {
@@ -1123,6 +1172,17 @@ namespace YDataRendering
      //     if ((M.Min < 0) && (M.Min - (int)M.Min != 0)) res.start -= res.step;
          
         }
+      } else
+      {
+        String v = res.step.ToString( nfi);
+        int p = v.IndexOf('.');
+        if (p>=0)
+        {
+          res.precision = -(v.Length-p-1);
+        }
+        else res.precision = 0;
+      
+       
       }
 
       startStopStep = res;
@@ -1145,14 +1205,14 @@ namespace YDataRendering
 
 
     private VrtPosition _position = VrtPosition.BOTTOM;
-    public VrtPosition position { get { return _position; } set { _position = value; parent.redraw(); } }
+    public VrtPosition position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
     private double _initialZoom = 300;
-    public double initialZoom { get { return _initialZoom; } set { _initialZoom = value; max = min + initialZoom; parent.redraw(); } }
+    public double initialZoom { get { return _initialZoom; } set { _initialZoom = value; max = min + initialZoom; _parentRenderer.redraw(); } }
 
 
 
-    public XAxis(YGraph parent) : base(parent)
+    public XAxis(YGraph parent, Object directParent) : base(parent,directParent )
     {
       min = TimeConverter.ToUnixTime(DateTime.UtcNow);
       max = min + initialZoom;
@@ -1162,7 +1222,7 @@ namespace YDataRendering
 
     protected TimeConverter.TimeReference _timeReference = TimeConverter.TimeReference.ABSOLUTE;
     public TimeConverter.TimeReference timeReference
-    { get { return _timeReference; } set { _timeReference = value; parent.redraw(); } }
+    { get { return _timeReference; } set { _timeReference = value; _parentRenderer.redraw(); } }
 
     public TimeResolution bestFormat(double dataTimedelta, double viewportTimedelta)
     {
@@ -1194,6 +1254,7 @@ namespace YDataRendering
     int lastBottomMargin = -1;
 
     Bitmap navigatorCache;
+    
 
     private LegendPanel _legendPanel;
     public LegendPanel legendPanel { get { return _legendPanel; }}
@@ -1222,13 +1283,13 @@ namespace YDataRendering
     public YGraph(PictureBox ChartContainer, logFct logFunction) : base(ChartContainer, logFunction)
     {
       
-      _xAxis = new XAxis(this);
+      _xAxis = new XAxis(this,this);
       _yAxes = new List<YAxis>();
       _series = new List<DataSerie>();
     
-      _navigator = new Navigator(this);
-      _legendPanel = new LegendPanel(this);
-      _dataTracker = new DataTracker(this);
+      _navigator = new Navigator(this,this);
+      _legendPanel = new LegendPanel(this,this);
+      _dataTracker = new DataTracker(this,this);
 
       this.UIContainer.MouseDown += MouseDown;
       this.UIContainer.MouseMove += MouseMove;
@@ -1301,7 +1362,7 @@ namespace YDataRendering
 
     public YAxis addYAxis()
     {
-      YAxis s = new YAxis(this);
+      YAxis s = new YAxis(this,this);
       _yAxes.Add(s);
       redraw();
       return s;
@@ -1569,7 +1630,8 @@ namespace YDataRendering
 
 
         for (int i = 0; i < _series.Count; i++)
-          if (_series[i].segments.Count > 0)
+
+          if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
           {
             SizeF ssize = g.MeasureString(legends[i], _legendPanel.font.fontObject, 100000);
             legendHeight[i] = (ssize.Height) + 1;
@@ -1609,7 +1671,7 @@ namespace YDataRendering
       { double ty = 0;
         for (int i = 0; i < _series.Count; i++)
 
-          if (_series[i].segments.Count > 0)
+          if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
           {
             SizeF ssize = g.MeasureString(legends[i], _legendPanel.font.fontObject, 100000);
             legendWidths[i] = (ssize.Width) + 1; if (maxWidth < legendWidths[i] + 20) maxWidth = legendWidths[i] + 20;
@@ -1749,7 +1811,7 @@ namespace YDataRendering
           g.DrawRectangle(_legendPanel.pen, r);
          
           for (int i = 0; i < _series.Count; i++)
-            if (_series[i].segments.Count > 0)
+            if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
              {
               g.DrawString(legends[i], _legendPanel.font.fontObject, _legendPanel.font.brushObject,
                  (int)(x+ofsetx[i]  + 20 + legendPanel.padding),
@@ -1990,7 +2052,7 @@ namespace YDataRendering
         {
           int x = w.Lmargin + (int)Math.Round((t - xRange.Min) / XZoom);
           g.DrawLine(_navigator.pen, x, y, x, y - 4);
-          String label = TimeConverter.FromUnixTime(t).ToString(scale.format);
+          String label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scale.format);
           SizeF ssize = g.MeasureString(label, _navigator.font.fontObject, 100000);
           g.DrawString(label, _navigator.font.fontObject, _navigator.font.brushObject, new Point((int)(x - ssize.Width / 2), (int)(y - ssize.Height - 2)));
         }
@@ -2028,7 +2090,9 @@ namespace YDataRendering
       }
       else
       {
-        for (int i = 0; i < this._series.Count; i++) timeRange = MinMaxHandler.Combine(timeRange, this._series[i].timeRange);
+        for (int i = 0; i < this._series.Count; i++)
+          if  (!_series[i].disabled)
+            timeRange = MinMaxHandler.Combine(timeRange, this._series[i].timeRange);
         if (double.IsNaN(timeRange.Min)) return 0;
         FirstStep = timeRange.Min + scale.step * (Math.Truncate((scale.min - timeRange.Min) / scale.step));
       }
@@ -2146,7 +2210,8 @@ namespace YDataRendering
 
 
       for (int i = 0; i < _series.Count; i++)
-      {
+        if ( (_series[i].visible) && (!_series[i].disabled))
+        {
         
          IRLmatch[i]  = _series[i].findClosestValue(DataPoint.x, false);
         if (IRLmatch[i] != null)
@@ -2270,7 +2335,7 @@ namespace YDataRendering
       {
         M = MinMaxHandler.DefaultValue();
         for (int k = 0; k < _series.Count; k++)
-          if (_series[k].yAxisIndex == i)
+          if ((_series[k].yAxisIndex == i) && (!_series[k].disabled))
           {
 
             for (int j = 0; j < _series[k].segments.Count; j++)
@@ -2380,6 +2445,7 @@ namespace YDataRendering
       int lineCount = 0;
       int pointCount = 0;
       for (int k = 0; k < _series.Count; k++)
+        if ((_series[k].visible) && !(_series[k].disabled))
       {
         int scaleIndex = _series[k].yAxisIndex;
         mypenb = _series[k].pen;
@@ -2410,7 +2476,8 @@ namespace YDataRendering
 
         // step 7A, find out Time Range
         MinMaxHandler.MinMax range = MinMaxHandler.DefaultValue();
-        for (int i = 0; i < _series.Count; i++) range = MinMaxHandler.Combine(range, _series[i].timeRange);
+        for (int i = 0; i < _series.Count; i++)
+          if (!_series[i].disabled)range = MinMaxHandler.Combine(range, _series[i].timeRange);
 
         _navigator.Xrange = MinMaxHandler.extend(range,1.05);
        
@@ -2436,6 +2503,7 @@ namespace YDataRendering
             if (_navigator.yAxisHandling == Navigator.YAxisHandling.AUTO)
             { // Automatic yAxis handling
               for (int k = 0; k < _series.Count; k++)
+                if (!_series[k].disabled)
               {
                
                 v.IRLy = _series[k].valueRange.Min;
@@ -2468,7 +2536,7 @@ namespace YDataRendering
               { // findout data MinMax
                 MinMaxHandler.MinMax Yrange = MinMaxHandler.DefaultValue();
                 for (int j = 0; j < _series.Count; j++)
-                  if (_series[j].yAxisIndex == i)
+                  if ((_series[j].yAxisIndex == i) && (!_series[j].disabled))
                     Yrange = MinMaxHandler.Combine(Yrange, _series[j].valueRange);
                 Yrange= MinMaxHandler.extend(Yrange, 1+2*dontSticktoBorderZoom);
                 Min = _yAxes[i].min; if (Double.IsNaN(Min)) Min = Yrange.Min;
@@ -2478,7 +2546,7 @@ namespace YDataRendering
                 v.IRLy = Min;
                 v.zoomy = (v.Height - v.Tmargin - v.Bmargin) / (Max - Min);
                 for (int j = 0; j < _series.Count; j++)
-                  if (_series[j].yAxisIndex == i)
+                  if ((_series[j].yAxisIndex == i)  && (!_series[j].disabled) && (_series[j].visible))
                   {
                     mypenb = _series[j].navigatorpen;
                     for (int k = 0; k < _series[j].segments.Count; k++)

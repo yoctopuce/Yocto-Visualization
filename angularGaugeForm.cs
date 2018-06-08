@@ -65,9 +65,10 @@ namespace YoctoVisualisation
 
     private MessagePanel  noDataSourcepanel;
 
-  
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
 
-  public YAngularGauge angularGauge { get { return _angularGauge; } } 
+    public YAngularGauge angularGauge { get { return _angularGauge; } } 
 
 
 
@@ -83,7 +84,9 @@ namespace YoctoVisualisation
 
       InitializeComponent();
       _angularGauge = new YAngularGauge(rendererCanvas, LogManager.Log);
+     
       _angularGauge.DisableRedraw();
+      _angularGauge.resizeRule = Proportional.ResizeRule.FIXED;
       _angularGauge.getCaptureParameters = constants.getCaptureParametersCallback;
 
 
@@ -102,12 +105,18 @@ namespace YoctoVisualisation
       mainForm = parent;
       initDataNode = initData;   
       prop.ApplyAllProperties(this);
+      if (!manager.initForm()) {
+        Rectangle s = Screen.FromControl(this).Bounds;
+        this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
+      }
+
       prop.ApplyAllProperties(_angularGauge);
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
  
-     
-
+    
       _angularGauge.AllowPrintScreenCapture = true;
+      _angularGauge.proportionnalValueChangeCallback = manager.proportionalValuechanged ;
+      _angularGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _angularGauge.AllowRedraw();
 
 
@@ -235,7 +244,7 @@ namespace YoctoVisualisation
 
     private void angularGaugeForm_Load_1(object sender, EventArgs e)
     {
-      manager.initForm();
+     // manager.initForm();
     }
   }
 }

@@ -43,6 +43,7 @@ using System.Xml;
 using System.Windows.Forms;
 using YDataRendering;
 using YoctoVisualization.Properties;
+using System.Drawing;
 
 namespace YoctoVisualisation
 {
@@ -68,7 +69,8 @@ namespace YoctoVisualisation
     String[] offlineMessages;
     bool[] showOffline;
 
-
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
 
     public GraphForm(StartForm parent, XmlNode initData)
     {
@@ -109,10 +111,16 @@ namespace YoctoVisualisation
 
           SeriesCount++;
         }
-        if (name.StartsWith("Graph_yAxes")) YAxisCount++;
-
-
       }
+
+      if (YAxisCount ==0)
+        foreach (var p in typeof(GraphFormProperties).GetProperties())
+         {
+           string name = p.Name;
+           if (name.StartsWith("Graph_yAxes")) YAxisCount++;
+         }
+
+     
       for (int i = 0; i < YAxisCount; i++)
       {
         YAxis axis = _cartesianChart.addYAxis();
@@ -135,11 +143,16 @@ namespace YoctoVisualisation
       mainForm = parent;
       initDataNode = initData;
       prop.ApplyAllProperties(this);
+      if (!manager.initForm())
+      {
+        Rectangle s = Screen.FromControl(this).Bounds;
+        this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
+      }
       prop.ApplyAllProperties(_cartesianChart);
       
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
-
+      _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;
 
       for (int i = 0; i < SeriesCount; i++)
       {
@@ -156,6 +169,7 @@ namespace YoctoVisualisation
 
 
       _cartesianChart.AllowPrintScreenCapture = true;
+      _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _cartesianChart.AllowRedraw();
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Clear dataloggers", Resources.cleardatalogger, clearDataLogger));
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset dataview", Resources.resetdataview, resetDataView));
@@ -247,7 +261,7 @@ namespace YoctoVisualisation
 
     private void GraphForm_Load(object sender, EventArgs e)
     {
-      manager.initForm();
+     
     }
 
 

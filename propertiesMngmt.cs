@@ -1290,12 +1290,9 @@ namespace YoctoVisualisation
       newSetProperty(rootTarget, source, propertySourceName, path, NoFilter);
     }
 
-
-    static public void newSetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
+    static public object getObjectFromPath(object rootTarget, List<string> path)
     {
       System.Reflection.PropertyInfo tinfo = null;
-      string ttype = "";
-
       object FinalTarget = rootTarget;
       for (int i = 0; i < path.Count - 1; i++)
       {
@@ -1310,7 +1307,7 @@ namespace YoctoVisualisation
         if (index == "")
         {
 
-          FinalTarget = tinfo.GetValue(FinalTarget,null);
+          FinalTarget = tinfo.GetValue(FinalTarget, null);
         }
         else
         {
@@ -1336,6 +1333,18 @@ namespace YoctoVisualisation
             FinalTarget = ((List<object>)targetArray)[int.Parse(index)];
         }
       }
+      return FinalTarget;
+    }
+       
+
+    static public void newSetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
+    {
+      System.Reflection.PropertyInfo tinfo = null;
+      string ttype = "";
+
+
+      object FinalTarget = getObjectFromPath(rootTarget, path);
+
 
       object TerminalSource = source;
       System.Reflection.PropertyInfo sinfo = null;
@@ -1430,8 +1439,14 @@ namespace YoctoVisualisation
       else
 
 
-      {
-        tinfo.SetValue(FinalTarget, TerminalSource, null);
+      { try
+        {
+          tinfo.SetValue(FinalTarget, TerminalSource, null);
+        }
+        catch (Exception )
+        {
+          
+        }
       }
     }
 
@@ -1462,6 +1477,8 @@ namespace YoctoVisualisation
     {
      if (sourceValue is AlarmSection)  return;  // dirty hack: alarms are no handled through reflexion
 
+     
+  
 
       if (!IsStructured(sourceValue))
       {
@@ -1469,6 +1486,14 @@ namespace YoctoVisualisation
       }
       else
       {
+        // map all target's userdata to its mirrored source 
+        List<String> path2 = new List<String>(path);
+        path2.Add("");
+        object target = getObjectFromPath(rootTarget, path2);
+        PropertyInfo info = target.GetType().GetProperty("userData");
+        if (info != null)
+          info.SetValue(target, sourceValue, null);
+
         System.Reflection.PropertyInfo[] props = sourceValue.GetType().GetProperties();
         for (int i = 0; i < props.Length; i++)
         {

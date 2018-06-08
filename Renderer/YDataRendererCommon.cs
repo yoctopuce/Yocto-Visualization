@@ -15,6 +15,9 @@ namespace YDataRendering
 
   static class Ycolor
   {
+
+   
+
     static int hsl2rgbInt(int temp1, int temp2, int temp3)
     {
       if (temp3 >= 170) return (int)((temp1 + 127) / 255);
@@ -94,7 +97,10 @@ namespace YDataRendering
 
   public class MessagePanel
   {
-    private YDataRenderer parent = null;
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+    private YDataRenderer _parentRenderer = null;
 
     public enum HorizontalAlign {[Description("Left")]LEFT,
       [Description("Center")]CENTER,
@@ -102,15 +108,20 @@ namespace YDataRendering
     public enum VerticalAlign {[Description("Top")] TOP, [Description("Center")]CENTER, [Description("Bottom")] BOTTOM };
     public enum TextAlign {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Right")]RIGHT };
 
-    public MessagePanel(YDataRenderer parent)
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
+
+
+    public MessagePanel(YDataRenderer parent, Object directParent)
     {
-      this.parent = parent;
-      this._font = new YFontParams(parent, 8, null);
+      this._directParent = directParent;
+      this._parentRenderer = parent;
+      this._font = new YFontParams(parent, this, 8, null);
 
     }
 
     private bool _enabled = false;
-    public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; parent.redraw(); } } }
+    public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; _parentRenderer.redraw(); } } }
 
   
 
@@ -118,36 +129,36 @@ namespace YDataRendering
 
 
     private HorizontalAlign _panelHrzAlign = HorizontalAlign.CENTER;
-    public HorizontalAlign panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) parent.redraw(); } }
+    public HorizontalAlign panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
     private VerticalAlign _panelVrtAlign = VerticalAlign.CENTER;
-    public VerticalAlign panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) parent.redraw(); } }
+    public VerticalAlign panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
     private TextAlign _panelTextAlign = TextAlign.LEFT;
-    public TextAlign panelTextAlign { get { return _panelTextAlign; } set { _panelTextAlign = value; if (_enabled) parent.redraw(); } }
+    public TextAlign panelTextAlign { get { return _panelTextAlign; } set { _panelTextAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
 
 
     private string _text = "";
-    public string text { get { return _text; } set { _text = value; if (_enabled)  parent.redraw(); } }
+    public string text { get { return _text; } set { _text = value; if (_enabled)  _parentRenderer.redraw(); } }
 
     private Color _bgColor = Color.FromArgb(255, 255, 255, 192);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled)  parent.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled)  _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; if (_enabled) parent.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; if (_enabled) parent.redraw(); } }
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _padding = 10;
-    public double padding { get { return _padding; } set { _padding = value; if (_enabled)  parent.redraw(); } }
+    public double padding { get { return _padding; } set { _padding = value; if (_enabled)  _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; if (_enabled)  parent.redraw(); } }
+    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; if (_enabled)  _parentRenderer.redraw(); } }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; if (_enabled) parent.redraw(); } }
+    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
 
 
 
@@ -185,10 +196,17 @@ namespace YDataRendering
 
   public class Zone
   {
-    protected YDataRenderer parent = null;
-    public Zone(YDataRenderer parent)
+    protected YDataRenderer _parentRenderer = null;
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
+
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+    public Zone(YDataRenderer parentRenderer, Object directParent)
     {
-      this.parent = parent;
+      this._directParent = directParent;
+      this._parentRenderer = parentRenderer;
 
     }
 
@@ -204,29 +222,34 @@ namespace YDataRendering
 
 
     private Color _color = Color.FromArgb(128, 255, 0, 0);
-    public Color color { get { return _color; } set { _color = value; _zoneBrush = null; if (visible) parent.redraw(); } }
+    public Color color { get { return _color; } set { _color = value; _zoneBrush = null; if (visible) _parentRenderer.redraw(); } }
 
     private bool _visible = false;
-    public bool visible { get { return _visible; } set { _visible = value; parent.redraw(); } }
+    public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
 
     private double _min = 0;
-    public double min { get { return _min; } set { _min = value; if (visible) parent.redraw(); } }
+    public double min { get { return _min; } set { _min = value; if (visible) _parentRenderer.redraw(); } }
 
     private double _max = 0;
-    public double max { get { return _max; } set { _max = value; if (visible) parent.redraw(); } }
+    public double max { get { return _max; } set { _max = value; if (visible) _parentRenderer.redraw(); } }
 
   }
 
 
   public class Proportional
   {
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
     ResetCallBack _reset = null;
-    YDataRenderer _parent = null;
+    YDataRenderer _parentRenderer = null;
+    Object _directParent = null;
     double _refWidth = 1;
     double _refHeight = 1;
     double _refValue;
    
-   
+    
+    public Object directParent { get { return _directParent; } }
 
     public enum ResizeRule {[Description("Fixed")]FIXED, [Description("Relative to Width")]RELATIVETOWIDTH, [Description("Relatif to height")]RELATIVETOHEIGHT, [Description("Relative to Width and Height")] RELATIVETOBOTH };
 
@@ -234,8 +257,8 @@ namespace YDataRendering
 
     private void set_refPoint()
     {
-      _refWidth = Math.Max(1, _parent.usableUiWidth());
-      _refHeight = Math.Max(1, _parent.usableUiHeight());
+      _refWidth = Math.Max(1, _parentRenderer.usableUiWidth());
+      _refHeight = Math.Max(1, _parentRenderer.usableUiHeight());
       _refValue = _value;
     }
 
@@ -244,47 +267,53 @@ namespace YDataRendering
        set {
              set_refPoint();
              _resizeRule = value;
-           }
+             
+         }
 
     }
 
 
     public void containerResized(double newWidth, double  newHeight)
     {
-      //double newHeight, newWidth;
+     
       switch (_resizeRule)
       {
         case ResizeRule.FIXED: return;
         case ResizeRule.RELATIVETOWIDTH:
-           //newWidth = _parent.usableUiWidth();
+           
           _value = _refValue * newWidth / _refWidth;
            break;
         case ResizeRule.RELATIVETOHEIGHT:
-           //newHeight = _parent.usableUiHeight();
+          
           _value = _refValue * newHeight / _refHeight;
           break;
         case ResizeRule.RELATIVETOBOTH:
-           //newHeight = _parent.usableUiHeight();
-           //newWidth = _parent.usableUiWidth();
+          
           _value = _refValue * Math.Min(newHeight / _refHeight, newWidth / _refWidth);
           break;
 
       }
-      if (_reset != null) _reset(null);
+     
+      if (_reset != null) _reset(this);
+    }
+
+   public void forceChangeCallback()
+    {
+      if (_reset != null) _reset(this);
+
     }
 
 
 
-
-
-    public Proportional(double value, ResizeRule resizeRule, YDataRenderer parent, ResetCallBack resetCallBack)
+    public Proportional(double value, ResizeRule resizeRule, YDataRenderer parentRenderer, Object directParent, ResetCallBack resetCallBack)
     {
       _reset      = resetCallBack;
-      _parent     = parent;
+      _parentRenderer     = parentRenderer;
       _value       = value;
       _resizeRule = resizeRule;
+      _directParent = directParent;
        set_refPoint();
-       parent.AddNewProportionalToSizeValue(this);
+       parentRenderer.AddNewProportionalToSizeValue(this);
 
 
     }
@@ -295,7 +324,7 @@ namespace YDataRendering
       set {
            _value = value;
            set_refPoint();
-           if (_reset != null) _reset(null);
+           if (_reset != null) _reset(this);
       }
 
     }
@@ -314,59 +343,72 @@ namespace YDataRendering
 
   public class YFontParams
   {
-    
-    private YDataRenderer parent = null;
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+    private YDataRenderer _parentRenderer = null;
+   
     private fontChangeResetCallBack  _fontChangeCallback = null;
 
 
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
 
-    public YFontParams(YDataRenderer parent, int size, fontChangeResetCallBack fontChangeCallback)
+
+    public YFontParams(YDataRenderer parentRenderer, object directParent, int size, fontChangeResetCallBack fontChangeCallback)
     {
-      this.parent = parent;
+      this._parentRenderer = parentRenderer;
+      _directParent = directParent;
       _fontChangeCallback = fontChangeCallback;
-      this._size =  new Proportional(size, Proportional.ResizeRule.FIXED, parent, ResetFont);
+      this._size =  new Proportional(size, Proportional.ResizeRule.FIXED, parentRenderer, this, ResetFont);
     
     }
 
 
-    public YFontParams(YDataRenderer parent)
+    public YFontParams(YDataRenderer parent, Object directParent)
     {
-   
+      _directParent = directParent;
 
-      this.parent = parent;
-      this._size = new Proportional(10, Proportional.ResizeRule.FIXED, parent, ResetFont);
+      this._parentRenderer = parent;
+      this._size = new Proportional(10, Proportional.ResizeRule.FIXED, parent, this, ResetFont);
     }
 
-    public void ResetFont(Proportional source) { _font = null; }
+    public void ResetFont(Proportional source)
+    {
+      _font = null;
+      if (source != null) _parentRenderer.ProportionnalValueChanged(source);
+    }
+
 
     private String _name = "Arial";
-    public string name { get { return _name; } set { _name = value; ResetFont(null); parent.redraw(); } }
+    public string name { get { return _name; } set { _name = value; ResetFont(null); _parentRenderer.redraw(); } }
 
     private Proportional _size;
     public Double size { get { return _size.value; }
 
-      set { _size.value = value;
+      set {
+            _size.value = value;
              ResetFont(null);
             if (_fontChangeCallback != null) _fontChangeCallback(this);
-            parent.redraw();
+            _parentRenderer.redraw();
       }
     }
 
     private bool _italic = false;
     public bool italic { get { return _italic; }
-                         set { if (_italic != value) { _italic = value; ResetFont(null); parent.redraw(); }
+                         set { if (_italic != value) { _italic = value; ResetFont(null); _parentRenderer.redraw(); }
       } }
 
     private bool _bold = false;
-    public bool bold { get { return _bold; } set { if (_bold != value) { _bold = value; ResetFont(null); parent.redraw(); } } }
+    public bool bold { get { return _bold; } set { if (_bold != value) { _bold = value; ResetFont(null); _parentRenderer.redraw(); } } }
 
     private Color _color = Color.Black;
     public Color color { get { return _color; }
-                         set { if (_color != value) { _color = value; _brush = null; parent.redraw(); } } }
+                         set { if (_color != value) { _color = value; _brush = null; _parentRenderer.redraw(); } } }
 
     private Nullable<Color> _alternateColor = null;
     public Nullable<Color> alternateColor { get { return _alternateColor; }
-                                            set { if (_alternateColor != value) { _alternateColor = value; _brush = null; parent.redraw(); } } }
+                                            set { if (_alternateColor != value) { _alternateColor = value; _brush = null; _parentRenderer.redraw(); } } }
 
 
     private Font _font = null;
@@ -386,7 +428,7 @@ namespace YDataRendering
            
           }
           catch (Exception e) {
-             parent.log("can't create instanciate "+_name+" font ("+e.Message+"), falling back to Arial.");
+             _parentRenderer.log("can't create instanciate "+_name+" font ("+e.Message+"), falling back to Arial.");
             _font = new Font(new FontFamily("Arial"), (float)_size.value, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
           }
 
@@ -409,6 +451,8 @@ namespace YDataRendering
     }
   }
 
+  public delegate void ProportionnalValueChangeCallback(Proportional source);
+
   public abstract class YDataRenderer
   {
     private RegisterHotKeyClass _RegisKey = new RegisterHotKeyClass();
@@ -425,6 +469,9 @@ namespace YDataRendering
       [Description("Fixed height, keep ration aspect")]
       FixedHeight
     };
+
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
 
     public enum CaptureTargets { ToClipBoard, ToPng };
 
@@ -496,6 +543,28 @@ namespace YDataRendering
       return null;
 
     }
+
+    private ProportionnalValueChangeCallback _proportionnalValueChangeCallback = null;
+    public ProportionnalValueChangeCallback proportionnalValueChangeCallback
+      { set
+        { _proportionnalValueChangeCallback = value;
+        //if (value != null)
+        //foreach (Proportional p in ProportionalToSizeValues)
+        //  p.forceChangeCallback();
+        //
+      }
+
+      }
+
+
+    public void ProportionnalValueChanged(Proportional source)
+    {
+      if (_proportionnalValueChangeCallback != null) _proportionnalValueChangeCallback(source);
+
+
+
+    }
+
 
 
     public int Draw()
@@ -620,11 +689,14 @@ namespace YDataRendering
           ProportionalToSizeValues[i].containerResized(w, h);
     }
 
+    public void containerResized()
+    { containerResize(null, null);
+    } 
 
     private void containerResize(object sender, EventArgs e)
     {
       DisableRedraw();
-      log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
+      // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
 
       resetProportionalSizeObjectsCache(usableUiWidth(), usableUiHeight());
       AllowRedraw();
@@ -872,8 +944,19 @@ namespace YDataRendering
     }
 
     private void  getFocus(object sender, EventArgs e)
-    { if (_AllowPrintScreenCapture)  _RegisKey.StarHotKey();
-    }
+    {try
+      {
+
+        if (_AllowPrintScreenCapture) _RegisKey.StarHotKey();
+
+      }
+      catch (Exception err  )
+      {
+        _AllowPrintScreenCapture = false;
+        log("Can't register PrintScrn key capture (" + err.Message + ")");
+      }
+      
+      }
 
     private void lostFocus(object sender, EventArgs e)
     {
@@ -934,7 +1017,7 @@ namespace YDataRendering
 
     public MessagePanel addMessagePanel()
     {
-      MessagePanel p = new MessagePanel(this);
+      MessagePanel p = new MessagePanel(this,this);
       _messagePanels.Add(p);
       return p;
       

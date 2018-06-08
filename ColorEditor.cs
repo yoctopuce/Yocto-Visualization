@@ -457,6 +457,37 @@ namespace YColors
 
       }
     }
+
+    private void textBoxColorCode_KeyDown(object sender, KeyEventArgs e)
+    {
+
+    
+
+    }
+
+    private void textBoxColorCode_Validating(object sender, CancelEventArgs e)
+    {
+      
+    }
+
+    private void ColorEditor_KeyPress(object sender, KeyPressEventArgs e)
+    {
+    
+    }
+
+
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+      if ((this.ActiveControl == textBoxColorCode) && (keyData == Keys.Return))
+      {
+        button1_Click(null, null);
+        return true;
+      }
+      else
+      {
+        return base.ProcessCmdKey(ref msg, keyData);
+      }
+    }
   }
 
   delegate void ColorCursorChangeCallBack(ColorCursor source,byte value);
@@ -928,7 +959,7 @@ namespace YColors
       if ((s.Length > 4))
       {
         if (s.Substring(0, 4).ToUpper() == "HSL:") { fromHSL = true; s = s.Substring(4); }
-        if (s.Substring(0, 4).ToUpper() == "RGB:") { s = s.Substring(4); }
+        else if (s.Substring(0, 4).ToUpper() == "RGB:") { s = s.Substring(4); }
       }
 
       long value;

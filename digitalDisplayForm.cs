@@ -78,11 +78,19 @@ namespace YoctoVisualisation
       mainForm = parent;
       initDataNode = initData;
       prop.ApplyAllProperties(this);
+      if (!manager.initForm())
+      {
+        Rectangle s = Screen.FromControl(this).Bounds;
+        this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
+      }
+
       prop.ApplyAllProperties(_display);
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
-
+    
       _display.AllowPrintScreenCapture = true;
+      _display.proportionnalValueChangeCallback = manager.proportionalValuechanged;
+      _display.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _display.AllowRedraw();
     }
 
@@ -94,7 +102,7 @@ namespace YoctoVisualisation
 
     private void digitalDisplayForm_Load(object sender, EventArgs e)
     {
-      manager.initForm();
+     
     }
 
     void PropertyChanged(PropertyValueChangedEventArgs e)

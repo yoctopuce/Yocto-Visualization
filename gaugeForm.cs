@@ -42,6 +42,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Windows.Forms;
 using YDataRendering;
+using System.Drawing;
 
 namespace YoctoVisualisation
 {
@@ -58,6 +59,9 @@ namespace YoctoVisualisation
     private YSolidGauge _solidGauge;
     private MessagePanel noDataSourcepanel;
     private YSolidGauge solidGauge { get { return _solidGauge; } }
+
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
 
     public string valueformatter(YDataRenderer source,double value)
     {
@@ -79,6 +83,8 @@ namespace YoctoVisualisation
       return value.ToString("F" + n.ToString()) + unit;
     }
 
+  
+
     public gaugeForm(StartForm parent, XmlNode initData)
     {
       InitializeComponent();
@@ -99,10 +105,21 @@ namespace YoctoVisualisation
       mainForm = parent;
       initDataNode = initData;
       prop.ApplyAllProperties(this);
+      if (!manager.initForm())
+      {
+        Rectangle s = Screen.FromControl(this).Bounds;
+        this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
+      }
+
       prop.ApplyAllProperties(_solidGauge);
-  
+
+     
+
+
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration,capture);
       _solidGauge.AllowPrintScreenCapture = true;
+      _solidGauge.proportionnalValueChangeCallback = manager.proportionalValuechanged;
+      _solidGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _solidGauge.AllowRedraw();
     }
 
@@ -118,7 +135,7 @@ namespace YoctoVisualisation
 
 
 
-      manager.initForm();
+     
     }
 
 

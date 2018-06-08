@@ -421,6 +421,7 @@ namespace YColors
       this.Controls.Add(this.textBoxColorCode);
       this.Name = "ColorEditor";
       this.Size = new System.Drawing.Size(357, 328);
+      this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ColorEditor_KeyPress);
       ((System.ComponentModel.ISupportInitialize)(this.C1RGB_pictureBox)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.C2RGB_pictureBox)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.C3RGB_pictureBox)).EndInit();

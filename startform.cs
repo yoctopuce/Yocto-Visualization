@@ -129,7 +129,8 @@ namespace YoctoVisualisation
             {
               case "GraphForm": NewGraphForm(node); MustHide = true; break;
               case "GaugeForm": NewSolidGaugeForm(node); MustHide = true; break;
-              case "angularGaugeForm": NewAngularGaugeForm(node); MustHide = true; break;
+              case "angularGaugeForm":
+                 NewAngularGaugeForm(node); MustHide = true; break;
               case "digitalDisplayForm": NewDigitalDisplayForm(node); MustHide = true; break;
               case "Config": configWindow.Init(node); break;
               case "PropertiesForm": propnode = node; break;
@@ -149,7 +150,10 @@ namespace YoctoVisualisation
       if (constants.OpenLogWindowAtStartUp) LogManager.Show();
     }
 
-  
+    public void  refreshPropertiesForm()
+    {  if (propWindow != null) propWindow.refresh();
+
+    }
 
     public static void RestoreWindowPosition(Form f, XmlNode initNode)
     {

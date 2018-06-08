@@ -199,10 +199,10 @@ namespace YDataRendering
     }
     public YSolidGauge(PictureBox ChartContainer, DisplayMode mode, logFct logFunction) : base(ChartContainer, logFunction)
     {
-      this._minMaxFont = new YFontParams(this, Math.Min(ChartContainer.Width, ChartContainer.Height)/15, FontsizeChange);
+      this._minMaxFont = new YFontParams(this, this, Math.Min(ChartContainer.Width, ChartContainer.Height)/15, FontsizeChange);
       _displayMode = mode;
-      this._font = new YFontParams(this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 5,null);
-      resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
+      this._font = new YFontParams(this, this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 5,null);
+     
 
       Graphics g = ChartContainer.CreateGraphics();
       DrawPrameters p = ComputeDrawParameters(g, UIContainer.Size.Width, UIContainer.Size.Height);

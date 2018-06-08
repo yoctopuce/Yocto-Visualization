@@ -54,6 +54,7 @@ namespace YDataRendering
 
   public class YDigitalDisplay : YDataRenderer
   {
+    
 
     public enum HrzAlignment {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Decimal point")]DECIMAL, [Description("Right")]RIGHT };
     
@@ -109,9 +110,9 @@ namespace YDataRendering
     public YDigitalDisplay(PictureBox ChartContainer, logFct logFunction) : base(ChartContainer, logFunction)
     {
      
-      this._font       = new YFontParams(this, Math.Min(ChartContainer.Width/5, ChartContainer.Height/2), null);
+      this._font       = new YFontParams(this,this, Math.Min(ChartContainer.Width/5, ChartContainer.Height/2), null);
       this._font.color = Color.LightGreen;
-      resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
+     
       AllowRedraw();
       Draw();
 

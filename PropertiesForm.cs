@@ -72,7 +72,11 @@ namespace YoctoVisualisation
     }
 
 
+   public void   refresh()
+    {
+      this.propertyGrid1.Refresh();
 
+    }
 
 
     private void PropertiesForm_Load(object sender, EventArgs e)

@@ -44,7 +44,7 @@ using System.Windows.Forms;
 using System.Xml;
 using YoctoVisualization.Properties;
 using YColors;
- 
+using YDataRendering;
 
 namespace YoctoVisualisation
 {
@@ -83,7 +83,23 @@ namespace YoctoVisualisation
 
     }
 
-  
+    public void proportionalValuechanged(Proportional source)
+    {
+      Object parent = source.directParent;
+      if (parent is YFontParams)
+      {
+        object userData = ((YFontParams)parent).userData;
+        if (userData != null)
+        {
+          double newvalue = (Math.Round(source.value * 1000)) / 1000;
+          if (((FontDescription)userData).size != newvalue)
+          {
+            ((FontDescription)userData).size = newvalue;
+            mainForm.refreshPropertiesForm();
+          }
+        }
+      }
+    }
 
     private void target_Shown(object sender, EventArgs e)
     {
@@ -107,7 +123,7 @@ namespace YoctoVisualisation
       menu.Items.Add(new ToolStripMenuItem("Snapshot", Resources.snapshot, Capture));
 
       menu.Items.Add(new ToolStripSeparator());
-      menu.Items.Add(new ToolStripMenuItem("Configure USB / Network ", Resources.menu_configure, ConfigureUSBNet));
+      menu.Items.Add(new ToolStripMenuItem("Global configuration ", Resources.menu_configure, ConfigureUSBNet));
       menu.Items.Add(new ToolStripMenuItem("Show logs", Resources.menu_logs, showlogs));
 
       menu.Items.Add(new ToolStripMenuItem("Close the whole application", Resources.exit, ExitTheApplication));
@@ -185,7 +201,7 @@ namespace YoctoVisualisation
       }
     }
 
-    public void initForm()
+    public bool initForm()
     {
       if (initDataNode != null)
       {
@@ -212,8 +228,9 @@ namespace YoctoVisualisation
 
 
         }
-
+        return true;
       }
+      return false;
     }
 
     public bool deleteForm(bool explicitCall)
