@@ -1,2 +1,2 @@
-- First release of version 2.
-- Removed dependencies to third party rendering library.
+- Fixed decimal in Yaxes when ticks spacing is manually defined
+- Fixed saving of proportional font sizes +  a few cosmetic fixes
