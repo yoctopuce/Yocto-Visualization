@@ -1747,6 +1747,7 @@ namespace YoctoVisualisation
     {
       _visible = shown;
       _showGrid = index == 0;
+      _position = index == 0 ? YAxis.HrzPosition.LEFT : YAxis.HrzPosition.RIGHT;
     }
 
     private bool _visible = false;

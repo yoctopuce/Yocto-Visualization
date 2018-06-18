@@ -166,9 +166,13 @@ namespace YoctoVisualisation
 
       }
 
-
-
-      _cartesianChart.AllowPrintScreenCapture = true;
+      for (int i = 0; i < YAxisCount; i++)
+      {
+        
+        _cartesianChart.yAxes[i].AxisChanged = AxisParamtersChangedAutomatically;
+        _cartesianChart.yAxes[i].AllowAutoShow = true;
+      }
+        _cartesianChart.AllowPrintScreenCapture = true;
       _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _cartesianChart.AllowRedraw();
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Clear dataloggers", Resources.cleardatalogger, clearDataLogger));
@@ -183,7 +187,13 @@ namespace YoctoVisualisation
       _cartesianChart.capture();
     }
 
+    public void AxisParamtersChangedAutomatically(GenericAxis source)
+    {
+      YaxisDescription yaxis = (YaxisDescription)source.userData;
+      yaxis.visible = source.visible;
+      mainForm.refreshPropertiesForm();
 
+    }
 
 
 

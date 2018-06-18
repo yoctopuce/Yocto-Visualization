@@ -78,10 +78,10 @@ namespace YoctoVisualisation
       form.FormClosing += targetFormClosing;
       form.Shown += target_Shown;
    
-      
-    
-
     }
+
+   
+
 
     public void proportionalValuechanged(Proportional source)
     {
@@ -187,8 +187,13 @@ namespace YoctoVisualisation
 
     public string getConfigData()
     {
-      return "  <location x='" + myForm.Location.X.ToString() + "' y='" + myForm.Location.Y.ToString() + "'/>\n"
-            +"  <size     w='" + myForm.Size.Width.ToString() + "' h='" + myForm.Size.Height.ToString() + "'/>\n"
+      Point p = (myForm.WindowState == FormWindowState.Normal) ? myForm.Location : myForm.RestoreBounds.Location;  
+      Size  s = (myForm.WindowState == FormWindowState.Normal) ? myForm.Size : myForm.RestoreBounds.Size;
+
+
+      return "  <location x='" + p.X.ToString() + "' y='" + p.Y.ToString() + "'/>\n"
+            +"  <size     w='" + s.Width.ToString() + "' h='" + s.Height.ToString() + "'  state='"+myForm.WindowState.ToString() +"'/>\n"
+            
             + settings.getXml(1);
     }
 

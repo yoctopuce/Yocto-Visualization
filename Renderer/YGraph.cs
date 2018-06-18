@@ -53,7 +53,7 @@ using System.Globalization;
 namespace YDataRendering
 {
 
-  
+
 
   public struct pointXY
   {
@@ -194,13 +194,13 @@ namespace YDataRendering
     }
 
 
-    public static MinMax extend( MinMax M, double factor)
+    public static MinMax extend(MinMax M, double factor)
     {
-      
+
 
       if (Double.IsNaN(M.Min)) return M;
       double delta = M.Max - M.Min;
-      return new MinMax { Min = M.Min-(delta*(factor-1))/2, Max = M.Max + (delta * (factor-1)) / 2 };
+      return new MinMax { Min = M.Min - (delta * (factor - 1)) / 2, Max = M.Max + (delta * (factor - 1)) / 2 };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -263,16 +263,16 @@ namespace YDataRendering
     const int SegmentGranularity = 10000;
     public pointXY[] data;
     public int count;
-  //  public double max;
-  //  public double min;
+    //  public double max;
+    //  public double min;
 
     public DataSegment(pointXY p)
     {
       data = new pointXY[SegmentGranularity];
       data[0] = p;
       count = 1;
-  //    min = p.y;
-  //    max = p.y;
+      //    min = p.y;
+      //    max = p.y;
 
     }
 
@@ -282,14 +282,14 @@ namespace YDataRendering
       data = new pointXY[p.Length];
       Array.Copy(p, 0, data, 0, p.Length);
       count = p.Length;
-  /*    min = data[0].y;
-      max = data[0].y;
-      for (int i=1;i<count;i++)
-      { if (min > data[i].y) min = data[i].y;
-        if (max > data[i].y) max = data[i].y;
-      }
-    */
-      }
+      /*    min = data[0].y;
+          max = data[0].y;
+          for (int i=1;i<count;i++)
+          { if (min > data[i].y) min = data[i].y;
+            if (max > data[i].y) max = data[i].y;
+          }
+        */
+    }
 
     public void grow() { Array.Resize(ref data, data.Length + SegmentGranularity); }
 
@@ -322,6 +322,8 @@ namespace YDataRendering
       {
         if (value >= parent.yAxes.Count) throw new System.ArgumentException("No such yAxis (" + value.ToString() + ")");
         _yAxisIndex = value;
+        parent.yAxes[_yAxisIndex].AutoShow();
+
       }
     }
 
@@ -338,7 +340,7 @@ namespace YDataRendering
           _pen.EndCap = LineCap.Round;
 
         }
-          return _pen;
+        return _pen;
       }
     }
 
@@ -443,19 +445,19 @@ namespace YDataRendering
       double FirstStep = points[1].x - points[0].x;
       double LastStep = points[points.Length - 1].x - points[points.Length - 2].x;
       int InsertAtBegining = -1;
-      int InsertAtEnd      = -1;
+      int InsertAtEnd = -1;
       int sz = System.Runtime.InteropServices.Marshal.SizeOf(typeof(pointXY));
 
       // can we merge with one already existing segment ?
       for (int i = 0; i < segments.Count; i++)
-       if (segments[i].count > 1)
+        if (segments[i].count > 1)
         { double DeltaInsertAtBegining = segments[i].data[0].x - points[points.Length - 1].x;
-          double DeltaInsertAtEnd = points[0].x -segments[i].data[segments[i].count - 1].x  ;
+          double DeltaInsertAtEnd = points[0].x - segments[i].data[segments[i].count - 1].x;
           if ((DeltaInsertAtBegining > 0) && (DeltaInsertAtBegining < 2 * FirstStep)) InsertAtBegining = i;
           if ((DeltaInsertAtEnd > 0) && (DeltaInsertAtEnd < 2 * LastStep)) InsertAtEnd = i;
         }
-      
-     
+
+
       if (InsertAtBegining >= 0)  // insert at the begining of segments[InsertAtBegining]
       {
         if (segments[InsertAtBegining].count + points.Length >= segments[InsertAtBegining].data.Length) segments[InsertAtBegining].grow();
@@ -464,7 +466,7 @@ namespace YDataRendering
         segments[InsertAtBegining].count += points.Length;
 
       }
-     
+
       else if (InsertAtEnd >= 0) // insert at the end of segments[InsertAtEnd]
       {
 
@@ -474,15 +476,15 @@ namespace YDataRendering
       }
       else // create a whole new segment
       {
-         segments.Add( new DataSegment(points));
+        segments.Add(new DataSegment(points));
 
       }
 
       _timeRange = MinMaxHandler.Combine(_timeRange, points[0].x);
-      _timeRange = MinMaxHandler.Combine(_timeRange, points[points.Length-1].x);
+      _timeRange = MinMaxHandler.Combine(_timeRange, points[points.Length - 1].x);
 
-      for (int i=0;i<points.Length;i++)
-       _valueRange = MinMaxHandler.Combine(_valueRange, points[i].y);
+      for (int i = 0; i < points.Length; i++)
+        _valueRange = MinMaxHandler.Combine(_valueRange, points[i].y);
 
 
       parent.redraw();
@@ -491,35 +493,35 @@ namespace YDataRendering
 
     public Nullable<pointXY> findClosestValue(Double x, bool AllowInterpolation)
     {
-      int  N1, N2,Pos;
+      int N1, N2, Pos;
 
       if (segments.Count <= 0) return null;
 
       // check for best match inside segments
-      for (int i=0;i< segments.Count;i++)
+      for (int i = 0; i < segments.Count; i++)
       {
-       if ((x>=segments[i].data[0].x) && (x<= segments[i].data[segments[i].count-1].x))
+        if ((x >= segments[i].data[0].x) && (x <= segments[i].data[segments[i].count - 1].x))
+        {
+          pointXY[] data = segments[i].data;
+          N1 = 0; N2 = segments[i].count - 1;
+          while (N2 - N1 > 1)
           {
-             pointXY[] data = segments[i].data;
-             N1 = 0; N2 = segments[i].count - 1;
-             while (N2 - N1 > 1)
-             {
-               int N = (N1 + N2) >> 1;
-               if (data[N].x > x) N2 = N; else N1 = N;
-             }
-             Pos = N1 - 1; if (Pos < 0) Pos = 0;
-          if (x - data[Pos].x < data[Pos + 1].x - x) return data[Pos]; else return data[Pos + 1];
+            int N = (N1 + N2) >> 1;
+            if (data[N].x > x) N2 = N; else N1 = N;
           }
+          Pos = N1 - 1; if (Pos < 0) Pos = 0;
+          if (x - data[Pos].x < data[Pos + 1].x - x) return data[Pos]; else return data[Pos + 1];
+        }
       }
 
       // check for best match outside segemnts
       pointXY match = segments[0].data[0];
       double delta = Math.Abs(segments[0].data[0].x - x);
       for (int i = 0; i < segments.Count; i++)
-      {  double  d1 = Math.Abs(segments[i].data[0].x - x);
-         double d2 = Math.Abs(segments[i].data[segments[i].count - 1].x - x);
-         if (d1 < delta) { match = segments[i].data[0]; delta = d1; }
-         if (d2 < delta) { match = segments[i].data[segments[i].count - 1]; delta = d2; }
+      { double d1 = Math.Abs(segments[i].data[0].x - x);
+        double d2 = Math.Abs(segments[i].data[segments[i].count - 1].x - x);
+        if (d1 < delta) { match = segments[i].data[0]; delta = d1; }
+        if (d2 < delta) { match = segments[i].data[segments[i].count - 1]; delta = d2; }
       }
 
 
@@ -592,7 +594,7 @@ namespace YDataRendering
     public double handleLength { get { return _handleLength; } set { _handleLength = value; _parentRenderer.redraw(); } }
 
     private int _detectionDistance = 50;
-    public int detectionDistance { get { return _detectionDistance; } set { _detectionDistance = value;  } }
+    public int detectionDistance { get { return _detectionDistance; } set { _detectionDistance = value; } }
 
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
@@ -673,7 +675,7 @@ namespace YDataRendering
     public Position position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
     private bool _overlap = false;
-    public bool  overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.redraw(); } }
+    public bool overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.redraw(); } }
 
 
 
@@ -765,13 +767,13 @@ namespace YDataRendering
       }
     }
 
-     
+
 
     public Navigator(YGraph parent, Object directParent)
     {
-      _directParent = directParent; 
+      _directParent = directParent;
       _parentRenderer = parent;
-      _font = new YFontParams(parent, this, 8,null);
+      _font = new YFontParams(parent, this, 8, null);
 
     }
 
@@ -782,10 +784,10 @@ namespace YDataRendering
     public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; _parentRenderer.redraw(); } }
 
 
-    private Color _cursorBorderColor = Color.FromArgb(255,  40, 40, 40);
+    private Color _cursorBorderColor = Color.FromArgb(255, 40, 40, 40);
     public Color cursorBorderColor { get { return _cursorBorderColor; } set { _cursorBorderColor = value; _cursorBorderPen = null; _parentRenderer.redraw(); } }
 
-    
+
 
 
     private YAxisHandling _yAxisHandling = YAxisHandling.AUTO;
@@ -805,7 +807,7 @@ namespace YDataRendering
       get
       {
         if (_cursorBrush == null)
-           _cursorBrush = new SolidBrush(_cursorColor);
+          _cursorBrush = new SolidBrush(_cursorColor);
         return _cursorBrush;
       }
     }
@@ -830,7 +832,7 @@ namespace YDataRendering
       }
     }
 
- 
+
 
 
 
@@ -916,12 +918,12 @@ namespace YDataRendering
       }
     }
 
-     YFontParams _font = null;
+    YFontParams _font = null;
     public YFontParams font { get { return _font; } }
   }
 
 
-  
+
 
   public class Legend
   {
@@ -934,11 +936,11 @@ namespace YDataRendering
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
-    public Legend(YGraph parent,Object directParent)
+    public Legend(YGraph parent, Object directParent)
     {
       _directParent = directParent;
       _parentRenderer = parent;
-      _font = new YFontParams(parent, this, 12,null);
+      _font = new YFontParams(parent, this, 12, null);
     }
 
     private String _title = "";
@@ -960,6 +962,13 @@ namespace YDataRendering
 
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
+
+    public delegate void axisChangedCallBack(GenericAxis source);
+
+
+    protected axisChangedCallBack _AxisChanged = null;
+
+    public  axisChangedCallBack AxisChanged { set {_AxisChanged=value;} get {return  _AxisChanged;} }
 
     public GenericAxis(YGraph parent,Object directParent)
     {
@@ -998,7 +1007,16 @@ namespace YDataRendering
 
 
     protected bool _visible = true;
-    public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
+    public bool visible { get { return _visible; } set { _visible = value; if (!value) { _AllowAutoShow = false; } _parentRenderer.redraw(); } }
+
+
+    protected bool _AllowAutoShow = false;
+    public bool AllowAutoShow { get { return _AllowAutoShow; } set { _AllowAutoShow = value; } }
+
+    public void AutoShow() { if (_AllowAutoShow) { visible = true; if (_AxisChanged != null) _AxisChanged(this); } } 
+
+    
+
 
     protected Double _min = Double.NaN;
     public Double min { get { return _min; } set { _min = value; _parentRenderer.redraw(); } }

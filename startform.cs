@@ -163,6 +163,7 @@ namespace YoctoVisualisation
         Point p = new Point(0, 0);
         bool sizeFound = false;
         bool positionFound = false;
+        FormWindowState state = FormWindowState.Normal;
 
         foreach (XmlNode node in initNode.ChildNodes)
         {
@@ -176,6 +177,13 @@ namespace YoctoVisualisation
             case "size":
               s = new Size(int.Parse(node.Attributes["w"].InnerText),
                                int.Parse(node.Attributes["h"].InnerText));
+
+             
+              if  (node.Attributes["state"]!=null)
+                {  if (node.Attributes["state"].Value ==  FormWindowState.Maximized.ToString()) state = FormWindowState.Maximized; 
+                   if (node.Attributes["state"].Value ==  FormWindowState.Minimized.ToString()) state = FormWindowState.Minimized;
+                }
+
               sizeFound = true;
               break;
           }
@@ -194,7 +202,7 @@ namespace YoctoVisualisation
           {
             f.Location = p;
             f.Size = s;
-
+            f.WindowState = state;
           }
 
         }

@@ -423,8 +423,10 @@ namespace YDataRendering
           bool b = _bold;
           if (!f.IsStyleAvailable(FontStyle.Italic)) i = false;
           if (!f.IsStyleAvailable(FontStyle.Bold)) b = false;
+          float s = _size.value > 0 ? (float)_size.value : 1;
+
           try
-          {  _font = new Font(f, (float)_size.value, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
+          {  _font = new Font(f, s, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
            
           }
           catch (Exception e) {
@@ -632,6 +634,7 @@ namespace YDataRendering
 
     public void redraw()
     {
+      if (parentForm.WindowState == FormWindowState.Minimized) return;
       if (_redrawAllowed > 0) return;
       if (UIContainer.Height < 2) return;
       if (UIContainer.Width < 2) return;
@@ -694,7 +697,8 @@ namespace YDataRendering
     } 
 
     private void containerResize(object sender, EventArgs e)
-    {
+    {if (((Form)sender).WindowState==FormWindowState.Minimized) return;
+
       DisableRedraw();
       // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
 
@@ -944,7 +948,10 @@ namespace YDataRendering
     }
 
     private void  getFocus(object sender, EventArgs e)
-    {try
+    {
+      if (((Form)sender).WindowState == FormWindowState.Minimized) return;
+
+      try
       {
 
         if (_AllowPrintScreenCapture) _RegisKey.StarHotKey();
