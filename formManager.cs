@@ -241,12 +241,13 @@ namespace YoctoVisualisation
     public bool deleteForm(bool explicitCall)
     {
 
+	  bool userResponse  = (MessageBox.Show("You really want to delete this " + formDesc + " ?", "deleting " + formDesc,
+                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+				  MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes);
+	  //looks like MessageBox is causing the main form to automatically pop-up in mono
+	 if (constants.MonoRunning) mainForm.Hide();
 
-
-      if (MessageBox.Show("You really want to delete this " + formDesc + " ?", "deleting " + formDesc,
-         MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-         MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
-      {
+	 if (userResponse){
         Closing = true;
         mainForm.removeForm(myForm);
         myForm.Close();

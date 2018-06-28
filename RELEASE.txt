@@ -1,2 +1,3 @@
-- Fixed decimal in Yaxes when ticks spacing is manually defined
-- Fixed saving of proportional font sizes +  a few cosmetic fixes
+Yocto-Visualization <bound method YLibVisu.get_version_number of <libdef.YLibVisu object at 0x134ead0>>
+
+- Check in installer if .NET framework 4.5 is installed.

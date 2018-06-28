@@ -63,10 +63,12 @@ namespace YoctoVisualisation
       KeyPreview = true;
       initNode = initDataNode;
       propertyGrid1.PropertySort = PropertySort.Categorized;
+      // doesn't exists on Mono
       //  propertyGrid1.CategoryForeColor = System.Drawing.Color.Red;
-      propertyGrid1.CategorySplitterColor = System.Drawing.Color.Silver;
-      propertyGrid1.CommandsBorderColor = System.Drawing.Color.Silver;
-      propertyGrid1.DisabledItemForeColor = System.Drawing.Color.Silver;
+      // propertyGrid1.CategorySplitterColor = System.Drawing.Color.Silver;
+      // propertyGrid1.CommandsBorderColor = System.Drawing.Color.Silver;
+      // propertyGrid1.DisabledItemForeColor = System.Drawing.Color.Silver;
+	 
 
 
     }
@@ -82,8 +84,12 @@ namespace YoctoVisualisation
     private void PropertiesForm_Load(object sender, EventArgs e)
     {
       StartForm.RestoreWindowPosition(this, initNode);
-
-
+	  if (constants.MonoRunning)
+  	{	// dropdown buttons are missing on mono without this (don't ask me why)
+				propertyGrid1.Width = ClientSize.Width -4; //propertyGrid1.Width - 1;
+				propertyGrid1.Height = ClientSize.Height-4;//propertyGrid1.Height - 4;
+	      propertyGrid1.Refresh(); 
+	   }
     }
 
     public void showWindow(GenericProperties prop, SetValueCallBack valueCallBack, bool ForceToTshow)
@@ -209,32 +215,6 @@ namespace YoctoVisualisation
       }
     }
 
-    private void propertyGrid1_Validating(object sender, CancelEventArgs e)
-    {
 
-    }
-
-    private void propertyGrid1_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
-    {
-    //  PropertyGrid it = (PropertyGrid)sender;
-    //  if (it.SelectedGridItem.Expandable)
-    //    it.SelectedGridItem.Expanded = !it.SelectedGridItem.Expanded;
-    }
-
-    private void propertyGrid1_SelectedObjectsChanged(object sender, EventArgs e)
-    {
-    
-    }
-
-    private void propertyGrid1_DoubleClick(object sender, EventArgs e)
-    {
-    
-
-    }
-
-    private void propertyGrid1_MouseClick(object sender, MouseEventArgs e)
-    {
-      
-    }
   }
 }

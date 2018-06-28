@@ -52,7 +52,7 @@
       this.UseVirtualHub = new System.Windows.Forms.CheckBox();
       this.useUSB = new System.Windows.Forms.CheckBox();
       this.tabPage2 = new System.Windows.Forms.TabPage();
-      this.label10 = new System.Windows.Forms.Label();
+      this.copyWarning2 = new System.Windows.Forms.Label();
       this.heightUnit = new System.Windows.Forms.Label();
       this.heightValue = new System.Windows.Forms.TextBox();
       this.heightLabel = new System.Windows.Forms.Label();
@@ -72,6 +72,7 @@
       this.label5 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+      this.copyWarning = new System.Windows.Forms.Label();
       this.contextMenuStrip1.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -302,7 +303,8 @@
       // 
       // tabPage2
       // 
-      this.tabPage2.Controls.Add(this.label10);
+      this.tabPage2.Controls.Add(this.copyWarning);
+      this.tabPage2.Controls.Add(this.copyWarning2);
       this.tabPage2.Controls.Add(this.heightUnit);
       this.tabPage2.Controls.Add(this.heightValue);
       this.tabPage2.Controls.Add(this.heightLabel);
@@ -329,17 +331,18 @@
       this.tabPage2.Text = "Screen capture";
       this.tabPage2.UseVisualStyleBackColor = true;
       // 
-      // label10
+      // copyWarning2
       // 
-      this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+      this.copyWarning2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.label10.Location = new System.Drawing.Point(11, 277);
-      this.label10.Name = "label10";
-      this.label10.Size = new System.Drawing.Size(466, 74);
-      this.label10.TabIndex = 18;
-      this.label10.Text = resources.GetString("label10.Text");
-      this.label10.Click += new System.EventHandler(this.label10_Click_1);
+      this.copyWarning2.Location = new System.Drawing.Point(11, 277);
+      this.copyWarning2.Name = "copyWarning2";
+      this.copyWarning2.Size = new System.Drawing.Size(466, 74);
+      this.copyWarning2.TabIndex = 18;
+      this.copyWarning2.Text = "(1) PrintScreen key may not work if it is already captured by an other screen cap" +
+    "ture utility, in that case,  use the right-clic contextual  menu.\r\n\r\n";
+      this.copyWarning2.Click += new System.EventHandler(this.label10_Click_1);
       // 
       // heightUnit
       // 
@@ -517,6 +520,15 @@
       this.label4.Text = "At any time, widget contents can be captured to an image by a PrintScreen key pre" +
     "ss (1)";
       // 
+      // copyWarning
+      // 
+      this.copyWarning.Location = new System.Drawing.Point(11, 318);
+      this.copyWarning.Name = "copyWarning";
+      this.copyWarning.Size = new System.Drawing.Size(456, 33);
+      this.copyWarning.TabIndex = 19;
+      this.copyWarning.Text = "(2) Due to technical limitations , images copied to clipboard can\'t keep their ba" +
+    "ckground transparency, window background color will be used instead. \r\n\r\n";
+      // 
       // ConfigForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -584,10 +596,11 @@
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.Label widthUnit;
     private System.Windows.Forms.TextBox widthValue;
-    private System.Windows.Forms.Label label10;
+    private System.Windows.Forms.Label copyWarning2;
     private System.Windows.Forms.Label heightUnit;
     private System.Windows.Forms.TextBox heightValue;
     private System.Windows.Forms.Label heightLabel;
     private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+    private System.Windows.Forms.Label copyWarning;
   }
 }

@@ -86,7 +86,14 @@ namespace YColors
       }
     }
 
-    
+   public void	Init(YColor initialValue)
+	{ _ok = false;
+	  _value = initialValue;
+	  autoSelectTab();
+	  DrawHistory();
+	  PreviewColor();
+	  DrawPredefinedColors();
+	}
 
     public ColorEditor(YColor initialValue)
     {
@@ -432,9 +439,10 @@ namespace YColors
       if (found>=0) _colorHistory.RemoveAt(found);
       _colorHistory.Insert(0, _value);
       while (_colorHistory.Count > maxHistoryLength) _colorHistory.RemoveAt(_colorHistory.Count - 1);
-      
 
-      this.ParentForm.Close();   
+      // calling this.ParentForm.Close(); from mono will cause a
+      // catastrophic crash next time a drop down is used.
+      if (YoctoVisualisation.constants.MonoRunning) this.ParentForm.Hide(); else this.ParentForm.Close();  
 
     }
 
@@ -1058,17 +1066,13 @@ namespace YColors
 
     Brush White;
     Brush Black;
+	static	ColorEditor control =null;
 
     public YColorEditor()
     {
       White = new SolidBrush(Color.White);
       Black = new SolidBrush(Color.Black);
-
-
     }
-
-
-
 
     public override bool GetPaintValueSupported(
     ITypeDescriptorContext context)
@@ -1083,14 +1087,8 @@ namespace YColors
       e.Graphics.FillRectangle(Black, new Rectangle(e.Bounds.Left + (e.Bounds.Width >> 1), e.Bounds.Top + (e.Bounds.Height >> 1), e.Bounds.Width >> 1, e.Bounds.Height >> 1));
       Brush b = new SolidBrush(((YColor)e.Value).toColor());
       e.Graphics.FillRectangle(b, e.Bounds);
-
-
-
-
     }
-
-
-
+			
     public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
     {
       return UITypeEditorEditStyle.DropDown;
@@ -1099,18 +1097,17 @@ namespace YColors
     {
       IWindowsFormsEditorService svc = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
 
-
-      ColorEditor control = new ColorEditor((YColor)value);
-
-
+      // for some reason, Mono doesn't care if one allocate a
+	  // control each time it's needed, it will always use the
+	  // first one allocated.
+  	  if ((control == null) || (!YoctoVisualisation.constants.MonoRunning))
+		control = new ColorEditor ((YColor)value);
+	  else
+		control.Init ((YColor)value);
 
       svc.DropDownControl(control);
       if (control.ok) return control.value;
       return value;
-
-
-
-
     }
   }
 

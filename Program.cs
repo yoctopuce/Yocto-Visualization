@@ -55,6 +55,7 @@ namespace YoctoVisualisation
     {
       string errmsg = "";
       constants.init(args);
+           
       YAPI.RegisterLogFunction(LogManager.APIlog);
       int res = yAPI.FILE_NOT_FOUND;
     

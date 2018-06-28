@@ -60,10 +60,11 @@ namespace YoctoVisualisation
     static PropertiesForm propWindow = null;
     static LogForm logWindow = new LogForm();
     static String DefaultWindowName = "New Window ";
+	static Timer HideTimer;
 
     public StartForm()
     {
-
+			
       InitializeComponent();
 
       LogManager.Log("Application start, Welcome to Yocto-Visualization.");
@@ -148,6 +149,19 @@ namespace YoctoVisualisation
       YoctoTimer.Interval = 100;
       YoctoTimer.Enabled = true;
       if (constants.OpenLogWindowAtStartUp) LogManager.Show();
+
+	  HideTimer = new Timer ();
+	
+		HideTimer.Tick+= HideTimer_Tick;
+
+    }
+
+    void HideTimer_Tick (object sender, EventArgs e)
+
+    { HideTimer.Enabled = false;
+		Hide();
+
+    	
     }
 
     public void  refreshPropertiesForm()
@@ -235,6 +249,7 @@ namespace YoctoVisualisation
 
     }
 
+   
 
     public static void NetworkArrival(YNetwork net)
     {
@@ -304,11 +319,20 @@ namespace YoctoVisualisation
 
     }
 
+    public new  void Hide()
+   { 
+
+			WindowState = FormWindowState.Minimized;
+	}
+
+	public  new  void Show()
+		{ WindowState = FormWindowState.Normal;
+	}
 
     private void button2_Click(object sender, EventArgs e)
     {
       NewGraphForm(null);
-      this.ShowInTaskbar = false;
+	 if (!constants.MonoRunning) this.ShowInTaskbar = false;
       Hide();
 
 
@@ -317,7 +341,7 @@ namespace YoctoVisualisation
     private void button3_Click(object sender, EventArgs e)
     {
       NewSolidGaugeForm(null);
-      this.ShowInTaskbar = false;
+	  if (!constants.MonoRunning)this.ShowInTaskbar = false;
       Hide();
 
 
@@ -326,7 +350,7 @@ namespace YoctoVisualisation
     private void button4_Click(object sender, EventArgs e)
     {
       NewAngularGaugeForm(null);
-      this.ShowInTaskbar = false;
+	if (!constants.MonoRunning) this.ShowInTaskbar = false;
       Hide();
 
     }
@@ -334,7 +358,7 @@ namespace YoctoVisualisation
     private void button5_Click(object sender, EventArgs e)
     {
       NewDigitalDisplayForm(null);
-      this.ShowInTaskbar = false;
+	  if (!constants.MonoRunning)this.ShowInTaskbar = false;
       Hide();
     }
 
@@ -391,8 +415,14 @@ namespace YoctoVisualisation
 
     private void startform_Load(object sender, EventArgs e)
     {
-      this.Visible = !MustHide;
-      this.ShowInTaskbar = !MustHide;
+ 	 if (MustHide) 
+			{  if (constants.MonoRunning) 
+				{  // cant get mono minimize this window while in load function
+					HideTimer.Interval = 250;
+					HideTimer.Enabled = true;
+			} else Hide();
+		}
+	  if (!constants.MonoRunning) this.ShowInTaskbar = !MustHide;
 
     }
 

@@ -66,6 +66,8 @@ namespace YoctoVisualisation
     public static int captureHeight = 1024;
     public static int captureDPI = 70;
 
+	  private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);
+		public static bool MonoRunning {get {return  _MonoRunning;}} 
 
      public static  void getCaptureParametersCallback(YDataRenderer source,
                                               out YDataRenderer.CaptureTargets pcaptureTarget,
@@ -96,6 +98,8 @@ namespace YoctoVisualisation
 
     public static void init(String[] args)
     {
+      if (_MonoRunning) captureTarget = YDataRenderer.CaptureTargets.ToPng;
+
       for (int i = 0; i < args.Length; i++)
       {
         if ((args[i] == "-config") && (i < args.Length - 1))

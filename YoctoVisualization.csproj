@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>YoctoVisualization</RootNamespace>
     <AssemblyName>YoctoVisualization</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -27,6 +27,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -51,8 +52,6 @@
     <ApplicationIcon>main.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
@@ -66,23 +65,22 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
-    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Renderer\YAngularGauge.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YDataRendererCommon.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YDigitalDisplay.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YGraph.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YSolidGauge.cs">
-      
+
     </Compile>
     <Compile Include="angularGaugeForm.cs">
       <SubType>Form</SubType>
@@ -91,7 +89,6 @@
       <DependentUpon>angularGaugeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="API\yocto_api.cs" />
-    <Compile Include="API\yocto_datalogger.cs" />
     <Compile Include="API\yocto_network.cs" />
     <Compile Include="ColorEditor.cs">
       <SubType>UserControl</SubType>
@@ -198,6 +195,21 @@
     <EmbeddedResource Include="startform.resx">
       <DependentUpon>startform.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="dllmap.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libyapi-amd64.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libyapi-armhf.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libyapi-i386.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libyapi.dylib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -209,10 +221,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\snapshot.png" />
+    <Content Include="amd64\yapi.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="yapi.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

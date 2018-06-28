@@ -66,6 +66,14 @@ namespace YoctoVisualisation
     public ConfigForm()
     {
       InitializeComponent();
+      if (constants.MonoRunning)
+      {
+        ExportToClipboard.Text = "Export to clipboard (2) (not available on linux).";
+        ExportToClipboard.Enabled = false;
+       
+        ExportToPNG.Checked = true;
+
+      }
     }
 
     public static string GetLocalIPAddress()
@@ -254,7 +262,8 @@ namespace YoctoVisualisation
         {
           case "Target":
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToClipBoard.ToString()) constants.captureTarget =YDataRenderer.CaptureTargets.ToClipBoard;
-            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToPng.ToString()) constants.captureTarget =YDataRenderer.CaptureTargets.ToPng;
+            if ((node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToPng.ToString())||(constants.MonoRunning)) constants.captureTarget =YDataRenderer.CaptureTargets.ToPng;
+          
             break;
           case "Size":
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Fixed.ToString()) constants.captureSizePolicy =YDataRenderer.CaptureFormats.Fixed;

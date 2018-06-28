@@ -57,13 +57,13 @@ namespace YDataRendering
   public class YSolidGauge : YDataRenderer
   {
     public enum DisplayMode {
-      [Description("90°")]
+      [Description("90\u00B0")]
       DISPLAY90,
-      [Description("180°")]
+      [Description("180\u00B0")]
       DISPLAY180,
-      [Description("270°")]
+      [Description("270\u00B0")]
       DISPLAY270,
-      [Description("360°")]
+      [Description("360\u00B0")]
       DISPLAY360, };
     double _shownValue = 0;
 
