@@ -9,6 +9,7 @@ using System.Drawing.Imaging;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace YDataRendering
 {
@@ -16,7 +17,7 @@ namespace YDataRendering
   static class Ycolor
   {
 
-   
+
 
     static int hsl2rgbInt(int temp1, int temp2, int temp3)
     {
@@ -102,9 +103,15 @@ namespace YDataRendering
 
     private YDataRenderer _parentRenderer = null;
 
-    public enum HorizontalAlign {[Description("Left")]LEFT,
-      [Description("Center")]CENTER,
-      [Description("Right")]RIGHT };
+    public enum HorizontalAlign
+    {
+      [Description("Left")]
+      LEFT,
+      [Description("Center")]
+      CENTER,
+      [Description("Right")]
+      RIGHT
+    };
     public enum VerticalAlign {[Description("Top")] TOP, [Description("Center")]CENTER, [Description("Bottom")] BOTTOM };
     public enum TextAlign {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Right")]RIGHT };
 
@@ -123,7 +130,7 @@ namespace YDataRendering
     private bool _enabled = false;
     public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; _parentRenderer.redraw(); } } }
 
-  
+
 
 
 
@@ -140,10 +147,10 @@ namespace YDataRendering
 
 
     private string _text = "";
-    public string text { get { return _text; } set { _text = value; if (_enabled)  _parentRenderer.redraw(); } }
+    public string text { get { return _text; } set { _text = value; if (_enabled) _parentRenderer.redraw(); } }
 
     private Color _bgColor = Color.FromArgb(255, 255, 255, 192);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled)  _parentRenderer.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled) _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
@@ -152,10 +159,10 @@ namespace YDataRendering
     public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _padding = 10;
-    public double padding { get { return _padding; } set { _padding = value; if (_enabled)  _parentRenderer.redraw(); } }
+    public double padding { get { return _padding; } set { _padding = value; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; if (_enabled)  _parentRenderer.redraw(); } }
+    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _horizontalMargin = 10;
     public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
@@ -191,7 +198,7 @@ namespace YDataRendering
 
   }
 
- 
+
 
 
   public class Zone
@@ -247,13 +254,13 @@ namespace YDataRendering
     double _refWidth = 1;
     double _refHeight = 1;
     double _refValue;
-   
-    
+
+
     public Object directParent { get { return _directParent; } }
 
     public enum ResizeRule {[Description("Fixed")]FIXED, [Description("Relative to Width")]RELATIVETOWIDTH, [Description("Relatif to height")]RELATIVETOHEIGHT, [Description("Relative to Width and Height")] RELATIVETOBOTH };
 
-    ResizeRule  _resizeRule = ResizeRule.FIXED;
+    ResizeRule _resizeRule = ResizeRule.FIXED;
 
     private void set_refPoint()
     {
@@ -263,41 +270,43 @@ namespace YDataRendering
     }
 
     public ResizeRule resizeRule
-    {  get { return _resizeRule; }
-       set {
-             set_refPoint();
-             _resizeRule = value;
-             
-         }
+    {
+      get { return _resizeRule; }
+      set
+      {
+        set_refPoint();
+        _resizeRule = value;
+
+      }
 
     }
 
 
-    public void containerResized(double newWidth, double  newHeight)
+    public void containerResized(double newWidth, double newHeight)
     {
-     
+
       switch (_resizeRule)
       {
         case ResizeRule.FIXED: return;
         case ResizeRule.RELATIVETOWIDTH:
-           
+
           _value = _refValue * newWidth / _refWidth;
-           break;
+          break;
         case ResizeRule.RELATIVETOHEIGHT:
-          
+
           _value = _refValue * newHeight / _refHeight;
           break;
         case ResizeRule.RELATIVETOBOTH:
-          
+
           _value = _refValue * Math.Min(newHeight / _refHeight, newWidth / _refWidth);
           break;
 
       }
-     
+
       if (_reset != null) _reset(this);
     }
 
-   public void forceChangeCallback()
+    public void forceChangeCallback()
     {
       if (_reset != null) _reset(this);
 
@@ -307,33 +316,35 @@ namespace YDataRendering
 
     public Proportional(double value, ResizeRule resizeRule, YDataRenderer parentRenderer, Object directParent, ResetCallBack resetCallBack)
     {
-      _reset      = resetCallBack;
-      _parentRenderer     = parentRenderer;
-      _value       = value;
+      _reset = resetCallBack;
+      _parentRenderer = parentRenderer;
+      _value = value;
       _resizeRule = resizeRule;
       _directParent = directParent;
-       set_refPoint();
-       parentRenderer.AddNewProportionalToSizeValue(this);
+      set_refPoint();
+      parentRenderer.AddNewProportionalToSizeValue(this);
 
 
     }
 
     double _value;
     public double value
-    { get { return _value; }
-      set {
-           _value = value;
-           set_refPoint();
-           if (_reset != null) _reset(this);
+    {
+      get { return _value; }
+      set
+      {
+        _value = value;
+        set_refPoint();
+        if (_reset != null) _reset(this);
       }
 
     }
 
 
 
-  
 
-   
+
+
 
   }
 
@@ -347,8 +358,8 @@ namespace YDataRendering
     public Object userData { get { return _userData; } set { _userData = value; } }
 
     private YDataRenderer _parentRenderer = null;
-   
-    private fontChangeResetCallBack  _fontChangeCallback = null;
+
+    private fontChangeResetCallBack _fontChangeCallback = null;
 
 
     private Object _directParent = null;
@@ -360,8 +371,8 @@ namespace YDataRendering
       this._parentRenderer = parentRenderer;
       _directParent = directParent;
       _fontChangeCallback = fontChangeCallback;
-      this._size =  new Proportional(size, Proportional.ResizeRule.FIXED, parentRenderer, this, ResetFont);
-    
+      this._size = new Proportional(size, Proportional.ResizeRule.FIXED, parentRenderer, this, ResetFont);
+
     }
 
 
@@ -384,31 +395,45 @@ namespace YDataRendering
     public string name { get { return _name; } set { _name = value; ResetFont(null); _parentRenderer.redraw(); } }
 
     private Proportional _size;
-    public Double size { get { return _size.value; }
+    public Double size
+    {
+      get { return _size.value; }
 
-      set {
-            _size.value = value;
-             ResetFont(null);
-            if (_fontChangeCallback != null) _fontChangeCallback(this);
-            _parentRenderer.redraw();
+      set
+      {
+        _size.value = value;
+        ResetFont(null);
+        if (_fontChangeCallback != null) _fontChangeCallback(this);
+        _parentRenderer.redraw();
       }
     }
 
     private bool _italic = false;
-    public bool italic { get { return _italic; }
-                         set { if (_italic != value) { _italic = value; ResetFont(null); _parentRenderer.redraw(); }
-      } }
+    public bool italic
+    {
+      get { return _italic; }
+      set
+      {
+        if (_italic != value) { _italic = value; ResetFont(null); _parentRenderer.redraw(); }
+      }
+    }
 
     private bool _bold = false;
     public bool bold { get { return _bold; } set { if (_bold != value) { _bold = value; ResetFont(null); _parentRenderer.redraw(); } } }
 
     private Color _color = Color.Black;
-    public Color color { get { return _color; }
-                         set { if (_color != value) { _color = value; _brush = null; _parentRenderer.redraw(); } } }
+    public Color color
+    {
+      get { return _color; }
+      set { if (_color != value) { _color = value; _brush = null; _parentRenderer.redraw(); } }
+    }
 
     private Nullable<Color> _alternateColor = null;
-    public Nullable<Color> alternateColor { get { return _alternateColor; }
-                                            set { if (_alternateColor != value) { _alternateColor = value; _brush = null; _parentRenderer.redraw(); } } }
+    public Nullable<Color> alternateColor
+    {
+      get { return _alternateColor; }
+      set { if (_alternateColor != value) { _alternateColor = value; _brush = null; _parentRenderer.redraw(); } }
+    }
 
 
     private Font _font = null;
@@ -426,11 +451,13 @@ namespace YDataRendering
           float s = _size.value > 0 ? (float)_size.value : 1;
 
           try
-          {  _font = new Font(f, s, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
-           
+          {
+            _font = new Font(f, s, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
+
           }
-          catch (Exception e) {
-             _parentRenderer.log("can't create instanciate "+_name+" font ("+e.Message+"), falling back to Arial.");
+          catch (Exception e)
+          {
+            _parentRenderer.log("can't create instanciate " + _name + " font (" + e.Message + "), falling back to Arial.");
             _font = new Font(new FontFamily("Arial"), (float)_size.value, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
           }
 
@@ -446,7 +473,7 @@ namespace YDataRendering
       {
         if (_brush == null)
         {
-          _brush = new SolidBrush(_alternateColor==null ? _color: (Color)_alternateColor);
+          _brush = new SolidBrush(_alternateColor == null ? _color : (Color)_alternateColor);
         }
         return _brush;
       }
@@ -459,6 +486,7 @@ namespace YDataRendering
   {
     private RegisterHotKeyClass _RegisKey = new RegisterHotKeyClass();
     protected int _redrawAllowed = 1;
+
 
     public enum CaptureFormats
     {
@@ -515,7 +543,8 @@ namespace YDataRendering
     List<Proportional> ProportionalToSizeValues = new List<Proportional>();
 
     public void AddNewProportionalToSizeValue(Proportional v)
-    { if (!ProportionalToSizeValues.Contains(v)) ProportionalToSizeValues.Add(v);
+    {
+      if (!ProportionalToSizeValues.Contains(v)) ProportionalToSizeValues.Add(v);
 
     }
 
@@ -529,9 +558,10 @@ namespace YDataRendering
     protected Form parentForm;
     protected logFct _logFunction;
     Timer redrawTimer = null;
-    protected int LastDrawTiming = 0;
-    protected DateTime LastDrawTimeStamp = DateTime.Now;
-    protected DateTime drawStart;
+    private Stopwatch watch = Stopwatch.StartNew();
+    private int LastDrawTiming = 0;
+
+
 
 
 
@@ -548,15 +578,17 @@ namespace YDataRendering
 
     private ProportionnalValueChangeCallback _proportionnalValueChangeCallback = null;
     public ProportionnalValueChangeCallback proportionnalValueChangeCallback
-      { set
-        { _proportionnalValueChangeCallback = value;
+    {
+      set
+      {
+        _proportionnalValueChangeCallback = value;
         //if (value != null)
         //foreach (Proportional p in ProportionalToSizeValues)
         //  p.forceChangeCallback();
         //
       }
 
-      }
+    }
 
 
     public void ProportionnalValueChanged(Proportional source)
@@ -585,19 +617,20 @@ namespace YDataRendering
       UIContainer.Image = DrawArea;
       Graphics g;
 
-      StartTiming();
+      watch.Reset();
+      watch.Start();
       g = Graphics.FromImage(DrawArea);
 
-      try
-      { Render(g, w, h); }
-      catch (Exception e) { log("Rendering error: " + e.Message); }
+      try {
+        Render(g, w, h);
+      } catch (Exception e) { log("Rendering error: " + e.Message); }
 
       g.Dispose();
-      int timing = StopTiming();
-      // log(" refresh done in " + timing.ToString() + "ms");
+      long timing = watch.ElapsedMilliseconds;
+    //  log(" refresh done in " + timing.ToString() + "ms");
       AllowRedrawNoRefresh();
       renderingPostProcessing();
-      return timing;
+      return (int)timing;
 
     }
 
@@ -614,8 +647,10 @@ namespace YDataRendering
 
     Proportional.ResizeRule _resizeRule = Proportional.ResizeRule.FIXED;
     public Proportional.ResizeRule resizeRule
-    { get { return _resizeRule; }
-      set {
+    {
+      get { return _resizeRule; }
+      set
+      {
 
         if (value != _resizeRule)
         {
@@ -640,38 +675,33 @@ namespace YDataRendering
       if (UIContainer.Width < 2) return;
       if (redrawTimer.Enabled) return;
 
+      int elapsed = (int)watch.ElapsedMilliseconds;
+     // log("elapsed" + elapsed.ToString());
 
-      //    if (_renderingPaused) return;
       redrawTimer.Enabled = false;
-      // note: should we move this to the redraw method ?
+
       int timelimit = 40; // no need to refresh  more then 25 times per seconds
       if (timelimit < LastDrawTiming) timelimit = (15 * LastDrawTiming) / 10; // refresh starting to get very slow, don't try to go faster than the music
-      int elapsed = (DateTime.Now - LastDrawTimeStamp).Milliseconds;
+      if (timelimit > 1000) timelimit = 1000; // if last redraw took more then 1 sec, you are in deep sh*t anayway.
+
+
+     
       if (elapsed < timelimit)
       {
         redrawTimer.Interval = timelimit - elapsed;
         redrawTimer.Enabled = true;
-        //        log("postponed" +elapsed.ToString()+"<"+timelimit.ToString());
+      //  log("postponed" + elapsed.ToString() + "<" + timelimit.ToString());
         return;
       }
 
+      //log("drawing");
+      LastDrawTiming = Draw();
 
 
-      Draw();
+
     }
 
-    protected void StartTiming()
-    {
-      drawStart = DateTime.Now;
-    }
 
-    protected int StopTiming()
-    {
-      int timing = (DateTime.Now - drawStart).Milliseconds;
-      LastDrawTimeStamp = DateTime.Now;
-      LastDrawTiming = timing;
-      return timing;
-    }
 
 
     private void TimerTick(object sender, EventArgs e)
@@ -693,11 +723,13 @@ namespace YDataRendering
     }
 
     public void containerResized()
-    { containerResize(null, null);
-    } 
+    {
+      containerResize(null, null);
+    }
 
     private void containerResize(object sender, EventArgs e)
-    {if (((Form)sender).WindowState==FormWindowState.Minimized) return;
+    {
+      if (((Form)sender).WindowState == FormWindowState.Minimized) return;
 
       DisableRedraw();
       // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
@@ -836,45 +868,45 @@ namespace YDataRendering
     void _Regis_HotKey()
     {
 
-     string error="";
+      string error = "";
 
-     YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
-     YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
-     string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-     int captureWidth = 1024;
-     int captureHeight = 1024;
-     int captureDPI = 70;
+      YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
+      YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
+      string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+      int captureWidth = 1024;
+      int captureHeight = 1024;
+      int captureDPI = 70;
       if (_getCaptureParameters != null) _getCaptureParameters(this, out captureTarget, out captureFolder, out captureSizePolicy,
                                                   out captureDPI, out captureWidth, out captureHeight);
 
-      int w = 0 ;
+      int w = 0;
       int h = 0;
       switch (captureSizePolicy)
       {
-        case CaptureFormats.Fixed:  w = captureWidth; h = captureHeight; break;
-        case CaptureFormats.Keep:  w = UIContainer.Size.Width; h = UIContainer.Size.Height; break;
-        case CaptureFormats.FixedWidth: w = captureWidth;  h =  (int)(w* UIContainer.Size.Height / UIContainer.Size.Width) ; break;
+        case CaptureFormats.Fixed: w = captureWidth; h = captureHeight; break;
+        case CaptureFormats.Keep: w = UIContainer.Size.Width; h = UIContainer.Size.Height; break;
+        case CaptureFormats.FixedWidth: w = captureWidth; h = (int)(w * UIContainer.Size.Height / UIContainer.Size.Width); break;
         case CaptureFormats.FixedHeight: h = captureHeight; w = (int)(h * UIContainer.Size.Width / UIContainer.Size.Height); break;
 
       }
 
 
 
-      if ((w <= 5) || (h <= 5)) return ;
+      if ((w <= 5) || (h <= 5)) return;
 
       DisableRedraw();
 
       Bitmap DrawArea = new Bitmap(w, h);
       DrawArea.SetResolution(captureDPI, captureDPI);
-     
+
       Graphics g;
 
-      StartTiming();
-      g = Graphics.FromImage(DrawArea);
-      if  (captureTarget == YDataRenderer.CaptureTargets.ToClipBoard)
-           g.FillRectangle(new SolidBrush(parentForm.BackColor), 0, 0, w, h);
 
-      resetProportionalSizeObjectsCache(w,h);  // reset all size related cached objects
+      g = Graphics.FromImage(DrawArea);
+      if (captureTarget == YDataRenderer.CaptureTargets.ToClipBoard)
+        g.FillRectangle(new SolidBrush(parentForm.BackColor), 0, 0, w, h);
+
+      resetProportionalSizeObjectsCache(w, h);  // reset all size related cached objects
       bool renderok = false;
       _snapshotPanel.enabled = false;
       try
@@ -883,13 +915,14 @@ namespace YDataRendering
         int t = Render(g, w, h);
         renderok = true;
 
-      } catch (Exception e) { error = e.Message;  log("Render error: " + error); }
+      }
+      catch (Exception e) { error = e.Message; log("Render error: " + error); }
 
       resetProportionalSizeObjectsCache(UIContainer.Size.Width, UIContainer.Size.Height); // reset all size related cached objects, again
       g.Dispose();
 
 
-      int timing = StopTiming();
+
 
       if (renderok)
       {
@@ -901,7 +934,7 @@ namespace YDataRendering
           renderok = false;
           string[] f = new String[0];
 
-          if(Directory.Exists(captureFolder)) f = Directory.GetFiles(captureFolder);
+          if (Directory.Exists(captureFolder)) f = Directory.GetFiles(captureFolder);
 
           List<string> files = new List<string>();
           for (int i = 0; i < f.Length; i++) files.Add(f[i]);
@@ -922,12 +955,12 @@ namespace YDataRendering
               renderok = true;
             }
             catch (Exception e) { error = e.Message; log("PNG file save error: " + error); }
-          else { error = "PNG file save error:\nFolder \"" + captureFolder + "\"does not exists."; } 
+          else { error = "PNG file save error:\nFolder \"" + captureFolder + "\"does not exists."; }
 
         }
       }
 
-      
+
 
       if (renderok)
       {
@@ -936,8 +969,8 @@ namespace YDataRendering
       }
       else
       {
-        _snapshotPanel.text =  "Capture error, " + error;
-        _snapshotPanel.bgColor = Color.FromArgb(200,  255, 127, 127);
+        _snapshotPanel.text = "Capture error, " + error;
+        _snapshotPanel.bgColor = Color.FromArgb(200, 255, 127, 127);
       }
       AllowRedrawNoRefresh();
 
@@ -947,7 +980,7 @@ namespace YDataRendering
       redraw();
     }
 
-    private void  getFocus(object sender, EventArgs e)
+    private void getFocus(object sender, EventArgs e)
     {
       if (((Form)sender).WindowState == FormWindowState.Minimized) return;
 
@@ -957,13 +990,13 @@ namespace YDataRendering
         if (_AllowPrintScreenCapture) _RegisKey.StarHotKey();
 
       }
-      catch (Exception err  )
+      catch (Exception err)
       {
         _AllowPrintScreenCapture = false;
         log("Can't register PrintScrn key capture (" + err.Message + ")");
       }
-      
-      }
+
+    }
 
     private void lostFocus(object sender, EventArgs e)
     {
@@ -974,13 +1007,13 @@ namespace YDataRendering
     private Timer _snapshotTimer = null;
 
     private bool _AllowPrintScreenCapture = false;
-    public bool AllowPrintScreenCapture { get { return _AllowPrintScreenCapture; } set {  _AllowPrintScreenCapture = value; }   }
+    public bool AllowPrintScreenCapture { get { return _AllowPrintScreenCapture; } set { _AllowPrintScreenCapture = value; } }
 
 
     public YDataRenderer(PictureBox UIContainer, logFct logFunction)
     {
       this.UIContainer = UIContainer;
-     
+
       this.UIContainer.SizeMode = PictureBoxSizeMode.Normal;
       _logFunction = logFunction;
       parentForm = (Form)UIContainer.Parent;
@@ -989,7 +1022,7 @@ namespace YDataRendering
       DisableRedraw();
       _snapshotPanel = addMessagePanel();
       _snapshotPanel.panelTextAlign = MessagePanel.TextAlign.CENTER;
-      _snapshotPanel.text="Captured to clipboard";
+      _snapshotPanel.text = "Captured to clipboard";
       _snapshotPanel.panelHrzAlign = MessagePanel.HorizontalAlign.CENTER;
       _snapshotPanel.panelVrtAlign = MessagePanel.VerticalAlign.CENTER;
       _snapshotPanel.bgColor = Color.FromArgb(200, 0xcc, 0xf7, 0xa1);
@@ -1002,41 +1035,41 @@ namespace YDataRendering
       redrawTimer = new Timer();
       redrawTimer.Enabled = false;
       redrawTimer.Tick += TimerTick;
-     // ProportionalToSizeValues = new List<Proportional>();
+      // ProportionalToSizeValues = new List<Proportional>();
       this.parentForm.Resize += containerResize;
 
 
-  
 
 
-    _RegisKey.Keys = Keys.PrintScreen;
+
+      _RegisKey.Keys = Keys.PrintScreen;
       _RegisKey.ModKey = 0;
       _RegisKey.WindowHandle = this.parentForm.Handle;
       _RegisKey.HotKey += new RegisterHotKeyClass.HotKeyPass(_Regis_HotKey);
-       this.parentForm.Activated += getFocus;
-       this.parentForm.Deactivate += lostFocus;
+      this.parentForm.Activated += getFocus;
+      this.parentForm.Deactivate += lostFocus;
 
 
 
     }
 
-   
+
 
     public MessagePanel addMessagePanel()
     {
-      MessagePanel p = new MessagePanel(this,this);
+      MessagePanel p = new MessagePanel(this, this);
       _messagePanels.Add(p);
       return p;
-      
+
     }
 
     public void drawMessagePanels(Graphics g, int viewPortWidth, int viewPortHeight)
     {
 
-     
+
       g.SetClip(new Rectangle(0, 0, viewPortWidth, viewPortHeight));
 
-      for (int i = 0; i< _messagePanels.Count;i++ )
+      for (int i = 0; i < _messagePanels.Count; i++)
         if (_messagePanels[i].enabled)
         {
           MessagePanel p = _messagePanels[i];
@@ -1045,16 +1078,16 @@ namespace YDataRendering
           if (AvailableWidth < 100) AvailableWidth = 100;
 
 
-          SizeF ssize = g.MeasureString(p.text, p.font.fontObject,(int) AvailableWidth);
-          double panelWidth = ssize.Width + 2*p.padding + p.borderthickness;
-          double panelHeight = ssize.Height + 2*p.padding + p.borderthickness;
-          
+          SizeF ssize = g.MeasureString(p.text, p.font.fontObject, (int)AvailableWidth);
+          double panelWidth = ssize.Width + 2 * p.padding + p.borderthickness;
+          double panelHeight = ssize.Height + 2 * p.padding + p.borderthickness;
+
           double x = 0;
           switch (p.panelHrzAlign)
           {
             case MessagePanel.HorizontalAlign.LEFT: x = p.horizontalMargin; break;
             case MessagePanel.HorizontalAlign.RIGHT: x = viewPortWidth - panelWidth - p.horizontalMargin; break;
-            default: x=(viewPortWidth - panelWidth)/ 2; break;
+            default: x = (viewPortWidth - panelWidth) / 2; break;
           }
 
           double y = 0;
@@ -1066,7 +1099,7 @@ namespace YDataRendering
           }
 
           g.FillRectangle(p.bgBrush, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
-          if (p.borderthickness>0) g.DrawRectangle(p.pen, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
+          if (p.borderthickness > 0) g.DrawRectangle(p.pen, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
 
           StringFormat sf = new StringFormat();
           switch (p.panelTextAlign)
@@ -1087,8 +1120,8 @@ namespace YDataRendering
           Rectangle r = new Rectangle((int)(x + p.padding + p.borderthickness / 2),
 
             (int)(y + p.padding + p.borderthickness / 2),
-                  (int)ssize.Width + 1,(int) ssize.Height + 1);
-            g.DrawString(p.text, p.font.fontObject, p.font.brushObject, r, sf);
+                  (int)ssize.Width + 1, (int)ssize.Height + 1);
+          g.DrawString(p.text, p.font.fontObject, p.font.brushObject, r, sf);
 
 
         }
@@ -1096,7 +1129,8 @@ namespace YDataRendering
 
 
     public void log(string s)
-    {  if (_logFunction == null) return;
+    {
+      if (_logFunction == null) return;
       _logFunction(s);
 
     }
@@ -1108,111 +1142,111 @@ namespace YDataRendering
 
 
 
-    public class RegisterHotKeyClass  // thanks stackoverflow
+  public class RegisterHotKeyClass  // thanks stackoverflow
+  {
+    private IntPtr m_WindowHandle = IntPtr.Zero;
+    private MODKEY m_ModKey = MODKEY.MOD_CONTROL;
+    private Keys m_Keys = Keys.A;
+    private int m_WParam = 10000;
+    private bool Star = false;
+    private HotKeyWndProc m_HotKeyWnd = new HotKeyWndProc();
+
+    public IntPtr WindowHandle
     {
-      private IntPtr m_WindowHandle = IntPtr.Zero;
-      private MODKEY m_ModKey = MODKEY.MOD_CONTROL;
-      private Keys m_Keys = Keys.A;
-      private int m_WParam = 10000;
-      private bool Star = false;
-      private HotKeyWndProc m_HotKeyWnd = new HotKeyWndProc();
+      get { return m_WindowHandle; }
+      set { if (Star) return; m_WindowHandle = value; }
+    }
+    public MODKEY ModKey
+    {
+      get { return m_ModKey; }
+      set { if (Star) return; m_ModKey = value; }
+    }
+    public Keys Keys
+    {
+      get { return m_Keys; }
+      set { if (Star) return; m_Keys = value; }
+    }
+    public int WParam
+    {
+      get { return m_WParam; }
+      set { if (Star) return; m_WParam = value; }
+    }
 
-      public IntPtr WindowHandle
+    public void StarHotKey()
+    {
+      if (m_WindowHandle != IntPtr.Zero)
       {
-        get { return m_WindowHandle; }
-        set { if (Star) return; m_WindowHandle = value; }
-      }
-      public MODKEY ModKey
-      {
-        get { return m_ModKey; }
-        set { if (Star) return; m_ModKey = value; }
-      }
-      public Keys Keys
-      {
-        get { return m_Keys; }
-        set { if (Star) return; m_Keys = value; }
-      }
-      public int WParam
-      {
-        get { return m_WParam; }
-        set { if (Star) return; m_WParam = value; }
-      }
-
-      public void StarHotKey()
-      {
-        if (m_WindowHandle != IntPtr.Zero)
+        if (!RegisterHotKey(m_WindowHandle, m_WParam, m_ModKey, m_Keys))
         {
-          if (!RegisterHotKey(m_WindowHandle, m_WParam, m_ModKey, m_Keys))
-          {
-            throw new Exception(GetLastError().ToString());
-          }
-          try
-          {
-            m_HotKeyWnd.m_HotKeyPass = new HotKeyPass(KeyPass);
-            m_HotKeyWnd.m_WParam = m_WParam;
-            m_HotKeyWnd.AssignHandle(m_WindowHandle);
-            Star = true;
-          }
-          catch
-          {
-            StopHotKey();
-          }
+          throw new Exception(GetLastError().ToString());
+        }
+        try
+        {
+          m_HotKeyWnd.m_HotKeyPass = new HotKeyPass(KeyPass);
+          m_HotKeyWnd.m_WParam = m_WParam;
+          m_HotKeyWnd.AssignHandle(m_WindowHandle);
+          Star = true;
+        }
+        catch
+        {
+          StopHotKey();
         }
       }
-      private void KeyPass()
+    }
+    private void KeyPass()
+    {
+      if (HotKey != null) HotKey();
+    }
+    public void StopHotKey()
+    {
+      if (Star)
       {
-        if (HotKey != null) HotKey();
-      }
-      public void StopHotKey()
-      {
-        if (Star)
+        if (!UnregisterHotKey(m_WindowHandle, m_WParam))
         {
-          if (!UnregisterHotKey(m_WindowHandle, m_WParam))
-          {
-            throw new Exception(GetLastError().ToString());
-          }
-          Star = false;
-          m_HotKeyWnd.ReleaseHandle();
+          throw new Exception(GetLastError().ToString());
         }
+        Star = false;
+        m_HotKeyWnd.ReleaseHandle();
       }
+    }
 
 
-      public delegate void HotKeyPass();
-      public event HotKeyPass HotKey;
+    public delegate void HotKeyPass();
+    public event HotKeyPass HotKey;
 
 
-      private class HotKeyWndProc : NativeWindow
+    private class HotKeyWndProc : NativeWindow
+    {
+      public int m_WParam = 10000;
+      public HotKeyPass m_HotKeyPass;
+      protected override void WndProc(ref Message m)
       {
-        public int m_WParam = 10000;
-        public HotKeyPass m_HotKeyPass;
-        protected override void WndProc(ref Message m)
+        if (m.Msg == 0x0312 && m.WParam.ToInt32() == m_WParam)
         {
-          if (m.Msg == 0x0312 && m.WParam.ToInt32() == m_WParam)
-          {
-            if (m_HotKeyPass != null) m_HotKeyPass.Invoke();
-          }
-
-          base.WndProc(ref m);
+          if (m_HotKeyPass != null) m_HotKeyPass.Invoke();
         }
+
+        base.WndProc(ref m);
       }
+    }
 
-      public enum MODKEY
-      {
-        MOD_ALT = 0x0001,
-        MOD_CONTROL = 0x0002,
-        MOD_SHIFT = 0x0004,
-        MOD_WIN = 0x0008,
-      }
+    public enum MODKEY
+    {
+      MOD_ALT = 0x0001,
+      MOD_CONTROL = 0x0002,
+      MOD_SHIFT = 0x0004,
+      MOD_WIN = 0x0008,
+    }
 
-      [DllImport("user32.dll")]
-      public static extern bool RegisterHotKey(IntPtr wnd, int id, MODKEY mode, Keys vk);
+    [DllImport("user32.dll")]
+    public static extern bool RegisterHotKey(IntPtr wnd, int id, MODKEY mode, Keys vk);
 
-      [DllImport("user32.dll")]
-      public static extern bool UnregisterHotKey(IntPtr wnd, int id);
+    [DllImport("user32.dll")]
+    public static extern bool UnregisterHotKey(IntPtr wnd, int id);
 
     [DllImport("kernel32.dll")]
     static extern uint GetLastError();
   }
-  
+
 
 }

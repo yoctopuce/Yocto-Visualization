@@ -340,8 +340,16 @@ namespace YoctoVisualisation
 
     BackgroundWorker predloadProcess;
     BackgroundWorker loadProcess;
-
+    long dataLoggerStartReadTime = 0;
     List<AlarmSettings> Alarms = new List<AlarmSettings>();
+    private static  int _MaxDataRecords = 0;
+    public static int MaxDataRecords
+    {
+      get { return _MaxDataRecords; }
+      set { _MaxDataRecords = value; }
+
+      
+    }
 
 
     public CustomYSensor(YSensor s, string name, XmlNode SensorLocalConfig)
@@ -456,7 +464,10 @@ namespace YoctoVisualisation
       previewMinData = new List<TimedSensorValue>();
       previewCurData = new List<TimedSensorValue>();
       previewMaxData = new List<TimedSensorValue>();
-      for (int i = 0; i < measures.Count; i++)
+      int startIndex = 0;
+      if ((_MaxDataRecords > 0) && (measures.Count > _MaxDataRecords)) startIndex = measures.Count - _MaxDataRecords;
+
+      for (int i = startIndex; i < measures.Count; i++)
       {
         double t = measures[i].get_endTimeUTC();
         if ((t < firstLiveDataTimeStamp) || (firstLiveDataTimeStamp == 0))
@@ -466,9 +477,86 @@ namespace YoctoVisualisation
           previewMaxData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_maxValue() });
         }
       }
+
+
+
+      if (_MaxDataRecords > 0)
+      { // find out where to start reading datalogger to make sure we don't read more the _MaxDataRecords records
+      
+        List<YDataStream> list = recordedData.get_privateDataStreams();
+        int index = list.Count - 1;
+        int totalRecords = 0;
+        while ((index > 0) && (totalRecords<_MaxDataRecords))
+         { totalRecords += list[index].get_rowCount();
+           dataLoggerStartReadTime = list[index].get_startTimeUTC();
+           index--;
+         }
+
+        int n = 0;
+        while ((n < previewMinData.Count) && (previewMinData[n].DateTime < dataLoggerStartReadTime)) n++;
+        if (n>1)
+        {
+          previewMinData.RemoveRange(0, n-1);
+          previewCurData.RemoveRange(0, n-1);
+          previewMaxData.RemoveRange(0, n-1);
+        }
+        
+      }
     }
 
+    protected void preload_Completed(object sender, RunWorkerCompletedEventArgs e)
+    {
 
+
+      LogManager.Log(hwdName + " : datalogger preloading completed");
+
+      int RangeTo = -1;
+      if (previewMinData == null) return;
+
+
+      if (previewMinData.Count <= 0) return;
+
+
+      if (firstLiveDataTimeStamp > 0)
+      {
+        while ((RangeTo < previewMinData.Count - 1) && (previewMinData[RangeTo + 1].DateTime < firstLiveDataTimeStamp)) RangeTo++;
+      }
+      else RangeTo = previewMinData.Count - 1;
+
+      if (RangeTo < 0) return;
+
+      firstDataloggerTimeStamp = previewMinData[0].DateTime;
+
+
+      previewMinData = previewMinData.GetRange(0, RangeTo);
+      previewCurData = previewCurData.GetRange(0, RangeTo);
+      previewMaxData = previewMaxData.GetRange(0, RangeTo);
+      dataMutex.WaitOne();
+      minData = previewMinData.Union(minData).ToList();
+      curData = previewCurData.Union(curData).ToList();
+      maxData = previewMinData.Union(maxData).ToList();
+      dataMutex.ReleaseMutex();
+
+      preloadDone = true;
+
+
+      int count = curData.Count;
+      if (count > 0)
+        if (curData[count - 1].DateTime > lastDataTimeStamp)
+          lastDataTimeStamp = curData[count - 1].DateTime;
+
+      foreach (Form f in FormsToNotify)
+        if (f is GraphForm)
+          ((GraphForm)f).SensorNewDataBlock(this, 0, RangeTo - 1, 0, true);
+
+      if (recordedDataLoadProgress < 100)
+      {
+        LogManager.Log(hwdName + " : start datalogger loading");
+        loadProcess.RunWorkerAsync(null);
+
+      }
+
+    }
 
     public string get_frequency()
     {
@@ -539,63 +627,16 @@ namespace YoctoVisualisation
 
 
 
-    protected void preload_Completed(object sender, RunWorkerCompletedEventArgs e)
-    {
-     
-
-      LogManager.Log(hwdName + " : datalogger preloading completed");
-     
-      int RangeTo = -1;
-      if (previewMinData == null) return;
-
-
-     if (previewMinData.Count <= 0) return;
-
-      
-          if (firstLiveDataTimeStamp > 0)
-          {
-            while ((RangeTo < previewMinData.Count - 1) && (previewMinData[RangeTo + 1].DateTime < firstLiveDataTimeStamp)) RangeTo++;
-          }
-          else RangeTo = previewMinData.Count - 1;
-
-          if (RangeTo < 0) return;
-
-          firstDataloggerTimeStamp = previewMinData[0].DateTime;
-
-
-          previewMinData = previewMinData.GetRange(0, RangeTo);
-          previewCurData = previewCurData.GetRange(0, RangeTo);
-          previewMaxData = previewMaxData.GetRange(0, RangeTo);
-          dataMutex.WaitOne();
-          minData = previewMinData.Union(minData).ToList();
-          curData = previewCurData.Union(curData).ToList();
-          maxData = previewMinData.Union(maxData).ToList();
-          dataMutex.ReleaseMutex();
-
-          preloadDone = true;
-
-
-          int count = curData.Count;
-          if (count > 0)
-            if (curData[count - 1].DateTime > lastDataTimeStamp)
-              lastDataTimeStamp = curData[count - 1].DateTime;
-
-          foreach (Form f in FormsToNotify)
-            if (f is GraphForm)
-              ((GraphForm)f).SensorNewDataBlock(this, 0, RangeTo - 1, 0, true);
-
-          if (recordedDataLoadProgress < 100)
-          {
-            LogManager.Log(hwdName + " : start datalogger loading");
-            loadProcess.RunWorkerAsync(null);
-
-          }
-          
-    }
+ 
 
     protected void load_DoWork(object sender, DoWorkEventArgs e)
     {
      
+      if (dataLoggerStartReadTime>0)
+       {
+         recordedData = sensor.get_recordedData(dataLoggerStartReadTime, 0);
+       }
+
       while (recordedDataLoadProgress < 100)
       {
         if ((((BackgroundWorker)sender).CancellationPending == true))
@@ -639,6 +680,9 @@ namespace YoctoVisualisation
           previewMaxData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_maxValue() });
         }
       }
+
+      if (_MaxDataRecords > 0) previewDataCleanUp();
+
       for (int i = 0; i < previewMinData.Count - 1; i++)
       {
         if (previewMinData[i].DateTime >= previewMinData[i + 1].DateTime)
@@ -654,13 +698,8 @@ namespace YoctoVisualisation
         globalDataLoadProgress = 100;
         int index = 0;
         dataMutex.WaitOne();
-
         double lastPreviewTimeStamp = previewMinData[previewMinData.Count - 1].DateTime;
-
-
         while ((index < minData.Count) && (minData[index].DateTime < lastPreviewTimeStamp)) index++;
-
-
         minData.RemoveRange(0, index);
         curData.RemoveRange(0, index);
         maxData.RemoveRange(0, index);
@@ -721,6 +760,34 @@ namespace YoctoVisualisation
       previewMaxData.Clear();
 
     }
+
+    private void dataCleanUp()
+    { if (_MaxDataRecords <= 0) return;
+      int newsize = (_MaxDataRecords * 90) / 100;
+      if ((curData!=null) && (_MaxDataRecords< curData.Count))
+      {
+        
+        minData.RemoveRange(0,minData.Count - newsize);
+        curData.RemoveRange(0,curData.Count - newsize);
+        maxData.RemoveRange(0,maxData.Count - newsize);
+      }
+    
+
+    }
+
+    private void previewDataCleanUp()
+    {
+      if (_MaxDataRecords <= 0) return;
+      int newsize = (_MaxDataRecords * 90) / 100;  
+      if ((previewMinData != null) && (_MaxDataRecords < previewMinData.Count))
+      {
+        previewMinData.RemoveRange(0,previewMinData.Count - newsize);
+        previewCurData.RemoveRange(0,previewCurData.Count - newsize);
+        previewMaxData.RemoveRange(0,previewMaxData.Count - newsize);
+      }
+
+    }
+
 
     public void stopDataloggerloading()
     {
@@ -893,6 +960,7 @@ namespace YoctoVisualisation
         curData.Add(new TimedSensorValue { DateTime = t, Value = M.get_averageValue() });
         minData.Add(new TimedSensorValue { DateTime = t, Value = M.get_minValue() });
         maxData.Add(new TimedSensorValue { DateTime = t, Value = M.get_maxValue() });
+        if (_MaxDataRecords > 0) dataCleanUp();
         dataMutex.ReleaseMutex();
 
         for (int i = 0; i < Alarms.Count; i++)
@@ -967,6 +1035,8 @@ namespace YoctoVisualisation
   public static class sensorsManager
   {
     private static int counter = 0;
+    private static int _MaxDataRecordsPerSensor = 0;
+    
     public static List<CustomYSensor> sensorList;  // actual list of sensors
     public static CustomYSensor NullSensor;
     private static XmlNode KnownSensors = null;  // sensors list picked up from xml config file

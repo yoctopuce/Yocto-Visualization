@@ -79,6 +79,7 @@ namespace YoctoVisualisation
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.Log("Current config file is " + constants.configfile);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
+      LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits");
 
 
       string cfgFile = constants.configfile;

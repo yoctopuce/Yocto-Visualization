@@ -293,6 +293,8 @@ namespace YDataRendering
 
     public void grow() { Array.Resize(ref data, data.Length + SegmentGranularity); }
 
+    
+
 
   }
 
@@ -300,9 +302,13 @@ namespace YDataRendering
   public class DataSerie
   {
     protected YGraph parent = null;
-
+    static int _MaxPointsPerSeries = 0;
+    int totalPointCount = 0;
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
+
+    public static int MaxPointsPerSeries { get { return _MaxPointsPerSeries; } set { _MaxPointsPerSeries = value; }  } 
+
 
     public DataSerie(YGraph parent)
     {
@@ -414,7 +420,7 @@ namespace YDataRendering
 
 
 
-      if (segments.Count <= 0) { AddNewSegment(p); return; }
+      if (segments.Count <= 0) { AddNewSegment(p); totalPointCount++; return; }
       else if (segments[0].count > 1)
       {
         double delta1 = segments[0].data[segments[0].count - 1].x - segments[0].data[segments[0].count - 2].x;
@@ -426,11 +432,55 @@ namespace YDataRendering
 
       segments[0].data[segments[0].count] = p;
       segments[0].count++;
+      totalPointCount++;
+      if  ((_MaxPointsPerSeries>0)  && (totalPointCount > _MaxPointsPerSeries)) dataCleanUp();
+
       parent.adjustGlobalTimeRange(p.x);
       parent.redraw();
     }
 
+    public void dataCleanUp()
+    {  if (segments.Count <= 0) return;
+      int newLimit = ((_MaxPointsPerSeries * 90) / 100);
+      while ( segments[segments.Count-1].count < (totalPointCount - newLimit))
+      {
+        totalPointCount -= segments[segments.Count - 1].count;
+        segments.RemoveAt(segments.Count - 1);
+      }
 
+     if  (totalPointCount> newLimit)
+      {
+        int delta = totalPointCount - newLimit;
+        int newsize = segments[segments.Count - 1].count - delta;
+        pointXY[] newdata =  new pointXY[newsize];
+        Array.Copy(segments[segments.Count - 1].data, delta, newdata, 0, segments[segments.Count - 1].count - delta);
+        segments[segments.Count - 1].data = newdata;
+        segments[segments.Count - 1].count -= delta;
+        totalPointCount -= delta;
+
+      }
+
+      double tmin = segments[0].data[0].x;
+      double tmax = segments[0].data[0].x;
+      double ymin = segments[0].data[0].y;
+      double ymax = segments[0].data[0].y;
+      
+      for (int i=0;i< segments.Count;i++)
+      { int count = segments[i].count;
+         if (tmin > segments[i].data[0].x) tmin = segments[i].data[0].x;
+        if (tmax < segments[i].data[count - 1].x) tmax = segments[i].data[count - 1].x;
+         for (int j = 0; j < count; j++) 
+          { if (ymin > segments[i].data[j].y) ymin = segments[i].data[j].y;
+            if (ymax < segments[i].data[j].y) ymax = segments[i].data[j].y;
+          }
+       }
+      _timeRange.Min = tmin;
+      _timeRange.Max = tmax;
+      _valueRange.Min = ymin;
+      _valueRange.Max = ymax;
+
+
+    }
 
     public void InsertPoints(pointXY[] points)
     {
@@ -464,7 +514,7 @@ namespace YDataRendering
         Array.Copy(segments[InsertAtBegining].data, 0, segments[InsertAtBegining].data, points.Length, segments[InsertAtBegining].count);
         Array.Copy(points, 0, segments[InsertAtBegining].data, 0, points.Length);
         segments[InsertAtBegining].count += points.Length;
-
+        totalPointCount+= points.Length;
       }
 
       else if (InsertAtEnd >= 0) // insert at the end of segments[InsertAtEnd]
@@ -473,11 +523,12 @@ namespace YDataRendering
         if (segments[InsertAtEnd].count + points.Length >= segments[InsertAtEnd].data.Length) segments[InsertAtEnd].grow();
         Array.Copy(points, 0, segments[InsertAtEnd].data, segments[InsertAtEnd].count, points.Length);
         segments[InsertAtEnd].count += points.Length;
+        totalPointCount += points.Length;
       }
       else // create a whole new segment
       {
         segments.Add(new DataSegment(points));
-
+        totalPointCount += points.Length;
       }
 
       _timeRange = MinMaxHandler.Combine(_timeRange, points[0].x);
@@ -485,6 +536,8 @@ namespace YDataRendering
 
       for (int i = 0; i < points.Length; i++)
         _valueRange = MinMaxHandler.Combine(_valueRange, points[i].y);
+
+      if ((_MaxPointsPerSeries > 0) && (totalPointCount > _MaxPointsPerSeries)) dataCleanUp();
 
 
       parent.redraw();
@@ -535,7 +588,7 @@ namespace YDataRendering
       segments.Clear();
       _timeRange = MinMaxHandler.DefaultValue();
       _valueRange = MinMaxHandler.DefaultValue();
-
+      totalPointCount = 0;
     }
 
   }

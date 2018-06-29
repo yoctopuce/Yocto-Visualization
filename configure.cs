@@ -62,7 +62,7 @@ namespace YoctoVisualisation
     string VirtualHubSerial = "";
     string localIP = GetLocalIPAddress();
     bool initdone = false;
-
+    System.Diagnostics.PerformanceCounter performance = new System.Diagnostics.PerformanceCounter("Memory", "Available MBytes");
     public ConfigForm()
     {
       InitializeComponent();
@@ -225,7 +225,11 @@ namespace YoctoVisualisation
       List<YColor> c = ColorEditor.colorHistory;
       for (int i = c.Count - 1; i >= 0; i--) 
          res = res + "    <Color value=\"" + c[i].ToString() + "\"/>\n";
-      res += "  </Colors>\n";    
+      res += "  </Colors>\n";
+      res += "  <MemoryUsage>\n";
+      res += "    <maxPointsPerGraphSerie value= \"" + constants.maxPointsPerGraphSerie.ToString() + "\"/>\n";
+      res += "    <maxDataRecordsPerSensor value= \"" + constants.maxDataRecordsPerSensor.ToString() + "\"/>\n";
+      res += "  </MemoryUsage>\n";
       res += "  <Capture>\n";
       res += "    <Target value= \"" + constants.captureTarget.ToString() + "\"/>\n";
       res += "    <Size value= \"" + constants.captureSizePolicy.ToString() + "\"/>\n";
@@ -253,10 +257,39 @@ namespace YoctoVisualisation
       }
     }
 
+    public void InitMemoryUsageParams(XmlNode memNode)
+    {
+      foreach (XmlNode node in memNode.ChildNodes)
+      {
+        int value;
+        switch (node.Name)
+        {
+          case "maxPointsPerGraphSerie":
+            value = 0;
+            if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
+              if (value >= 0)
+              {
+                constants.maxPointsPerGraphSerie = value;
+                DataSerie.MaxPointsPerSeries = value;
+              }
+            break;
+          case "maxDataRecordsPerSensor":
+            value = 0;
+            if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
+              if (value >= 0)
+              {
+                constants.maxDataRecordsPerSensor = value;
+                CustomYSensor.MaxDataRecords = value;
+              }
+            break;
+        }
 
-    public void InitCaptureParams(XmlNode ColorsNode)
+      }
+    }
+
+    public void InitCaptureParams(XmlNode CaptureNode)
     { int value;
-      foreach (XmlNode node in ColorsNode.ChildNodes)
+      foreach (XmlNode node in CaptureNode.ChildNodes)
       {
         switch (node.Name)
         {
@@ -395,7 +428,9 @@ namespace YoctoVisualisation
           case "Capture":
             InitCaptureParams(node);
             break;
-
+          case "MemoryUsage":
+            InitMemoryUsageParams(node);
+            break;
           case "UseVirtualHub":
             UseVirtualHub.Checked = (node.Attributes["value"].InnerText.ToUpper() == "TRUE");
             if (UseVirtualHub.Checked) AddHub("127.0.0.1");
@@ -643,6 +678,58 @@ namespace YoctoVisualisation
                      "Parameter error", MessageBoxButtons.OK,
                       MessageBoxIcon.Warning);
       updateCaptureUI();
+    }
+
+    private void MaxDataRecordsCount_Leave(object sender, EventArgs e)
+    {
+      int value;
+      if (Int32.TryParse(MaxDataRecordsCount.Text,out value) &&(value>=0))
+        
+      {
+        constants.maxDataRecordsPerSensor = value;
+        CustomYSensor.MaxDataRecords = value;
+      }
+      else MessageBox.Show("Invalid Max Data records,\nshould be a positif integer or Zero.\nChange will be ignored. ",
+                           "Parameter error", MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+
+    }
+
+    private void MaxDataPointsCount_Leave(object sender, EventArgs e)
+    {
+      int value;
+      if (Int32.TryParse(MaxDataPointsCount.Text, out value)&& (value >= 0))
+      {
+        constants.maxPointsPerGraphSerie = value;
+       DataSerie.MaxPointsPerSeries = value;
+      }
+      else MessageBox.Show("Invalid Max Data points,\nshould be a positif integer or Zero.\nChange will be ignored. ",
+                        "Parameter error", MessageBoxButtons.OK,
+                         MessageBoxIcon.Warning);
+
+    }
+
+    private void MemoryTimer_Tick(object sender, EventArgs e)
+    {
+      if (constants.MonoRunning)
+      {
+        memoryLabel.Text = "Available memory : (not available on linux).";
+        MemoryTimer.Enabled = false;
+      } 
+      else memoryLabel.Text = "Available memory : " + performance.NextValue().ToString() +"MB";
+
+    }
+
+    private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (tabControl1.SelectedIndex == 2)
+      {
+        MaxDataPointsCount.Text = constants.maxPointsPerGraphSerie.ToString();
+        MaxDataRecordsCount.Text = constants.maxDataRecordsPerSensor.ToString();
+        MemoryTimer_Tick(null, null);
+        MemoryTimer.Enabled = true;
+      }
+      else MemoryTimer.Enabled = false;
     }
   }
 }

@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.31138
+Yocto-Visualization v2.0.31152
 
-- Check for framework .NET 4.5 in installer.
+- Check for framework .NET 4.5 in msi.

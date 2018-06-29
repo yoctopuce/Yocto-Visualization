@@ -66,7 +66,11 @@ namespace YoctoVisualisation
     public static int captureHeight = 1024;
     public static int captureDPI = 70;
 
-	  private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);
+    public static int maxPointsPerGraphSerie = 0;
+    public static int maxDataRecordsPerSensor = 0;
+
+
+    private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);
 		public static bool MonoRunning {get {return  _MonoRunning;}} 
 
      public static  void getCaptureParametersCallback(YDataRenderer source,
