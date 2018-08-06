@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.31397
+Yocto-Visualization v2.0.31406
 
-- Add Linux support
+- Add script to build Debian package
