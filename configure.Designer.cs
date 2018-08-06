@@ -72,18 +72,18 @@
       this.ExportToClipboard = new System.Windows.Forms.RadioButton();
       this.label5 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
-      this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
       this.tabPage3 = new System.Windows.Forms.TabPage();
-      this.label10 = new System.Windows.Forms.Label();
-      this.label11 = new System.Windows.Forms.Label();
-      this.label12 = new System.Windows.Forms.Label();
-      this.MaxDataRecordsCount = new System.Windows.Forms.TextBox();
-      this.MaxDataPointsCount = new System.Windows.Forms.TextBox();
-      this.label13 = new System.Windows.Forms.Label();
-      this.label14 = new System.Windows.Forms.Label();
-      this.memoryLabel = new System.Windows.Forms.Label();
-      this.MemoryTimer = new System.Windows.Forms.Timer(this.components);
       this.label15 = new System.Windows.Forms.Label();
+      this.memoryLabel = new System.Windows.Forms.Label();
+      this.label14 = new System.Windows.Forms.Label();
+      this.label13 = new System.Windows.Forms.Label();
+      this.MaxDataPointsCount = new System.Windows.Forms.TextBox();
+      this.MaxDataRecordsCount = new System.Windows.Forms.TextBox();
+      this.label12 = new System.Windows.Forms.Label();
+      this.label11 = new System.Windows.Forms.Label();
+      this.label10 = new System.Windows.Forms.Label();
+      this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+      this.MemoryTimer = new System.Windows.Forms.Timer(this.components);
       this.contextMenuStrip1.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -138,7 +138,7 @@
       this.tabControl1.Location = new System.Drawing.Point(12, 12);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
-      this.tabControl1.Size = new System.Drawing.Size(491, 390);
+      this.tabControl1.Size = new System.Drawing.Size(491, 339);
       this.tabControl1.TabIndex = 15;
       this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
       // 
@@ -160,7 +160,7 @@
       this.tabPage1.Location = new System.Drawing.Point(4, 22);
       this.tabPage1.Name = "tabPage1";
       this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage1.Size = new System.Drawing.Size(483, 364);
+      this.tabPage1.Size = new System.Drawing.Size(483, 313);
       this.tabPage1.TabIndex = 0;
       this.tabPage1.Text = "USB / Network";
       this.tabPage1.UseVisualStyleBackColor = true;
@@ -168,7 +168,7 @@
       // AddBtn
       // 
       this.AddBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.AddBtn.Location = new System.Drawing.Point(382, 330);
+      this.AddBtn.Location = new System.Drawing.Point(382, 276);
       this.AddBtn.Name = "AddBtn";
       this.AddBtn.Size = new System.Drawing.Size(75, 23);
       this.AddBtn.TabIndex = 27;
@@ -230,7 +230,7 @@
       // 
       this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(30, 335);
+      this.label3.Location = new System.Drawing.Point(30, 281);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(144, 13);
       this.label3.TabIndex = 21;
@@ -270,7 +270,7 @@
       this.listView1.LargeImageList = this.statusIcons;
       this.listView1.Location = new System.Drawing.Point(30, 133);
       this.listView1.Name = "listView1";
-      this.listView1.Size = new System.Drawing.Size(427, 193);
+      this.listView1.Size = new System.Drawing.Size(427, 133);
       this.listView1.SmallImageList = this.statusIcons;
       this.listView1.TabIndex = 18;
       this.listView1.UseCompatibleStateImageBehavior = false;
@@ -290,7 +290,7 @@
       // 
       this.newEntry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.newEntry.Location = new System.Drawing.Point(180, 332);
+      this.newEntry.Location = new System.Drawing.Point(175, 278);
       this.newEntry.Name = "newEntry";
       this.newEntry.Size = new System.Drawing.Size(196, 20);
       this.newEntry.TabIndex = 17;
@@ -340,14 +340,16 @@
       this.tabPage2.Location = new System.Drawing.Point(4, 22);
       this.tabPage2.Name = "tabPage2";
       this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage2.Size = new System.Drawing.Size(483, 364);
+      this.tabPage2.Size = new System.Drawing.Size(483, 313);
       this.tabPage2.TabIndex = 1;
       this.tabPage2.Text = "Screen capture";
       this.tabPage2.UseVisualStyleBackColor = true;
       // 
       // copyWarning
       // 
-      this.copyWarning.Location = new System.Drawing.Point(11, 318);
+      this.copyWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.copyWarning.Location = new System.Drawing.Point(11, 272);
       this.copyWarning.Name = "copyWarning";
       this.copyWarning.Size = new System.Drawing.Size(456, 33);
       this.copyWarning.TabIndex = 19;
@@ -356,12 +358,11 @@
       // 
       // copyWarning2
       // 
-      this.copyWarning2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+      this.copyWarning2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.copyWarning2.Location = new System.Drawing.Point(11, 277);
+      this.copyWarning2.Location = new System.Drawing.Point(11, 252);
       this.copyWarning2.Name = "copyWarning2";
-      this.copyWarning2.Size = new System.Drawing.Size(466, 74);
+      this.copyWarning2.Size = new System.Drawing.Size(466, 20);
       this.copyWarning2.TabIndex = 18;
       this.copyWarning2.Text = "(1) PrintScreen key may not work if it is already captured by an other screen cap" +
     "ture utility, in that case,  use the right-clic contextual  menu.\r\n\r\n";
@@ -370,7 +371,7 @@
       // heightUnit
       // 
       this.heightUnit.AutoSize = true;
-      this.heightUnit.Location = new System.Drawing.Point(245, 239);
+      this.heightUnit.Location = new System.Drawing.Point(245, 220);
       this.heightUnit.Name = "heightUnit";
       this.heightUnit.Size = new System.Drawing.Size(18, 13);
       this.heightUnit.TabIndex = 17;
@@ -378,7 +379,7 @@
       // 
       // heightValue
       // 
-      this.heightValue.Location = new System.Drawing.Point(164, 236);
+      this.heightValue.Location = new System.Drawing.Point(164, 217);
       this.heightValue.Name = "heightValue";
       this.heightValue.Size = new System.Drawing.Size(75, 20);
       this.heightValue.TabIndex = 16;
@@ -389,7 +390,7 @@
       // heightLabel
       // 
       this.heightLabel.AutoSize = true;
-      this.heightLabel.Location = new System.Drawing.Point(123, 239);
+      this.heightLabel.Location = new System.Drawing.Point(123, 220);
       this.heightLabel.Name = "heightLabel";
       this.heightLabel.Size = new System.Drawing.Size(39, 13);
       this.heightLabel.TabIndex = 15;
@@ -398,7 +399,7 @@
       // widthUnit
       // 
       this.widthUnit.AutoSize = true;
-      this.widthUnit.Location = new System.Drawing.Point(245, 213);
+      this.widthUnit.Location = new System.Drawing.Point(245, 194);
       this.widthUnit.Name = "widthUnit";
       this.widthUnit.Size = new System.Drawing.Size(18, 13);
       this.widthUnit.TabIndex = 14;
@@ -406,7 +407,7 @@
       // 
       // widthValue
       // 
-      this.widthValue.Location = new System.Drawing.Point(164, 210);
+      this.widthValue.Location = new System.Drawing.Point(164, 191);
       this.widthValue.Name = "widthValue";
       this.widthValue.Size = new System.Drawing.Size(75, 20);
       this.widthValue.TabIndex = 13;
@@ -417,7 +418,7 @@
       // widthLabel
       // 
       this.widthLabel.AutoSize = true;
-      this.widthLabel.Location = new System.Drawing.Point(123, 213);
+      this.widthLabel.Location = new System.Drawing.Point(123, 194);
       this.widthLabel.Name = "widthLabel";
       this.widthLabel.Size = new System.Drawing.Size(35, 13);
       this.widthLabel.TabIndex = 12;
@@ -430,7 +431,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.sizePolicy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.sizePolicy.FormattingEnabled = true;
-      this.sizePolicy.Location = new System.Drawing.Point(102, 176);
+      this.sizePolicy.Location = new System.Drawing.Point(102, 157);
       this.sizePolicy.Name = "sizePolicy";
       this.sizePolicy.Size = new System.Drawing.Size(354, 21);
       this.sizePolicy.TabIndex = 11;
@@ -439,7 +440,7 @@
       // label9
       // 
       this.label9.AutoSize = true;
-      this.label9.Location = new System.Drawing.Point(22, 179);
+      this.label9.Location = new System.Drawing.Point(22, 160);
       this.label9.Name = "label9";
       this.label9.Size = new System.Drawing.Size(30, 13);
       this.label9.TabIndex = 10;
@@ -448,7 +449,7 @@
       // label8
       // 
       this.label8.AutoSize = true;
-      this.label8.Location = new System.Drawing.Point(177, 144);
+      this.label8.Location = new System.Drawing.Point(177, 125);
       this.label8.Name = "label8";
       this.label8.Size = new System.Drawing.Size(21, 13);
       this.label8.TabIndex = 9;
@@ -456,7 +457,7 @@
       // 
       // DpiTextBox
       // 
-      this.DpiTextBox.Location = new System.Drawing.Point(102, 141);
+      this.DpiTextBox.Location = new System.Drawing.Point(102, 122);
       this.DpiTextBox.Name = "DpiTextBox";
       this.DpiTextBox.Size = new System.Drawing.Size(69, 20);
       this.DpiTextBox.TabIndex = 8;
@@ -466,7 +467,7 @@
       // label7
       // 
       this.label7.AutoSize = true;
-      this.label7.Location = new System.Drawing.Point(22, 144);
+      this.label7.Location = new System.Drawing.Point(22, 125);
       this.label7.Name = "label7";
       this.label7.Size = new System.Drawing.Size(60, 13);
       this.label7.TabIndex = 7;
@@ -475,7 +476,7 @@
       // CaptureFolderbutton
       // 
       this.CaptureFolderbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.CaptureFolderbutton.Location = new System.Drawing.Point(420, 107);
+      this.CaptureFolderbutton.Location = new System.Drawing.Point(420, 88);
       this.CaptureFolderbutton.Name = "CaptureFolderbutton";
       this.CaptureFolderbutton.Size = new System.Drawing.Size(36, 23);
       this.CaptureFolderbutton.TabIndex = 6;
@@ -485,7 +486,7 @@
       // 
       // targetFolder
       // 
-      this.targetFolder.Location = new System.Drawing.Point(102, 109);
+      this.targetFolder.Location = new System.Drawing.Point(102, 90);
       this.targetFolder.Name = "targetFolder";
       this.targetFolder.Size = new System.Drawing.Size(312, 20);
       this.targetFolder.TabIndex = 5;
@@ -494,7 +495,7 @@
       // label6
       // 
       this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(22, 112);
+      this.label6.Location = new System.Drawing.Point(22, 93);
       this.label6.Name = "label6";
       this.label6.Size = new System.Drawing.Size(39, 13);
       this.label6.TabIndex = 4;
@@ -503,7 +504,7 @@
       // ExportToPNG
       // 
       this.ExportToPNG.AutoSize = true;
-      this.ExportToPNG.Location = new System.Drawing.Point(102, 79);
+      this.ExportToPNG.Location = new System.Drawing.Point(102, 60);
       this.ExportToPNG.Name = "ExportToPNG";
       this.ExportToPNG.Size = new System.Drawing.Size(64, 17);
       this.ExportToPNG.TabIndex = 3;
@@ -514,7 +515,7 @@
       // 
       this.ExportToClipboard.AutoSize = true;
       this.ExportToClipboard.Checked = true;
-      this.ExportToClipboard.Location = new System.Drawing.Point(102, 56);
+      this.ExportToClipboard.Location = new System.Drawing.Point(102, 37);
       this.ExportToClipboard.Name = "ExportToClipboard";
       this.ExportToClipboard.Size = new System.Drawing.Size(84, 17);
       this.ExportToClipboard.TabIndex = 2;
@@ -526,7 +527,7 @@
       // label5
       // 
       this.label5.AutoSize = true;
-      this.label5.Location = new System.Drawing.Point(22, 58);
+      this.label5.Location = new System.Drawing.Point(22, 39);
       this.label5.Name = "label5";
       this.label5.Size = new System.Drawing.Size(59, 13);
       this.label5.TabIndex = 1;
@@ -536,9 +537,9 @@
       // 
       this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.label4.Location = new System.Drawing.Point(22, 17);
+      this.label4.Location = new System.Drawing.Point(22, 14);
       this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(445, 32);
+      this.label4.Size = new System.Drawing.Size(445, 20);
       this.label4.TabIndex = 0;
       this.label4.Text = "At any time, widget contents can be captured to an image by a PrintScreen key pre" +
     "ss (1)";
@@ -556,90 +557,10 @@
       this.tabPage3.Controls.Add(this.label10);
       this.tabPage3.Location = new System.Drawing.Point(4, 22);
       this.tabPage3.Name = "tabPage3";
-      this.tabPage3.Size = new System.Drawing.Size(483, 364);
+      this.tabPage3.Size = new System.Drawing.Size(483, 313);
       this.tabPage3.TabIndex = 2;
       this.tabPage3.Text = "Memory Usage";
       this.tabPage3.UseVisualStyleBackColor = true;
-      // 
-      // label10
-      // 
-      this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.label10.Location = new System.Drawing.Point(16, 10);
-      this.label10.Name = "label10";
-      this.label10.Size = new System.Drawing.Size(446, 44);
-      this.label10.TabIndex = 21;
-      this.label10.Text = resources.GetString("label10.Text");
-      // 
-      // label11
-      // 
-      this.label11.AutoSize = true;
-      this.label11.Location = new System.Drawing.Point(16, 73);
-      this.label11.Name = "label11";
-      this.label11.Size = new System.Drawing.Size(170, 13);
-      this.label11.TabIndex = 22;
-      this.label11.Text = "Max count of sensors data records";
-      // 
-      // label12
-      // 
-      this.label12.AutoSize = true;
-      this.label12.Location = new System.Drawing.Point(16, 113);
-      this.label12.Name = "label12";
-      this.label12.Size = new System.Drawing.Size(184, 13);
-      this.label12.TabIndex = 23;
-      this.label12.Text = "Max count of graph series data points";
-      // 
-      // MaxDataRecordsCount
-      // 
-      this.MaxDataRecordsCount.Location = new System.Drawing.Point(208, 70);
-      this.MaxDataRecordsCount.Name = "MaxDataRecordsCount";
-      this.MaxDataRecordsCount.Size = new System.Drawing.Size(100, 20);
-      this.MaxDataRecordsCount.TabIndex = 24;
-      this.MaxDataRecordsCount.Text = "0";
-      this.MaxDataRecordsCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-      this.MaxDataRecordsCount.Leave += new System.EventHandler(this.MaxDataRecordsCount_Leave);
-      // 
-      // MaxDataPointsCount
-      // 
-      this.MaxDataPointsCount.Location = new System.Drawing.Point(206, 110);
-      this.MaxDataPointsCount.Name = "MaxDataPointsCount";
-      this.MaxDataPointsCount.Size = new System.Drawing.Size(100, 20);
-      this.MaxDataPointsCount.TabIndex = 25;
-      this.MaxDataPointsCount.Text = "0";
-      this.MaxDataPointsCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-      this.MaxDataPointsCount.Leave += new System.EventHandler(this.MaxDataPointsCount_Leave);
-      // 
-      // label13
-      // 
-      this.label13.AutoSize = true;
-      this.label13.Location = new System.Drawing.Point(325, 73);
-      this.label13.Name = "label13";
-      this.label13.Size = new System.Drawing.Size(69, 13);
-      this.label13.TabIndex = 26;
-      this.label13.Text = " (0=unlimited)";
-      // 
-      // label14
-      // 
-      this.label14.AutoSize = true;
-      this.label14.Location = new System.Drawing.Point(325, 113);
-      this.label14.Name = "label14";
-      this.label14.Size = new System.Drawing.Size(69, 13);
-      this.label14.TabIndex = 27;
-      this.label14.Text = " (0=unlimited)";
-      // 
-      // memoryLabel
-      // 
-      this.memoryLabel.AutoSize = true;
-      this.memoryLabel.Location = new System.Drawing.Point(16, 151);
-      this.memoryLabel.Name = "memoryLabel";
-      this.memoryLabel.Size = new System.Drawing.Size(93, 13);
-      this.memoryLabel.TabIndex = 28;
-      this.memoryLabel.Text = "Available Memory:";
-      // 
-      // MemoryTimer
-      // 
-      this.MemoryTimer.Interval = 1000;
-      this.MemoryTimer.Tick += new System.EventHandler(this.MemoryTimer_Tick);
       // 
       // label15
       // 
@@ -652,11 +573,91 @@
       this.label15.Text = "After a  limit increase, you\'ll have to restart the application to get your old d" +
     "ata back.";
       // 
+      // memoryLabel
+      // 
+      this.memoryLabel.AutoSize = true;
+      this.memoryLabel.Location = new System.Drawing.Point(16, 151);
+      this.memoryLabel.Name = "memoryLabel";
+      this.memoryLabel.Size = new System.Drawing.Size(93, 13);
+      this.memoryLabel.TabIndex = 28;
+      this.memoryLabel.Text = "Available Memory:";
+      // 
+      // label14
+      // 
+      this.label14.AutoSize = true;
+      this.label14.Location = new System.Drawing.Point(325, 113);
+      this.label14.Name = "label14";
+      this.label14.Size = new System.Drawing.Size(69, 13);
+      this.label14.TabIndex = 27;
+      this.label14.Text = " (0=unlimited)";
+      // 
+      // label13
+      // 
+      this.label13.AutoSize = true;
+      this.label13.Location = new System.Drawing.Point(325, 73);
+      this.label13.Name = "label13";
+      this.label13.Size = new System.Drawing.Size(69, 13);
+      this.label13.TabIndex = 26;
+      this.label13.Text = " (0=unlimited)";
+      // 
+      // MaxDataPointsCount
+      // 
+      this.MaxDataPointsCount.Location = new System.Drawing.Point(206, 110);
+      this.MaxDataPointsCount.Name = "MaxDataPointsCount";
+      this.MaxDataPointsCount.Size = new System.Drawing.Size(100, 20);
+      this.MaxDataPointsCount.TabIndex = 25;
+      this.MaxDataPointsCount.Text = "0";
+      this.MaxDataPointsCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      this.MaxDataPointsCount.Leave += new System.EventHandler(this.MaxDataPointsCount_Leave);
+      // 
+      // MaxDataRecordsCount
+      // 
+      this.MaxDataRecordsCount.Location = new System.Drawing.Point(208, 70);
+      this.MaxDataRecordsCount.Name = "MaxDataRecordsCount";
+      this.MaxDataRecordsCount.Size = new System.Drawing.Size(100, 20);
+      this.MaxDataRecordsCount.TabIndex = 24;
+      this.MaxDataRecordsCount.Text = "0";
+      this.MaxDataRecordsCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      this.MaxDataRecordsCount.Leave += new System.EventHandler(this.MaxDataRecordsCount_Leave);
+      // 
+      // label12
+      // 
+      this.label12.AutoSize = true;
+      this.label12.Location = new System.Drawing.Point(16, 113);
+      this.label12.Name = "label12";
+      this.label12.Size = new System.Drawing.Size(184, 13);
+      this.label12.TabIndex = 23;
+      this.label12.Text = "Max count of graph series data points";
+      // 
+      // label11
+      // 
+      this.label11.AutoSize = true;
+      this.label11.Location = new System.Drawing.Point(16, 73);
+      this.label11.Name = "label11";
+      this.label11.Size = new System.Drawing.Size(170, 13);
+      this.label11.TabIndex = 22;
+      this.label11.Text = "Max count of sensors data records";
+      // 
+      // label10
+      // 
+      this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.label10.Location = new System.Drawing.Point(16, 10);
+      this.label10.Name = "label10";
+      this.label10.Size = new System.Drawing.Size(446, 44);
+      this.label10.TabIndex = 21;
+      this.label10.Text = resources.GetString("label10.Text");
+      // 
+      // MemoryTimer
+      // 
+      this.MemoryTimer.Interval = 1000;
+      this.MemoryTimer.Tick += new System.EventHandler(this.MemoryTimer_Tick);
+      // 
       // ConfigForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(514, 411);
+      this.ClientSize = new System.Drawing.Size(514, 363);
       this.Controls.Add(this.tabControl1);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;

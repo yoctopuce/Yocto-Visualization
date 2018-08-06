@@ -1097,13 +1097,18 @@ namespace YColors
     {
       IWindowsFormsEditorService svc = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
 
-      // for some reason, Mono doesn't care if one allocate a
-	  // control each time it's needed, it will always use the
-	  // first one allocated.
-  	  if ((control == null) || (!YoctoVisualisation.constants.MonoRunning))
-		control = new ColorEditor ((YColor)value);
-	  else
-		control.Init ((YColor)value);
+      // mode empirical ON
+      if ((control == null)   // no control yet
+          || (!YoctoVisualisation.constants.MonoRunning)   // windows 
+          || ((YoctoVisualisation.constants.MonoRunning) && (control != null) && (control.Parent == null))) // non mono bogus version  
+      
+       control = new ColorEditor ((YColor)value);
+	    else
+        // for some reason, Mono version don't care if one allocate a
+        // control each time it's needed, it will always use the
+        // first one allocated.
+        control.Init ((YColor)value);
+      // mode empirical OFF
 
       svc.DropDownControl(control);
       if (control.ok) return control.value;

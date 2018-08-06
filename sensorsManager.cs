@@ -1035,7 +1035,7 @@ namespace YoctoVisualisation
   public static class sensorsManager
   {
     private static int counter = 0;
-    private static int _MaxDataRecordsPerSensor = 0;
+    
     
     public static List<CustomYSensor> sensorList;  // actual list of sensors
     public static CustomYSensor NullSensor;

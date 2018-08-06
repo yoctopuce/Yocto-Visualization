@@ -1157,6 +1157,41 @@ namespace YoctoVisualisation
       set { _Form_Text = value; }
     }
 
+    public enum BordersMode
+    {
+      [Description("Normal")]
+      Sizable = System.Windows.Forms.FormBorderStyle.Sizable,
+      [Description("Minimal")]
+      SizableToolWindow = System.Windows.Forms.FormBorderStyle.SizableToolWindow,
+      [Description("No border")]
+      None = System.Windows.Forms.FormBorderStyle.None,
+     
+    };
+   
+
+    public static FormBorderStyle BordersModeFromString(string value)
+    { value = value.ToUpper();
+      FormBorderStyle res = FormBorderStyle.Sizable;
+      foreach (BordersMode m in Enum.GetValues(typeof(BordersMode)))
+      {  if (m.ToString().ToUpper() == value) res = (FormBorderStyle)(int)m;
+
+      }
+      return res;
+
+    }
+
+
+    private BordersMode _Form_FormBorderStyle = BordersMode.Sizable;
+    [DisplayName("Borders"),
+     CategoryAttribute("Window"),
+      TypeConverter(typeof(SmartEnumConverter)),
+     DescriptionAttribute("Window borders style. If you use \"none\" on a maximized window, you will get a kiosk mode.")]
+    public BordersMode Form_FormBorderStyle
+    {
+      get { return _Form_FormBorderStyle; }
+      set { _Form_FormBorderStyle = value; }
+    }
+
     private YColor _Form_BackColor = YColor.FromArgb(0xff, 0xf0, 0xf0, 0xf0);
     [DisplayName("Background color"),
      CategoryAttribute("Window"),

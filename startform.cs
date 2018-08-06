@@ -66,7 +66,7 @@ namespace YoctoVisualisation
     {
 			
       InitializeComponent();
-
+      MaximizeBox = false;
       LogManager.Log("Application start, Welcome to Yocto-Visualization.");
 
      

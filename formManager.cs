@@ -202,6 +202,7 @@ namespace YoctoVisualisation
       switch (info.PropertyType.ToString())
       {
         case "System.Drawing.Color": info.SetValue(target, YColor.fromString(value).toColor(),null); break;
+        case "System.Windows.Forms.FormBorderStyle": /* info.SetValue(target, GenericProperties.BordersModeFromString(value),null);*/ break;
         default: info.SetValue(target, value,null); break;
       }
     }

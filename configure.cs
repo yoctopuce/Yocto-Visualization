@@ -713,7 +713,7 @@ namespace YoctoVisualisation
     {
       if (constants.MonoRunning)
       {
-        memoryLabel.Text = "Available memory : (not available on linux).";
+        memoryLabel.Visible = false;
         MemoryTimer.Enabled = false;
       } 
       else memoryLabel.Text = "Available memory : " + performance.NextValue().ToString() +"MB";
