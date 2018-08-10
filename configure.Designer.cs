@@ -31,24 +31,25 @@
       this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConfigForm));
       this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-      this.Menuitemremove = new System.Windows.Forms.ToolStripMenuItem();
       this.openThisHubConfigurationPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.editThisHubConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.Menuitemremove = new System.Windows.Forms.ToolStripMenuItem();
       this.statusIcons = new System.Windows.Forms.ImageList(this.components);
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
+      this.deleteButton = new System.Windows.Forms.Button();
+      this.editButton = new System.Windows.Forms.Button();
       this.AddBtn = new System.Windows.Forms.Button();
       this.hubWaiting = new System.Windows.Forms.PictureBox();
       this.hubOk = new System.Windows.Forms.PictureBox();
       this.hubFailed = new System.Windows.Forms.PictureBox();
       this.usbFailed = new System.Windows.Forms.PictureBox();
       this.usbOk = new System.Windows.Forms.PictureBox();
-      this.label3 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
       this.listView1 = new System.Windows.Forms.ListView();
       this.Adresse = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.Status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.newEntry = new System.Windows.Forms.TextBox();
       this.UseVirtualHub = new System.Windows.Forms.CheckBox();
       this.useUSB = new System.Windows.Forms.CheckBox();
       this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -73,6 +74,10 @@
       this.label5 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.tabPage3 = new System.Windows.Forms.TabPage();
+      this.label17 = new System.Windows.Forms.Label();
+      this.label3 = new System.Windows.Forms.Label();
+      this.maxPointsPerDatalogger = new System.Windows.Forms.TextBox();
+      this.label16 = new System.Windows.Forms.Label();
       this.label15 = new System.Windows.Forms.Label();
       this.memoryLabel = new System.Windows.Forms.Label();
       this.label14 = new System.Windows.Forms.Label();
@@ -99,18 +104,12 @@
       // contextMenuStrip1
       // 
       this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Menuitemremove,
-            this.openThisHubConfigurationPageToolStripMenuItem});
+            this.openThisHubConfigurationPageToolStripMenuItem,
+            this.editThisHubConnectionToolStripMenuItem,
+            this.Menuitemremove});
       this.contextMenuStrip1.Name = "contextMenuStrip1";
-      this.contextMenuStrip1.Size = new System.Drawing.Size(254, 48);
+      this.contextMenuStrip1.Size = new System.Drawing.Size(254, 92);
       this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
-      // 
-      // Menuitemremove
-      // 
-      this.Menuitemremove.Name = "Menuitemremove";
-      this.Menuitemremove.Size = new System.Drawing.Size(253, 22);
-      this.Menuitemremove.Text = "Remove this hub";
-      this.Menuitemremove.Click += new System.EventHandler(this.Menuitemremove_Click);
       // 
       // openThisHubConfigurationPageToolStripMenuItem
       // 
@@ -118,6 +117,20 @@
       this.openThisHubConfigurationPageToolStripMenuItem.Size = new System.Drawing.Size(253, 22);
       this.openThisHubConfigurationPageToolStripMenuItem.Text = "Open this hub configuration page";
       this.openThisHubConfigurationPageToolStripMenuItem.Click += new System.EventHandler(this.openThisHubConfigurationPageToolStripMenuItem_Click);
+      // 
+      // editThisHubConnectionToolStripMenuItem
+      // 
+      this.editThisHubConnectionToolStripMenuItem.Name = "editThisHubConnectionToolStripMenuItem";
+      this.editThisHubConnectionToolStripMenuItem.Size = new System.Drawing.Size(253, 22);
+      this.editThisHubConnectionToolStripMenuItem.Text = "Edit This hub connection";
+      this.editThisHubConnectionToolStripMenuItem.Click += new System.EventHandler(this.editThisHubConnectionToolStripMenuItem_Click);
+      // 
+      // Menuitemremove
+      // 
+      this.Menuitemremove.Name = "Menuitemremove";
+      this.Menuitemremove.Size = new System.Drawing.Size(253, 22);
+      this.Menuitemremove.Text = "Remove this hub connection";
+      this.Menuitemremove.Click += new System.EventHandler(this.Menuitemremove_Click);
       // 
       // statusIcons
       // 
@@ -144,17 +157,17 @@
       // 
       // tabPage1
       // 
+      this.tabPage1.Controls.Add(this.deleteButton);
+      this.tabPage1.Controls.Add(this.editButton);
       this.tabPage1.Controls.Add(this.AddBtn);
       this.tabPage1.Controls.Add(this.hubWaiting);
       this.tabPage1.Controls.Add(this.hubOk);
       this.tabPage1.Controls.Add(this.hubFailed);
       this.tabPage1.Controls.Add(this.usbFailed);
       this.tabPage1.Controls.Add(this.usbOk);
-      this.tabPage1.Controls.Add(this.label3);
       this.tabPage1.Controls.Add(this.label2);
       this.tabPage1.Controls.Add(this.label1);
       this.tabPage1.Controls.Add(this.listView1);
-      this.tabPage1.Controls.Add(this.newEntry);
       this.tabPage1.Controls.Add(this.UseVirtualHub);
       this.tabPage1.Controls.Add(this.useUSB);
       this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -165,14 +178,36 @@
       this.tabPage1.Text = "USB / Network";
       this.tabPage1.UseVisualStyleBackColor = true;
       // 
+      // deleteButton
+      // 
+      this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+      this.deleteButton.Location = new System.Drawing.Point(382, 276);
+      this.deleteButton.Name = "deleteButton";
+      this.deleteButton.Size = new System.Drawing.Size(75, 20);
+      this.deleteButton.TabIndex = 29;
+      this.deleteButton.Text = "Delete";
+      this.deleteButton.UseVisualStyleBackColor = true;
+      this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
+      // 
+      // editButton
+      // 
+      this.editButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+      this.editButton.Location = new System.Drawing.Point(301, 276);
+      this.editButton.Name = "editButton";
+      this.editButton.Size = new System.Drawing.Size(75, 20);
+      this.editButton.TabIndex = 28;
+      this.editButton.Text = "Edit";
+      this.editButton.UseVisualStyleBackColor = true;
+      this.editButton.Click += new System.EventHandler(this.editButton_Click);
+      // 
       // AddBtn
       // 
       this.AddBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.AddBtn.Location = new System.Drawing.Point(382, 276);
+      this.AddBtn.Location = new System.Drawing.Point(220, 276);
       this.AddBtn.Name = "AddBtn";
-      this.AddBtn.Size = new System.Drawing.Size(75, 23);
+      this.AddBtn.Size = new System.Drawing.Size(75, 20);
       this.AddBtn.TabIndex = 27;
-      this.AddBtn.Text = "Add";
+      this.AddBtn.Text = "New";
       this.AddBtn.UseVisualStyleBackColor = true;
       this.AddBtn.Click += new System.EventHandler(this.Add_Click);
       // 
@@ -226,26 +261,15 @@
       this.usbOk.TabStop = false;
       this.usbOk.Visible = false;
       // 
-      // label3
-      // 
-      this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(30, 281);
-      this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(144, 13);
-      this.label3.TabIndex = 21;
-      this.label3.Text = "IP address or Network name:";
-      // 
       // label2
       // 
       this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.label2.Location = new System.Drawing.Point(27, 89);
+      this.label2.Location = new System.Drawing.Point(27, 93);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(430, 29);
+      this.label2.Size = new System.Drawing.Size(430, 15);
       this.label2.TabIndex = 20;
-      this.label2.Text = "You  can use devices from remote VirtualHub and YoctoHub as well. Just enter the " +
-    "address and click \"Add\". Do a right click to remove hubs from the list.";
+      this.label2.Text = "You  can use devices from remote VirtualHub and YoctoHub as well. ";
       // 
       // label1
       // 
@@ -268,32 +292,24 @@
       this.listView1.FullRowSelect = true;
       this.listView1.GridLines = true;
       this.listView1.LargeImageList = this.statusIcons;
-      this.listView1.Location = new System.Drawing.Point(30, 133);
+      this.listView1.Location = new System.Drawing.Point(33, 111);
       this.listView1.Name = "listView1";
-      this.listView1.Size = new System.Drawing.Size(427, 133);
+      this.listView1.Size = new System.Drawing.Size(427, 157);
       this.listView1.SmallImageList = this.statusIcons;
       this.listView1.TabIndex = 18;
       this.listView1.UseCompatibleStateImageBehavior = false;
       this.listView1.View = System.Windows.Forms.View.Details;
+      this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
       // 
       // Adresse
       // 
       this.Adresse.Text = "Address";
-      this.Adresse.Width = 200;
+      this.Adresse.Width = 252;
       // 
       // Status
       // 
       this.Status.Text = "Status";
-      this.Status.Width = 200;
-      // 
-      // newEntry
-      // 
-      this.newEntry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.newEntry.Location = new System.Drawing.Point(175, 278);
-      this.newEntry.Name = "newEntry";
-      this.newEntry.Size = new System.Drawing.Size(196, 20);
-      this.newEntry.TabIndex = 17;
+      this.Status.Width = 163;
       // 
       // UseVirtualHub
       // 
@@ -546,6 +562,10 @@
       // 
       // tabPage3
       // 
+      this.tabPage3.Controls.Add(this.label17);
+      this.tabPage3.Controls.Add(this.label3);
+      this.tabPage3.Controls.Add(this.maxPointsPerDatalogger);
+      this.tabPage3.Controls.Add(this.label16);
       this.tabPage3.Controls.Add(this.label15);
       this.tabPage3.Controls.Add(this.memoryLabel);
       this.tabPage3.Controls.Add(this.label14);
@@ -559,16 +579,56 @@
       this.tabPage3.Name = "tabPage3";
       this.tabPage3.Size = new System.Drawing.Size(483, 313);
       this.tabPage3.TabIndex = 2;
-      this.tabPage3.Text = "Memory Usage";
+      this.tabPage3.Text = "Ressources";
       this.tabPage3.UseVisualStyleBackColor = true;
+      // 
+      // label17
+      // 
+      this.label17.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.label17.Location = new System.Drawing.Point(16, 138);
+      this.label17.Name = "label17";
+      this.label17.Size = new System.Drawing.Size(446, 45);
+      this.label17.TabIndex = 33;
+      this.label17.Text = resources.GetString("label17.Text");
+      // 
+      // label3
+      // 
+      this.label3.Location = new System.Drawing.Point(325, 193);
+      this.label3.Name = "label3";
+      this.label3.Size = new System.Drawing.Size(143, 41);
+      this.label3.TabIndex = 32;
+      this.label3.Text = " (0=unlimited,\r\n  -1 = no datalogger access)";
+      this.label3.Click += new System.EventHandler(this.label3_Click);
+      // 
+      // maxPointsPerDatalogger
+      // 
+      this.maxPointsPerDatalogger.Location = new System.Drawing.Point(245, 192);
+      this.maxPointsPerDatalogger.Name = "maxPointsPerDatalogger";
+      this.maxPointsPerDatalogger.Size = new System.Drawing.Size(70, 20);
+      this.maxPointsPerDatalogger.TabIndex = 31;
+      this.maxPointsPerDatalogger.Text = "0";
+      this.maxPointsPerDatalogger.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      this.maxPointsPerDatalogger.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+      this.maxPointsPerDatalogger.Leave += new System.EventHandler(this.maxPointsPerDatalogger_Leave);
+      // 
+      // label16
+      // 
+      this.label16.AutoSize = true;
+      this.label16.Location = new System.Drawing.Point(16, 193);
+      this.label16.Name = "label16";
+      this.label16.Size = new System.Drawing.Size(228, 13);
+      this.label16.TabIndex = 30;
+      this.label16.Text = "Max data points/series  loaded from datalogger";
+      this.label16.Click += new System.EventHandler(this.label16_Click);
       // 
       // label15
       // 
       this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.label15.Location = new System.Drawing.Point(16, 189);
+      this.label15.Location = new System.Drawing.Point(16, 243);
       this.label15.Name = "label15";
-      this.label15.Size = new System.Drawing.Size(446, 44);
+      this.label15.Size = new System.Drawing.Size(446, 22);
       this.label15.TabIndex = 29;
       this.label15.Text = "After a  limit increase, you\'ll have to restart the application to get your old d" +
     "ata back.";
@@ -576,7 +636,7 @@
       // memoryLabel
       // 
       this.memoryLabel.AutoSize = true;
-      this.memoryLabel.Location = new System.Drawing.Point(16, 151);
+      this.memoryLabel.Location = new System.Drawing.Point(16, 221);
       this.memoryLabel.Name = "memoryLabel";
       this.memoryLabel.Size = new System.Drawing.Size(93, 13);
       this.memoryLabel.TabIndex = 28;
@@ -585,7 +645,7 @@
       // label14
       // 
       this.label14.AutoSize = true;
-      this.label14.Location = new System.Drawing.Point(325, 113);
+      this.label14.Location = new System.Drawing.Point(325, 99);
       this.label14.Name = "label14";
       this.label14.Size = new System.Drawing.Size(69, 13);
       this.label14.TabIndex = 27;
@@ -602,19 +662,20 @@
       // 
       // MaxDataPointsCount
       // 
-      this.MaxDataPointsCount.Location = new System.Drawing.Point(206, 110);
+      this.MaxDataPointsCount.Location = new System.Drawing.Point(245, 96);
       this.MaxDataPointsCount.Name = "MaxDataPointsCount";
-      this.MaxDataPointsCount.Size = new System.Drawing.Size(100, 20);
+      this.MaxDataPointsCount.Size = new System.Drawing.Size(70, 20);
       this.MaxDataPointsCount.TabIndex = 25;
       this.MaxDataPointsCount.Text = "0";
       this.MaxDataPointsCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      this.MaxDataPointsCount.TextChanged += new System.EventHandler(this.MaxDataPointsCount_TextChanged);
       this.MaxDataPointsCount.Leave += new System.EventHandler(this.MaxDataPointsCount_Leave);
       // 
       // MaxDataRecordsCount
       // 
-      this.MaxDataRecordsCount.Location = new System.Drawing.Point(208, 70);
+      this.MaxDataRecordsCount.Location = new System.Drawing.Point(245, 70);
       this.MaxDataRecordsCount.Name = "MaxDataRecordsCount";
-      this.MaxDataRecordsCount.Size = new System.Drawing.Size(100, 20);
+      this.MaxDataRecordsCount.Size = new System.Drawing.Size(72, 20);
       this.MaxDataRecordsCount.TabIndex = 24;
       this.MaxDataRecordsCount.Text = "0";
       this.MaxDataRecordsCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -623,7 +684,7 @@
       // label12
       // 
       this.label12.AutoSize = true;
-      this.label12.Location = new System.Drawing.Point(16, 113);
+      this.label12.Location = new System.Drawing.Point(16, 99);
       this.label12.Name = "label12";
       this.label12.Size = new System.Drawing.Size(184, 13);
       this.label12.TabIndex = 23;
@@ -697,13 +758,11 @@
     private System.Windows.Forms.PictureBox hubFailed;
     private System.Windows.Forms.PictureBox usbFailed;
     private System.Windows.Forms.PictureBox usbOk;
-    private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.ListView listView1;
     private System.Windows.Forms.ColumnHeader Adresse;
     private System.Windows.Forms.ColumnHeader Status;
-    private System.Windows.Forms.TextBox newEntry;
     private System.Windows.Forms.CheckBox UseVirtualHub;
     private System.Windows.Forms.CheckBox useUSB;
     private System.Windows.Forms.TabPage tabPage2;
@@ -739,5 +798,12 @@
     private System.Windows.Forms.Label label13;
     private System.Windows.Forms.Timer MemoryTimer;
     private System.Windows.Forms.Label label15;
+    private System.Windows.Forms.Button deleteButton;
+    private System.Windows.Forms.Button editButton;
+    private System.Windows.Forms.ToolStripMenuItem editThisHubConnectionToolStripMenuItem;
+    private System.Windows.Forms.Label label3;
+    private System.Windows.Forms.TextBox maxPointsPerDatalogger;
+    private System.Windows.Forms.Label label16;
+    private System.Windows.Forms.Label label17;
   }
 }

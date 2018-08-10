@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 31387 2018-07-31 12:28:32Z seb $
+ * $Id: yocto_api.cs 31493 2018-08-10 08:43:29Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -1141,6 +1141,38 @@ internal static class SafeNativeMethods
              }
         }
     }
+    [DllImport("yapi", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidity32(int sValidity);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidity64(int sValidity);
+    internal static void _yapiSetNetDevListValidity(int sValidity)
+    {
+        if (IntPtr.Size == 4) {
+             _yapiSetNetDevListValidity32(sValidity);
+        } else {
+             try {
+                 _yapiSetNetDevListValidity64(sValidity);
+             } catch (System.DllNotFoundException) {
+                 _yapiSetNetDevListValidity32(sValidity);
+             }
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidity32();
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidity64();
+    internal static int _yapiGetNetDevListValidity()
+    {
+        if (IntPtr.Size == 4) {
+             return _yapiGetNetDevListValidity32();
+        } else {
+             try {
+                 return _yapiGetNetDevListValidity64();
+             } catch (System.DllNotFoundException) {
+                 return _yapiGetNetDevListValidity32();
+             }
+        }
+    }
 //--- (end of generated code: YFunction dlldef)
 }
 
@@ -1186,7 +1218,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "31406";
+    public const string YOCTO_API_BUILD_NO = "31494";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -3907,15 +3939,11 @@ public class YAPI
     internal static YRETCODE yapiUpdateDeviceList(uint force, ref string errmsg)
     {
         YRETCODE res = YAPI.SUCCESS;
-        if (force != 0 || YAPI._yapiContext._devListExpires < YAPI.GetTickCount()) {
-            StringBuilder buffer = new StringBuilder(YOCTO_ERRMSG_LEN);
-            buffer.Length = 0;
-             res = SafeNativeMethods._yapiUpdateDeviceList(force, buffer);
-            if (YAPI.YISERR(res)) {
-                errmsg = buffer.ToString();
-            }
-            YAPI._yapiContext._devListExpires = YAPI.GetTickCount() + YAPI._yapiContext.GetDeviceListValidity();
-
+        StringBuilder buffer = new StringBuilder(YOCTO_ERRMSG_LEN);
+        buffer.Length = 0;
+        res = SafeNativeMethods._yapiUpdateDeviceList(force, buffer);
+        if (YAPI.YISERR(res)) {
+            errmsg = buffer.ToString();
         }
 
         return res;
@@ -3973,54 +4001,76 @@ public class YAPI
     //--- (generated code: YAPIContext yapiwrapper)
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Change the time between each forced enumeration of the YoctoHub used.
      * <para>
+     *   By default, the library performs a complete enumeration every 10 seconds.
+     *   To reduce network traffic it is possible to increase this delay.
+     *   This is particularly useful when a YoctoHub is connected to a GSM network
+     *   where the traffic is charged. This setting does not affect modules connected by USB,
+     *   nor the operation of arrival/removal callbacks.
+     *   Note: This function must be called after <c>yInitAPI</c>.
      * </para>
      * </summary>
-     * <param name="deviceListValidityMs">
-     *   number of seconds before rebooting
+     * <param name="deviceListValidity">
+     *   number of seconds between each enumeration.
      * </param>
      */
-    public static void SetDeviceListValidity(ulong deviceListValidityMs)
+    public static void SetDeviceListValidity(int deviceListValidity)
     {
-        _yapiContext.SetDeviceListValidity(deviceListValidityMs);
+        _yapiContext.SetDeviceListValidity(deviceListValidity);
     }
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Returns the time between each forced enumeration of the YoctoHub used.
      * <para>
+     *   Note: This function must be called after <c>yInitAPI</c>.
      * </para>
      * </summary>
      * <returns>
-     *   <c>YAPI_SUCCESS</c> when the call succeeds.
+     *   the number of seconds between each enumeration.
      * </returns>
      */
-    public static ulong GetDeviceListValidity()
+    public static int GetDeviceListValidity()
     {
         return _yapiContext.GetDeviceListValidity();
     }
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Change the validity period of the data loaded by the library.
+     * <para>
+     *   By default, when accessing a module, all the attributes of the
+     *   module functions are automatically kept in cache for the standard
+     *   duration (5 ms). This method can be used to change this standard duration,
+     *   for example in order to reduce network or USB traffic. This parameter
+     *   does not affect value change callbacks
+     *   Note: This function must be called after <c>yInitAPI</c>.
+     * </para>
      * <para>
      * </para>
      * </summary>
-     * <param name="cacheValidity">
-     *   number of seconds before rebooting
+     * <param name="cacheValidityMs">
+     *   an integer corresponding to the validity attributed to the
+     *   loaded function parameters, in milliseconds
      * </param>
      */
-    public static void SetCacheValidity(ulong cacheValidity)
+    public static void SetCacheValidity(ulong cacheValidityMs)
     {
-        _yapiContext.SetCacheValidity(cacheValidity);
+        _yapiContext.SetCacheValidity(cacheValidityMs);
     }
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Returns the validity period of the data loaded by the library.
+     * <para>
+     *   This method returns the cache validity of all attributes
+     *   module functions.
+     *   Note: This function must be called after <c>yInitAPI </c>.
+     * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   <c>YAPI_SUCCESS</c> when the call succeeds.
+     *   an integer corresponding to the validity attributed to the
+     *   loaded function parameters, in milliseconds
      * </returns>
      */
     public static ulong GetCacheValidity()
@@ -4044,11 +4094,9 @@ public class yAPI : YAPI
 public class YAPIContext
 {
 //--- (end of generated code: YAPIContext class start)
-    internal ulong _devListExpires = 0;
 
     //--- (generated code: YAPIContext definitions)
 
-    protected ulong _deviceListValidityMs = 500;
     protected ulong _cacheValidity = 5;
     //--- (end of generated code: YAPIContext definitions)
 
@@ -4062,57 +4110,81 @@ public class YAPIContext
 
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Change the time between each forced enumeration of the YoctoHub used.
      * <para>
+     *   By default, the library performs a complete enumeration every 10 seconds.
+     *   To reduce network traffic it is possible to increase this delay.
+     *   This is particularly useful when a YoctoHub is connected to a GSM network
+     *   where the traffic is charged. This setting does not affect modules connected by USB,
+     *   nor the operation of arrival/removal callbacks.
+     *   Note: This function must be called after <c>yInitAPI</c>.
      * </para>
      * </summary>
-     * <param name="deviceListValidityMs">
-     *   number of seconds before rebooting
+     * <param name="deviceListValidity">
+     *   number of seconds between each enumeration.
      * </param>
      */
-    public virtual void SetDeviceListValidity(ulong deviceListValidityMs)
+    public virtual void SetDeviceListValidity(int deviceListValidity)
     {
-        this._deviceListValidityMs = deviceListValidityMs;
+        SafeNativeMethods._yapiSetNetDevListValidity(deviceListValidity);
     }
 
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Returns the time between each forced enumeration of the YoctoHub used.
      * <para>
+     *   Note: This function must be called after <c>yInitAPI</c>.
      * </para>
      * </summary>
      * <returns>
-     *   <c>YAPI_SUCCESS</c> when the call succeeds.
+     *   the number of seconds between each enumeration.
      * </returns>
      */
-    public virtual ulong GetDeviceListValidity()
+    public virtual int GetDeviceListValidity()
     {
-        return this._deviceListValidityMs;
+        int res;
+        res = SafeNativeMethods._yapiGetNetDevListValidity();
+        return res;
     }
 
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Change the validity period of the data loaded by the library.
+     * <para>
+     *   By default, when accessing a module, all the attributes of the
+     *   module functions are automatically kept in cache for the standard
+     *   duration (5 ms). This method can be used to change this standard duration,
+     *   for example in order to reduce network or USB traffic. This parameter
+     *   does not affect value change callbacks
+     *   Note: This function must be called after <c>yInitAPI</c>.
+     * </para>
      * <para>
      * </para>
      * </summary>
-     * <param name="cacheValidity">
-     *   number of seconds before rebooting
+     * <param name="cacheValidityMs">
+     *   an integer corresponding to the validity attributed to the
+     *   loaded function parameters, in milliseconds
      * </param>
      */
-    public virtual void SetCacheValidity(ulong cacheValidity)
+    public virtual void SetCacheValidity(ulong cacheValidityMs)
     {
-        this._cacheValidity = cacheValidity;
+        this._cacheValidity = cacheValidityMs;
     }
 
     /**
      * <summary>
-     *   Schedules a simple module reboot after the given number of seconds.
+     *   Returns the validity period of the data loaded by the library.
+     * <para>
+     *   This method returns the cache validity of all attributes
+     *   module functions.
+     *   Note: This function must be called after <c>yInitAPI </c>.
+     * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   <c>YAPI_SUCCESS</c> when the call succeeds.
+     *   an integer corresponding to the validity attributed to the
+     *   loaded function parameters, in milliseconds
      * </returns>
      */
     public virtual ulong GetCacheValidity()
@@ -5693,7 +5765,11 @@ public class YDataSet
                 url = stream._get_url();
             }
         }
-        return this.processMore(this._progress, this._parent._download(url));
+        try {
+            return this.processMore(this._progress, this._parent._download(url));
+        } catch {
+            return this.processMore(this._progress, this._parent._download(url));
+        }
     }
 
     /**

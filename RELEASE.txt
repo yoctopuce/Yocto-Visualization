@@ -1,3 +1,5 @@
-Yocto-Visualization v2.0.31406
+Yocto-Visualization v2.0.31494
 
-- Add script to build Debian package
+- Improve hub editor
+- Fixed angular Gauge zones rendering
+- Add datalogger data loading cap

@@ -63,7 +63,7 @@ namespace YDataRendering
 
     public PointF[] path { get{ return _path; } }
 
-    
+    protected override void resetCache() { resetPath(); }
 
     double _width = 10;
     public double width { get { return _width; }  set { _width = value;  _path = null; _parentRenderer.redraw();  } }
@@ -87,7 +87,8 @@ namespace YDataRendering
     protected Double _min = 0;
     public Double min { get { return _min; }
       set { _min = value;
-        if (_needleValue < _min) { _needleValue = _min; }
+        for (int i = 0; i < _zones.Count; i++) zones[i].resetPath();
+          if (_needleValue < _min) { _needleValue = _min; }
         redraw(); }
     }
 
@@ -98,6 +99,7 @@ namespace YDataRendering
       set
       {
         _max = value;
+        for (int i = 0; i < _zones.Count; i++) zones[i].resetPath();
         if (_needleValue > _max) { _needleValue = _max; }
         redraw();
       }

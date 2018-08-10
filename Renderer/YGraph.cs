@@ -442,7 +442,7 @@ namespace YDataRendering
     public void dataCleanUp()
     {  if (segments.Count <= 0) return;
       int newLimit = ((_MaxPointsPerSeries * 90) / 100);
-      while ( segments[segments.Count-1].count < (totalPointCount - newLimit))
+      while ( segments[segments.Count-1].count <= (totalPointCount - newLimit))
       {
         totalPointCount -= segments[segments.Count - 1].count;
         segments.RemoveAt(segments.Count - 1);

@@ -210,6 +210,9 @@ namespace YDataRendering
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
+    protected virtual void resetCache() { }
+
+
     public Zone(YDataRenderer parentRenderer, Object directParent)
     {
       this._directParent = directParent;
@@ -235,10 +238,10 @@ namespace YDataRendering
     public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
 
     private double _min = 0;
-    public double min { get { return _min; } set { _min = value; if (visible) _parentRenderer.redraw(); } }
+    public double min { get { return _min; } set { _min = value; resetCache(); if (visible) _parentRenderer.redraw(); } }
 
     private double _max = 0;
-    public double max { get { return _max; } set { _max = value; if (visible) _parentRenderer.redraw(); } }
+    public double max { get { return _max; } set { _max = value; resetCache(); if (visible) _parentRenderer.redraw(); } }
 
   }
 

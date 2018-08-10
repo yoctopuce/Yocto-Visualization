@@ -49,7 +49,7 @@ using System.Windows.Forms;
 using System.IO;
 using YDataRendering;
 
-namespace YoctoVisualisation
+namespace YoctoVisualisation 
 {
   class constants
   {
@@ -57,8 +57,8 @@ namespace YoctoVisualisation
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
     public static bool OpenLogWindowAtStartUp = false;
-   
-  
+
+    public  static string  loginCypherPassword = "YouShouldReallyChangeThis!";
     public static YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
     public static YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
     public static string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -67,6 +67,7 @@ namespace YoctoVisualisation
     public static int captureDPI = 70;
 
     public static int maxPointsPerGraphSerie = 0;
+    public static int maxPointsPerDataloggerSerie = 0;
     public static int maxDataRecordsPerSensor = 0;
 
 

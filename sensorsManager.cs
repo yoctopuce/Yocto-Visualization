@@ -318,10 +318,13 @@ namespace YoctoVisualisation
     bool loadDone = false;
     bool dataLoggerFeature = false;
     private readonly Mutex dataMutex = new Mutex();
+    bool cfgChgNotificationsSupported = false;
+    bool mustReloadConfig = false;
 
-    
 
-    ulong lastGetunit = 0;
+
+
+    ulong lastGetConfig = 0;
     int recordedDataLoadProgress = 0;
     YDataSet recordedData = null;
     bool loadFailed = false;
@@ -351,6 +354,21 @@ namespace YoctoVisualisation
       
     }
 
+    private static int _MaxLoggerRecords = 0;
+    public static int MaxLoggerRecords
+    {
+      get { return _MaxLoggerRecords; }
+      set { _MaxLoggerRecords = value; }
+
+
+    }
+
+    public void ConfigHasChanged()
+    {
+       cfgChgNotificationsSupported = true;
+       mustReloadConfig = true;
+
+    }
 
     public CustomYSensor(YSensor s, string name, XmlNode SensorLocalConfig)
     {
@@ -480,13 +498,13 @@ namespace YoctoVisualisation
 
 
 
-      if (_MaxDataRecords > 0)
-      { // find out where to start reading datalogger to make sure we don't read more the _MaxDataRecords records
-      
+      if (_MaxLoggerRecords > 0)
+      { // find out where to start reading datalogger to make sure we don't read more the _MaxLoggerRecords records
+
         List<YDataStream> list = recordedData.get_privateDataStreams();
         int index = list.Count - 1;
         int totalRecords = 0;
-        while ((index > 0) && (totalRecords<_MaxDataRecords))
+        while ((index > 0) && (totalRecords< _MaxLoggerRecords))
          { totalRecords += list[index].get_rowCount();
            dataLoggerStartReadTime = list[index].get_startTimeUTC();
            index--;
@@ -820,35 +838,45 @@ namespace YoctoVisualisation
       return online;
     }
 
+    public void reloadConfig()
+    {
+      if (online)
+      {
+        bool ison = sensor.isOnline();
+
+        if (ison)
+        {
+          try
+          {
+            unit         = sensor.get_unit();
+            friendlyname = sensor.get_friendlyName();
+            lastGetConfig = YAPI.GetTickCount();
+            mustReloadConfig = false;
+          }
+          catch (Exception e) { LogManager.Log("reload config error: " + e.Message); }
+        }
+        else online = false;
+      }
+
+    }
+
     public string get_unit()
     {
-    
-      if ((lastGetunit <= 0) || (YAPI.GetTickCount() - lastGetunit > 5000))
-      {
-        if (online)
-        {
-          bool ison = sensor.isOnline();
-         
-          if (ison)
-          {
-            try
-            {
-              unit = sensor.get_unit();
-              lastGetunit = YAPI.GetTickCount();
-            }
-            catch (Exception e) { LogManager.Log("Get unit Error: " + e.Message); }
-          }
-          else online = false;
-        }
-      }
-     
-
+      
+      if ((cfgChgNotificationsSupported) && (!mustReloadConfig)) return unit;
+      if ((lastGetConfig <= 0) || (YAPI.GetTickCount() - lastGetConfig > 5000)) reloadConfig();
       return unit;
 
     }
 
     public void  loadDatalogger()
     {
+      if (constants.maxPointsPerDataloggerSerie < 0)
+      {
+        LogManager.Log(hwdName + " : datalogger access is disabled");
+        return;
+      }
+
       if ((!preloadDone) && (!predloadProcess.IsBusy) && dataLoggerFeature)
       {
         LogManager.Log(hwdName + " : start datalogger preloading");
@@ -993,14 +1021,8 @@ namespace YoctoVisualisation
 
     public string get_friendlyName()
     {
-      if (online)
-      {
-        try
-        {
-          friendlyname = sensor.get_friendlyName();
-        }
-        catch { online = false; }
-      }
+      if ((cfgChgNotificationsSupported) && (!mustReloadConfig)) return friendlyname;
+      reloadConfig();
       return friendlyname;
 
     }
@@ -1068,12 +1090,24 @@ namespace YoctoVisualisation
       return SensorConfig;
     }
 
+    public static void deviceConfigChanged(YModule m)
+    {
+      LogManager.Log("Config change omn device  " + m.get_serialNumber());
+      string serialprefix = m.get_serialNumber().Substring(0, 8);
+      for (int i = 0; i < sensorList.Count; i++)
+        if (sensorList[i].get_hardwareId().Substring(0, 8) == serialprefix)
+          sensorList[i].ConfigHasChanged();
+     
+
+    }
+
     public static void deviceArrival(YModule m)
     {
       try
       {
         int count = m.functionCount();
         string serial = m.get_serialNumber();
+        int luminosity = m.get_luminosity();
         LogManager.Log("Device Arrival " + serial);
         bool recording = false;
         // first loop to find network and datalogger settings
@@ -1127,6 +1161,15 @@ namespace YoctoVisualisation
             }
           }
         }
+
+        // register config change callback then tries to trigger a configuration 
+        // change to check to the devices supports that feature 
+        // (depends on firmware version)
+
+        m.registerConfigChangeCallback(deviceConfigChanged);
+        m.triggerConfigChangeCallback();
+      
+
       }
       catch (Exception e) { LogManager.Log("Device Arrival Error: " + e.Message); }
     }
@@ -1179,6 +1222,7 @@ namespace YoctoVisualisation
       sensorList.Add(NullSensor);
       YAPI.RegisterDeviceArrivalCallback(deviceArrival);
       YAPI.RegisterDeviceRemovalCallback(deviceRemoval);
+      
 
     }
 

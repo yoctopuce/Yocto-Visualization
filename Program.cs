@@ -56,13 +56,15 @@ namespace YoctoVisualisation
       string errmsg = "";
       constants.init(args);
            
-      YAPI.RegisterLogFunction(LogManager.APIlog);
+    
       int res = yAPI.FILE_NOT_FOUND;
     
       res = YAPI.InitAPI(0, ref errmsg);
- 
+      YAPI.RegisterLogFunction(LogManager.APIlog);
+
       if (res == YAPI.SUCCESS)
       {
+        YAPI.SetDeviceListValidity(600);
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
         Application.Run(new StartForm());
