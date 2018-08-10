@@ -1,5 +1,3 @@
-Yocto-Visualization v2.0.31494
+Yocto-Visualization v2.0.31520
 
-- Improve hub editor
-- Fixed angular Gauge zones rendering
-- Add datalogger data loading cap
+- Fix crash when adding new YoctHub
