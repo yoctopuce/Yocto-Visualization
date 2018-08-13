@@ -60,10 +60,14 @@ namespace YoctoVisualisation
       }
       catch (Exception)
       {
-        textBox1.Invoke((MethodInvoker)delegate
+        try
         {
-          textBox1.AppendText(line + "\r\n");
-        });
+          textBox1.Invoke((MethodInvoker)delegate
+          {
+            textBox1.AppendText(line + "\r\n");
+          });
+        }
+        catch (Exception) { };
       }
     }
 

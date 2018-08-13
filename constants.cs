@@ -48,6 +48,7 @@ using System.Xml;
 using System.Windows.Forms;
 using System.IO;
 using YDataRendering;
+using System.Reflection;
 
 namespace YoctoVisualisation 
 {
@@ -72,9 +73,51 @@ namespace YoctoVisualisation
 
 
     private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);
-		public static bool MonoRunning {get {return  _MonoRunning;}} 
+		public static bool MonoRunning {get {return  _MonoRunning;}}
+    private static string MonoMinVersion { get { return "4.0"; }} 
+    public static string MonoVersion
+    {
+      get
+      {
+        Type type = Type.GetType("Mono.Runtime");
+        if (type != null)
+        {
+          MethodInfo displayName = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+          if (displayName != null)
+            return displayName.Invoke(null, null).ToString();
+          else
+            return "unknow";
+        }
+        return "Not in Mono";
 
-     public static  void getCaptureParametersCallback(YDataRenderer source,
+      }
+    }
+
+
+    public static bool CheckMonoVersion(out string errmsg)
+    {
+       errmsg = "";
+       if (!MonoRunning) return true;
+       string[] requirement = MonoMinVersion.Split(new[] { "." }, StringSplitOptions.None);
+       string[] value = MonoVersion.Split(new[] { " " }, StringSplitOptions.None)[0].Split(new[] { "." }, StringSplitOptions.None);
+       for (int i=0;i< Math.Min(requirement.Length, value.Length); i++)
+       {
+        if  (Int32.Parse(value[i])< Int32.Parse(requirement[i]))
+        {
+          errmsg = "Yocto-Visualization requires at least Mono " + MonoMinVersion + ", installed version is " + MonoVersion;
+          return false;
+        }
+
+       }
+
+
+       return true;
+
+
+    }
+
+
+    public static  void getCaptureParametersCallback(YDataRenderer source,
                                               out YDataRenderer.CaptureTargets pcaptureTarget,
                                               out string pcaptureFolder,
                                               out YDataRenderer.CaptureFormats pcaptureSizePolicy,

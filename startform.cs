@@ -81,6 +81,12 @@ namespace YoctoVisualisation
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
       LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits");
 
+     
+      if (constants.MonoRunning)
+      {
+        LogManager.Log("Mono version is " + constants.MonoVersion); 
+       
+      } else LogManager.Log("Running on .NET");
 
       string cfgFile = constants.configfile;
 

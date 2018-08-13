@@ -55,21 +55,36 @@ namespace YoctoVisualisation
     {
       string errmsg = "";
       constants.init(args);
-           
-    
-      int res = yAPI.FILE_NOT_FOUND;
-    
-      res = YAPI.InitAPI(0, ref errmsg);
-      YAPI.RegisterLogFunction(LogManager.APIlog);
 
-      if (res == YAPI.SUCCESS)
+      if (constants.CheckMonoVersion(out errmsg))
       {
-        YAPI.SetDeviceListValidity(600);
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(new StartForm());
+        int res = yAPI.FILE_NOT_FOUND;
+
+        res = YAPI.InitAPI(0, ref errmsg);
+        YAPI.RegisterLogFunction(LogManager.APIlog);
+
+        if (res == YAPI.SUCCESS)
+        {
+          YAPI.SetDeviceListValidity(600);
+          Application.EnableVisualStyles();
+          Application.SetCompatibleTextRenderingDefault(false);
+          try  { Application.Run(new StartForm());}
+          catch (OutOfMemoryException)
+          {
+            string msg = ("Yocto-Visualization ran out of memory");
+            Console.Write(msg);
+            MessageBox.Show(msg);
+          }
+          catch (Exception e)
+          {
+            string msg = "Yocto-Visualization raised an exception:\r\n" + e.Message + "\r\n" + e.StackTrace.ToString();
+            Console.Write(msg);
+            MessageBox.Show(msg);
+          }
+        }
+        else MessageBox.Show("Init error: " + errmsg);
       }
-      else MessageBox.Show("Init error: " + errmsg);
+      else MessageBox.Show(errmsg);
     }
   }
 }
