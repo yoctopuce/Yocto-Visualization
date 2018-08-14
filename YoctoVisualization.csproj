@@ -67,19 +67,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Renderer\YAngularGauge.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YDataRendererCommon.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YDigitalDisplay.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YGraph.cs">
-      
+
     </Compile>
     <Compile Include="Renderer\YSolidGauge.cs">
-      
+
     </Compile>
     <Compile Include="angularGaugeForm.cs">
       <SubType>Form</SubType>
@@ -206,13 +206,13 @@
     <None Include="dllmap.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="linux\libyapi-amd64.so">
+    <None Include="libyapi-amd64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="linux\libyapi-armhf.so">
+    <None Include="libyapi-armhf.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="linux\libyapi-i386.so">
+    <None Include="libyapi-i386.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="osx\libyapi.dylib">

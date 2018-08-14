@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.31559
+Yocto-Visualization v2.0.31634
 
-- fixed some random crash at start up on linux
+- test

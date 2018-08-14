@@ -1,3 +1,4 @@
+#!/bin/bash
 ## builds linux binary for local platform
 ## requires installation of
 ## mono-devel   (sudo apt-get install mono-devel)
@@ -55,14 +56,11 @@ cp Yocto-Visualization yoctovisualization/usr/bin
 chmod 755 yoctovisualization/usr/bin/Yocto-Visualization
 
 #copy linux libs
-#strip -S -o yoctovisualization/usr/lib/Yocto-Visualization/libyapi-amd64.so libyapi-amd64.so
-cp libyapi-amd64.so yoctovisualization/usr/lib/Yocto-Visualization
+cp ../libyapi-amd64.so yoctovisualization/usr/lib/Yocto-Visualization
 chmod 0644 yoctovisualization/usr/lib/Yocto-Visualization/libyapi-amd64.so
-chmod 0644 libyapi-armhf.so
-#strip -S -o yoctovisualization/usr/lib/libyapi-armhf.so libyapi-armhf.so
-cp libyapi-armhf.so yoctovisualization/usr/lib/Yocto-Visualization/libyapi-armhf.so
-#strip -S -o yoctovisualization/usr/lib/Yocto-Visualization/libyapi-i386.so libyapi-i386.so
-cp libyapi-i386.so yoctovisualization/usr/lib/Yocto-Visualization
+cp ../libyapi-armhf.so yoctovisualization/usr/lib/Yocto-Visualization/libyapi-armhf.so
+chmod 0644 yoctovisualization/usr/lib/Yocto-Visualization/libyapi-armhf.so
+cp ../libyapi-i386.so yoctovisualization/usr/lib/Yocto-Visualization
 chmod 0644 yoctovisualization/usr/lib/Yocto-Visualization/libyapi-i386.so
 
 #copy binary
