@@ -7,9 +7,9 @@ Both USB and networked sensors are supported. Sensors datalogger are supported a
 - Solid gauge
 - Angular gauge
 
-![Screenshot example](https://www.yoctopuce.com/pubarchive/2017-04/widgets_1.png)
+![Screenshot example](http://www.yoctopuce.com/pubarchive/2018-06/YoctoVisualizationV2-Renderer_1.png)
 
-You will find more information about this application on [Yoctopuce website](https://www.yoctopuce.com/EN/article/yocto-visualization-a-free-visualization-app).
+You will find more information about this application on [Yoctopuce website](https://www.yoctopuce.com/EN/article/version-2-for-the-yocto-visualization).
 If you are not much into programming and are only interested in installing Yocto-Visualization V2,  here is a page linking to the [Windows installer](https://www.yoctopuce.com/EN/tools.php) .   
 
 
