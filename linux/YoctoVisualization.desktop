@@ -18,7 +18,7 @@ Comment=A tool to graph values any Yoctopuce sensors
 Exec=/usr/bin/Yocto-Visualization
 
 # The name of the icon that will be used to display this entry
-Icon=/usr/share/pixmaps/YoctoVisualization.png
+Icon=YoctoVisualization
 
 # Describes whether this application needs to be run in a terminal or not
 Terminal=false

@@ -47,8 +47,21 @@ chmod 644 yoctovisualization/DEBIAN/*
 #copy freedesktop stuff
 cp YoctoVisualization.desktop yoctovisualization/usr/share/applications
 chmod 644 yoctovisualization/usr/share/applications/YoctoVisualization.desktop
-cp YoctoVisualization.png yoctovisualization/usr/share/pixmaps
+cp YoctoVisualization.svg yoctovisualization/usr/share/icons/hicolor/scalable/app/
+chmod 644 yoctovisualization/usr/share/icons/hicolor/scalable/app/YoctoVisualization.svg
+cp YoctoVisualization_16.png yoctovisualization/usr/share/icons/hicolor/16x16/app/YoctoVisualization.png
+chmod 644 yoctovisualization/usr/share/icons/hicolor/16x16/app/YoctoVisualization.png
+cp YoctoVisualization_32.png yoctovisualization/usr/share/icons/hicolor/32x32/app/YoctoVisualization.png
+chmod 644 yoctovisualization/usr/share/icons/hicolor/32x32/app/YoctoVisualization.png
+cp YoctoVisualization_48.png yoctovisualization/usr/share/icons/hicolor/48x48/app/YoctoVisualization.png
+chmod 644 yoctovisualization/usr/share/icons/hicolor/48x48/app/YoctoVisualization.png
+cp YoctoVisualization_128.png yoctovisualization/usr/share/icons/hicolor//128x128/app/YoctoVisualization.png
+chmod 644 yoctovisualization/usr/share/icons/hicolor//128x128/app/YoctoVisualization.png
+cp YoctoVisualization_256.png yoctovisualization/usr/share/icons/hicolor/256x256/app/YoctoVisualization.png
+chmod 644 yoctovisualization/usr/share/icons/hicolor/256x256/app/YoctoVisualization.png
+cp YoctoVisualization_48.png yoctovisualization/usr/share/pixmaps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/pixmaps/YoctoVisualization.png
+
 
 
 # copy shell script in the path
