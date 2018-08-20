@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 31625 2018-08-14 11:48:05Z seb $
+ * $Id: yocto_api.cs 31770 2018-08-20 09:54:36Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -1218,7 +1218,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "31666";
+    public const string YOCTO_API_BUILD_NO = "31772";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -4010,9 +4010,12 @@ public class YAPI
      *   nor the operation of arrival/removal callbacks.
      *   Note: This function must be called after <c>yInitAPI</c>.
      * </para>
+     * <para>
+     * </para>
      * </summary>
      * <param name="deviceListValidity">
      *   number of seconds between each enumeration.
+     * @noreturn
      * </param>
      */
     public static void SetDeviceListValidity(int deviceListValidity)
@@ -4050,7 +4053,8 @@ public class YAPI
      * </summary>
      * <param name="cacheValidityMs">
      *   an integer corresponding to the validity attributed to the
-     *   loaded function parameters, in milliseconds
+     *   loaded function parameters, in milliseconds.
+     * @noreturn
      * </param>
      */
     public static void SetCacheValidity(ulong cacheValidityMs)
@@ -4097,7 +4101,7 @@ public class YAPIContext
 
     //--- (generated code: YAPIContext definitions)
 
-    protected ulong _cacheValidity = 5;
+    protected ulong _defaultCacheValidity = 5;
     //--- (end of generated code: YAPIContext definitions)
 
     public YAPIContext()    {
@@ -4119,9 +4123,12 @@ public class YAPIContext
      *   nor the operation of arrival/removal callbacks.
      *   Note: This function must be called after <c>yInitAPI</c>.
      * </para>
+     * <para>
+     * </para>
      * </summary>
      * <param name="deviceListValidity">
      *   number of seconds between each enumeration.
+     * @noreturn
      * </param>
      */
     public virtual void SetDeviceListValidity(int deviceListValidity)
@@ -4163,12 +4170,13 @@ public class YAPIContext
      * </summary>
      * <param name="cacheValidityMs">
      *   an integer corresponding to the validity attributed to the
-     *   loaded function parameters, in milliseconds
+     *   loaded function parameters, in milliseconds.
+     * @noreturn
      * </param>
      */
     public virtual void SetCacheValidity(ulong cacheValidityMs)
     {
-        this._cacheValidity = cacheValidityMs;
+        this._defaultCacheValidity = cacheValidityMs;
     }
 
     /**
@@ -4189,7 +4197,7 @@ public class YAPIContext
      */
     public virtual ulong GetCacheValidity()
     {
-        return this._cacheValidity;
+        return this._defaultCacheValidity;
     }
 
     //--- (end of generated code: YAPIContext implementation)

@@ -87,8 +87,12 @@
       this.label12 = new System.Windows.Forms.Label();
       this.label11 = new System.Windows.Forms.Label();
       this.label10 = new System.Windows.Forms.Label();
+      this.UserInterface = new System.Windows.Forms.TabPage();
+      this.label18 = new System.Windows.Forms.Label();
+      this.VerticalDragZoom = new System.Windows.Forms.CheckBox();
       this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
       this.MemoryTimer = new System.Windows.Forms.Timer(this.components);
+      this.dbleClickBringsUpContextMenu = new System.Windows.Forms.CheckBox();
       this.contextMenuStrip1.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -99,6 +103,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.usbOk)).BeginInit();
       this.tabPage2.SuspendLayout();
       this.tabPage3.SuspendLayout();
+      this.UserInterface.SuspendLayout();
       this.SuspendLayout();
       // 
       // contextMenuStrip1
@@ -108,7 +113,7 @@
             this.editThisHubConnectionToolStripMenuItem,
             this.Menuitemremove});
       this.contextMenuStrip1.Name = "contextMenuStrip1";
-      this.contextMenuStrip1.Size = new System.Drawing.Size(254, 92);
+      this.contextMenuStrip1.Size = new System.Drawing.Size(254, 70);
       this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
       // 
       // openThisHubConfigurationPageToolStripMenuItem
@@ -148,6 +153,7 @@
       this.tabControl1.Controls.Add(this.tabPage1);
       this.tabControl1.Controls.Add(this.tabPage2);
       this.tabControl1.Controls.Add(this.tabPage3);
+      this.tabControl1.Controls.Add(this.UserInterface);
       this.tabControl1.Location = new System.Drawing.Point(12, 12);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
@@ -709,10 +715,52 @@
       this.label10.TabIndex = 21;
       this.label10.Text = resources.GetString("label10.Text");
       // 
+      // UserInterface
+      // 
+      this.UserInterface.Controls.Add(this.dbleClickBringsUpContextMenu);
+      this.UserInterface.Controls.Add(this.label18);
+      this.UserInterface.Controls.Add(this.VerticalDragZoom);
+      this.UserInterface.Location = new System.Drawing.Point(4, 22);
+      this.UserInterface.Name = "UserInterface";
+      this.UserInterface.Size = new System.Drawing.Size(483, 313);
+      this.UserInterface.TabIndex = 3;
+      this.UserInterface.Text = "User Interface";
+      this.UserInterface.UseVisualStyleBackColor = true;
+      // 
+      // label18
+      // 
+      this.label18.Location = new System.Drawing.Point(13, 12);
+      this.label18.Name = "label18";
+      this.label18.Size = new System.Drawing.Size(467, 36);
+      this.label18.TabIndex = 1;
+      this.label18.Text = "You can alter user interface behavior according to your hardware capabilities";
+      // 
+      // VerticalDragZoom
+      // 
+      this.VerticalDragZoom.AutoSize = true;
+      this.VerticalDragZoom.Location = new System.Drawing.Point(16, 61);
+      this.VerticalDragZoom.Name = "VerticalDragZoom";
+      this.VerticalDragZoom.Size = new System.Drawing.Size(231, 17);
+      this.VerticalDragZoom.TabIndex = 0;
+      this.VerticalDragZoom.Text = "Graphs zoom can be driven by vertical drag";
+      this.VerticalDragZoom.UseVisualStyleBackColor = true;
+      this.VerticalDragZoom.CheckedChanged += new System.EventHandler(this.ZoomVerticalDragZoom_CheckedChanged);
+      // 
       // MemoryTimer
       // 
       this.MemoryTimer.Interval = 1000;
       this.MemoryTimer.Tick += new System.EventHandler(this.MemoryTimer_Tick);
+      // 
+      // dbleClickBringsUpContextMenu
+      // 
+      this.dbleClickBringsUpContextMenu.AutoSize = true;
+      this.dbleClickBringsUpContextMenu.Location = new System.Drawing.Point(16, 85);
+      this.dbleClickBringsUpContextMenu.Name = "dbleClickBringsUpContextMenu";
+      this.dbleClickBringsUpContextMenu.Size = new System.Drawing.Size(252, 17);
+      this.dbleClickBringsUpContextMenu.TabIndex = 2;
+      this.dbleClickBringsUpContextMenu.Text = "Double click on widgets brings up context menu";
+      this.dbleClickBringsUpContextMenu.UseVisualStyleBackColor = true;
+      this.dbleClickBringsUpContextMenu.CheckedChanged += new System.EventHandler(this.dbleClickBringsUpContextMenu_CheckedChanged);
       // 
       // ConfigForm
       // 
@@ -741,6 +789,8 @@
       this.tabPage2.PerformLayout();
       this.tabPage3.ResumeLayout(false);
       this.tabPage3.PerformLayout();
+      this.UserInterface.ResumeLayout(false);
+      this.UserInterface.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -805,5 +855,9 @@
     private System.Windows.Forms.TextBox maxPointsPerDatalogger;
     private System.Windows.Forms.Label label16;
     private System.Windows.Forms.Label label17;
+    private System.Windows.Forms.TabPage UserInterface;
+    private System.Windows.Forms.Label label18;
+    private System.Windows.Forms.CheckBox VerticalDragZoom;
+    private System.Windows.Forms.CheckBox dbleClickBringsUpContextMenu;
   }
 }

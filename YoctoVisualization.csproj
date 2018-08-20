@@ -67,19 +67,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Renderer\YAngularGauge.cs">
-
+      
     </Compile>
     <Compile Include="Renderer\YDataRendererCommon.cs">
-
+      
     </Compile>
     <Compile Include="Renderer\YDigitalDisplay.cs">
-
+      
     </Compile>
     <Compile Include="Renderer\YGraph.cs">
-
+      
     </Compile>
     <Compile Include="Renderer\YSolidGauge.cs">
-
+      
     </Compile>
     <Compile Include="angularGaugeForm.cs">
       <SubType>Form</SubType>

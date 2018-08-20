@@ -54,6 +54,8 @@ namespace YoctoVisualisation
 {
   class constants
   {
+
+    public static string buildVersion = "31772";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
@@ -70,6 +72,7 @@ namespace YoctoVisualisation
     public static int maxPointsPerGraphSerie = 0;
     public static int maxPointsPerDataloggerSerie = 0;
     public static int maxDataRecordsPerSensor = 0;
+    public static bool dbleClickBringsUpContextMenu = false;
 
 
     private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);

@@ -1,3 +1,5 @@
-Yocto-Visualization v2.0.31666
+Yocto-Visualization v2.0.31772
 
-- Fix some crash when adding new YoctHub
+- Add optional vertical drag based zoom
+- Add optional double-click induced properties editor
+- Add version info

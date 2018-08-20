@@ -66,6 +66,7 @@ namespace YoctoVisualisation
     {
 			
       InitializeComponent();
+      version.Text = constants.buildVersion;
       MaximizeBox = false;
       LogManager.Log("Application start, Welcome to Yocto-Visualization.");
 
@@ -78,6 +79,7 @@ namespace YoctoVisualisation
       LogManager.LogNoTS("-log                     Automatically open log window");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.Log("Current config file is " + constants.configfile);
+      LogManager.Log("Yocto-Visualization version is "+constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
       LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits");
 

@@ -179,8 +179,19 @@ namespace YoctoVisualisation
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset dataview", Resources.resetdataview, resetDataView));
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
 
+      rendererCanvas.DoubleClick += rendererCanvas_DoubleClick;
+
     }
 
+    private void rendererCanvas_DoubleClick(object sender, EventArgs e)
+    {
+      if (!constants.dbleClickBringsUpContextMenu) return;
+      MouseEventArgs m = (MouseEventArgs)e;
+      ContextMenuStrip.Show(this, new Point(m.X, m.Y));
+  
+    }
+
+  
 
     private void capture(object sender, EventArgs e)
     {

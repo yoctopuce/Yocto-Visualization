@@ -611,6 +611,7 @@ namespace YDataRendering
     public int Height;
     public bool Capture;
     public double IRLCaptureStartX;
+    public int CaptureStartY;
     public double OriginalXAxisMin;
     public double OriginalXAxisMax;
     public double OriginalIRLx;
@@ -1319,6 +1320,7 @@ namespace YDataRendering
     List<YAxis> _yAxes;
     List<DataSerie> _series;
    
+    public static bool  VerticalDragZoomEnabled = false;
    
     int lastPointCount = -1;
     int lastTopMargin = -1;
@@ -1474,15 +1476,11 @@ namespace YDataRendering
       {
         mainViewPort.OriginalXAxisMin = xAxis.min;
         mainViewPort.OriginalXAxisMax = xAxis.max;
-
-
-        mainViewPort.OriginalIRLx = mainViewPort.IRLx;
+        mainViewPort.OriginalIRLx = mainViewPort.IRLx;      
         mainViewPort.OriginalLmargin = mainViewPort.Lmargin;
-        mainViewPort.OriginalZoomx = mainViewPort.zoomx;
-
-
+        mainViewPort.OriginalZoomx = mainViewPort.zoomx;  
         pointXY p = ViewPortPointToIRL(mainViewPort, new Point(e.X, e.Y));
-     //   log("Start capture @  T=" + TimeConverter.FromUnixTime(p.x).ToString());
+        mainViewPort.CaptureStartY = e.Y;
         mainViewPort.IRLCaptureStartX = p.x;
         mainViewPort.Capture = true;
 
@@ -1540,10 +1538,17 @@ namespace YDataRendering
       if (mainViewPort.Capture)
       {
         double x1 = mainViewPort.OriginalIRLx + (double)(e.X - mainViewPort.OriginalLmargin) / mainViewPort.OriginalZoomx;
-        double delta = (x1 - mainViewPort.IRLCaptureStartX);
+      
+        double deltaX = (x1 - mainViewPort.IRLCaptureStartX);
+        double deltaY = (e.Y - mainViewPort.CaptureStartY);
         DisableRedraw();
-        _xAxis.min = mainViewPort.OriginalXAxisMin - delta;
-        _xAxis.max = mainViewPort.OriginalXAxisMax - delta;
+        double halfAxisDelta =( mainViewPort.OriginalXAxisMax - mainViewPort.OriginalXAxisMin) / 2;
+        double Axismiddle = (mainViewPort.OriginalXAxisMax + mainViewPort.OriginalXAxisMin) / 2;
+        double deltaCoef = (YGraph.VerticalDragZoomEnabled && (Math.Abs(deltaY)  > 10)) ? Math.Pow(1.01, deltaY) : 1;
+     
+
+        _xAxis.min = Axismiddle - halfAxisDelta * deltaCoef - deltaX;
+        _xAxis.max = Axismiddle + halfAxisDelta * deltaCoef - deltaX;
         AllowRedraw();
         redraw();
         return;

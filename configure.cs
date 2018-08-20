@@ -258,6 +258,10 @@ namespace YoctoVisualisation
       res += "    <Width value= \"" + constants.captureWidth.ToString() + "\"/>\n";
       res += "    <Height value= \"" + constants.captureHeight.ToString() + "\"/>\n";    
       res += "  </Capture>\n";
+      res += "  <UI>\n";
+      res += "    <VerticalDragZoom value= \"" + YGraph.VerticalDragZoomEnabled.ToString() + "\"/>\n";
+      res += "    <DbleClickContextMenu value= \"" + constants.dbleClickBringsUpContextMenu.ToString() + "\"/>\n";   
+      res += "  </UI>\n";
       res += "</Config>\n";
 
       return res;
@@ -276,6 +280,32 @@ namespace YoctoVisualisation
 
       }
     }
+
+    public void InitUIParams(XmlNode uiNode)
+    {
+      foreach (XmlNode node in uiNode.ChildNodes)
+      {
+        bool value;
+        switch (node.Name)
+        {
+          case "VerticalDragZoom":
+            value = false;
+            if (Boolean.TryParse(node.Attributes["value"].InnerText, out value))          
+               YGraph.VerticalDragZoomEnabled = value;                         
+            break;
+
+          case "DbleClickContextMenu":
+            value = false;
+            if (Boolean.TryParse(node.Attributes["value"].InnerText, out value))
+              constants.dbleClickBringsUpContextMenu = value;
+            break;
+
+           
+
+        }
+      }
+    }
+
 
     public void InitMemoryUsageParams(XmlNode memNode)
     {
@@ -427,7 +457,10 @@ namespace YoctoVisualisation
       ExportToClipboard.Checked = constants.captureTarget == YDataRenderer.CaptureTargets.ToClipBoard;
       ExportToPNG.Checked = constants.captureTarget ==YDataRenderer.CaptureTargets.ToPng;
       targetFolder.Text = constants.captureFolder;
-     
+      VerticalDragZoom.Checked = YGraph.VerticalDragZoomEnabled;
+      dbleClickBringsUpContextMenu.Checked = constants.dbleClickBringsUpContextMenu;
+
+
       DpiTextBox.Text = constants.captureDPI.ToString();
       int n = 0;
       foreach (YDataRenderer.CaptureFormats v in Enum.GetValues(typeof(YDataRenderer.CaptureFormats)))
@@ -469,6 +502,9 @@ namespace YoctoVisualisation
             break;
           case "Capture":
             InitCaptureParams(node);
+            break;
+          case "UI":
+            InitUIParams(node);
             break;
           case "MemoryUsage":
             InitMemoryUsageParams(node);
@@ -907,6 +943,16 @@ namespace YoctoVisualisation
     private void editThisHubConnectionToolStripMenuItem_Click(object sender, EventArgs e)
     {
       editButton_Click(sender, e);
+    }
+
+    private void ZoomVerticalDragZoom_CheckedChanged(object sender, EventArgs e)
+    {
+      YGraph.VerticalDragZoomEnabled = VerticalDragZoom.Checked;
+    }
+
+    private void dbleClickBringsUpContextMenu_CheckedChanged(object sender, EventArgs e)
+    {
+      constants.dbleClickBringsUpContextMenu = dbleClickBringsUpContextMenu.Checked;
     }
   }
 
