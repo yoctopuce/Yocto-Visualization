@@ -42,7 +42,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 using System.Windows.Forms;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -203,21 +203,27 @@ namespace YDataRendering
       return new MinMax { Min = M.Min - (delta * (factor - 1)) / 2, Max = M.Max + (delta * (factor - 1)) / 2 };
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static MinMax DefaultValue()
     {
       return new MinMax { Min = Double.NaN, Max = Double.NaN };
 
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static MinMax DefaultValue(double value)
     {
       return new MinMax { Min = value, Max = value };
 
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static MinMax DefaultValue(double value1, double value2)
     {
       if (value2 < value1) throw new InvalidOperationException("MinMax invalid paramters (" + value1.ToString() + ">" + value2.ToString());
@@ -226,7 +232,9 @@ namespace YDataRendering
 
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static bool isDefined(MinMax v)
     {
       return !Double.IsNaN(v.Min);
@@ -234,7 +242,9 @@ namespace YDataRendering
     }
 
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static MinMax Combine(MinMax M1, MinMax M2)
     {
       if (Double.IsNaN(M1.Min)) return M2;
@@ -246,7 +256,9 @@ namespace YDataRendering
       return M2;
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static MinMax Combine(MinMax M1, double value)
     {
       if (double.IsNaN(M1.Min)) { M1.Min = value; M1.Max = value; return M1; }
@@ -1583,7 +1595,9 @@ namespace YDataRendering
       UIContainer.Invalidate();
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private Point IRLPointToViewPort(ViewPortSettings viewport, pointXY p)
     {
       int xx = viewport.Lmargin + (int)Math.Round((p.x - viewport.IRLx) * viewport.zoomx);
@@ -1592,7 +1606,9 @@ namespace YDataRendering
 
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private Point IRLPointToViewPort(ViewPortSettings viewport, pointXY p , double IRLy, double zoomy)
     {
       int xx = viewport.Lmargin + (int)Math.Round((p.x - viewport.IRLx) * viewport.zoomx);
@@ -1602,7 +1618,9 @@ namespace YDataRendering
     }
 
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private pointXY ViewPortPointToIRL(ViewPortSettings viewport, Point p)
     {
       return new pointXY()
@@ -1614,7 +1632,9 @@ namespace YDataRendering
       };
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     private pointXY ViewPortPointToIRL(ViewPortSettings viewport, Point p,Double IRLy, Double zoomy)
     {
       return new pointXY()
@@ -2212,19 +2232,25 @@ namespace YDataRendering
             else
             {
               Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - timeRange.Min ));
-              label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
+
+#if !NET35
+            label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
+#else
+             label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
+
+#endif
 
             }
 
-           /*  not convinced
-            int p = label.IndexOf('\n');
-            if (p>0)
-            {
-              string date = label.Substring(p);
-              if (date == lastdate) label = label.Substring(0, p); else lastdate = date;
+            /*  not convinced
+             int p = label.IndexOf('\n');
+             if (p>0)
+             {
+               string date = label.Substring(p);
+               if (date == lastdate) label = label.Substring(0, p); else lastdate = date;
 
-            }
-            */
+             }
+             */
 
             SizeF ssize = g.MeasureString(label, scale.font.fontObject, 100000);
             if (ssize.Height > UnitHeight) UnitHeight = ssize.Height;

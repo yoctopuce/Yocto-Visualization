@@ -44,7 +44,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 using System.Xml;
 using System.Windows.Forms;
 using YDataRendering;
@@ -119,14 +119,16 @@ namespace YoctoVisualisation
       _angularGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _angularGauge.AllowRedraw();
 
+      _angularGauge.OnDblClick += rendererCanvas_DoubleClick;
 
-      rendererCanvas.DoubleClick += RendererCanvas_DoubleClick;
     }
 
-    private void RendererCanvas_DoubleClick(object sender, EventArgs e)
-    { if (!constants.dbleClickBringsUpContextMenu) return;
+    private void rendererCanvas_DoubleClick(object sender, EventArgs e)
+    {
+      if (!constants.dbleClickBringsUpContextMenu) return;
       MouseEventArgs m = (MouseEventArgs)e;
       ContextMenuStrip.Show(this, new Point(m.X, m.Y));
+
     }
 
     private void capture(object sender, EventArgs e)

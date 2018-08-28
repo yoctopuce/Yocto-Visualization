@@ -179,7 +179,7 @@ namespace YoctoVisualisation
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset dataview", Resources.resetdataview, resetDataView));
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
 
-      rendererCanvas.DoubleClick += rendererCanvas_DoubleClick;
+      _cartesianChart.OnDblClick += rendererCanvas_DoubleClick;
 
     }
 

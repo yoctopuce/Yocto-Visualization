@@ -50,7 +50,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
+
 using System.Windows.Forms;
 using System.Xml;
 using YColors;
@@ -1103,6 +1103,18 @@ namespace YoctoVisualisation
     // This constant determines the number of iterations for the password bytes generation function.
     private const int DerivationIterations = 1000;
 
+    private static byte[] Generate256BitsOfRandomEntropy()
+    {
+      var randomBytes = new byte[32]; // 32 Bytes will give us 256 bits.
+      RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
+      
+        // Fill the array with cryptographically secure random bytes.
+        rngCsp.GetBytes(randomBytes);
+      
+      return randomBytes;
+    }
+
+
     public static string Encrypt(string plainText, string passPhrase)
     {
       // Salt and IV is randomly generated each time, but is preprended to encrypted cipher text
@@ -1110,8 +1122,8 @@ namespace YoctoVisualisation
       var saltStringBytes = Generate256BitsOfRandomEntropy();
       var ivStringBytes = Generate256BitsOfRandomEntropy();
       var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-      using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
-      {
+      Rfc2898DeriveBytes password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations);
+      
         var keyBytes = password.GetBytes(Keysize / 8);
         using (var symmetricKey = new RijndaelManaged())
         {
@@ -1135,7 +1147,7 @@ namespace YoctoVisualisation
                 return Convert.ToBase64String(cipherTextBytes);
               }
             }
-          }
+          
         }
       }
     }
@@ -1152,8 +1164,8 @@ namespace YoctoVisualisation
       // Get the actual cipher text bytes by removing the first 64 bytes from the cipherText string.
       var cipherTextBytes = cipherTextBytesWithSaltAndIv.Skip((Keysize / 8) * 2).Take(cipherTextBytesWithSaltAndIv.Length - ((Keysize / 8) * 2)).ToArray();
 
-      using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
-      {
+      Rfc2898DeriveBytes password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations);
+      
         var keyBytes = password.GetBytes(Keysize / 8);
         using (var symmetricKey = new RijndaelManaged())
         {
@@ -1174,20 +1186,11 @@ namespace YoctoVisualisation
               }
             }
           }
-        }
+        
       }
     }
 
-    private static byte[] Generate256BitsOfRandomEntropy()
-    {
-      var randomBytes = new byte[32]; // 32 Bytes will give us 256 bits.
-      using (var rngCsp = new RNGCryptoServiceProvider())
-      {
-        // Fill the array with cryptographically secure random bytes.
-        rngCsp.GetBytes(randomBytes);
-      }
-      return randomBytes;
-    }
+
   }
 
 }

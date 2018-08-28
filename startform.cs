@@ -83,13 +83,19 @@ namespace YoctoVisualisation
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
       LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits");
 
-     
+
       if (constants.MonoRunning)
       {
-        LogManager.Log("Mono version is " + constants.MonoVersion); 
-       
-      } else LogManager.Log("Running on .NET");
+        LogManager.Log("Mono version is " + constants.MonoVersion);
 
+      }
+      else
+      {
+        LogManager.Log("Running on .NET");
+#if NET35
+        LogManager.Log("WARNING! this exe was specificaly compiled for .NET 3.5 (Windows XP compatibility)");
+#endif
+      }
       string cfgFile = constants.configfile;
 
       if (!File.Exists(cfgFile) && !constants.configfileOveridden)

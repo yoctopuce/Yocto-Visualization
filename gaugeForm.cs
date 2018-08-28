@@ -121,7 +121,7 @@ namespace YoctoVisualisation
       _solidGauge.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _solidGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _solidGauge.AllowRedraw();
-      rendererCanvas.DoubleClick += RendererCanvas_DoubleClick;
+      _solidGauge.OnDblClick += RendererCanvas_DoubleClick;
     }
 
     private void RendererCanvas_DoubleClick(object sender, EventArgs e)

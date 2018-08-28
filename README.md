@@ -13,9 +13,14 @@ You will find more information about this application on [Yoctopuce website](htt
 
 ## Source code installation
 Unzip the project files wherever you want.
-### On Windows
-Open the *.csprog* project with at least Visual-Studio 2015, that's it.  This project requires .NET 4, adaptation for  previous version of .Net and/or Visual-Studio should be possible at the cost of some minor rework. 
-#### On Linux
+
+### On Windows 7+
+Open the *.csprog* project with at least Visual-Studio 2015, that's it. Adaptation for  previous version of Visual-Studio should be possible at the cost of some minor rework.  
+
+### On Windows XP
+This project normaly requires .Net 4.5 which can't be installed on Windows XP, but there is a workaround: just open the project with at least visual studio 2015, search for *Application/Target Framework* parameter in the *Project properties*, set it to *.Net framework 3.5* and recompile, the resulting executable will run on XP systems as long as .Net Framework 3.5 is installed but some optimizations will be lost on the way.
+
+### On Linux
 Make sure that Mono is installed (min version 4) as well as Mono-Develop (min version 5) and open the  *.csprog* project with Mono-Develop. Avoid the flatpak based Mono-Develop version as it is sand-boxed and can't access to the libusb. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-linux)
 
 ## What you need to know

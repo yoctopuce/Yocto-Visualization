@@ -1,5 +1,3 @@
-Yocto-Visualization v2.0.31772
+Yocto-Visualization v2.0.31933
 
-- Add optional vertical drag based zoom
-- Add optional double-click induced properties editor
-- Add version info
+- Allow compilation for .Net framework 3.5

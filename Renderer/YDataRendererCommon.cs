@@ -490,6 +490,8 @@ namespace YDataRendering
     private RegisterHotKeyClass _RegisKey = new RegisterHotKeyClass();
     protected int _redrawAllowed = 1;
 
+    public delegate void RendererDblClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
+    
 
     public enum CaptureFormats
     {
@@ -511,12 +513,14 @@ namespace YDataRendering
     private getCaptureParamaters _getCaptureParameters = null;
     public getCaptureParamaters getCaptureParameters { get { return _getCaptureParameters; } set { _getCaptureParameters = value; } }
 
+    public event  RendererDblClickCallBack OnDblClick;
 
 
     protected List<MessagePanel> _messagePanels;
     public List<MessagePanel> messagePanels { get { return _messagePanels; } }
-
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public void AllowRedraw()
     {
       _redrawAllowed--;
@@ -525,7 +529,9 @@ namespace YDataRendering
 
     }
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public void AllowRedrawNoRefresh()
     {
       _redrawAllowed--;
@@ -536,7 +542,9 @@ namespace YDataRendering
 
 
 
+#if !NET35
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public void DisableRedraw()
     {
       _redrawAllowed++;
@@ -1011,7 +1019,7 @@ namespace YDataRendering
 
     private bool _AllowPrintScreenCapture = false;
     public bool AllowPrintScreenCapture { get { return _AllowPrintScreenCapture; } set { _AllowPrintScreenCapture = value; } }
-
+    System.Diagnostics.Stopwatch DblClickWatch = null;
 
     public YDataRenderer(PictureBox UIContainer, logFct logFunction)
     {
@@ -1053,10 +1061,33 @@ namespace YDataRendering
       this.parentForm.Deactivate += lostFocus;
 
 
+      UIContainer.Click += RendererCanvas_Click;
+      UIContainer.DoubleClick += RendererCanvas_DoubleClick;
+    }
 
+    private void RendererCanvas_Click(object sender, EventArgs e)
+    {
+      // emulates a a double click, which not does seem to exist on touch-screens
+      if (DblClickWatch == null)
+      {
+        DblClickWatch = System.Diagnostics.Stopwatch.StartNew();
+        return;
+      }
+
+      DblClickWatch.Stop();
+      var elapsedMs = DblClickWatch.ElapsedMilliseconds;
+      DblClickWatch = System.Diagnostics.Stopwatch.StartNew();
+
+      if (elapsedMs < 330) RendererCanvas_DoubleClick(sender, e);
     }
 
 
+    private void RendererCanvas_DoubleClick(object sender, EventArgs e)
+    {
+    
+      MouseEventArgs m = (MouseEventArgs)e;
+      if (OnDblClick != null) OnDblClick(this, (MouseEventArgs)e);
+    }
 
     public MessagePanel addMessagePanel()
     {

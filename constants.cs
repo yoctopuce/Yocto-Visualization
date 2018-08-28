@@ -43,7 +43,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 using System.Xml;
 using System.Windows.Forms;
 using System.IO;
@@ -55,7 +55,7 @@ namespace YoctoVisualisation
   class constants
   {
 
-    public static string buildVersion = "31772";
+    public static string buildVersion = "31933";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;

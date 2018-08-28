@@ -92,7 +92,7 @@ namespace YoctoVisualisation
       _display.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _display.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _display.AllowRedraw();
-      rendererCanvas.DoubleClick += RendererCanvas_DoubleClick;
+      _display.OnDblClick += RendererCanvas_DoubleClick;
     }
 
     private void RendererCanvas_DoubleClick(object sender, EventArgs e)
