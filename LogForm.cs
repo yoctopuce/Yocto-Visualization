@@ -45,6 +45,11 @@ namespace YoctoVisualisation
     public LogForm()
     {
       InitializeComponent();
+      // Don't use SizableTool on OSX, it cannot hide properly
+      if (constants.OSX_Running && this.FormBorderStyle == FormBorderStyle.SizableToolWindow)
+      {
+        this.FormBorderStyle = FormBorderStyle.Sizable;
+      }
     }
 
     public void Log(string line)

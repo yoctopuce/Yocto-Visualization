@@ -88,11 +88,11 @@
       this.label11 = new System.Windows.Forms.Label();
       this.label10 = new System.Windows.Forms.Label();
       this.UserInterface = new System.Windows.Forms.TabPage();
+      this.dbleClickBringsUpContextMenu = new System.Windows.Forms.CheckBox();
       this.label18 = new System.Windows.Forms.Label();
       this.VerticalDragZoom = new System.Windows.Forms.CheckBox();
       this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
       this.MemoryTimer = new System.Windows.Forms.Timer(this.components);
-      this.dbleClickBringsUpContextMenu = new System.Windows.Forms.CheckBox();
       this.contextMenuStrip1.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -621,11 +621,11 @@
       // label16
       // 
       this.label16.AutoSize = true;
-      this.label16.Location = new System.Drawing.Point(16, 193);
+      this.label16.Location = new System.Drawing.Point(16, 195);
       this.label16.Name = "label16";
-      this.label16.Size = new System.Drawing.Size(228, 13);
+      this.label16.Size = new System.Drawing.Size(230, 13);
       this.label16.TabIndex = 30;
-      this.label16.Text = "Max data points/series  loaded from datalogger";
+      this.label16.Text = "Max data points/series loaded from dataloggers";
       this.label16.Click += new System.EventHandler(this.label16_Click);
       // 
       // label15
@@ -727,6 +727,17 @@
       this.UserInterface.Text = "User Interface";
       this.UserInterface.UseVisualStyleBackColor = true;
       // 
+      // dbleClickBringsUpContextMenu
+      // 
+      this.dbleClickBringsUpContextMenu.AutoSize = true;
+      this.dbleClickBringsUpContextMenu.Location = new System.Drawing.Point(16, 85);
+      this.dbleClickBringsUpContextMenu.Name = "dbleClickBringsUpContextMenu";
+      this.dbleClickBringsUpContextMenu.Size = new System.Drawing.Size(272, 17);
+      this.dbleClickBringsUpContextMenu.TabIndex = 2;
+      this.dbleClickBringsUpContextMenu.Text = "Double click/tap on widgets brings up context menu";
+      this.dbleClickBringsUpContextMenu.UseVisualStyleBackColor = true;
+      this.dbleClickBringsUpContextMenu.CheckedChanged += new System.EventHandler(this.dbleClickBringsUpContextMenu_CheckedChanged);
+      // 
       // label18
       // 
       this.label18.Location = new System.Drawing.Point(13, 12);
@@ -750,17 +761,6 @@
       // 
       this.MemoryTimer.Interval = 1000;
       this.MemoryTimer.Tick += new System.EventHandler(this.MemoryTimer_Tick);
-      // 
-      // dbleClickBringsUpContextMenu
-      // 
-      this.dbleClickBringsUpContextMenu.AutoSize = true;
-      this.dbleClickBringsUpContextMenu.Location = new System.Drawing.Point(16, 85);
-      this.dbleClickBringsUpContextMenu.Name = "dbleClickBringsUpContextMenu";
-      this.dbleClickBringsUpContextMenu.Size = new System.Drawing.Size(252, 17);
-      this.dbleClickBringsUpContextMenu.TabIndex = 2;
-      this.dbleClickBringsUpContextMenu.Text = "Double click on widgets brings up context menu";
-      this.dbleClickBringsUpContextMenu.UseVisualStyleBackColor = true;
-      this.dbleClickBringsUpContextMenu.CheckedChanged += new System.EventHandler(this.dbleClickBringsUpContextMenu_CheckedChanged);
       // 
       // ConfigForm
       // 

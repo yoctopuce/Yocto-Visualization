@@ -55,7 +55,7 @@ namespace YoctoVisualisation
   class constants
   {
 
-    public static string buildVersion = "31933";
+    public static string buildVersion = "31992";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
@@ -74,7 +74,10 @@ namespace YoctoVisualisation
     public static int maxDataRecordsPerSensor = 0;
     public static bool dbleClickBringsUpContextMenu = false;
 
-
+    public static bool _OSX_Running = (Environment.OSVersion.Platform == PlatformID.Unix &&
+                                       Directory.Exists("/Applications") && Directory.Exists("/System") &&
+                                       Directory.Exists("/Users") && Directory.Exists("/Volumes"));
+    public static bool OSX_Running { get { return _OSX_Running; } }
     private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);
 		public static bool MonoRunning {get {return  _MonoRunning;}}
     private static string MonoMinVersion { get { return "4.0"; }} 
@@ -92,7 +95,6 @@ namespace YoctoVisualisation
             return "unknow";
         }
         return "Not in Mono";
-
       }
     }
 

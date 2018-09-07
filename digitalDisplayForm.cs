@@ -93,11 +93,21 @@ namespace YoctoVisualisation
       _display.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _display.AllowRedraw();
       _display.OnDblClick += RendererCanvas_DoubleClick;
+      if (constants.OSX_Running)
+      {
+        _display.OnRightClick += rendererCanvas_RightClick;
+      }
     }
 
     private void RendererCanvas_DoubleClick(object sender, EventArgs e)
     {
       if (!constants.dbleClickBringsUpContextMenu) return;
+      MouseEventArgs m = (MouseEventArgs)e;
+      ContextMenuStrip.Show(this, new Point(m.X, m.Y));
+    }
+
+    private void rendererCanvas_RightClick(object sender, EventArgs e)
+    {
       MouseEventArgs m = (MouseEventArgs)e;
       ContextMenuStrip.Show(this, new Point(m.X, m.Y));
     }

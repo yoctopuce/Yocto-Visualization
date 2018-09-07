@@ -122,11 +122,21 @@ namespace YoctoVisualisation
       _solidGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
       _solidGauge.AllowRedraw();
       _solidGauge.OnDblClick += RendererCanvas_DoubleClick;
+      if (constants.OSX_Running)
+      {
+        _solidGauge.OnRightClick += rendererCanvas_RightClick;
+      }
     }
 
     private void RendererCanvas_DoubleClick(object sender, EventArgs e)
     {
       if (!constants.dbleClickBringsUpContextMenu) return;
+      MouseEventArgs m = (MouseEventArgs)e;
+      ContextMenuStrip.Show(this, new Point(m.X, m.Y));
+    }
+
+    private void rendererCanvas_RightClick(object sender, EventArgs e)
+    {
       MouseEventArgs m = (MouseEventArgs)e;
       ContextMenuStrip.Show(this, new Point(m.X, m.Y));
     }
@@ -140,10 +150,6 @@ namespace YoctoVisualisation
 
     private void gaugeForm_Load(object sender, EventArgs e)
     {
-
-
-
-     
     }
 
 

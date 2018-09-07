@@ -491,7 +491,7 @@ namespace YDataRendering
     protected int _redrawAllowed = 1;
 
     public delegate void RendererDblClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
-    
+    public delegate void RendererRightClickCallBack(YDataRenderer source, MouseEventArgs eventArg);    
 
     public enum CaptureFormats
     {
@@ -513,8 +513,8 @@ namespace YDataRendering
     private getCaptureParamaters _getCaptureParameters = null;
     public getCaptureParamaters getCaptureParameters { get { return _getCaptureParameters; } set { _getCaptureParameters = value; } }
 
-    public event  RendererDblClickCallBack OnDblClick;
-
+    public event RendererDblClickCallBack OnDblClick;
+    public event RendererRightClickCallBack OnRightClick;
 
     protected List<MessagePanel> _messagePanels;
     public List<MessagePanel> messagePanels { get { return _messagePanels; } }
@@ -1067,6 +1067,12 @@ namespace YDataRendering
 
     private void RendererCanvas_Click(object sender, EventArgs e)
     {
+      MouseEventArgs m = (MouseEventArgs)e;
+      if(OnRightClick != null && m.Button == MouseButtons.Right) {
+        OnRightClick(this, m);
+        return;
+      }
+                
       // emulates a a double click, which not does seem to exist on touch-screens
       if (DblClickWatch == null)
       {
@@ -1083,10 +1089,9 @@ namespace YDataRendering
 
 
     private void RendererCanvas_DoubleClick(object sender, EventArgs e)
-    {
-    
+    {    
       MouseEventArgs m = (MouseEventArgs)e;
-      if (OnDblClick != null) OnDblClick(this, (MouseEventArgs)e);
+      if (OnDblClick != null) OnDblClick(this, m);
     }
 
     public MessagePanel addMessagePanel()

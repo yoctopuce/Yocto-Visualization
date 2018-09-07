@@ -59,6 +59,11 @@ namespace YoctoVisualisation
     public PropertiesForm(XmlNode initDataNode)
     {
       InitializeComponent();
+      // Don't use SizableTool on OSX, it cannot hide properly
+      if(constants.OSX_Running && this.FormBorderStyle == FormBorderStyle.SizableToolWindow)
+      {
+        this.FormBorderStyle = FormBorderStyle.Sizable;
+      }
       // Set this property to intercept all events
       KeyPreview = true;
       initNode = initDataNode;
@@ -73,13 +78,11 @@ namespace YoctoVisualisation
 
     }
 
-
-   public void   refresh()
+    public void   refresh()
     {
       this.propertyGrid1.Refresh();
 
     }
-
 
     private void PropertiesForm_Load(object sender, EventArgs e)
     {
@@ -103,8 +106,13 @@ namespace YoctoVisualisation
       }
       catch (Exception e){ LogManager.Log("Properties Windows error: " + e.Message); }
 
-      if (ForceToTshow) Show();
-
+      if (ForceToTshow)
+      {
+        Show();
+        if(this.WindowState == FormWindowState.Minimized) {
+          this.WindowState = FormWindowState.Normal;
+        }
+      }
     }
 
     public string getConfigData()
@@ -113,16 +121,11 @@ namespace YoctoVisualisation
             + "<location x='" + this.Location.X.ToString() + "' y='" + this.Location.Y.ToString() + "'/>\n"
             + "<size     w='" + this.Size.Width.ToString() + "' h='" + this.Size.Height.ToString() + "'/>\n"
             + "</PropertiesForm>\n";
-
     }
-
 
     private void propertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
     {
       setCallback(e);
-
-
-
     }
 
     private void PropertiesForm_KeyDown(object sender, KeyEventArgs e)
@@ -164,9 +167,6 @@ namespace YoctoVisualisation
         nextIndex  = index - 1;
         if (nextIndex < 0)nextIndex = gridItems.Count - 1;
         // Select next griditem in collection
-       
-
-
       }
       else
       {

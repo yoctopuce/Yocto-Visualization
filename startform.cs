@@ -81,13 +81,18 @@ namespace YoctoVisualisation
       LogManager.Log("Current config file is " + constants.configfile);
       LogManager.Log("Yocto-Visualization version is "+constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
-      LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits");
-
+      LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits (platform "+ Environment.OSVersion.Platform.ToString()+")");
 
       if (constants.MonoRunning)
       {
-        LogManager.Log("Mono version is " + constants.MonoVersion);
-
+        if (constants.OSX_Running)
+        {
+          LogManager.Log("Mono version is " + constants.MonoVersion + " (Mac OS X)");
+        } 
+        else 
+        {
+          LogManager.Log("Mono version is " + constants.MonoVersion);
+        }
       }
       else
       {
@@ -227,6 +232,10 @@ namespace YoctoVisualisation
               positionOk = true;
 
           }
+          if (constants.OSX_Running && r.Y == 0)
+          {
+            positionOk = false;
+          }
           if (positionOk)
           {
             f.Location = p;
@@ -270,26 +279,21 @@ namespace YoctoVisualisation
     {
       LogManager.Log("Network device detected: " + net.get_hardwareId());
       configWindow.NetworkArrival(net);
-
     }
 
     public static void   DeviceRemoval(string serial)
     {
-    
       configWindow.removal(serial);
-
-
     }
-    public void ShowPropertyForm(Form caller, GenericProperties prop, SetValueCallBack PropertyChanged, bool forceToShow)
-    {
-     
-      if (propWindow!=null) propWindow.showWindow(prop, PropertyChanged, forceToShow);
 
+    public void ShowPropertyForm(Form caller, GenericProperties prop, SetValueCallBack PropertyChanged, bool forceToShow)
+    {     
+      if (propWindow!=null) propWindow.showWindow(prop, PropertyChanged, forceToShow);
     }
 
     public int formCount
-    { get { return formlist.Count; } 
-
+    { 
+      get { return formlist.Count; } 
     }
 
     public void removeForm(Form f)
@@ -298,9 +302,6 @@ namespace YoctoVisualisation
       if (formlist.Count <= 0) Show();
 
     }
-
-
-   
 
     public void NewGraphForm(XmlNode initData)
     {

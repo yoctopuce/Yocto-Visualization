@@ -212,7 +212,7 @@
     <None Include="libyapi-i386.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="osx\libyapi.dylib">
+    <None Include="libyapi.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">

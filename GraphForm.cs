@@ -180,7 +180,10 @@ namespace YoctoVisualisation
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
 
       _cartesianChart.OnDblClick += rendererCanvas_DoubleClick;
-
+      if(constants.OSX_Running) 
+      {
+        _cartesianChart.OnRightClick += rendererCanvas_RightClick;
+      }
     }
 
     private void rendererCanvas_DoubleClick(object sender, EventArgs e)
@@ -191,6 +194,11 @@ namespace YoctoVisualisation
   
     }
 
+    private void rendererCanvas_RightClick(object sender, EventArgs e)
+    {
+      MouseEventArgs m = (MouseEventArgs)e;
+      ContextMenuStrip.Show(this, new Point(m.X, m.Y));
+    }
   
 
     private void capture(object sender, EventArgs e)
