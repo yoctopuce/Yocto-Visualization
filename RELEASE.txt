@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.31992
+Yocto-Visualization v2.0.32003
 
--test
+-Add support for MacOS
