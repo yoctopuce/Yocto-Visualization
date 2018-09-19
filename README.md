@@ -27,7 +27,7 @@ This project normaly requires .Net 4.5 which can't be installed on Windows XP, b
 Make sure that Mono is installed (min version 4) as well as Mono-Develop (min version 5) and open the  *.csprog* project with Mono-Develop. Avoid the flatpak based Mono-Develop version as it is sand-boxed and can't access to the libusb. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-linux)
 
 ### On macOS 
-Install Mono for macOS (Visual Studio channel) and Visual Studio for macOS and open the *.csprog* project with Mono-Develop. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-macos)
+Install Mono for macOS (Visual Studio channel) and Visual Studio for macOS and open the *.csprog* project with Visual Studio. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-macos)
 
 ## What you need to know
 - The application is based on the Yoctopuce YSensor generic class. Any past, present and future Yoctopuce sensor compatible with this class will work with this application.
