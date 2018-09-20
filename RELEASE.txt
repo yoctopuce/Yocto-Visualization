@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.32188
+Yocto-Visualization v2.0.32223
 
-- Fix high res icons for linux
+- Update Linux icons
