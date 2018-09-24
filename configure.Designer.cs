@@ -647,6 +647,7 @@
       this.memoryLabel.Size = new System.Drawing.Size(93, 13);
       this.memoryLabel.TabIndex = 28;
       this.memoryLabel.Text = "Available Memory:";
+      this.memoryLabel.Visible = false;
       // 
       // label14
       // 

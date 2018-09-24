@@ -65,7 +65,9 @@ namespace YoctoVisualisation
     List<Hub> hubList = new List<Hub>();
     string localIP = GetLocalIPAddress();
     bool initdone = false;
-    System.Diagnostics.PerformanceCounter performance = new System.Diagnostics.PerformanceCounter("Memory", "Available MBytes");
+
+    // might not work on non English Windows 
+    // System.Diagnostics.PerformanceCounter performance = new System.Diagnostics.PerformanceCounter("Memory", "Available MBytes");
     public ConfigForm()
     {
       InitializeComponent();
@@ -806,14 +808,14 @@ namespace YoctoVisualisation
     }
 
     private void MemoryTimer_Tick(object sender, EventArgs e)
-    {
+    {/*  might not work on non english Windows
       if (constants.MonoRunning)
       {
         memoryLabel.Visible = false;
         MemoryTimer.Enabled = false;
       } 
       else memoryLabel.Text = "Available memory : " + performance.NextValue().ToString() +"MB";
-
+      */
     }
 
     private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
