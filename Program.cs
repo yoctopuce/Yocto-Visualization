@@ -68,7 +68,7 @@ namespace YoctoVisualisation
 
         if (res == YAPI.SUCCESS)
         {
-          YAPI.SetDeviceListValidity(600);
+          YAPI.SetDeviceListValidity(3600);
           Application.EnableVisualStyles();
           Application.SetCompatibleTextRenderingDefault(false);
           try  { Application.Run(new StartForm());}

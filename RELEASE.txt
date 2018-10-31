@@ -1,3 +1,5 @@
-Yocto-Visualization v2.0.32312
+Yocto-Visualization v2.0.32798
 
--Fix crash on non English Windows 7
+- New property editor
+- Improved CSV export
+- Plenty of minor bug fixes

@@ -36,20 +36,25 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace YoctoVisualisation
 {
   public partial class LogForm : Form
   {
+    LogHandler h;
+
     public LogForm()
     {
-      InitializeComponent();
+     InitializeComponent();
       // Don't use SizableTool on OSX, it cannot hide properly
       if (constants.OSX_Running && this.FormBorderStyle == FormBorderStyle.SizableToolWindow)
       {
         this.FormBorderStyle = FormBorderStyle.Sizable;
       }
+       h = new LogHandler(textBox1);
     }
 
     public void Log(string line)
@@ -59,21 +64,7 @@ namespace YoctoVisualisation
     }
     public void LogNoTS(string line)
     {
-      try
-      {
-        textBox1.AppendText(line + "\r\n");
-      }
-      catch (Exception)
-      {
-        try
-        {
-          textBox1.Invoke((MethodInvoker)delegate
-          {
-            textBox1.AppendText(line + "\r\n");
-          });
-        }
-        catch (Exception) { };
-      }
+      h.log(line);
     }
 
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -86,13 +77,70 @@ namespace YoctoVisualisation
     }
   }
 
-  static class LogManager
+
+
+public class LogHandler
   {
-    static LogForm w = new LogForm();
+    List<String> buffer;
+    TextBox _logWindow;
+    public Mutex Lock = new Mutex();
+    System.Windows.Forms.Timer t;
+
+    public LogHandler(TextBox logWindow)
+    {
+      _logWindow = logWindow;
+      buffer = new List<String>();
+      t = new System.Windows.Forms.Timer();
+      t.Interval = 200;
+      t.Tick += T_Tick;
+      t.Enabled = true;
+
+
+    }
+
+    private void T_Tick(object sender, EventArgs e)
+    {
+      refresh();
+    }
+
+    public void log(string msg)
+    {
+     
+      Lock.WaitOne();
+      buffer.Add(msg+"\r\n");
+      Lock.ReleaseMutex();
+    }
+
+
+    private void refresh()
+    {
+      if (buffer.Count <= 0) return;
+      Lock.WaitOne();
+      while (buffer.Count > 0)
+      {
+        _logWindow.AppendText(buffer[0]);
+        buffer.RemoveAt(0);
+      }
+      Lock.ReleaseMutex();
+      if (_logWindow.Lines.Length >1000)
+      {
+        List<string> lines = new List<string>(_logWindow.Lines);
+        lines.RemoveRange(0, 100);
+        this._logWindow.Lines = lines.ToArray();
+      }
+    }
+
+  }
+
+
+
+
+static class LogManager
+  {
+    static LogForm w = null; 
 
     static LogManager()
-    {
-      w = new LogForm();
+    { w = new LogForm();
 
     }
 

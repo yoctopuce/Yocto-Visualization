@@ -160,9 +160,9 @@ namespace YDataRendering
 
         if (dataDeltaTime <= 0.10) { ShowSecondsHundredth = true; }
         if (dataDeltaTime <= 1) { ShowSecondsTenth = true; }
-        if (dataDeltaTime >= 120) { ShowMinutes = true; }
-        if (dataDeltaTime >= 3600) { ShowHours = true; }
-        if (dataDeltaTime >= 86400) { ShowDays = true; }
+        if ((dataDeltaTime >= 60) || (viewportDeltaTime>=60)) { ShowMinutes = true; }
+        if ((dataDeltaTime >= 3600) || (viewportDeltaTime >= 3600)) { ShowHours = true; }
+        if ((dataDeltaTime >= 86400) || (viewportDeltaTime >= 86400)) { ShowDays = true; }
 
         if (res.step >= .1) ShowSecondsHundredth = false;
         if (res.step >= 1) ShowSecondsTenth = false;

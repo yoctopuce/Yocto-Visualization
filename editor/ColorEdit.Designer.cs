@@ -1,8 +1,10 @@
 ﻿
 
+using System.Windows.Forms;
+
 namespace YColors
 {
-  partial class ColorEditor
+  partial class ColorEdit
   {
     /// <summary> 
     /// Required designer variable.
@@ -30,8 +32,8 @@ namespace YColors
     /// </summary>
     private void InitializeComponent()
     {
-      this.textBoxColorCode = new System.Windows.Forms.TextBox();
-      this.OkButton = new System.Windows.Forms.Button();
+     
+      
       this.C1RGB_pictureBox = new System.Windows.Forms.PictureBox();
       this.C1RGB_textBox = new System.Windows.Forms.TextBox();
       this.C1_label = new System.Windows.Forms.Label();
@@ -81,30 +83,16 @@ namespace YColors
       ((System.ComponentModel.ISupportInitialize)(this.PredefinedPanel)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.C1_pictureBox)).BeginInit();
       this.SuspendLayout();
-      // 
-      // textBoxColorCode
-      // 
-      this.textBoxColorCode.Location = new System.Drawing.Point(252, 265);
-      this.textBoxColorCode.Name = "textBoxColorCode";
-      this.textBoxColorCode.Size = new System.Drawing.Size(91, 20);
-      this.textBoxColorCode.TabIndex = 0;
-      // 
-      // OkButton
-      // 
-      this.OkButton.Location = new System.Drawing.Point(253, 291);
-      this.OkButton.Name = "OkButton";
-      this.OkButton.Size = new System.Drawing.Size(91, 23);
-      this.OkButton.TabIndex = 1;
-      this.OkButton.Text = "Ok";
-      this.OkButton.UseVisualStyleBackColor = true;
-      this.OkButton.Click += new System.EventHandler(this.button1_Click);
-      // 
+
+      this.MinimumSize = new System.Drawing.Size(200, 200);
+
       // C1RGB_pictureBox
       // 
       this.C1RGB_pictureBox.Cursor = System.Windows.Forms.Cursors.Hand;
       this.C1RGB_pictureBox.Location = new System.Drawing.Point(26, 16);
       this.C1RGB_pictureBox.Name = "C1RGB_pictureBox";
       this.C1RGB_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C1RGB_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C1RGB_pictureBox.TabIndex = 2;
       this.C1RGB_pictureBox.TabStop = false;
       // 
@@ -114,6 +102,7 @@ namespace YColors
       this.C1RGB_textBox.Location = new System.Drawing.Point(289, 20);
       this.C1RGB_textBox.Name = "C1RGB_textBox";
       this.C1RGB_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C1RGB_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C1RGB_textBox.TabIndex = 3;
       // 
       // C1_label
@@ -140,6 +129,7 @@ namespace YColors
       this.C2RGB_textBox.Location = new System.Drawing.Point(289, 56);
       this.C2RGB_textBox.Name = "C2RGB_textBox";
       this.C2RGB_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C2RGB_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C2RGB_textBox.TabIndex = 6;
       // 
       // C2RGB_pictureBox
@@ -148,6 +138,7 @@ namespace YColors
       this.C2RGB_pictureBox.Location = new System.Drawing.Point(26, 52);
       this.C2RGB_pictureBox.Name = "C2RGB_pictureBox";
       this.C2RGB_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C2RGB_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C2RGB_pictureBox.TabIndex = 5;
       this.C2RGB_pictureBox.TabStop = false;
       // 
@@ -166,6 +157,7 @@ namespace YColors
       this.C3RGB_textBox.Location = new System.Drawing.Point(289, 92);
       this.C3RGB_textBox.Name = "C3RGB_textBox";
       this.C3RGB_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C3RGB_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C3RGB_textBox.TabIndex = 9;
       // 
       // C3RGB_pictureBox
@@ -174,6 +166,7 @@ namespace YColors
       this.C3RGB_pictureBox.Location = new System.Drawing.Point(26, 88);
       this.C3RGB_pictureBox.Name = "C3RGB_pictureBox";
       this.C3RGB_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C3RGB_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C3RGB_pictureBox.TabIndex = 8;
       this.C3RGB_pictureBox.TabStop = false;
       // 
@@ -192,6 +185,8 @@ namespace YColors
       this.C4RGB_textBox.Location = new System.Drawing.Point(289, 128);
       this.C4RGB_textBox.Name = "C4RGB_textBox";
       this.C4RGB_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C4RGB_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
+
       this.C4RGB_textBox.TabIndex = 12;
       // 
       // C4RGB_pictureBox
@@ -200,6 +195,7 @@ namespace YColors
       this.C4RGB_pictureBox.Location = new System.Drawing.Point(26, 124);
       this.C4RGB_pictureBox.Name = "C4RGB_pictureBox";
       this.C4RGB_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C4RGB_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C4RGB_pictureBox.TabIndex = 11;
       this.C4RGB_pictureBox.TabStop = false;
       // 
@@ -208,7 +204,8 @@ namespace YColors
       this.pictureBoxPreview.Cursor = System.Windows.Forms.Cursors.Hand;
       this.pictureBoxPreview.Location = new System.Drawing.Point(252, 201);
       this.pictureBoxPreview.Name = "pictureBoxPreview";
-      this.pictureBoxPreview.Size = new System.Drawing.Size(91, 58);
+      this.pictureBoxPreview.Size = new System.Drawing.Size(91, 110);
+      this.pictureBoxPreview.Anchor = (AnchorStyles.Top |   AnchorStyles.Right);
       this.pictureBoxPreview.TabIndex = 16;
       this.pictureBoxPreview.TabStop = false;
       // 
@@ -217,8 +214,10 @@ namespace YColors
       this.pictureBoxHistory.Location = new System.Drawing.Point(7, 201);
       this.pictureBoxHistory.Name = "pictureBoxHistory";
       this.pictureBoxHistory.Size = new System.Drawing.Size(240, 113);
+      this.pictureBoxHistory.Anchor = (AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right);
       this.pictureBoxHistory.TabIndex = 17;
       this.pictureBoxHistory.TabStop = false;
+     // this.pictureBoxHistory.BorderStyle = BorderStyle.FixedSingle;
       // 
       // ColorTypeTab
       // 
@@ -228,7 +227,8 @@ namespace YColors
       this.ColorTypeTab.Location = new System.Drawing.Point(3, 3);
       this.ColorTypeTab.Name = "ColorTypeTab";
       this.ColorTypeTab.SelectedIndex = 0;
-      this.ColorTypeTab.Size = new System.Drawing.Size(351, 187);
+      this.ColorTypeTab.Size = new System.Drawing.Size(345, 187);
+      this.ColorTypeTab.Anchor  = (AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top );
       this.ColorTypeTab.TabIndex = 19;
       this.ColorTypeTab.SelectedIndexChanged += new System.EventHandler(this.ColorTypeTab_SelectedIndexChanged);
       // 
@@ -284,6 +284,7 @@ namespace YColors
       this.C4HSL_pictureBox.Location = new System.Drawing.Point(26, 124);
       this.C4HSL_pictureBox.Name = "C4HSL_pictureBox";
       this.C4HSL_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C4HSL_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C4HSL_pictureBox.TabIndex = 23;
       this.C4HSL_pictureBox.TabStop = false;
       // 
@@ -293,6 +294,7 @@ namespace YColors
       this.C1HSL_pictureBox.Location = new System.Drawing.Point(26, 16);
       this.C1HSL_pictureBox.Name = "C1HSL_pictureBox";
       this.C1HSL_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C1HSL_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C1HSL_pictureBox.TabIndex = 14;
       this.C1HSL_pictureBox.TabStop = false;
       // 
@@ -302,6 +304,7 @@ namespace YColors
       this.C1HSL_textBox.Location = new System.Drawing.Point(289, 20);
       this.C1HSL_textBox.Name = "C1HSL_textBox";
       this.C1HSL_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C1HSL_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C1HSL_textBox.TabIndex = 15;
       // 
       // label1
@@ -328,6 +331,7 @@ namespace YColors
       this.C4HSL_textBox.Location = new System.Drawing.Point(289, 128);
       this.C4HSL_textBox.Name = "C4HSL_textBox";
       this.C4HSL_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C4HSL_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C4HSL_textBox.TabIndex = 24;
       // 
       // C2HSL_pictureBox
@@ -336,6 +340,7 @@ namespace YColors
       this.C2HSL_pictureBox.Location = new System.Drawing.Point(26, 52);
       this.C2HSL_pictureBox.Name = "C2HSL_pictureBox";
       this.C2HSL_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C2HSL_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C2HSL_pictureBox.TabIndex = 17;
       this.C2HSL_pictureBox.TabStop = false;
       // 
@@ -345,6 +350,7 @@ namespace YColors
       this.C2HSL_textBox.Location = new System.Drawing.Point(289, 56);
       this.C2HSL_textBox.Name = "C2HSL_textBox";
       this.C2HSL_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C2HSL_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C2HSL_textBox.TabIndex = 18;
       // 
       // label3
@@ -371,6 +377,7 @@ namespace YColors
       this.C3HSL_textBox.Location = new System.Drawing.Point(289, 92);
       this.C3HSL_textBox.Name = "C3HSL_textBox";
       this.C3HSL_textBox.Size = new System.Drawing.Size(35, 20);
+      this.C3HSL_textBox.Anchor = (AnchorStyles.Top | AnchorStyles.Right);
       this.C3HSL_textBox.TabIndex = 21;
       // 
       // C3HSL_pictureBox
@@ -379,6 +386,7 @@ namespace YColors
       this.C3HSL_pictureBox.Location = new System.Drawing.Point(26, 88);
       this.C3HSL_pictureBox.Name = "C3HSL_pictureBox";
       this.C3HSL_pictureBox.Size = new System.Drawing.Size(257, 28);
+      this.C3HSL_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C3HSL_pictureBox.TabIndex = 20;
       this.C3HSL_pictureBox.TabStop = false;
       // 
@@ -398,8 +406,12 @@ namespace YColors
       this.PredefinedPanel.Location = new System.Drawing.Point(0, 3);
       this.PredefinedPanel.Name = "PredefinedPanel";
       this.PredefinedPanel.Size = new System.Drawing.Size(340, 155);
+      this.PredefinedPanel.Anchor = (AnchorStyles.Top | AnchorStyles.Left );
       this.PredefinedPanel.TabIndex = 21;
       this.PredefinedPanel.TabStop = false;
+     // this.PredefinedPanel.BorderStyle = BorderStyle.FixedSingle;
+
+
       // 
       // C1_pictureBox
       // 
@@ -407,6 +419,7 @@ namespace YColors
       this.C1_pictureBox.Location = new System.Drawing.Point(26, 6);
       this.C1_pictureBox.Name = "C1_pictureBox";
       this.C1_pictureBox.Size = new System.Drawing.Size(257, 20);
+      this.C1_pictureBox.Anchor = (AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right);
       this.C1_pictureBox.TabIndex = 2;
       this.C1_pictureBox.TabStop = false;
       // 
@@ -417,8 +430,7 @@ namespace YColors
       this.Controls.Add(this.ColorTypeTab);
       this.Controls.Add(this.pictureBoxHistory);
       this.Controls.Add(this.pictureBoxPreview);
-      this.Controls.Add(this.OkButton);
-      this.Controls.Add(this.textBoxColorCode);
+     
       this.Name = "ColorEditor";
       this.Size = new System.Drawing.Size(357, 328);
       this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ColorEditor_KeyPress);
@@ -440,6 +452,10 @@ namespace YColors
       this.tabPage3.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.PredefinedPanel)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.C1_pictureBox)).EndInit();
+
+      this.Resize += new System.EventHandler(this.ColorEditor_Resize);
+     
+
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -447,8 +463,8 @@ namespace YColors
 
     #endregion
 
-    private System.Windows.Forms.TextBox textBoxColorCode;
-    private System.Windows.Forms.Button OkButton;
+
+  
     private System.Windows.Forms.PictureBox C1RGB_pictureBox;
     private System.Windows.Forms.Label C1_label;
     private System.Windows.Forms.Label C2_label;

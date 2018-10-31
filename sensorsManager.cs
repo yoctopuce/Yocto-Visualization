@@ -51,84 +51,7 @@ using System.Diagnostics;
 namespace YoctoVisualisation
 {
 
-  public class SensorConverter : TypeConverter
-  {
-    public override bool GetStandardValuesSupported(
-                          ITypeDescriptorContext context)
-    {
-      return true;
-    }
-
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    {
-
-      return new StandardValuesCollection(sensorsManager.sensorList);
-
-    }
-
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-    {
-      if (sourceType == typeof(string))
-      {
-        return true;
-      }
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-    {
-      if (value is string)
-      {
-        foreach (CustomYSensor s in sensorsManager.sensorList)
-        {
-          if (s.ToString() == (string)value)
-          {
-            return s;
-          }
-        }
-      }
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-  public class AlarmConverter : TypeConverter
-  {
-    public override bool GetStandardValuesSupported(
-                          ITypeDescriptorContext context)
-    {
-      return true;
-    }
-
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    {
-
-      return new StandardValuesCollection(sensorsManager.sensorList);
-
-    }
-
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-    {
-      if (sourceType == typeof(string))
-      {
-        return true;
-      }
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-    {
-     
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-
+ 
 
 
   public class TimedSensorValue
@@ -181,29 +104,41 @@ namespace YoctoVisualisation
 
     static void ExecuteCommand(string source, string command)
     {
-      var processInfo = new ProcessStartInfo("cmd.exe", "/c " + command);
+
+      string shell = "cmd.exe";
+      string shellcommand = "/c " + command;
+      if (constants.MonoRunning) { shell = "bash"; shellcommand = "-c \"" + command + "\""; }
+      LogManager.Log(source + " executing :" + shell + " " + shellcommand);
+      var processInfo = new ProcessStartInfo(shell, shellcommand);
       processInfo.CreateNoWindow = true;
       processInfo.UseShellExecute = false;
       processInfo.RedirectStandardError = true;
       processInfo.RedirectStandardOutput = true;
 
-      var process = Process.Start(processInfo);
+      try
+      {
+        var process = Process.Start(processInfo);
 
-      process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
-          LogManager.Log(source+" output :" + e.Data);
-      process.BeginOutputReadLine();
+        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
+            LogManager.Log(source + " output :" + e.Data);
+        process.BeginOutputReadLine();
 
-      process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) =>
-          LogManager.Log(source + " error : " + e.Data);
-      process.BeginErrorReadLine();
+        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) =>
+            LogManager.Log(source + " error : " + e.Data);
+        process.BeginErrorReadLine();
 
-      process.WaitForExit();
+        process.WaitForExit();
 
-      Console.WriteLine(source + " ExitCode: " + process.ExitCode.ToString());
-      process.Close();
+        //    Console.WriteLine(source + " ExitCode: " + process.ExitCode.ToString());
+        process.Close();
+      }
+      catch (Exception e)
+      {
+        LogManager.Log(source + " execution raised an exception :" + e.Message);
 
-   
-      
+      }
+
+
     }
 
 
@@ -526,7 +461,7 @@ namespace YoctoVisualisation
     {
 
 
-      LogManager.Log(hwdName + " : datalogger preloading completed");
+      LogManager.Log(hwdName + " : datalogger preloading completed ("+ previewMinData.Count + " rows )");
 
       int RangeTo = -1;
       if (previewMinData == null) return;
@@ -630,12 +565,9 @@ namespace YoctoVisualisation
         {
           recording = recordingStatus;
           sensor.set_logFrequency(recording ? frequency : "OFF");
-          if (recording)
-          {
-            YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");
-            dl.set_recording(YDataLogger.RECORDING_ON);
-
-          }
+          YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");
+          dl.set_recording(recording ? YDataLogger.RECORDING_ON: YDataLogger.RECORDING_OFF);
+          dl.set_autoStart(recording ?  YDataLogger.AUTOSTART_ON : YDataLogger.RECORDING_OFF);
           sensor.get_module().saveToFlash();
         }
         else online = false;
@@ -670,7 +602,9 @@ namespace YoctoVisualisation
         try
         {
           recordedDataLoadProgress = recordedData.loadMore();
-         
+          //LogManager.Log(hwdName + "loading " + recordedDataLoadProgress.ToString() + "%");
+
+
         }
         catch (Exception) { loadFailed = true; return; }
 
@@ -718,6 +652,8 @@ namespace YoctoVisualisation
         dataMutex.WaitOne();
         double lastPreviewTimeStamp = previewMinData[previewMinData.Count - 1].DateTime;
         while ((index < minData.Count) && (minData[index].DateTime < lastPreviewTimeStamp)) index++;
+        //LogManager.Log(hwdName + " time range is ["+constants.UnixTimeStampToDateTime(previewMinData[0].DateTime)+".."+ constants.UnixTimeStampToDateTime(lastPreviewTimeStamp)+"]");
+
         minData.RemoveRange(0, index);
         curData.RemoveRange(0, index);
         maxData.RemoveRange(0, index);
@@ -756,7 +692,7 @@ namespace YoctoVisualisation
         return;
       }
 
-      LogManager.Log(hwdName + " : datalogger loading completed");
+      LogManager.Log(hwdName + " : datalogger loading completed  (" + previewMinData.Count + " rows )");
 
       loadDone = true;
       globalDataLoadProgress = 100;
@@ -1052,16 +988,26 @@ namespace YoctoVisualisation
 
 
 
-
+ 
 
   public static class sensorsManager
   {
+
+    public delegate void SensorManagerChangeCallback();
+
+
     private static int counter = 0;
     
     
     public static List<CustomYSensor> sensorList;  // actual list of sensors
     public static CustomYSensor NullSensor;
     private static XmlNode KnownSensors = null;  // sensors list picked up from xml config file
+
+    private static SensorManagerChangeCallback _changeCallback=null;
+
+    public static void registerChangeCallback(SensorManagerChangeCallback changeCallback)
+       { _changeCallback = changeCallback; }
+
     public static string  getXMLSensorsConfig()
     {
       string res = "<Sensors>\n";
@@ -1097,8 +1043,8 @@ namespace YoctoVisualisation
       for (int i = 0; i < sensorList.Count; i++)
         if (sensorList[i].get_hardwareId().Substring(0, 8) == serialprefix)
           sensorList[i].ConfigHasChanged();
-     
 
+      if (_changeCallback != null) _changeCallback();
     }
 
     public static void deviceArrival(YModule m)
@@ -1121,7 +1067,7 @@ namespace YoctoVisualisation
             YNetwork net = YNetwork.FindNetwork(serial + "." + fid);
             StartForm.NetworkArrival(net);
           }
-          else if (ftype == "Datalogger")
+          else if (ftype== "DataLogger")
           {
             YDataLogger dlog = YDataLogger.FindDataLogger(serial + "." + fid);
             int state = dlog.get_recording();
@@ -1157,7 +1103,7 @@ namespace YoctoVisualisation
 
 
               sensorList.Add(new CustomYSensor(s, hwd, FindSensorLastLocalConfig(hwd)));
-              LogManager.Log(" Added to list");
+             
             }
           }
         }
@@ -1168,8 +1114,8 @@ namespace YoctoVisualisation
 
         m.registerConfigChangeCallback(deviceConfigChanged);
         m.triggerConfigChangeCallback();
-      
 
+        if (_changeCallback != null) _changeCallback();
       }
       catch (Exception e) { LogManager.Log("Device Arrival Error: " + e.Message); }
     }
@@ -1193,6 +1139,7 @@ namespace YoctoVisualisation
               alreadyThereSensor.removal();
         }
 
+      if (_changeCallback != null) _changeCallback();
 
     }
 

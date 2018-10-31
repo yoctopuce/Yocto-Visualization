@@ -30,6 +30,11 @@ namespace YoctoVisualization
       pathChooser.Text = "";
       usernameChooser.Text = "";
       passwordChooser.Text = "";
+
+      new InputFieldManager(addressChooser, InputFieldManager.dataType.DATA_STRING, false, Double.NaN, Double.NaN, null);
+      new InputFieldManager(portChooser, InputFieldManager.dataType.DATA_STRICT_POSITIVE_INT, true, Double.NaN, Double.NaN, null);
+
+
       ShowDialog();
       if (ok)
        {
@@ -38,6 +43,9 @@ namespace YoctoVisualization
                     usernameChooser.Text, passwordChooser.Text,
                     addressChooser.Text, portChooser.Text,pathChooser.Text);
        } else h = null;
+
+
+
 
       return ok;
     }

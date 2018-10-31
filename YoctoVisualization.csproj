@@ -38,6 +38,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -47,6 +48,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>main.ico</ApplicationIcon>
@@ -86,12 +88,6 @@
     </Compile>
     <Compile Include="API\yocto_api.cs" />
     <Compile Include="API\yocto_network.cs" />
-    <Compile Include="ColorEditor.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ColorEditor.Designer.cs">
-      <DependentUpon>ColorEditor.cs</DependentUpon>
-    </Compile>
     <Compile Include="configure.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -104,6 +100,21 @@
     </Compile>
     <Compile Include="digitalDisplayForm.Designer.cs">
       <DependentUpon>digitalDisplayForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="editor\ColorEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="editor\ColorEdit.Designer.cs">
+      <DependentUpon>ColorEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="editor\Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="editor\Editor.Designer.cs">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="editor\UIElements.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="formManager.cs" />
     <Compile Include="gaugeForm.cs">
@@ -131,12 +142,6 @@
       <DependentUpon>LogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="properties.cs" />
-    <Compile Include="PropertiesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="PropertiesForm.Designer.cs">
-      <DependentUpon>PropertiesForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="propertiesMngmt.cs" />
     <Compile Include="rawDataForm.cs">
       <SubType>Form</SubType>
@@ -154,18 +159,22 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XMLConfigTranslator.cs" />
+    <Compile Include="YColor.cs" />
     <EmbeddedResource Include="angularGaugeForm.resx">
       <DependentUpon>angularGaugeForm.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ColorEditor.resx">
-      <DependentUpon>ColorEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="configure.resx">
       <DependentUpon>configure.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="digitalDisplayForm.resx">
       <DependentUpon>digitalDisplayForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="editor\ColorEdit.resx">
+      <DependentUpon>ColorEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="editor\Editor.resx">
+      <DependentUpon>Editor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="gaugeForm.resx">
       <DependentUpon>gaugeForm.cs</DependentUpon>
@@ -179,10 +188,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropertiesForm.resx">
-      <DependentUpon>PropertiesForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

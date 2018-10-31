@@ -54,17 +54,22 @@ namespace YoctoVisualisation
     static List<Form> formlist = new List<Form>();
     bool MustHide = false;
     bool ClosingNow = false;
-     XmlNode propnode =null;
-    static ConfigForm configWindow = new ConfigForm();
-    static RawDataForm rawDataWindow = new RawDataForm();
-    static PropertiesForm propWindow = null;
+  //   XmlNode propnode =null;
+    static ConfigForm configWindow; 
+    static RawDataForm rawDataWindow;
+   
+    static PropertiesForm2 propWindow2 = null;
     static LogForm logWindow = new LogForm();
     static String DefaultWindowName = "New Window ";
 	static Timer HideTimer;
 
     public StartForm()
     {
-			
+
+      configWindow = new ConfigForm();
+      rawDataWindow = new RawDataForm();
+      propWindow2 = new PropertiesForm2();
+
       InitializeComponent();
       version.Text = constants.buildVersion;
       MaximizeBox = false;
@@ -150,11 +155,10 @@ namespace YoctoVisualisation
             {
               case "GraphForm": NewGraphForm(node); MustHide = true; break;
               case "GaugeForm": NewSolidGaugeForm(node); MustHide = true; break;
-              case "angularGaugeForm":
-                 NewAngularGaugeForm(node); MustHide = true; break;
+              case "angularGaugeForm":    NewAngularGaugeForm(node); MustHide = true; break;
               case "digitalDisplayForm": NewDigitalDisplayForm(node); MustHide = true; break;
               case "Config": configWindow.Init(node); break;
-              case "PropertiesForm": propnode = node; break;
+              case "PropertiesForm": RestoreWindowPosition(propWindow2,node); break;
             
             }
 
@@ -163,7 +167,10 @@ namespace YoctoVisualisation
         catch (Exception e) { LogManager.Log("Cannot load config file " + constants.configfile + ": " + e.Message); }
 
         } else configWindow.DefaultInit();
-      propWindow = new PropertiesForm(propnode);
+     
+      
+    
+      sensorsManager.registerChangeCallback(sensorListHaschanged);
 
       configWindow.CheckInit();
       YoctoTimer.Interval = 100;
@@ -176,6 +183,11 @@ namespace YoctoVisualisation
 
     }
 
+    public void sensorListHaschanged()
+    {
+      propWindow2.refresh();
+    }
+
     void HideTimer_Tick (object sender, EventArgs e)
 
     { HideTimer.Enabled = false;
@@ -185,8 +197,8 @@ namespace YoctoVisualisation
     }
 
     public void  refreshPropertiesForm()
-    {  if (propWindow != null) propWindow.refresh();
-
+    { 
+      if (propWindow2 != null) propWindow2.refresh();
     }
 
     public static void RestoreWindowPosition(Form f, XmlNode initNode)
@@ -286,10 +298,18 @@ namespace YoctoVisualisation
       configWindow.removal(serial);
     }
 
-    public void ShowPropertyForm(Form caller, GenericProperties prop, SetValueCallBack PropertyChanged, bool forceToShow)
+    public void ShowPropertyForm(Form caller, GenericProperties prop,  SetValueCallBack2 PropertyChanged2, bool forceToShow)
     {     
-      if (propWindow!=null) propWindow.showWindow(prop, PropertyChanged, forceToShow);
+     
+
+     
+      if (propWindow2 != null) propWindow2.showWindow(caller, prop, PropertyChanged2, forceToShow);
+
     }
+
+   
+
+
 
     public int formCount
     { 
@@ -391,7 +411,7 @@ namespace YoctoVisualisation
         if (f is angularGaugeForm) XmlConfigFile += ((angularGaugeForm)f).getConfigData();
         if (f is digitalDisplayForm) XmlConfigFile += ((digitalDisplayForm)f).getConfigData();
       }
-      XmlConfigFile += propWindow.getConfigData();
+      XmlConfigFile += propWindow2.getConfigData();
       XmlConfigFile += sensorsManager.getXMLSensorsConfig();
 
 
@@ -460,7 +480,7 @@ namespace YoctoVisualisation
     }
     public void hidePropertyEditor()
     {
-      propWindow.Hide();
+      propWindow2.Hide();
 
     }
 

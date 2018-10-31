@@ -50,6 +50,7 @@ namespace YoctoVisualisation
   {
 
     BackgroundWorker exportProcess;
+    bool refreshDisabled = false;
 
     public RawDataForm()
     {
@@ -120,7 +121,7 @@ namespace YoctoVisualisation
 
     private void RefreshContents(List<CustomYSensor> slist)
     {
-
+      dataGridView1.SuspendLayout();
       List<int> indexes = new List<int>();
       for (int i = 0; i < slist.Count; i++)
       {
@@ -156,7 +157,7 @@ namespace YoctoVisualisation
         {
           bool Shown = false;
           if (indexes[i] >= 0)
-            if (slist[i].curData[indexes[i]].DateTime == MaxTimeStamp)
+          { if (slist[i].curData[indexes[i]].DateTime == MaxTimeStamp)
             {
               int n = 0;
               if (sMin) { row[n + i * toShow] = slist[i].minData[indexes[i]].Value.ToString(); n++; }
@@ -164,6 +165,14 @@ namespace YoctoVisualisation
               if (sMax) { row[n + i * toShow] = slist[i].maxData[indexes[i]].Value.ToString(); n++; }
               Shown = true;
               indexes[i]--;
+            }
+              if (indexes[i] >= 0)
+              {
+                if (slist[i].curData[indexes[i]].DateTime > nextTimeStamp)
+                  nextTimeStamp = slist[i].curData[indexes[i]].DateTime;
+
+              }
+
             }
           if (!Shown)
           {
@@ -173,18 +182,17 @@ namespace YoctoVisualisation
             if (sMax) { row[n + i * toShow] = ""; n++; }
           }
 
-          if (indexes[i] > 0)
-          {
-            double t = slist[i].minData[indexes[i]].DateTime;
-            if ((t > nextTimeStamp) && (t < MaxTimeStamp)) nextTimeStamp = t;
-          }
+        //  if (indexes[i] > 0)
+        //  {
+        //    double t = slist[i].minData[indexes[i]].DateTime;
+        //    if ((t > nextTimeStamp) && (t < MaxTimeStamp)) nextTimeStamp = t;
+        //  }
         }
 
         if (colcount > 0)
         {
           int idx = dataGridView1.Rows.Add(row);
           dataGridView1.Rows[idx].HeaderCell.Value = constants.UnixTimeStampToDateTime(MaxTimeStamp).ToString("yyyy/MM/dd HH:mm:ss.ff");
-          // for (int i = 0; i < colcount; i++) dataGridView1.Rows[idx].Cells[i].Value = roe;
         }
 
         MaxTimeStamp = nextTimeStamp;
@@ -195,7 +203,7 @@ namespace YoctoVisualisation
       else label1.Text = "Here are the last " + rowcount.ToString() + " data rows.  Use the export feature to get the whole data set.";
 
       CsvBtn.Enabled = ((rowcount > 0) && (toShow > 0));
-
+      dataGridView1.ResumeLayout();
     }
 
 
@@ -242,7 +250,7 @@ namespace YoctoVisualisation
         {
           bool Shown = false;
           if (indexes[i] < slist[i].curData.Count)
-            if (slist[i].curData[indexes[i]].DateTime == MinTimeStamp)
+          { if (slist[i].curData[indexes[i]].DateTime == MinTimeStamp)
             {
 
               if (sMin) line += ";" + slist[i].minData[indexes[i]].Value.ToString();
@@ -251,19 +259,24 @@ namespace YoctoVisualisation
               Shown = true;
               indexes[i]++;
             }
+              if (indexes[i] < slist[i].curData.Count)
+                if (slist[i].curData[indexes[i]].DateTime < nextTimeStamp)
+                  nextTimeStamp = slist[i].curData[indexes[i]].DateTime;
+
+            }
           if (!Shown)
           {
 
-            if (sMin) line += ";";
-            if (sAvg) line += ";";
-            if (sMax) line += ";";
+            if (sMin) line += " ; ";
+            if (sAvg) line += " ; ";
+            if (sMax) line += " ; ";
           }
 
-          if (indexes[i] < slist[i].curData.Count)
-          {
-            double t = slist[i].minData[indexes[i]].DateTime;
-            if ((t < nextTimeStamp) && (t > MinTimeStamp)) nextTimeStamp = t;
-          }
+          //  if (indexes[i] < slist[i].curData.Count)
+          //  {
+          //    double t = slist[i].minData[indexes[i]].DateTime;
+          //    if ((t < nextTimeStamp) && (t > MinTimeStamp)) nextTimeStamp = t;
+          //  }
         }
 
         if (colcount > 0)
@@ -277,6 +290,7 @@ namespace YoctoVisualisation
       }
       return res;
     }
+
 
     private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
     {
@@ -302,7 +316,7 @@ namespace YoctoVisualisation
 
     private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
     {
-      refeshGridGeometry(e);
+     if (!refreshDisabled) refeshGridGeometry(e);
     }
 
     private void button2_Click(object sender, EventArgs e)
@@ -414,5 +428,29 @@ namespace YoctoVisualisation
 
 
     }
+
+    private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      refreshDisabled = true;
+      for (int i = 0; i < checkedListBox1.Items.Count; i++)
+      {
+        checkedListBox1.SetItemChecked(i, true);
+
+      }
+      refreshDisabled = false;
+      refeshGridGeometry(null);
+    }
+
+    private void selectNoneToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      refreshDisabled = true;
+      for (int i = 0; i < checkedListBox1.Items.Count; i++)
+      {
+        checkedListBox1.SetItemChecked(i, false);
+
+      }
+      refreshDisabled = false;
+      refeshGridGeometry(null);
+    }
   }
-}
+  }

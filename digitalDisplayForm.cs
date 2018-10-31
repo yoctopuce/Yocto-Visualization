@@ -123,6 +123,36 @@ namespace YoctoVisualisation
      
     }
 
+
+    void PropertyChanged2(UIElement src)
+    {
+      string fullpropname = "";
+      string propType = "";
+      string OriginalPropName = "";
+
+     
+      List<string> path =src.ExtractPropPath( ref OriginalPropName, ref fullpropname, ref propType);
+
+
+      switch (propType)
+      {
+        case "Form":
+          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          break;
+        case "display":
+          GenericProperties.newSetProperty(_display, prop, fullpropname, path);
+          break;
+        case "DataSource":
+          manager.AjustHint("");
+          mainForm.refreshPropertiesForm();
+          break;
+      }
+
+
+
+    }
+
+
     void PropertyChanged(PropertyValueChangedEventArgs e)
     {
       string fullpropname = "";
@@ -158,12 +188,12 @@ namespace YoctoVisualisation
 
     private void showConfiguration(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged, true);
+      mainForm.ShowPropertyForm(this, prop,  PropertyChanged2, true);
     }
 
     private void switchConfiguration(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
+      mainForm.ShowPropertyForm(this, prop,  PropertyChanged2, false);
     }
 
 
@@ -220,7 +250,7 @@ namespace YoctoVisualisation
 
     private void digitalDisplayForm_Enter(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged, false);
+      mainForm.ShowPropertyForm(this, prop,  PropertyChanged2, false);
     }
   }
 

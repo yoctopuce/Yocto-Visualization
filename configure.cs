@@ -83,6 +83,20 @@ namespace YoctoVisualisation
         ExportToPNG.Checked = true;
 
       }
+
+      new InputFieldManager(targetFolder, InputFieldManager.dataType.DATA_PATH, false, Double.NaN, Double.NaN, null);
+      new InputFieldManager(DpiTextBox, InputFieldManager.dataType.DATA_STRICT_POSITIVE_FLOAT, false, Double.NaN, Double.NaN, null);
+      new InputFieldManager(widthValue, InputFieldManager.dataType.DATA_STRICT_POSITIVE_FLOAT, false, Double.NaN, Double.NaN, null);
+      new InputFieldManager(heightValue, InputFieldManager.dataType.DATA_STRICT_POSITIVE_INT, false, Double.NaN, Double.NaN, null);
+
+      new InputFieldManager(MaxDataRecordsCount, InputFieldManager.dataType.DATA_POSITIVE_INT, false, Double.NaN, Double.NaN, null);
+      new InputFieldManager(MaxDataPointsCount, InputFieldManager.dataType.DATA_POSITIVE_INT, false, Double.NaN, Double.NaN, null);
+      new InputFieldManager(maxPointsPerDatalogger, InputFieldManager.dataType.DATA_INT, false,-1, Double.NaN, null);
+
+
+
+
+
     }
 
     public static string GetLocalIPAddress()
@@ -242,7 +256,7 @@ namespace YoctoVisualisation
       res += "  </Hubs>\n";
 
       res += "  <Colors>\n";
-      List<YColor> c = ColorEditor.colorHistory;
+      List<YColor> c = ColorEdit.colorHistory;
       for (int i = c.Count - 1; i >= 0; i--) 
          res = res + "    <Color value=\"" + c[i].ToString() + "\"/>\n";
       res += "  </Colors>\n";
@@ -276,7 +290,7 @@ namespace YoctoVisualisation
         switch (node.Name)
         {
           case "Color":
-            ColorEditor.AddColorToHistory( YColor.fromString(node.Attributes["value"].InnerText));        
+            ColorEdit.AddColorToHistory( YColor.fromString(node.Attributes["value"].InnerText));        
             break;
         }
 

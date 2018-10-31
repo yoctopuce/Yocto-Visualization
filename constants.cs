@@ -55,7 +55,7 @@ namespace YoctoVisualisation
   class constants
   {
 
-    public static string buildVersion = "32312";
+    public static string buildVersion = "32798";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;

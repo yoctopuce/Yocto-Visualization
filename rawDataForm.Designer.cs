@@ -40,17 +40,22 @@
       this.label1 = new System.Windows.Forms.Label();
       this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
       this.progressPanel = new System.Windows.Forms.Panel();
-      this.progressBar1 = new System.Windows.Forms.ProgressBar();
       this.label2 = new System.Windows.Forms.Label();
+      this.progressBar1 = new System.Windows.Forms.ProgressBar();
       this.timer1 = new System.Windows.Forms.Timer(this.components);
+      this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.selectNoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
       this.progressPanel.SuspendLayout();
+      this.contextMenuStrip1.SuspendLayout();
       this.SuspendLayout();
       // 
       // checkedListBox1
       // 
       this.checkedListBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.checkedListBox1.ContextMenuStrip = this.contextMenuStrip1;
       this.checkedListBox1.FormattingEnabled = true;
       this.checkedListBox1.Location = new System.Drawing.Point(12, 13);
       this.checkedListBox1.Name = "checkedListBox1";
@@ -163,6 +168,15 @@
       this.progressPanel.TabIndex = 8;
       this.progressPanel.Visible = false;
       // 
+      // label2
+      // 
+      this.label2.AutoSize = true;
+      this.label2.Location = new System.Drawing.Point(144, 33);
+      this.label2.Name = "label2";
+      this.label2.Size = new System.Drawing.Size(116, 13);
+      this.label2.TabIndex = 1;
+      this.label2.Text = "Exporting, please wait..";
+      // 
       // progressBar1
       // 
       this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -173,19 +187,32 @@
       this.progressBar1.TabIndex = 0;
       this.progressBar1.Visible = false;
       // 
-      // label2
-      // 
-      this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(144, 33);
-      this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(116, 13);
-      this.label2.TabIndex = 1;
-      this.label2.Text = "Exporting, please wait..";
-      // 
       // timer1
       // 
       this.timer1.Interval = 1000;
       this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+      // 
+      // contextMenuStrip1
+      // 
+      this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.selectAllToolStripMenuItem,
+            this.selectNoneToolStripMenuItem});
+      this.contextMenuStrip1.Name = "contextMenuStrip1";
+      this.contextMenuStrip1.Size = new System.Drawing.Size(153, 70);
+      // 
+      // selectAllToolStripMenuItem
+      // 
+      this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
+      this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.selectAllToolStripMenuItem.Text = "Select All";
+      this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
+      // 
+      // selectNoneToolStripMenuItem
+      // 
+      this.selectNoneToolStripMenuItem.Name = "selectNoneToolStripMenuItem";
+      this.selectNoneToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.selectNoneToolStripMenuItem.Text = "Select None";
+      this.selectNoneToolStripMenuItem.Click += new System.EventHandler(this.selectNoneToolStripMenuItem_Click);
       // 
       // RawDataForm
       // 
@@ -209,6 +236,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
       this.progressPanel.ResumeLayout(false);
       this.progressPanel.PerformLayout();
+      this.contextMenuStrip1.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -229,5 +257,8 @@
     private System.Windows.Forms.ProgressBar progressBar1;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Timer timer1;
+    private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+    private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem selectNoneToolStripMenuItem;
   }
 }

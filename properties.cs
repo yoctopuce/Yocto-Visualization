@@ -61,6 +61,8 @@ using System.Xml;
 using YDataRendering;
 using YColors;
 using System.Drawing.Design;
+using System.Drawing.Text;
+using System.Collections.Generic;
 
 namespace YoctoVisualisation
 {
@@ -72,12 +74,114 @@ namespace YoctoVisualisation
   public static class GenericHints
   {
     public const string ColorMsg = " You can use the color chooser dropdown or type direcly the color as HSL:xxx or HSL:xxx where xxx is a 8 digit hex number (Alpha transparence is supported). You can also type a color litteral name (Red, Yellow etc...).";
-    public const string BoolMsg = " Value can be toggled with the dropdown menu, or a double click.";
+   
     public const string DevConfAffected = " Changing this value will affect the device configuration.";
+    public const string CheckSensor = "If the sensor you want to use is connected, but not listed or listed as OFFLINE, check USB / Network configuration in the global configuration.";
 
 
-    
+
   }
+
+  public static class TypeDescription
+  {
+    public static string[] AllowedValues { get { return null; } }
+
+  }
+
+
+
+  public static class sensorFreqTypeDescription
+  {
+     static string[] _AllowedValues = new string[]   { "25/s", "10/s", "5/s", "4/s","3/s","2/s","1/s",
+                                   "30/m","12/m","6/m","4/m","3/m","2/m","1/m",
+                                   "30/h","12/h","6/h","4/h","3/h","2/h","1/h"};
+
+
+     public static string[] AllowedValues { get { return _AllowedValues; } }
+
+  }
+
+
+  public static class yAxisDescription
+  {
+    static List<string> _AllowedValues = new List<string>();
+
+    static yAxisDescription()
+      {  
+        int yaxiscount = 0;
+        foreach (var p in typeof(GraphFormProperties).GetProperties())
+          if (p.Name.StartsWith("Graph_yAxes")) yaxiscount++;
+        for (int i=0;i< yaxiscount;i++)
+          switch(i)
+          {
+            case 0: _AllowedValues.Add("1srt Y axis"); break;
+            case 1: _AllowedValues.Add("2nd Y axis"); break;
+            case 2: _AllowedValues.Add("3rd Y axis"); break;
+            default: _AllowedValues.Add((i+1).ToString()+"th Y axis"); break;
+
+
+
+        }
+
+    }
+
+
+    public static string[] AllowedValues { get { return _AllowedValues.ToArray(); } }
+
+  }
+
+
+
+  public static class AlarmTestTypeDescription
+  {
+    static string[] _AllowedValues = new string[] { "Disabled", ">", ">=", "=", "<=", "<" };
+     public static string[] AllowedValues { get { return _AllowedValues; } }
+
+  }
+
+  public static class fontNameTypeDescription
+  {
+    static string[] _AllowedValues ;
+
+    static  fontNameTypeDescription()
+    {
+      InstalledFontCollection _fontsCollection = new InstalledFontCollection();
+      _AllowedValues = new string[_fontsCollection.Families.Length];
+      int i = 0;
+      foreach (FontFamily font in _fontsCollection.Families)
+        _AllowedValues[i++]=font.Name;
+
+    }
+
+    public static string[] AllowedValues { get { return _AllowedValues; } }
+  }
+
+
+
+
+public static class sensorPrecisionTypeDescription
+  {
+    static string[] _AllowedValues = new string[] { "0", "0.1", "0.12", "0.123" };
+
+
+    public static string[] AllowedValues { get { return _AllowedValues; } }
+
+  }
+
+
+  public static class sensorDataTypeDescription
+  {
+    static string[] _AllowedValues = new string[] { "Avg values", "Min values", "Max values" };
+
+     
+    public static string[] AllowedValues { get { return _AllowedValues; } }
+
+  }
+
+
+
+
+
 
   public class GaugeFormProperties : GenericProperties
   {
@@ -99,11 +203,13 @@ namespace YoctoVisualisation
     }
 
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
-    [TypeConverter(typeof(SensorConverter)),
+    [
       DisplayName("Sensor"),
       CategoryAttribute("Data source"),
-      DescriptionAttribute("Yoctopuce sensor feeding the gauge.")]
-
+      ParamCategorySummaryAttribute("sensorDescription"),
+      PreExpandedCategoryAttribute(true),
+      ChangeCausesParentRefreshAttribute(true),
+      DescriptionAttribute("Yoctopuce sensor feeding the gauge. ")]
 
     public CustomYSensor DataSource_source
     {
@@ -116,11 +222,20 @@ namespace YoctoVisualisation
 
       }
     }
+   
+    public string sensorDescription
+    {
+      get
+      {
+         return _DataSource_source is NullYSensor ? "none" : _DataSource_source.get_friendlyName();
+      }
+    }
+
     [DisplayName("Sensor freq"),
-    TypeConverter(typeof(FrequencyConverter)),
-       CategoryAttribute("Data source"),
-    NotSavedInXMLAttribute(true),
-    DescriptionAttribute("Sensor data acquisition frequency."+ GenericHints.DevConfAffected)]
+     CategoryAttribute("Data source"),
+     NotSavedInXMLAttribute(true),
+     ParamExtraDescription(typeof(sensorFreqTypeDescription)),
+     DescriptionAttribute("Sensor data acquisition frequency."+ GenericHints.DevConfAffected)]
 
     public string DataSource_freq
     {
@@ -131,10 +246,11 @@ namespace YoctoVisualisation
 
 
     private string _DataSource_precision = "0.1";
-    [TypeConverter(typeof(FormatterPrecisionConverter)),
+    [
       DisplayName("Precision"),
-     CategoryAttribute("Data source"),
-     DescriptionAttribute("How many digits shown after the decimal point")]
+      CategoryAttribute("Data source"),
+      DescriptionAttribute("How many digits shown after the decimal point"),
+      ParamExtraDescription(typeof(sensorPrecisionTypeDescription))]
     public string DataSource_precision
     {
       get { return _DataSource_precision; }
@@ -142,7 +258,7 @@ namespace YoctoVisualisation
     }
 
     private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
+    [
      DisplayName("Sensor value alarm 1"),
      NotSavedInXMLAttribute(true),
      ReadOnlyAttribute(true),
@@ -158,7 +274,7 @@ namespace YoctoVisualisation
 
 
     private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
+    [
      DisplayName("Sensor value alarm 2"),
      CategoryAttribute("Data source"),
      ReadOnlyAttribute(true),
@@ -196,8 +312,7 @@ namespace YoctoVisualisation
     private bool _SolidGauge_showMinMax = true;
     [DisplayName("show  min/max"),
      CategoryAttribute("Values range"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Show the min / max values."+ GenericHints.BoolMsg)]
+     DescriptionAttribute("Show the min / max values.")]
     public bool SolidGauge_showMinMax
     {
       get { return _SolidGauge_showMinMax; }
@@ -208,8 +323,7 @@ namespace YoctoVisualisation
     private YColor _SolidGauge_color1 = YColor.fromColor(Color.LightGreen);
     [DisplayName("Min Color"),
      CategoryAttribute("Values range"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Color for minimum value."+ GenericHints.ColorMsg)]
     public YColor SolidGauge_color1
     {
@@ -220,8 +334,7 @@ namespace YoctoVisualisation
     private YColor _SolidGauge_color2 = YColor.fromColor( Color.Red);
     [DisplayName("Max color"),
      CategoryAttribute("Values range"),
-     Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
       DescriptionAttribute("Color for maximum value." + GenericHints.ColorMsg)]
     public YColor SolidGauge_color2
     {
@@ -234,7 +347,6 @@ namespace YoctoVisualisation
     [DisplayName("Unit  Font"),
      CategoryAttribute("Fonts"),
       ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
      DescriptionAttribute("Font for displaying the value/status indicator")]
     public FontDescription SolidGauge_font
     {
@@ -246,7 +358,6 @@ namespace YoctoVisualisation
     [DisplayName("Min Max  Font"),
      CategoryAttribute("Fonts"),
       ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
      DescriptionAttribute("Font for displaying min/max values")]
     public FontDescription SolidGauge_minMaxFont
     {
@@ -262,7 +373,6 @@ namespace YoctoVisualisation
     private YSolidGauge.DisplayMode _SolidGauge_displayMode = YSolidGauge.DisplayMode.DISPLAY90;
     [DisplayName("Display mode"),
     CategoryAttribute("Dial"),
-     TypeConverter(typeof(SmartEnumConverter)),
     DescriptionAttribute("Dial general shape")]
     public YSolidGauge.DisplayMode SolidGauge_displayMode
     {
@@ -277,8 +387,7 @@ namespace YoctoVisualisation
     private YColor _SolidGauge_borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color"),
      CategoryAttribute("Dial"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Dial border color." + GenericHints.ColorMsg)]
     public YColor SolidGauge_borderColor
     {
@@ -300,8 +409,7 @@ namespace YoctoVisualisation
     private YColor _SolidGauge_backgroundColor1 = YColor.FromArgb(255, 240, 240, 240);
     [DisplayName("Background color 1"),
      CategoryAttribute("Dial"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Dial background gradiant color 1." + GenericHints.ColorMsg)]
     public YColor SolidGauge_backgroundColor1
     {
@@ -312,8 +420,7 @@ namespace YoctoVisualisation
     private YColor _SolidGauge_backgroundColor2 = YColor.FromArgb(255, 200, 200, 200);
     [DisplayName("Background color 2"),
      CategoryAttribute("Dial"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Dial background gradiant color 2." + GenericHints.ColorMsg)]
     public YColor SolidGauge_backgroundColor2
     {
@@ -383,10 +490,13 @@ namespace YoctoVisualisation
     }
 
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
-    [TypeConverter(typeof(SensorConverter)),
+    [
       DisplayName("Sensor"),
-     CategoryAttribute("Data source"),
-     DescriptionAttribute("Yoctopuce sensor feeding the gauge.")]
+      CategoryAttribute("Data source"),
+      ParamCategorySummaryAttribute("sensorDescription"),
+      PreExpandedCategoryAttribute(true),
+      ChangeCausesParentRefreshAttribute(true),
+      DescriptionAttribute("Yoctopuce sensor feeding the gauge. "+GenericHints.CheckSensor)]
     public CustomYSensor DataSource_source
     {
       get { return _DataSource_source; }
@@ -398,11 +508,20 @@ namespace YoctoVisualisation
       }
     }
 
+    
+    public string sensorDescription
+    {
+      get
+      {
+        return _DataSource_source is NullYSensor ? "none" : _DataSource_source.get_friendlyName();
+      }
+    }
+
     [DisplayName("Sensor freq"),
-    TypeConverter(typeof(FrequencyConverter)),
     CategoryAttribute("Data source"),
     NotSavedInXMLAttribute(true),
-    DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected)]
+    DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected),
+    ParamExtraDescription(typeof(sensorFreqTypeDescription))]
 
     public string DataSource_freq
     {
@@ -413,7 +532,7 @@ namespace YoctoVisualisation
 
 
     private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
+    [
      DisplayName("Sensor value alarm 1"),
      NotSavedInXMLAttribute(true),
       ReadOnlyAttribute(true),
@@ -429,7 +548,7 @@ namespace YoctoVisualisation
 
 
     private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
+    [
      DisplayName("Sensor value alarm 2"),
      CategoryAttribute("Data source"),
      NotSavedInXMLAttribute(true),
@@ -483,17 +602,7 @@ namespace YoctoVisualisation
       set { _AngularGauge_graduation = value; }
     }
 
-    private FontDescription _AngularGauge_graduationFont = new FontDescription("Arial", 20, YColor.fromColor(Color.Black), false, true);
-    [DisplayName("Main graduation font"),
-     CategoryAttribute("Gauge graduations"),
-      ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
-     DescriptionAttribute("Font used for graduation labels")]
-    public FontDescription AngularGauge_graduationFont
-    {
-      get { return _AngularGauge_graduationFont; }
-      set { _AngularGauge_graduationFont = value; }
-    }
+  
 
   
 
@@ -534,8 +643,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_graduationColor = YColor.fromColor(Color.Black);
     [DisplayName("Main graduation color"),
      CategoryAttribute("Gauge graduations"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Main gradduation marks color." + GenericHints.ColorMsg)]
     public YColor AngularGauge_graduationColor
     {
@@ -543,13 +651,22 @@ namespace YoctoVisualisation
       set { _AngularGauge_graduationColor = value; }
     }
 
+    private FontDescription _AngularGauge_graduationFont = new FontDescription("Arial", 20, YColor.fromColor(Color.Black), false, true);
+    [DisplayName("Main graduation font"),
+     CategoryAttribute("Gauge graduations"),
+      ReadOnlyAttribute(true),
+     DescriptionAttribute("Font used for graduation labels")]
+    public FontDescription AngularGauge_graduationFont
+    {
+      get { return _AngularGauge_graduationFont; }
+      set { _AngularGauge_graduationFont = value; }
+    }
 
-
-    private double _AngularGauge_subgraduationCount = 5;
+    private int _AngularGauge_subgraduationCount = 5;
     [DisplayName("Sub-graduation count"),
      CategoryAttribute("Gauge graduations"),
      DescriptionAttribute("How many sub-graduation (+1) marks between two consecutive main graduation marks")]
-    public double AngularGauge_subgraduationCount
+    public int AngularGauge_subgraduationCount
     {
       get { return _AngularGauge_subgraduationCount; }
       set { _AngularGauge_subgraduationCount = value; }
@@ -580,8 +697,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_subgraduationColor = YColor.fromColor(Color.Black);
     [DisplayName("Sub-graduation color"),
      CategoryAttribute("Gauge graduations"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Sub-graduation marks color." + GenericHints.ColorMsg)]
     public YColor AngularGauge_subgraduationColor
     {
@@ -594,8 +710,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_needleColor = YColor.fromColor(Color.Red);
     [DisplayName("Needle color"),
      CategoryAttribute("Needle"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Needle filling color." + GenericHints.ColorMsg)]
     public YColor AngularGauge_needleColor
     {
@@ -606,8 +721,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_needleContourColor = YColor.fromColor(Color.DarkRed);
     [DisplayName("Needle contour color"),
      CategoryAttribute("Needle"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Needle contour color." + GenericHints.ColorMsg)]
      public YColor AngularGauge_needleContourColor
      {
@@ -675,7 +789,6 @@ namespace YoctoVisualisation
     [DisplayName("Unit Line Font"),
      CategoryAttribute("Text lines"),
       ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
      DescriptionAttribute("Font used in the text line discribing unit")]
     public FontDescription AngularGauge_unitFont
     {
@@ -687,7 +800,6 @@ namespace YoctoVisualisation
     [DisplayName("Status Line Font"),
       ReadOnlyAttribute(true),
      CategoryAttribute("Text lines"),
-     TypeConverter(typeof(YFontDescriptionConverter)),
      DescriptionAttribute("Font used in the text line gauge status")]
     public FontDescription AngularGauge_statusFont
     {
@@ -700,8 +812,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color"),
      CategoryAttribute("Dial"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Dial border color." + GenericHints.ColorMsg)]
     public YColor AngularGauge_borderColor
     {
@@ -723,8 +834,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_backgroundColor1 = YColor.FromArgb(255, 240, 240, 240);
     [DisplayName("Background color 1"),
      CategoryAttribute("Dial"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Dial background gradiant color 1." + GenericHints.ColorMsg)]
      public YColor AngularGauge_backgroundColor1
      {
@@ -735,8 +845,7 @@ namespace YoctoVisualisation
     private YColor _AngularGauge_backgroundColor2 = YColor.FromArgb(255, 200, 200, 200);
     [DisplayName("Background color 2"),
      CategoryAttribute("Dial"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Dial background gradiant color 2." + GenericHints.ColorMsg)]
      public YColor AngularGauge_backgroundColor2
      {
@@ -749,7 +858,6 @@ namespace YoctoVisualisation
     [DisplayName("Zone 1"),
     CategoryAttribute("Zones"),
       ReadOnlyAttribute(true),
-    TypeConverter(typeof(YAngularZoneConverter)),
     DescriptionAttribute("Zone 1 parameters")]
     public AngularZoneDescription AngularGauge_zones0
     {
@@ -761,7 +869,6 @@ namespace YoctoVisualisation
     [DisplayName("Zone 2"),
     CategoryAttribute("Zones"),
       ReadOnlyAttribute(true),
-    TypeConverter(typeof(YAngularZoneConverter)),
     DescriptionAttribute("Zone 2 parameters")]
     public AngularZoneDescription AngularGauge_zones1
     {
@@ -773,7 +880,6 @@ namespace YoctoVisualisation
     [DisplayName("Zone 3"),
     CategoryAttribute("Zones"),
       ReadOnlyAttribute(true),
-    TypeConverter(typeof(YAngularZoneConverter)),
     DescriptionAttribute("Zone 3 parameters")]
     public AngularZoneDescription AngularGauge_zones2
     {
@@ -801,28 +907,31 @@ namespace YoctoVisualisation
 
     }
 
+    public string summary
+    {
+      get { return _visible ?  _min.ToString()+".."+ _max.ToString() : "Disabled"; }
+    }
 
     [DisplayName("Visible"),
-     CategoryAttribute("Zone"),
-      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Zone visibility." + GenericHints.BoolMsg)]
+     ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Zone visibility."  )]
     public bool visible { get { return _visible; } set { _visible = value; } }
 
 
     [DisplayName("Minimum value"),
-     CategoryAttribute("Zone"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Zone minimum value")]
     public double min { get { return _min; } set { _min = value; } }
 
     [DisplayName("Maximum value"),
-     CategoryAttribute("Zone"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Zone maximum value")]
     public double max { get { return _max; } set { _max = value; } }
 
 
     [DisplayName("Color"),
-    CategoryAttribute("Zone"),
-    Editor(typeof(YColorEditor), typeof(UITypeEditor)),
+    
+   
     DescriptionAttribute("Zone color")]
     public YColor color { get { return _color; } set { _color = value; } }
   }
@@ -837,6 +946,11 @@ namespace YoctoVisualisation
     bool _visible = true;
     YColor _color;
 
+    public string summary
+    {
+      get { return _visible ?  _min.ToString() + ".." + _max.ToString()  : "Disabled"; }
+    }
+
     public AngularZoneDescription(double min, double max, YColor color)
     {
       _min = min;
@@ -847,36 +961,35 @@ namespace YoctoVisualisation
 
 
     [DisplayName("Visible"),
-     CategoryAttribute("Zone"),
-      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Zone visibility." + GenericHints.BoolMsg)]
+     ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Zone visibility."  )]
      public bool visible { get { return _visible; } set { _visible = value; } }
 
 
     [DisplayName("Minimum value"),
-     CategoryAttribute("Zone"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Zone minimum value")]
      public double min { get { return _min; } set { _min = value; } }
 
     [DisplayName("Maximum value"),
-     CategoryAttribute("Zone"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Zone maximum value")]
      public double max { get { return _max; } set { _max = value; } }
 
 
     [DisplayName("Color"),
-    CategoryAttribute("Zone"),
-       Editor(typeof(YColorEditor), typeof(UITypeEditor)),
+    
+   
     DescriptionAttribute("Zone color")]
     public YColor color { get { return _color; } set { _color = value; } }
 
     [DisplayName("Outer radius (%)"),
-     CategoryAttribute("Zone"),
+     
      DescriptionAttribute("Zone outer radius, in percentage relative to dial radius ")]
      public double outerRadius { get { return _outerRadius; } set { _outerRadius = value; } }
 
     [DisplayName("Width (%)"),
-     CategoryAttribute("Zone"),
+     
      DescriptionAttribute("Zone  width, in percentage relative to dial radius ")]
      public double width { get { return _width; } set { _width = value; } }
   }
@@ -905,40 +1018,43 @@ namespace YoctoVisualisation
       return _name + " " + _size.ToString();
     }
 
+    public string summary
+     {
+      get { return _name + " " + _size.ToString(); }
+     }
+
     private string _name;
-    [TypeConverter(typeof(FontNameConverter)),
+    [
      DisplayName("Font name"),
-     CategoryAttribute("Font"),
+     ParamExtraDescription(typeof(fontNameTypeDescription)),
+      ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Name of the font")]
     public string name { get { return _name; } set { _name = value; } }
 
     private double _size;
     [DisplayName("Font size"),
-     CategoryAttribute("Font"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Size of the font")]
     public double size { get { return _size; } set { _size = value; } }
 
     private YColor _color;
     [DisplayName("Font color"),
-     CategoryAttribute("Font"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
+    
      DescriptionAttribute("Color of the font." + GenericHints.ColorMsg)]
     public YColor color { get { return _color; } set { _color = value; } }
 
     private bool _italic;
     [DisplayName("Italic"),
-     CategoryAttribute("Font"),
-      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Is the font style italic?." + GenericHints.BoolMsg)]
+     
+     DescriptionAttribute("Is the font style italic?."  )]
     public bool italic { get { return _italic; } set { _italic = value; } }
 
 
     private bool _bold;
     [DisplayName("Bold"),
-     CategoryAttribute("Font"),
-      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Is the font style bold?." + GenericHints.BoolMsg)]
+     
+     DescriptionAttribute("Is the font style bold?."  )]
     public bool bold { get { return _bold; } set { _bold = value; } }
 
 
@@ -971,6 +1087,7 @@ namespace YoctoVisualisation
           ((AlarmSection)(p.GetValue(this, null))).setDataSource(_DataSource_source);
         }
       }
+     
     }
 
     public override bool IsDataSourceAssigned()
@@ -979,11 +1096,13 @@ namespace YoctoVisualisation
     }
 
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
-    [TypeConverter(typeof(SensorConverter)),
+    [
       DisplayName("Sensor"),
       CategoryAttribute("Data source"),
-      
-      DescriptionAttribute("Yoctopuce sensor feeding the display.")]
+      ParamCategorySummaryAttribute("sensorDescription"),
+      PreExpandedCategoryAttribute(true),
+      ChangeCausesParentRefreshAttribute(true),
+      DescriptionAttribute("Yoctopuce sensor feeding the display. " + GenericHints.CheckSensor)]
     public CustomYSensor DataSource_source
     {
       get { return _DataSource_source; }
@@ -995,12 +1114,20 @@ namespace YoctoVisualisation
       }
     }
 
+    
+    public string sensorDescription
+    {
+      get
+      {
+        return _DataSource_source is NullYSensor ? "none" : _DataSource_source.get_friendlyName();
+      }
+    }
+
     [DisplayName("Sensor freq"),
-     TypeConverter(typeof(FrequencyConverter)),
      CategoryAttribute("Data source"),
      NotSavedInXMLAttribute(true),
-     DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected)]
-
+     DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected),
+     ParamExtraDescription(typeof(sensorFreqTypeDescription))] 
     public string DataSource_freq
     {
       get { return _DataSource_source.get_frequency(); }
@@ -1008,11 +1135,14 @@ namespace YoctoVisualisation
 
     }
 
+    
+
     private string _DataSource_precision = "0.1";
-    [TypeConverter(typeof(FormatterPrecisionConverter)),
+    [
       DisplayName("Precision"),
      CategoryAttribute("Data source"),
-     DescriptionAttribute("How many digits shown after the decimal point.")]
+     DescriptionAttribute("How many digits shown after the decimal point."),
+     ParamExtraDescription(typeof(sensorPrecisionTypeDescription)) ]
     public string DataSource_precision
     {
       get { return _DataSource_precision; }
@@ -1020,7 +1150,7 @@ namespace YoctoVisualisation
     }
     
     private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
+    [
      DisplayName("Sensor value alarm 1"),
      NotSavedInXMLAttribute(true),
       ReadOnlyAttribute(true),
@@ -1036,7 +1166,7 @@ namespace YoctoVisualisation
    
 
     private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
+    [
      DisplayName("Sensor value alarm 2"),
      CategoryAttribute("Data source"),
       ReadOnlyAttribute(true),
@@ -1054,7 +1184,6 @@ namespace YoctoVisualisation
 
     [DisplayName("Font"),
      CategoryAttribute("Display"),
-    TypeConverter(typeof(YFontDescriptionConverter)),
       ReadOnlyAttribute(true),
      DescriptionAttribute("Display font")]
     public FontDescription display_font
@@ -1066,8 +1195,7 @@ namespace YoctoVisualisation
     private YColor _backgroundColor1 = YColor.fromColor(Color.Black);
     [DisplayName("Background color 1"),
      CategoryAttribute("Display"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Display background gradiant color1." + GenericHints.ColorMsg)]
      public YColor display_backgroundColor1
     {
@@ -1078,8 +1206,7 @@ namespace YoctoVisualisation
     private YColor _backgroundColor2 = YColor.fromColor(Color.Black);
     [DisplayName("Background color 2"),
      CategoryAttribute("Display"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Display background gradiant color 2." + GenericHints.ColorMsg)]
     public YColor display_backgroundColor2
     {
@@ -1092,7 +1219,6 @@ namespace YoctoVisualisation
     private YDigitalDisplay.HrzAlignment _hrzAlignment = YDigitalDisplay.HrzAlignment.RIGHT;
     [DisplayName("Hrz alignment method"),
     CategoryAttribute("Display"),
-    TypeConverter(typeof(SmartEnumConverter)),
      
     DescriptionAttribute("Horizontal alignment method")]
     public YDigitalDisplay.HrzAlignment display_hrzAlignment
@@ -1115,7 +1241,6 @@ namespace YoctoVisualisation
     private doubleNan _outOfRangeMin = new doubleNan(Double.NaN);
     [DisplayName("Minimum value"),
      CategoryAttribute("Range Control"),
-     TypeConverter(typeof(doubleNanConverter)),
      DescriptionAttribute("Regular range minimum value. if value goes  outside regular  range, color will turn to \"Out of range Color\".Leave blank if you don't want to define such a range. ")]
     public doubleNan display_outOfRangeMin
     {
@@ -1126,7 +1251,6 @@ namespace YoctoVisualisation
     private doubleNan _outOfRangeMax = new doubleNan(Double.NaN);
     [DisplayName("Maximum value"),
      CategoryAttribute("Range Control"),
-     TypeConverter(typeof(doubleNanConverter)),
      DescriptionAttribute("Regular range maximxum value. if value is outside regular range, color will turn to \"Out of range Color\". Leave blank if you don't want to define such a range. ")]
     public doubleNan display_outOfRangeMax
     {
@@ -1138,10 +1262,9 @@ namespace YoctoVisualisation
     private YColor _outOfRangeColor = YColor.fromColor(Color.Red);
     [DisplayName("Out of range Color"),
      CategoryAttribute("Range Control"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Digits color when value is out of range." + GenericHints.ColorMsg)]
-    public YColor display_outOfRangeColorColor
+    public YColor display_outOfRangeColor
     {
       get { return _outOfRangeColor; }
       set { _outOfRangeColor = value; }
@@ -1168,14 +1291,27 @@ namespace YoctoVisualisation
     CustomYSensor _sensor = sensorsManager.getNullSensor();
     int _index = 0;
 
+    public string summary
+    { get {
+
+        int c = _sensor.getAlarmCondition(_index);
+        if (c == 0) return "Disabled";
+        return "Enabled";
+         
+      }
+
+    }
+
+
     public AlarmSection(int index)
     {
       _index = index;
     }
 
     [DisplayName("Data source type"),
-    TypeConverter(typeof(AlamSourceTypeConverter)),
+   
     NotSavedInXMLAttribute(true),
+    ParamExtraDescription(typeof(sensorDataTypeDescription)),
     DescriptionAttribute("Alarm sensor data source (Average, minimum or maximimum value during last interval)")]
     public int source
     {
@@ -1191,8 +1327,9 @@ namespace YoctoVisualisation
 
 
     [DisplayName("Test Condition"),
-     TypeConverter(typeof(AlamTriggerTypeConverter)),
      NotSavedInXMLAttribute(true),
+      ParamExtraDescription(typeof(AlarmTestTypeDescription)),
+       ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Alarm trigger condition")]
     public int condition
     {
@@ -1269,6 +1406,10 @@ namespace YoctoVisualisation
      
     }
 
+    public string summary
+    { get { return _DataSource_source is NullYSensor ? "none" : _DataSource_source.get_friendlyName(); }
+    }
+
     public void Init(Form owner, int serieIndex)
     {
       ownerForm = owner;
@@ -1293,9 +1434,10 @@ namespace YoctoVisualisation
 
 
     private CustomYSensor _DataSource_source = sensorsManager.getNullSensor();
-    [TypeConverter(typeof(SensorConverter)),
+    [
       DisplayName("Sensor"),
-      DescriptionAttribute("Yoctopuce sensor feeding the graph")]
+      ChangeCausesParentRefreshAttribute(true),
+      DescriptionAttribute("Yoctopuce sensor feeding the graph. " + GenericHints.CheckSensor)]
     public CustomYSensor DataSource_source
     {
       get { return _DataSource_source; }
@@ -1310,9 +1452,9 @@ namespace YoctoVisualisation
 
 
     [DisplayName("Sensor frequency"),
-     TypeConverter(typeof(FrequencyConverter)),
      NotSavedInXMLAttribute(true),
-     DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected)]
+     DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected),
+      ParamExtraDescription(typeof(sensorFreqTypeDescription))]
 
     public string DataSource_freq
     {
@@ -1323,9 +1465,9 @@ namespace YoctoVisualisation
 
     private int _DataType = 0;
     [DisplayName("Sensor data"),
-     TypeConverter(typeof(AvgMinMaxConverter)),
+     ParamExtraDescription(typeof(sensorDataTypeDescription)),
      DescriptionAttribute("Which data for sensor are displayed on the graph. Min and Max are available only for frequencies <1Hz")]
-    public int DataSource_datatype
+    public int DataSource_datatype 
     {
       get { return _DataType; }
       set
@@ -1337,36 +1479,12 @@ namespace YoctoVisualisation
     }
 
     
-    private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
-     DisplayName("Sensor value alarm 1"),
-     NotSavedInXMLAttribute(true),
-     DescriptionAttribute("Alarm 1 for this data source, expand for more.")]
-    public AlarmSection DataSource_AlarmSection0
-    {
-      get { return _DataSource_AlarmSection0; }
-      set { _DataSource_AlarmSection0 = value; }
-    }
-
-
-
-    private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
-    [TypeConverter(typeof(AlarmSectionParamConverter)),
-     DisplayName("Sensor value alarm 2"),   
-     NotSavedInXMLAttribute(true),
-     DescriptionAttribute("Alarm 2 for this data source, expand for more.")]
-    public AlarmSection DataSource_AlarmSection1
-    {
-      get { return _DataSource_AlarmSection1; }
-      set { _DataSource_AlarmSection1 = value; }
-    }
-    
+   
     
 
     [DisplayName("Sensor recording"),
-     TypeConverter(typeof(YesNoConverter)),
      NotSavedInXMLAttribute(true),
-     DescriptionAttribute("Enable/ disable sensor data recording in the device onboard datalogger."+  GenericHints.DevConfAffected + GenericHints.BoolMsg)]
+     DescriptionAttribute("Enable/ disable sensor data recording in the device onboard datalogger."+  GenericHints.DevConfAffected  )]
 
     public bool DataSource_recording
     {
@@ -1396,8 +1514,7 @@ namespace YoctoVisualisation
     private YColor _color = YColor.fromColor(Color.Red);
 
     [DisplayName("Color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Line color." + GenericHints.ColorMsg)]
     public YColor color
     {
@@ -1406,8 +1523,8 @@ namespace YoctoVisualisation
     }
 
     private int _yAxisIndex = 0;
-    [TypeConverter(typeof(YAxisChooserConverter)),
-
+    [
+      ParamExtraDescription(typeof(yAxisDescription)),
       DisplayName("Y axis"),
       DescriptionAttribute("Choose which Y axis the data with be scaled to.")]
     public int yAxisIndex
@@ -1416,7 +1533,30 @@ namespace YoctoVisualisation
       set { _yAxisIndex = value; }
     }
 
-  
+    private AlarmSection _DataSource_AlarmSection0 = new AlarmSection(0);
+    [
+     DisplayName("Sensor value alarm 1"),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 1 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection0
+    {
+      get { return _DataSource_AlarmSection0; }
+      set { _DataSource_AlarmSection0 = value; }
+    }
+
+
+
+    private AlarmSection _DataSource_AlarmSection1 = new AlarmSection(1);
+    [
+     DisplayName("Sensor value alarm 2"),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Alarm 2 for this data source, expand for more.")]
+    public AlarmSection DataSource_AlarmSection1
+    {
+      get { return _DataSource_AlarmSection1; }
+      set { _DataSource_AlarmSection1 = value; }
+    }
+
 
   }
 
@@ -1427,27 +1567,30 @@ namespace YoctoVisualisation
 
   public class LegendPanelDescription
   {
+
+    public string summary
+    {
+      get { return _enabled ? "Enabled" : "Disabled"; }
+    }
+
     private bool _enabled = false;
     [DisplayName("Enabled"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Should the legend panel be shown or not"+ GenericHints.BoolMsg)]
+      ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should the legend panel be shown or not" )]
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
     private bool _overlap = false;
     [DisplayName("Overlap"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Can the panel ovelap the graph data, or should we explicitely make space for it?" + GenericHints.BoolMsg)]
+     DescriptionAttribute("Can the panel ovelap the graph data, or should we explicitely make space for it?"  )]
     public bool overlap { get { return _overlap; } set { _overlap = value; } }
 
     private LegendPanel.Position _position = LegendPanel.Position.RIGHT;
     [DisplayName("Position"),
-       TypeConverter(typeof(SmartEnumConverter)),
      DescriptionAttribute("Position of the legend panel")]
      public LegendPanel.Position position { get { return _position; } set { _position = value; } }
 
     private FontDescription _font = new FontDescription("Arial", 7, YColor.FromArgb(255, 32, 32, 32), false, false);
     [DisplayName("Font"),
-     TypeConverter(typeof(YFontDescriptionConverter)),
       ReadOnlyAttribute(true),
      DescriptionAttribute("Legend panel contents fonts")]
     public FontDescription font
@@ -1460,15 +1603,13 @@ namespace YoctoVisualisation
 
     private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
     [DisplayName("Background color "),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
     DescriptionAttribute("Legend panel backgound color." + GenericHints.ColorMsg)]
     public YColor bgColor { get { return _bgColor; } set { _bgColor = value;  } }
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color "),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
     DescriptionAttribute("Legend panel border color." + GenericHints.ColorMsg)]
     public YColor borderColor { get { return _borderColor; } set { _borderColor = value; } }
 
@@ -1500,14 +1641,17 @@ namespace YoctoVisualisation
 
   public class DataTrackerDescription
   {
-   
 
-   
+    public string summary
+    {
+      get { return _enabled ? "Enabled" : "Disabled"; }
+    }
+
 
     private bool _enabled = false;
     [DisplayName("Enabled"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Should the data tracker be shown or not." + GenericHints.BoolMsg)]
+      ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should the data tracker be shown or not."  )]
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
     private double _diameter = 5;
@@ -1522,7 +1666,6 @@ namespace YoctoVisualisation
 
     private FontDescription _font = new FontDescription("Arial", 7, YColor.FromArgb(255, 32, 32, 32), false, false);
     [DisplayName("Font"),
-     TypeConverter(typeof(YFontDescriptionConverter)),
       ReadOnlyAttribute(true),
      DescriptionAttribute("Data tracker label fonts")]
     public FontDescription font
@@ -1535,15 +1678,13 @@ namespace YoctoVisualisation
 
     private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
     [DisplayName("Background color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Value panel ground color." + GenericHints.ColorMsg)]
     public YColor bgColor { get { return _bgColor; } set { _bgColor = value;  } }
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
     DescriptionAttribute("Value panel border and handle  color." + GenericHints.ColorMsg)]
     public YColor borderColor { get { return _borderColor; } set { _borderColor = value;  } }
 
@@ -1576,21 +1717,24 @@ namespace YoctoVisualisation
   public class NavigatorDescription
   {
 
+    public string summary
+    {
+      get { return _enabled ? "Enabled" : "Disabled"; }
+    }
 
 
     public NavigatorDescription() {}
 
     private bool _enabled = false;
     [DisplayName("Enabled"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Should the navigator be shown or not." + GenericHints.BoolMsg)]
+      ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should the navigator be shown or not."  )]
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
 
     private YColor _bgColor1 = YColor.FromArgb(255, 225, 225, 225);
     [DisplayName("Background color 1"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Navigator background gradiant color 1." + GenericHints.ColorMsg)]
     public YColor bgColor1
     {
@@ -1601,80 +1745,12 @@ namespace YoctoVisualisation
 
     private YColor _bgColor2 = YColor.FromArgb(255, 225, 225, 225);
     [DisplayName("Background color 2"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Navigator background gradiant color 2." + GenericHints.ColorMsg)]
     public YColor bgColor2
     {
       get { return _bgColor2; }
       set { _bgColor2 = value; }
-    }
-
-    private YColor _cursorColor = YColor.FromArgb(25, 0, 255, 0);
-    [DisplayName("Navigator cursor fill color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
-     DescriptionAttribute("Navigator")]
-    public YColor cursorColor
-    {
-      get { return _cursorColor; }
-      set { _cursorColor = value; }
-    }
-
-    private YColor _cursorBorderColor = YColor.FromArgb(255, 96, 96, 96);
-    [DisplayName("Navigator cursor left/right border color." + GenericHints.ColorMsg),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
-     DescriptionAttribute("Navigator")]
-    public YColor cursorBorderColor
-    {
-      get { return _cursorBorderColor; }
-      set { _cursorBorderColor = value; }
-    }
-
-
-    private Double _xAxisThickness = 1.0;
-    [DisplayName("X axis thickness"),
-     DescriptionAttribute("Navigator")]
-     public Double xAxisThickness
-    {
-      get { return _xAxisThickness; }
-      set { _xAxisThickness = value; }
-    }
-
-    private YColor _xAxisColor = YColor.fromColor(Color.Black);
-    [DisplayName("X axis color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
-     DescriptionAttribute("Navigator X axis color." + GenericHints.ColorMsg)]
-     public YColor xAxisColor
-    {
-      get { return _xAxisColor; }
-      set { _xAxisColor = value; }
-    }
-
-    private Navigator.YAxisHandling _yAxisHandling = Navigator.YAxisHandling.AUTO;
-    [DisplayName("Y axis range"),
-     TypeConverter(typeof(SmartEnumConverter)),
-     DescriptionAttribute("Is navigator Y axis zoom automatic or inherited from main view settings?")]
-    public Navigator.YAxisHandling yAxisHandling
-    {
-      get { return _yAxisHandling; }
-      set { _yAxisHandling = value; }
-    }
-
-   
-
-    private FontDescription _font = new FontDescription("Arial",7, YColor.FromArgb(255,32,32,32), false, false);
-    [DisplayName("X-Axis Font"),
-     CategoryAttribute("Fonts"),
-      ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
-     DescriptionAttribute("Navigator X axis font")]
-    public FontDescription font
-    {
-      get { return _font; }
-      set { _font = value; }
     }
 
     private Double _borderThickness = 1.0;
@@ -1688,14 +1764,79 @@ namespace YoctoVisualisation
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Navigator Border color." + GenericHints.ColorMsg)]
     public YColor borderColor
     {
       get { return _borderColor; }
       set { _borderColor = value; }
     }
+
+    private YColor _cursorColor = YColor.FromArgb(25, 0, 255, 0);
+    [DisplayName("Navigator cursor fill color"),
+      
+     DescriptionAttribute("Navigator")]
+    public YColor cursorColor
+    {
+      get { return _cursorColor; }
+      set { _cursorColor = value; }
+    }
+
+    private YColor _cursorBorderColor = YColor.FromArgb(255, 96, 96, 96);
+    [DisplayName("Navigator cursor left/right border color." + GenericHints.ColorMsg),
+    
+     DescriptionAttribute("Navigator")]
+    public YColor cursorBorderColor
+    {
+      get { return _cursorBorderColor; }
+      set { _cursorBorderColor = value; }
+    }
+
+
+    private Navigator.YAxisHandling _yAxisHandling = Navigator.YAxisHandling.AUTO;
+    [DisplayName("Y axis range"),
+     DescriptionAttribute("Is navigator Y axis zoom automatic or inherited from main view settings?")]
+    public Navigator.YAxisHandling yAxisHandling
+    {
+      get { return _yAxisHandling; }
+      set { _yAxisHandling = value; }
+    }
+
+    private Double _xAxisThickness = 1.0;
+    [DisplayName("X axis thickness"),
+     DescriptionAttribute("Navigator")]
+     public Double xAxisThickness
+    {
+      get { return _xAxisThickness; }
+      set { _xAxisThickness = value; }
+    }
+
+    private YColor _xAxisColor = YColor.fromColor(Color.Black);
+    [DisplayName("X axis color"),
+     
+     DescriptionAttribute("Navigator X axis color." + GenericHints.ColorMsg)]
+     public YColor xAxisColor
+    {
+      get { return _xAxisColor; }
+      set { _xAxisColor = value; }
+    }
+
+ 
+
+   
+
+    private FontDescription _font = new FontDescription("Arial",7, YColor.FromArgb(255,32,32,32), false, false);
+    [DisplayName("X-Axis Font"),
+     
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Navigator X axis font")]
+    public FontDescription font
+    {
+      get { return _font; }
+      set { _font = value; }
+    }
+
+  
   }
 
   //****************************
@@ -1708,7 +1849,7 @@ namespace YoctoVisualisation
 
     private String _title = "";
     [DisplayName("Text"),
-     CategoryAttribute("Legend"),
+     
      DescriptionAttribute("Legend text")]
     public String title
     {
@@ -1719,8 +1860,7 @@ namespace YoctoVisualisation
 
     private FontDescription _font = new FontDescription("Arial", 12, YColor.fromColor(Color.Black), false, true);
     [DisplayName("Font"),
-     CategoryAttribute("Legend"),
-     TypeConverter(typeof(YFontDescriptionConverter)),
+     
       ReadOnlyAttribute(true),
      DescriptionAttribute("Legend font")]
      public FontDescription font
@@ -1750,10 +1890,16 @@ namespace YoctoVisualisation
       _position = index == 0 ? YAxis.HrzPosition.LEFT : YAxis.HrzPosition.RIGHT;
     }
 
+    public string summary
+    {
+      get { return _visible ? "Enabled" : "Disabled"; }
+    }
+
+
     private bool _visible = false;
     [DisplayName("Visible"),
-      TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Should that YAxis be shown?." + GenericHints.BoolMsg)]
+      ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should that YAxis be shown?."  )]
     public bool visible
     {
       get { return _visible; }
@@ -1762,7 +1908,6 @@ namespace YoctoVisualisation
 
     private YAxis.HrzPosition _position = YAxis.HrzPosition.LEFT;
     [DisplayName("Position"),
-       TypeConverter(typeof(SmartEnumConverter)),
      DescriptionAttribute("Y Axis position (left / right)")]
     public YAxis.HrzPosition position
     {
@@ -1772,8 +1917,7 @@ namespace YoctoVisualisation
 
     private doubleNan _min = new doubleNan(Double.NaN);
     [DisplayName("Minimum value"),
-     CategoryAttribute("Y axis"),
-     TypeConverter(typeof(doubleNanConverter)),
+    
      DescriptionAttribute("YAxis minimum value, leave blank for automatic behavior.")]
     public doubleNan min
     {
@@ -1783,8 +1927,7 @@ namespace YoctoVisualisation
 
     private doubleNan _max = new doubleNan(Double.NaN);
     [DisplayName("Maximim value"),
-     CategoryAttribute("Y axis"),
-     TypeConverter(typeof(doubleNanConverter)),
+    
      DescriptionAttribute("YAxis maximum value, leave blank for automatic behavior.")]
     public doubleNan max
     {
@@ -1794,8 +1937,7 @@ namespace YoctoVisualisation
 
     private doubleNan _step = new doubleNan(Double.NaN);
     [DisplayName("Steps"),
-     CategoryAttribute("Y axis"),
-     TypeConverter(typeof(doubleNanConverter)),
+    
      DescriptionAttribute("YAxis step size, leave blank for automatic behavior.")]
     public doubleNan step
     {
@@ -1805,9 +1947,8 @@ namespace YoctoVisualisation
 
     private YColor _color = YColor.FromArgb(255,127, 127, 127);
     [DisplayName("Color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
-     CategoryAttribute("Y axis"),
+     
+    
      DescriptionAttribute("Y Axis Color." + GenericHints.ColorMsg)]
     public YColor color
     {
@@ -1817,7 +1958,7 @@ namespace YoctoVisualisation
 
     private Double _thickness = 1.0;
     [DisplayName("Thickness"),
-     CategoryAttribute("Y axis"),
+    
      DescriptionAttribute("Axis thickness")]
     public Double thickness
     {
@@ -1827,16 +1968,14 @@ namespace YoctoVisualisation
 
     private bool _showGrid = false;
     [DisplayName("Show Grid"),
-     CategoryAttribute("Y axis"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Show grid horizontal lines, or not." + GenericHints.BoolMsg)]
+     
+     DescriptionAttribute("Show grid horizontal lines, or not."  )]
     public bool showGrid { get { return _showGrid; } set { _showGrid = value; } }
 
     private YColor _gridColor = YColor.FromArgb(255,210, 210, 210);
     [DisplayName("Grid Color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
-     CategoryAttribute("Y axis"),
+    
+    
      DescriptionAttribute("Grid horizontal lines color." + GenericHints.ColorMsg)]
     public YColor gridColor
     {
@@ -1846,7 +1985,7 @@ namespace YoctoVisualisation
 
     private Double _gridThickness = 1.0;
     [DisplayName("Grid thickness"),
-     CategoryAttribute("Y axis"),
+    
      DescriptionAttribute("Grid horizontal lines thickness")]
     public Double gridThickness
     {
@@ -1856,9 +1995,8 @@ namespace YoctoVisualisation
 
     private FontDescription _font = new FontDescription("Arial", 10, YColor.fromColor(Color.Black), false, false);
     [DisplayName("Font"),
-     CategoryAttribute("Y axis"),
+     
       ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
      DescriptionAttribute("Axis font")]
      public FontDescription font
      {
@@ -1868,8 +2006,7 @@ namespace YoctoVisualisation
 
     private LegendDescription _legend = new LegendDescription();
     [DisplayName("Legend"),
-     CategoryAttribute("Y axis"),
-     TypeConverter(typeof(YLegendDescriptionConverter)),
+     
      DescriptionAttribute("Axis legend")]
      public LegendDescription legend
       {  get { return _legend; }
@@ -1880,7 +2017,6 @@ namespace YoctoVisualisation
     [DisplayName("Zone 1"),
     CategoryAttribute("Zones"),
       ReadOnlyAttribute(true),
-    TypeConverter(typeof(YZoneConverter)),
     DescriptionAttribute("Zone 1 parameters")]
     public ZoneDescription zones0
     {
@@ -1890,9 +2026,8 @@ namespace YoctoVisualisation
 
     private ZoneDescription _zones1 = new ZoneDescription(50, 80, YColor.fromColor(Color.Yellow));
     [DisplayName("Zone 2"),
-    CategoryAttribute("Zones"),
-      ReadOnlyAttribute(true),
-    TypeConverter(typeof(YZoneConverter)),
+     CategoryAttribute("Zones"),
+     ReadOnlyAttribute(true),
     DescriptionAttribute("Zone 2 parameters")]
     public ZoneDescription zones1
     {
@@ -1904,7 +2039,6 @@ namespace YoctoVisualisation
     [DisplayName("Zone 3"),
     CategoryAttribute("Zones"),
       ReadOnlyAttribute(true),
-    TypeConverter(typeof(YZoneConverter)),
     DescriptionAttribute("Zone 3 parameters")]
     public ZoneDescription zones2
     {
@@ -1924,9 +2058,9 @@ namespace YoctoVisualisation
 
   {
     private double _initialZoom = 60;
-    [TypeConverter(typeof(XAxisZoomConverter)),
+    [
      DisplayName("Initial Zoom"),
-     DescriptionAttribute("Zoom level at application startup.")]
+     DescriptionAttribute("Zoom level at application startup, i.e. width of the viewport in seconds.")]
     public double initialZoom
     {
       get { return _initialZoom; }
@@ -1937,7 +2071,6 @@ namespace YoctoVisualisation
 
     private XAxis.VrtPosition _position = XAxis.VrtPosition.BOTTOM;
     [DisplayName("Position"),
-       TypeConverter(typeof(SmartEnumConverter)),
      DescriptionAttribute("X Axis position (top / bottom)")]
     public XAxis.VrtPosition position
     {
@@ -1947,7 +2080,6 @@ namespace YoctoVisualisation
 
     private TimeConverter.TimeReference _timeReference = TimeConverter.TimeReference.ABSOLUTE;
     [DisplayName("Time reference"),
-       TypeConverter(typeof(SmartEnumConverter)),
     DescriptionAttribute("Are gradutation timestamps absolute or relative to experiment start time? ")]
     public TimeConverter.TimeReference timeReference
     {
@@ -1958,7 +2090,6 @@ namespace YoctoVisualisation
 
     private XAxis.OverflowHandling _overflowHandling = XAxis.OverflowHandling.SCROLL;
     [DisplayName("Overflow Handling"),
-     TypeConverter(typeof(SmartEnumConverter)),
      DescriptionAttribute("What to do when new data are about to reach the graph right border")]
     public XAxis.OverflowHandling overflowHandling
     {
@@ -1969,8 +2100,7 @@ namespace YoctoVisualisation
 
     private YColor _color = YColor.FromArgb(255, 127, 127, 127);
     [DisplayName("Color"),
-Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+
      DescriptionAttribute("X Axis Color." + GenericHints.ColorMsg)]
     public YColor color
     {
@@ -1990,14 +2120,12 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
     private bool _showGrid = false;
     [DisplayName("Show Grid"),
-     TypeConverter(typeof(YesNoConverter)),
-     DescriptionAttribute("Show grid vertical lines, or not." + GenericHints.BoolMsg)]
+     DescriptionAttribute("Show grid vertical lines, or not."  )]
     public bool showGrid { get { return _showGrid; } set { _showGrid = value; } }
 
     private YColor _gridColor = YColor.FromArgb(50, 0, 0, 0);
     [DisplayName("Grid Color"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Grid vertical lines color." + GenericHints.ColorMsg)]
     public YColor gridColor
     {
@@ -2016,8 +2144,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
     private FontDescription _font = new FontDescription("Arial", 10, YColor.fromColor(Color.Black), false, false);
     [DisplayName("Font"),
-      ReadOnlyAttribute(true),
-     TypeConverter(typeof(YFontDescriptionConverter)),
+     ReadOnlyAttribute(true),
      DescriptionAttribute("Axis font")]
     public FontDescription font
     {
@@ -2028,7 +2155,6 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     private LegendDescription _legend = new LegendDescription();
     [DisplayName("Legend"),
       ReadOnlyAttribute(true),
-     TypeConverter(typeof(YLegendDescriptionConverter)),
      DescriptionAttribute("X Axis legend")]
     public LegendDescription legend
     {
@@ -2071,9 +2197,11 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
 
     ChartSerie _Graph_series0 = new ChartSerie(YColor.fromColor(Color.Tomato));
-    [TypeConverter(typeof(ChartSerieConverter)),
+    [
       DisplayName("Series 1"),
       CategoryAttribute("Data Sources"),
+      PreExpandedCategoryAttribute(true),
+      PreExpandedAttribute(true),
       ReadOnlyAttribute(true),
       DescriptionAttribute("First data series, expand for more.")]
     public ChartSerie Graph_series0
@@ -2083,7 +2211,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     }
 
     ChartSerie _Graph_series1 = new ChartSerie(YColor.fromColor(Color.DodgerBlue));
-    [TypeConverter(typeof(ChartSerieConverter)),
+    [
       DisplayName("Series 2"),
       CategoryAttribute("Data Sources"),
       ReadOnlyAttribute(true),
@@ -2095,7 +2223,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     }
 
     ChartSerie _Graph_series2 = new ChartSerie(YColor.fromColor(Color.SeaGreen));
-    [TypeConverter(typeof(ChartSerieConverter)),
+    [
       DisplayName("Series 3"),
       CategoryAttribute("Data Sources"),
       ReadOnlyAttribute(true),
@@ -2108,7 +2236,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
 
     ChartSerie _Graph_series3 = new ChartSerie(YColor.fromColor(Color.Gold));
-    [TypeConverter(typeof(ChartSerieConverter)),
+    [
       DisplayName("Series 4"),
       CategoryAttribute("Data Sources"),
       ReadOnlyAttribute(true),
@@ -2124,9 +2252,8 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     private bool _Graph_showRecordedData = false;
     [
      DisplayName("Use datalogger data"),
-     TypeConverter(typeof(YesNoConverter)),
      CategoryAttribute("Graph"),
-     DescriptionAttribute("Makes the graph show the datalogger contents." + GenericHints.BoolMsg)]
+     DescriptionAttribute("Makes the graph show the datalogger contents."  )]
     public bool Graph_showRecordedData
     {
       get { return _Graph_showRecordedData; }
@@ -2144,8 +2271,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     private YColor _Graph_borderColor = YColor.fromColor(Color.LightGray);
     [DisplayName("Border color"),
      CategoryAttribute("Graph"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Canvas borders color." + GenericHints.ColorMsg)]
     public YColor Graph_borderColor
     {
@@ -2166,8 +2292,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     private YColor _Graph_bgColor1 = YColor.FromArgb(255, 220, 220, 220);
     [DisplayName("Background color 1"),
      CategoryAttribute("Graph"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+     
      DescriptionAttribute("Background gradiant color 1." + GenericHints.ColorMsg)]
     public YColor Graph_bgColor1
     {
@@ -2178,8 +2303,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     private YColor _Graph_bgColor2 = YColor.FromArgb(255, 240, 240, 240);
     [DisplayName("Background color 2"),
      CategoryAttribute("Graph"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-       TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Background gradiant color 2." + GenericHints.ColorMsg)]
     public YColor Graph_bgColor2
     {
@@ -2190,7 +2314,6 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     private Proportional.ResizeRule _Graph_resizeRule = Proportional.ResizeRule.FIXED;
     [DisplayName("Font sizes"),
      CategoryAttribute("Graph"),
-     TypeConverter(typeof(SmartEnumConverter)),
      
      DescriptionAttribute("Are font sizes fixed or do they change when window is resized?")]
     public Proportional.ResizeRule Graph_resizeRule
@@ -2201,7 +2324,6 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
     private XaxisDescription _Graph_xAxis = new XaxisDescription();
     [DisplayName("X Axis"),
-     TypeConverter(typeof(XaxisDescriptionConverter)),
      CategoryAttribute("X/Y Axes"),
      ReadOnlyAttribute(true),
      DescriptionAttribute("X-Axis, expand for more")]
@@ -2212,7 +2334,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
 
     private YaxisDescription _Graph_yAxes0 = new YaxisDescription(0, true);
-    [TypeConverter(typeof(YaxisDescriptionConverter)),
+    [
       DisplayName("YAxis 1"),
       ReadOnlyAttribute(true),
       CategoryAttribute("X/Y Axes"),
@@ -2225,7 +2347,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
 
     private YaxisDescription _Graph_yAxes1 = new YaxisDescription(1, false);
-    [TypeConverter(typeof(YaxisDescriptionConverter)),
+    [
       DisplayName("YAxis 2"),
       ReadOnlyAttribute(true),
      CategoryAttribute("X/Y Axes"),
@@ -2237,7 +2359,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     }
 
     private YaxisDescription _Graph_yAxes2 = new YaxisDescription(2, false);
-    [TypeConverter(typeof(YaxisDescriptionConverter)),
+    [
       DisplayName("YAxis 3"),
       ReadOnlyAttribute(true),
       CategoryAttribute("X/Y Axes"),
@@ -2249,7 +2371,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
     }
 
     private LegendPanelDescription _Graph_legendPanel = new LegendPanelDescription();
-    [TypeConverter(typeof(LegendPanelDescriptionConverter)),
+    [
       DisplayName("Legend Panel"),
       ReadOnlyAttribute(true),
       CategoryAttribute("Graph"),
@@ -2265,7 +2387,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
 
     private DataTrackerDescription _Graph_dataTracker = new DataTrackerDescription();
-    [TypeConverter(typeof(DataTrackerDescriptionConverter)),
+    [
       DisplayName("Data tracker"),
       ReadOnlyAttribute(true),
       CategoryAttribute("Graph"),
@@ -2278,7 +2400,7 @@ Editor(typeof(YColorEditor), typeof(UITypeEditor)),
 
 
     private NavigatorDescription _Graph_navigator = new NavigatorDescription();
-    [TypeConverter(typeof(NavigatorDescriptionConverter)),
+    [
       DisplayName("Navigator"),
       CategoryAttribute("Graph"),
       ReadOnlyAttribute(true),

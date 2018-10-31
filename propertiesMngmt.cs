@@ -60,9 +60,104 @@ namespace YoctoVisualisation
 {
   public delegate bool PropFilter(string propNname);
 
-  
 
-  
+
+[AttributeUsage(AttributeTargets.All)]
+ public class ParamExtraDescriptionAttribute : System.Attribute
+ {
+  public Type allowedValueClass =null;
+
+  public ParamExtraDescriptionAttribute(Type AllowedValueClass)
+  {
+    this.allowedValueClass = AllowedValueClass;
+  }
+
+
+}
+
+
+
+
+[AttributeUsage(AttributeTargets.All)]
+  public class ParamCategorySummaryAttribute : System.Attribute
+  {
+    public string callback = null;
+
+    public ParamCategorySummaryAttribute(string summaryPropertyName)
+    {
+      this.callback = summaryPropertyName;
+    }
+
+
+  }
+
+
+
+
+  [AttributeUsage(AttributeTargets.All)]
+  public class OnlyAvailableonAttribute : System.Attribute
+  {
+    public const int Windows = 1;
+    public const int Linux = 2;
+    public const int MacOS = 4;
+
+
+    
+
+
+   private int  _targetOs = Windows | Linux | MacOS;
+
+   public OnlyAvailableonAttribute(int targetOs )
+    {
+      this._targetOs = targetOs;
+    }
+
+    public bool Available
+    {
+      get {
+        if (((_targetOs & MacOS) != 0) && constants.OSX_Running) return true;
+        if (((_targetOs & Linux) != 0) && constants.MonoRunning) return true;
+        if ((_targetOs & Windows) != 0) return true;
+        return false;
+      }
+    }
+
+  }
+
+  [AttributeUsage(AttributeTargets.All)]
+  public class PreExpandedCategoryAttribute : System.Attribute
+  {
+    public readonly bool preExpandedCategory;
+
+    public PreExpandedCategoryAttribute(bool value)
+    {
+      this.preExpandedCategory = value;
+    }
+  }
+
+
+  [AttributeUsage(AttributeTargets.All)]
+  public class PreExpandedAttribute : System.Attribute
+  {
+    public readonly bool preExpanded;
+
+    public PreExpandedAttribute(bool value)
+    { 
+      this.preExpanded = value;
+    }
+  }
+
+  [AttributeUsage(AttributeTargets.All)]
+  public class ChangeCausesParentRefreshAttribute : System.Attribute
+  {
+    public readonly bool changeCausesParentRefresh;
+
+    public ChangeCausesParentRefreshAttribute(bool value)
+    {
+      this.changeCausesParentRefresh = value;
+    }
+  }
+
 
 
   [AttributeUsage(AttributeTargets.All)]
@@ -74,8 +169,6 @@ namespace YoctoVisualisation
     {
       this.mustSave = value;
     }
-
-
   }
 
   public static class colorConverter
@@ -95,883 +188,7 @@ namespace YoctoVisualisation
 
   }
 
-  public class YAxisParamConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      //if (destinationType == typeof(YAxisParam)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-   /*   if (destinationType == typeof(System.String) && value is YAxisParam)
-      {
-        return "..";
-      }*/
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-
-  
-
-  public class YAngularZoneConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(YAngularZone)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is AngularZoneDescription)
-      { if (((AngularZoneDescription)value).visible)
-          return ((AngularZoneDescription)value).min.ToString() + ".." + ((AngularZoneDescription)value).max.ToString();
-        else return ("Disabled");
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-  public class YZoneConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(Zone)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is ZoneDescription)
-      {
-        if (((ZoneDescription)value).visible)
-          return ((ZoneDescription)value).min.ToString() + ".." + ((ZoneDescription)value).max.ToString();
-        else return ("Disabled");
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-
-
-
-  public class YFontDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(YFontParams)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is YFontParams)
-      {
-        return "..";
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-
-  public class YLegendDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(Legend)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is LegendDescription)
-      {
-        return ((LegendDescription)value).title;
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-
  
-
- public class XaxisDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(XAxis)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is XaxisDescription)
-      {
-        return "..";
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-  public class LegendPanelDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(Navigator)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is LegendPanelDescription)
-      {
-        return ((LegendPanelDescription)value).enabled ? "Enabled" : "Disabled";
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-  public class DataTrackerDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(DataTracker)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is DataTrackerDescription)
-      {
-        return ((DataTrackerDescription)value).enabled ? "Enabled" : "Disabled";
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-  public class NavigatorDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(Navigator)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is NavigatorDescription)
-      {
-        return ((NavigatorDescription)value).enabled ? "Enabled" : "Disabled"; 
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-  
-
-
-  public class YaxisDescriptionConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(YAxis)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is YaxisDescription)
-      {
-       return  ((YaxisDescription)value).visible ? ((YaxisDescription)value).position == YAxis.HrzPosition.LEFT ? "Left" : "Right" : "Hidden";
-
-
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-
-
-
-  public class ChartSerieConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(ChartSerie)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is ChartSerie)
-      {
-
-        if  (((ChartSerie)value).DataSource_source is NullYSensor) return "No data source assigned";
-
-        return ((ChartSerie)value).DataSource_source.get_friendlyName();
-      
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-
-
-  class SmartEnumConverter : EnumConverter  // thanks stackoverflow
-  {
-    private Type enumType;
-
-    public SmartEnumConverter(Type type) : base(type)
-    {
-      enumType = type;
-    }
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, Type destType)
-    {
-      return destType == typeof(string);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                     object value, Type destType)
-    {
-      FieldInfo fi = enumType.GetField(Enum.GetName(enumType, value));
-      DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi,
-                                  typeof(DescriptionAttribute));
-      if (dna != null)
-        return dna.Description;
-      else
-        return value.ToString();
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type srcType)
-    {
-      return srcType == typeof(string);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture,
-                                       object value)
-    {
-      foreach (FieldInfo fi in enumType.GetFields())
-      {
-        DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi,
-                                    typeof(DescriptionAttribute));
-        if ((dna != null) && ((string)value == dna.Description))
-          return Enum.Parse(enumType, fi.Name);
-      }
-      return Enum.Parse(enumType, (string)value);
-    }
-  }
-
-
-
-
-  public class YesNoConverter : BooleanConverter
-  {
-
-   
-      public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
-      {
-        if (value is bool && destinationType == typeof(string))
-        {
-          return values[(bool)value ? 1 : 0];
-        }
-        return base.ConvertTo(context, culture, value, destinationType);
-      }
-
-      public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-      {
-        string txt = value as string;
-        if (values[0] == txt) return false;
-        if (values[1] == txt) return true;
-        return base.ConvertFrom(context, culture, value);
-      }
-
-      private string[] values = new string[] { "No", "Yes" };
-    
-
-
-  }
-
-  public class AlarmSectionParamConverter : ExpandableObjectConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(ChartSerie)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture,
-                                object value, System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String))
-      {
-
-        string cmd = ((AlarmSection)value).commandLine;
-        if (cmd.Trim() == "") cmd = "do nothing";
-        int isrc = ((AlarmSection)value).source;
-        string src = isrc == 1 ? "MIN" : isrc == 2 ? "MAX" : "AVG";
-
-        switch (((AlarmSection)value).condition)
-        { case 1 :  return "if "+ src + " > " + ((AlarmSection)value).value.ToString()+" then "+ cmd;
-          case 2 :  return "if " + src + " >= " + ((AlarmSection)value).value.ToString() + " then " + cmd;
-          case 3 :  return "if " + src + " = " + ((AlarmSection)value).value.ToString() + " then " + cmd;
-          case 4 :  return "if " + src + " <= " + ((AlarmSection)value).value.ToString() + " then " + cmd;
-          case 5 :  return "if " + src + " < " + ((AlarmSection)value).value.ToString() + " then " + cmd;
-
-
-          default :  return "Disabled";
-         } 
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-  }
-
-  public class AlamSourceTypeConverter : StringConverter
-  {
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(new string[] { "Average value", "Min value", "Max value" }); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(int)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if ((destinationType == typeof(System.String)) && (value is int))
-      {
-
-
-        switch ((int)value)
-        {
-          case 1: return "Min value";
-          case 2: return "Max value";
-         
-          default: return "Average value";
-        }
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        if (((string)value).ToUpper().IndexOf("MIN") >= 0) return 1;
-        if (((string)value).ToUpper().IndexOf("MAX") >= 0) return 2;
-       
-
-
-        return 0;
-      }
-
-      return base.ConvertFrom(context, culture, value);
-    }
-
-  }
-
-
-  public class AlamTriggerTypeConverter : StringConverter
-  {
-   
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(new string[] { "Disabled", ">", ">=", "=", "<=","<" }); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(int)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if ((destinationType == typeof(System.String)) && (value is int))
-      {
-         
-
-        switch ((int)value)
-        {
-          case 1: return ">";
-          case 2: return ">=";
-          case 3: return "=";
-          case 4: return "<=";
-          case 5: return "<";
-          default: return "Disabled";
-        }
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        if (((string)value).ToUpper().IndexOf(">=") >= 0) return 2;
-        if (((string)value).ToUpper().IndexOf("<=") >= 0) return 4;
-        if (((string)value).ToUpper().IndexOf("=") >= 0) return 3;
-        if (((string)value).ToUpper().IndexOf(">") >= 0) return 1;
-        if (((string)value).ToUpper().IndexOf("<") >= 0) return 5;
-
-
-        return 0;
-      }
-
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-
-  public class FontNameConverter : StringConverter
-  {
-
-    String[]  AvailableFontsList = null;
-
-    public FontNameConverter()
-    {
-      
-      InstalledFontCollection _fontsCollection = new InstalledFontCollection();
-      AvailableFontsList = new string[_fontsCollection.Families.Length] ;
-      int i = 0;
-      foreach (FontFamily font in _fontsCollection.Families)
-      {
-        AvailableFontsList[i++] = font.Name;
-      }
-    }
-
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(AvailableFontsList); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(string)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if ((destinationType == typeof(System.String)) && (value is string))
-      {
-        for (int i = 0; i < AvailableFontsList.Length; i++)
-          if (String.Compare((string)value, AvailableFontsList[i], StringComparison.OrdinalIgnoreCase) == 0)
-            return AvailableFontsList[i];
-       
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return false;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        for (int i = 0; i < AvailableFontsList.Length; i++)
-          if (String.Compare((string)value, AvailableFontsList[i], StringComparison.OrdinalIgnoreCase) == 0)
-            return AvailableFontsList[i];
-      }
-
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-
-
-
-
-  public class AvgMinMaxConverter : StringConverter
-  {
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(new string[] { "Avg values", "Min values", "Max values" }); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(int)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if ((destinationType == typeof(System.String)) && (value is int))
-      {
-        switch ((int)value)
-        {
-          case 1: return "Min values";
-          case 2: return "Max values";
-          default: return "Avg values";
-        }
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        if (((string)value).ToUpper().IndexOf("MIN") >= 0) return 1;
-        if (((string)value).ToUpper().IndexOf("MAX") >= 0) return 2;
-        return 0;
-      }
-
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-
-
-
-
-
-
-
-
-  public class FormatterPrecisionConverter : StringConverter
-  {
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(new string[] { "0", "0.1", "0.12", "0.123" }); }
-    public override bool GetStandardValuesExclusive(
-                           ITypeDescriptorContext context)
-    {
-      return true;
-    }
-  }
-
-  public class FrequencyConverter : StringConverter
-  {
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    {
-      return new StandardValuesCollection(new string[] { "25/s", "10/s", "5/s", "4/s","3/s","1/s",
-                                                         "30/m","12/m","6/m","4/m","3/m","2/m","1/m",
-                                                         "30/h","12/h","6/h","4/h","3/h","2/h","1/h"
-    });
-    }
-
-    public override bool GetStandardValuesExclusive(
-                           ITypeDescriptorContext context)
-    {
-      return true;
-    }
-
-
-  }
-
-
-
-
-
-
-
-
-
-
-  public class FontConverter : StringConverter
-  {
-    FontFamily[] ffArray = FontFamily.Families;
-    string[] fontnames;
-
-    public FontConverter()
-    {
-      fontnames = new string[ffArray.Length];
-      for (int i = 0; i < ffArray.Length; i++)
-        fontnames[i] = ffArray[i].Name;
-
-    }
-
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    {
-      return new StandardValuesCollection(fontnames);
-    }
-
-    public override bool GetStandardValuesExclusive(
-                           ITypeDescriptorContext context)
-    {
-      return true;
-    }
-
-  }
-
-
-
-  public class XAxisZoomConverter : StringConverter
-  {
-
-    string[] avalues = new string[] { "15 secondes", "30 secondes ",
-                                       "1 minute", "5 minutes", "15 minutes", "30 minutes",
-                                       "1 hour", "6 hour", "12 hours",
-                                       "1 day", "1 week", "1 month"};
-
-    double[] nvalues = new double[] { 15,30,
-                                      60,300,15*60,30*60,
-                                      3600, 6*3600,12*3600,
-                                      86400, 7*86400, 30*86400};
-
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    { return new StandardValuesCollection(avalues); }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(double)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override bool GetStandardValuesExclusive(
-                           ITypeDescriptorContext context)
-    {
-      return true;
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is double)
-      {
-        for (int i = 0; i < nvalues.Length; i++)
-          if ((double)value == nvalues[i]) return avalues[i];
-        return ((double)value).ToString();
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        for (int i = 0; i < avalues.Length; i++)
-          if ((string)value == avalues[i]) return nvalues[i];
-        return float.Parse((string)value);
-      }
-
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-
-
- 
-
-
-  public class YAxisChooserConverter : StringConverter
-  {
-
-    public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-    { return true; }
-
-    public override StandardValuesCollection
-                     GetStandardValues(ITypeDescriptorContext context)
-    {
-      List<string> AxisList = new List<string>();
-      for (int i = 0; i < GraphForm.YAxisCount; i++)
-        switch (i)
-        {
-          case 0: AxisList.Add("1rst Y Axis"); break;
-          case 1: AxisList.Add("2nd Y Axis"); break;
-          case 2: AxisList.Add("3rnd Y Axis"); break;
-          default: AxisList.Add(i.ToString() + "th Y axis"); break;
-        }
-
-      return new StandardValuesCollection(AxisList);
-    }
-
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(int)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if (destinationType == typeof(string) && (value is int))
-      {
-        int v = (int)value;
-        switch (v)
-        {
-          case 0: return "1rst Y Axis";
-          case 1: return "2nd Y Axis";
-          case 2: return "3rnd Y Axis";
-          default: return v.ToString() + "th Y axis";
-        }
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string)) return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        return Convert.ToInt32(Regex.Replace((string)value, "[^0-9]", "")) - 1;
-      }
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
-
-
-  public class doubleNanConverter : StringConverter
-  {
-    public override bool CanConvertTo(ITypeDescriptorContext context, System.Type destinationType)
-    {
-      if (destinationType == typeof(doubleNan)) return true;
-      return base.CanConvertTo(context, destinationType);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context,
-                                CultureInfo culture,
-                                object value,
-                                System.Type destinationType)
-    {
-      if (destinationType == typeof(System.String) && value is doubleNan)
-      {
-        if (double.IsNaN(((doubleNan)value).value))
-          return "";
-        return ((doubleNan)value).ToString();
-      }
-      return base.ConvertTo(context, culture, value, destinationType);
-    }
-
-    public override bool CanConvertFrom(ITypeDescriptorContext context,
-                              System.Type sourceType)
-    {
-      if (sourceType == typeof(string))
-        return true;
-
-      return base.CanConvertFrom(context, sourceType);
-    }
-
-    public override object ConvertFrom(ITypeDescriptorContext context,
-                              CultureInfo culture, object value)
-    {
-      if (value is String)
-      {
-        return new doubleNan((string)value);
-      }
-      return base.ConvertFrom(context, culture, value);
-    }
-  }
 
   public class doubleNan
   {
@@ -1059,6 +276,7 @@ namespace YoctoVisualisation
       ownerForm = Owner;
       if (initData != null)
         foreach (var p in o.GetType().GetProperties())
+          if (p.CanWrite)
         {
           foreach (XmlNode node in initData.ChildNodes)
           {
@@ -1184,7 +402,7 @@ namespace YoctoVisualisation
     private BordersMode _Form_FormBorderStyle = BordersMode.Sizable;
     [DisplayName("Borders"),
      CategoryAttribute("Window"),
-      TypeConverter(typeof(SmartEnumConverter)),
+     OnlyAvailableonAttribute(OnlyAvailableonAttribute.Windows),
      DescriptionAttribute("Window borders style. If you use \"none\" on a maximized window, you will get a kiosk mode.")]
     public BordersMode Form_FormBorderStyle
     {
@@ -1195,8 +413,7 @@ namespace YoctoVisualisation
     private YColor _Form_BackColor = YColor.FromArgb(0xff, 0xf0, 0xf0, 0xf0);
     [DisplayName("Background color"),
      CategoryAttribute("Window"),
-      Editor(typeof(YColorEditor), typeof(UITypeEditor)),
-     TypeConverter(typeof(YColorConverter)),
+    
      DescriptionAttribute("Window background color." + GenericHints.ColorMsg)]
     public YColor Form_BackColor
     {
@@ -1215,6 +432,7 @@ namespace YoctoVisualisation
 
       string value = "";
       foreach (System.Reflection.PropertyInfo p in o.GetType().GetProperties())
+        if (p.CanWrite)
       {
 
         bool Mustsave = true;
@@ -1529,13 +747,15 @@ namespace YoctoVisualisation
         if (info != null)
           info.SetValue(target, sourceValue, null);
 
-        System.Reflection.PropertyInfo[] props = sourceValue.GetType().GetProperties();
-        for (int i = 0; i < props.Length; i++)
-        {
-          path.Add(props[i].Name);
-          ApplyProperties(rootSource, rootTarget, fullpropname, props[i].GetValue(sourceValue, null), path);
-          path.RemoveAt(path.Count - 1);
-        }
+       
+
+        foreach (PropertyInfo p  in sourceValue.GetType().GetProperties())
+         if (p.CanWrite)
+          {
+            path.Add(p.Name);
+            ApplyProperties(rootSource, rootTarget, fullpropname, p.GetValue(sourceValue, null), path);
+            path.RemoveAt(path.Count - 1);
+          }
 
       }
 
@@ -1545,6 +765,7 @@ namespace YoctoVisualisation
     {
       System.Reflection.PropertyInfo[] props = this.GetType().GetProperties();
       foreach (var p in props)
+        if (p.CanWrite)
       {
         string fullpropname = p.Name;
         int index = fullpropname.IndexOf("_");

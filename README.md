@@ -31,7 +31,7 @@ Install Mono for macOS (Visual Studio channel) and Visual Studio for macOS and o
 
 ## What you need to know
 - The application is based on the Yoctopuce YSensor generic class. Any past, present and future Yoctopuce sensor compatible with this class will work with this application.
-- The editing principle is [C# reflection](https://msdn.microsoft.com/en-us/library/mt656691.aspx) associated with a *propertyGrid* component 
+- The editing principle is [C# reflection](https://msdn.microsoft.com/en-us/library/mt656691.aspx) associated with a custom made Editor working more or less like the standart *propertygrid* component.
 - The most interesting file to change is *properties.cs*. It contains the list of all customizable properties in the widgets. This is the place for adding / removing / customize properties. Default values are defined there as well.
 
 ## Note
