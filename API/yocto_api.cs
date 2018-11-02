@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 32517 2018-10-05 08:19:15Z seb $
+ * $Id: yocto_api.cs 32868 2018-11-01 15:34:57Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -1235,7 +1235,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "32798";
+    public const string YOCTO_API_BUILD_NO = "32881";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -1316,7 +1316,7 @@ public class YAPI
     public delegate void _yapiFunctionUpdateFunc(YFUN_DESCR dev, IntPtr value);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void _yapiTimedReportFunc(YFUN_DESCR dev, double timestamp, IntPtr data, u32 len);
+    public delegate void _yapiTimedReportFunc(YFUN_DESCR dev, double timestamp, IntPtr data, u32 len, double duration);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void _yapiHubDiscoveryCallback(IntPtr serial, IntPtr url);
@@ -2564,6 +2564,7 @@ public class YAPI
         private String _value;
         private List<int> _report;
         private double _timestamp;
+        private double _duration;
         private int _beacon;
 
         public DataEvent(YFunction fun, String value)
@@ -2577,13 +2578,14 @@ public class YAPI
             _beacon = -1;
         }
 
-        public DataEvent(YSensor sensor, double timestamp, List<int> report)
+        public DataEvent(YSensor sensor, double timestamp, double duration, List<int> report)
         {
             _fun = null;
             _sensor = sensor;
             _module = null;
             _value = null;
             _timestamp = timestamp;
+            _duration = duration;
             _report = report;
             _beacon = -1;
         }
@@ -2614,7 +2616,7 @@ public class YAPI
         public void invoke()
         {
             if (_sensor != null) {
-                YMeasure mesure = _sensor._decodeTimedReport(_timestamp, _report);
+                YMeasure mesure = _sensor._decodeTimedReport(_timestamp,_duration, _report);
                 _sensor._invokeTimedReportCallback(mesure);
             } else if (_fun != null) {
                 // new value
@@ -2873,7 +2875,7 @@ public class YAPI
         }
     }
 
-    private static void native_yTimedReportCallback(YFUN_DESCR fundesc, double timestamp, IntPtr rawdata, u32 len)
+    private static void native_yTimedReportCallback(YFUN_DESCR fundesc, double timestamp, IntPtr rawdata, u32 len, double duration)
     {
         for (int i = 0; i < YFunction._TimedReportCallbackList.Count; i++) {
             if (YFunction._TimedReportCallbackList[i].get_functionDescriptor() == fundesc) {
@@ -2886,7 +2888,7 @@ public class YAPI
                         report.Add(data[p++] & 0xff);
                     }
 
-                    DataEvent ev = new DataEvent(YFunction._TimedReportCallbackList[i], timestamp, report);
+                    DataEvent ev = new DataEvent(YFunction._TimedReportCallbackList[i], timestamp, duration, report);
                     _DataEvents.Add(ev);
                 }
             }
@@ -11269,7 +11271,7 @@ public class YSensor : YFunction
         return this._calhdl(rawValue, this._caltyp, this._calpar, this._calraw, this._calref);
     }
 
-    public virtual YMeasure _decodeTimedReport(double timestamp, List<int> report)
+    public virtual YMeasure _decodeTimedReport(double timestamp, double duration, List<int> report)
     {
         int i;
         int byteVal;
@@ -11284,7 +11286,11 @@ public class YSensor : YFunction
         double minVal;
         double avgVal;
         double maxVal;
-        startTime = this._prevTimedReport;
+        if (duration > 0) {
+            startTime = timestamp - duration;
+        } else {
+            startTime = this._prevTimedReport;
+        }
         endTime = timestamp;
         this._prevTimedReport = endTime;
         if (startTime == 0) {

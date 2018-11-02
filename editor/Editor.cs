@@ -87,6 +87,7 @@ namespace YoctoVisualisation
 
     public void EditObject(object structData, SetValueCallBack2 valueCallBack)
     {
+      string helpYourselfMsg = "This is the property editor. Change any parameter you want. All changes are applied in real time.";
       if (!Visible) return;
       label1.Text = "Please wait....";
       label1.Refresh();
@@ -94,8 +95,11 @@ namespace YoctoVisualisation
       //Console.WriteLine(" -> edit");
 
       if (EditedDataSourceList.ContainsKey(structData))
-        if (EditedDataSourceList[structData] == currentEditedDataSource) return;
-
+        if (EditedDataSourceList[structData] == currentEditedDataSource)
+        {
+          label1.Text = helpYourselfMsg;
+          return;
+        }
 
       if (currentEditedDataSource != null) currentEditedDataSource.root.stopEdit();
 
@@ -121,7 +125,7 @@ namespace YoctoVisualisation
 
       currentEditedDataSource.root.startEdit(valueCallBack);
       currentEditedDataSource.root.resizeAll();
-      label1.Text = "Change any parameter you want. All changes are applied in real time.";
+      label1.Text = helpYourselfMsg;
       outterpanel.Refresh();
     }
 

@@ -393,6 +393,7 @@ namespace YoctoVisualisation
 
         progressPanel.Visible = true;
         progressBar1.Visible = true;
+        progressBar1.Value = 0;
         exportProcess = new BackgroundWorker();
         exportProcess.WorkerReportsProgress = true;
         exportProcess.DoWork += new DoWorkEventHandler(export_DoWork);

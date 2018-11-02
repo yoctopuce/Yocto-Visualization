@@ -1055,8 +1055,16 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
-      string s = ((int)_prop.GetValue(_dataContainer, null)).ToString();
-      if (input != null) if (s != input.Text) input.Text = s;
+      if (input == null) return;
+      int propValue = (int)_prop.GetValue(_dataContainer, null);
+      int inputValue;
+      bool ok = false;
+      if (int.TryParse(input.Text, out inputValue))
+      {
+        ok = (inputValue == propValue);
+      }
+      if (!ok) input.Text = propValue.ToString();
+
     }
 
     private void Text_TextChanged(object sender, EventArgs e)
@@ -1119,10 +1127,15 @@ namespace YoctoVisualisation
     }
 
     public override void refresh()
-    {
-      string s = ((double)_prop.GetValue(_dataContainer, null)).ToString();
-
-      if (input != null) if (s != input.Text) input.Text = s;
+    { if (input == null) return;
+      double propValue = (double)_prop.GetValue(_dataContainer, null);
+      double inputValue;
+      bool  ok = false;
+      if  (Double.TryParse(input.Text, out inputValue))
+      {
+        ok = (inputValue == propValue);
+      }      
+      if  (!ok) input.Text = propValue.ToString(); 
     }
 
     protected virtual void Text_TextChanged(object sender, EventArgs e)
@@ -1182,6 +1195,20 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
+
+      if (input == null) return;
+      double propValue = (double)_prop.GetValue(_dataContainer, null);
+      if (double.IsNaN(propValue) && (input.Text != ""))
+      { input.Text = ""; return; }
+
+      double inputValue;
+      bool ok = false;
+      if (Double.TryParse(input.Text, out inputValue))
+      {
+        ok = (inputValue == propValue);
+      }
+      if (!ok) input.Text = propValue.ToString();
+
 
       string s = ((doubleNan)_prop.GetValue(_dataContainer, null)).ToString();
       if (input != null) if (s != input.Text) input.Text = s;

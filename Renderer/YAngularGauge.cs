@@ -366,6 +366,7 @@ namespace YDataRendering
       double ycenter = h / 2;
 
       double radius = (Math.Min(w, h) / 2) - borderThickness;
+      int circonference = (int)(2 * radius * 3.14);
       double AngleAperture = 4 * 2 * Math.PI / 5;
 
 
@@ -431,41 +432,51 @@ namespace YDataRendering
             double zmin = Math.Max(_min, Math.Min(_max, _zones[i].min));
             double zmax = Math.Max(_min, Math.Min(_max, _zones[i].max));
 
-
-
-            double zOuterCoef = _zones[i].outerRadius / 100;
-            double Angle1 = ((Math.PI - AngleAperture) / 2) + AngleAperture * (zmin - _min) / (_max - _min);
-            double Angle2 = ((Math.PI - AngleAperture) / 2) + AngleAperture * (zmax - _min) / (_max - _min);
-            double outterlength = (Angle2 - Angle1) * radius;
-            int stepCount = (int)(outterlength / SegmentMaxLength);
-            if (stepCount < 2) stepCount = 2;
-            _zones[i].setPathSize(2 * stepCount + 2);
-
-            PointF[] Path = new PointF[2 * stepCount + 2];
-            for (int j = 0; j <= stepCount; j++)
+            if (zmax > zmin)
             {
-              double A = Angle1 + ((Angle2 - Angle1) * j) / stepCount;
-              _zones[i].setPathPoint(j, new PointF((float)(xcenter - radius * zOuterCoef * Math.Cos(A)), (float)(ycenter - radius * zOuterCoef * Math.Sin(A))));
 
-            }
-            double innerRadiusCoef = zOuterCoef - (_zones[i].width / 100);
+              double zOuterCoef = _zones[i].outerRadius / 100;
+              double Angle1 = ((Math.PI - AngleAperture) / 2) + AngleAperture * (zmin - _min) / (_max - _min);
+              double Angle2 = ((Math.PI - AngleAperture) / 2) + AngleAperture * (zmax - _min) / (_max - _min);
+              double outterlength = (Angle2 - Angle1) * radius;
+              int stepCount = (int)(outterlength / SegmentMaxLength);
+              if (stepCount < 2) stepCount = 2;
+              _zones[i].setPathSize(2 * stepCount + 2);
 
-            for (int j = stepCount; j >= 0; j--)
-            {
-              double A = Angle1 + ((Angle2 - Angle1) * j) / stepCount;
-              _zones[i].setPathPoint(2 * stepCount + 1 - j, new PointF((float)(xcenter - radius * innerRadiusCoef * Math.Cos(A)), (float)(ycenter - radius * innerRadiusCoef * Math.Sin(A))));
+              PointF[] Path = new PointF[2 * stepCount + 2];
+              for (int j = 0; j <= stepCount; j++)
+              {
+                double A = Angle1 + ((Angle2 - Angle1) * j) / stepCount;
+                _zones[i].setPathPoint(j, new PointF((float)(xcenter - radius * zOuterCoef * Math.Cos(A)), (float)(ycenter - radius * zOuterCoef * Math.Sin(A))));
 
+              }
+              double innerRadiusCoef = zOuterCoef - (_zones[i].width / 100);
+
+              for (int j = stepCount; j >= 0; j--)
+              {
+                double A = Angle1 + ((Angle2 - Angle1) * j) / stepCount;
+                _zones[i].setPathPoint(2 * stepCount + 1 - j, new PointF((float)(xcenter - radius * innerRadiusCoef * Math.Cos(A)), (float)(ycenter - radius * innerRadiusCoef * Math.Sin(A))));
+
+              }
             }
           }
-          g.FillPolygon(_zones[i].zoneBrush, _zones[i].path);
-
+            if (_zones[i].path!=null)   g.FillPolygon(_zones[i].zoneBrush, _zones[i].path);
+          
+           
 
         }
+
+      firstGraduation = _graduation * (int)(_min / _graduation);
+      if (_min < 0) firstGraduation -= _graduation;
+
+      while (firstGraduation < _min) firstGraduation += _graduation;
+      gratuationCount = (int)((_max - _min) / _graduation) + 1;
+
 
 
       // draw sub graduations
 
-      if (_subgraduationCount > 0)
+      if ((_subgraduationCount > 0)  && ((_subgraduationCount* gratuationCount)< circonference))
       {
         double subgraduation = _graduation / _subgraduationCount;
         firstGraduation = subgraduation * (int)(_min / subgraduation);
@@ -496,14 +507,9 @@ namespace YDataRendering
 
       // draw Main graduations
 
-      firstGraduation = _graduation * (int)(_min / _graduation);
-      if (_min < 0) firstGraduation -= _graduation;
+     
 
-      while (firstGraduation < _min) firstGraduation += _graduation;
-      gratuationCount = (int)((_max - _min) / _graduation) + 1;
-
-
-
+      if (gratuationCount<circonference)  // stop drawing graduation if too many
       for (int i = 0; i < gratuationCount; i++)
       {
         double gvalue = firstGraduation + i * _graduation;

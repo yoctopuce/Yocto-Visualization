@@ -1,5 +1,3 @@
-Yocto-Visualization v2.0.32798
+Yocto-Visualization v2.0.32881
 
-- New property editor
-- Improved CSV export
-- Plenty of minor bug fixes
+- Fixed decimal point bug in properties editor, added protection against too many  graduations in both angular gauges and graphs

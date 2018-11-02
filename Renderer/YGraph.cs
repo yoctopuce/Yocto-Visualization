@@ -2071,8 +2071,7 @@ namespace YDataRendering
       string labelPrecision = "F0";
       if (axis.startStopStep.precision<0) labelPrecision = "F"+ (-axis.startStopStep.precision).ToString() ;
 
-     
-
+      if (stepCount<w.Height) // protection again infinity of graduation
       for (int i = 0; i < stepCount; i++)
       {
         int y = (int)Math.Round((FirstStep + i * axis.startStopStep.step - axis.startStopStep.dataMin) / YZoom);
