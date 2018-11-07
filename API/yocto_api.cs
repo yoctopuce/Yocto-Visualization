@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 32868 2018-11-01 15:34:57Z seb $
+ * $Id: yocto_api.cs 32899 2018-11-02 10:12:03Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -1235,7 +1235,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "32881";
+    public const string YOCTO_API_BUILD_NO = "32988";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -8236,6 +8236,8 @@ public class YModule : YFunction
      *   then by logical name.
      * </para>
      * <para>
+     * </para>
+     * <para>
      *   If a call to this object's is_online() method returns FALSE although
      *   you are certain that the device is plugged, make sure that you did
      *   call registerHub() at application initialization time.
@@ -9609,6 +9611,9 @@ public class YModule : YFunction
      * <summary>
      *   Continues the module enumeration started using <c>yFirstModule()</c>.
      * <para>
+     *   Caution: You can't make any assumption about the returned modules order.
+     *   If you want to find a specific module, use <c>Module.findModule()</c>
+     *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
@@ -11452,6 +11457,9 @@ public class YSensor : YFunction
      * <summary>
      *   Continues the enumeration of sensors started using <c>yFirstSensor()</c>.
      * <para>
+     *   Caution: You can't make any assumption about the returned sensors order.
+     *   If you want to find a specific a sensor, use <c>Sensor.findSensor()</c>
+     *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
@@ -12308,6 +12316,9 @@ public class YDataLogger : YFunction
      * <summary>
      *   Continues the enumeration of data loggers started using <c>yFirstDataLogger()</c>.
      * <para>
+     *   Caution: You can't make any assumption about the returned data loggers order.
+     *   If you want to find a specific a data logger, use <c>DataLogger.findDataLogger()</c>
+     *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>

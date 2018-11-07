@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.32881
+Yocto-Visualization v2.0.32988
 
-- Fixed decimal point bug in properties editor, added protection against too many  graduations in both angular gauges and graphs
+- Fix devices with wrong name
