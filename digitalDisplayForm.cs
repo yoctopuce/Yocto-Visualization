@@ -42,6 +42,7 @@ using System.Drawing;
 using System.Xml;
 using System.Windows.Forms;
 using YDataRendering;
+using System.Reflection;
 
 namespace YoctoVisualisation
 {
@@ -83,8 +84,10 @@ namespace YoctoVisualisation
         Rectangle s = Screen.FromControl(this).Bounds;
         this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
       }
-
-      prop.ApplyAllProperties(_display);
+      YDataRenderer.minMaxCheckDisabled = true;
+      try { prop.ApplyAllProperties(_display); }
+      catch (TargetInvocationException e) { LogManager.Log("DigitalDisplay init raised an exception (" + e.InnerException.Message + ")"); }
+      YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
     

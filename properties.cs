@@ -2247,7 +2247,20 @@ public static class sensorPrecisionTypeDescription
       set { _Graph_series3 = value; }
     }
 
-
+    // Wanna add a 5th serie? just uncomment the section below
+   /*
+    ChartSerie _Graph_series4 = new ChartSerie(YColor.fromColor(Color.Orange));
+    [
+      DisplayName("Series 5"),
+      CategoryAttribute("Data Sources"),
+      ReadOnlyAttribute(true),
+      DescriptionAttribute("Fifth series, expand for more.")]
+    public ChartSerie Graph_series4
+    {
+      get { return _Graph_series4; }
+      set { _Graph_series4 = value; }
+    }
+   */
 
     private bool _Graph_showRecordedData = false;
     [

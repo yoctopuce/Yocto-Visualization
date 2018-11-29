@@ -86,11 +86,20 @@ namespace YDataRendering
 
 
     private double _outOfRangeMin = Double.NaN;
-    public double outOfRangeMin { get { return _outOfRangeMin; } set {
-        _outOfRangeMin = value; redraw(); } }
+    public double outOfRangeMin { get { return _outOfRangeMin; }
+      set {
+          if (!Double.IsNaN(value) && !Double.IsNaN(_outOfRangeMax) && !minMaxCheckDisabled)
+          if (value >= _outOfRangeMax) throw new ArgumentException("Min cannot be greater than max (" + _outOfRangeMax.ToString() + ")");
+          _outOfRangeMin = value; redraw();
+       } }
 
     private double _outOfRangeMax = Double.NaN;
-    public double outOfRangeMax { get { return _outOfRangeMax; } set { _outOfRangeMax = value; redraw(); } }
+    public double outOfRangeMax { get { return _outOfRangeMax; }
+
+      set {
+        if (!Double.IsNaN(value) && !Double.IsNaN(_outOfRangeMin) && !minMaxCheckDisabled)
+        if (value <= _outOfRangeMin) throw new ArgumentException("Max cannot be less than min (" + _outOfRangeMin.ToString() + ")");
+        _outOfRangeMax = value; redraw(); } }
 
     private Color _outOfRangeColor = Color.Red;
     public Color outOfRangeColor { get { return _outOfRangeColor; } set { _outOfRangeColor = value;  redraw(); } }

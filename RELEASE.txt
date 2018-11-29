@@ -1,3 +1,5 @@
-Yocto-Visualization v2.0.32988
+Yocto-Visualization v2.0.33423
 
-- Fix devices with wrong name
+- Improve editor
+- Fixed Linux windows border style incompatibility
+- fix editor float cast issue

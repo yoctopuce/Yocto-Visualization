@@ -117,7 +117,7 @@ namespace YoctoVisualisation
       get {
         if (((_targetOs & MacOS) != 0) && constants.OSX_Running) return true;
         if (((_targetOs & Linux) != 0) && constants.MonoRunning) return true;
-        if ((_targetOs & Windows) != 0) return true;
+        if ((_targetOs & Windows) != 0 && !constants.MonoRunning && !constants.OSX_Running) return true;
         return false;
       }
     }
@@ -692,14 +692,11 @@ namespace YoctoVisualisation
       else
 
 
-      { try
-        {
+      { 
+        
           tinfo.SetValue(FinalTarget, TerminalSource, null);
-        }
-        catch (Exception )
-        {
-          
-        }
+        
+       
       }
     }
 
@@ -730,8 +727,9 @@ namespace YoctoVisualisation
     {
      if (sourceValue is AlarmSection)  return;  // dirty hack: alarms are no handled through reflexion
 
-     
-  
+      if ((sourceValue is GenericProperties.BordersMode) && constants.MonoRunning)
+        return;  // dirty hack: borders not supported in mono
+
 
       if (!IsStructured(sourceValue))
       {

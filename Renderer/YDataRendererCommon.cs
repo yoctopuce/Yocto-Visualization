@@ -238,10 +238,21 @@ namespace YDataRendering
     public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
 
     private double _min = 0;
-    public double min { get { return _min; } set { _min = value; resetCache(); if (visible) _parentRenderer.redraw(); } }
+    public double min { get { return _min; }
 
-    private double _max = 0;
-    public double max { get { return _max; } set { _max = value; resetCache(); if (visible) _parentRenderer.redraw(); } }
+      set {
+        if ((value >= _max)  && !YDataRenderer.minMaxCheckDisabled)
+          throw new ArgumentException("Min cannot be greater than max (" + _max.ToString() + ")");
+        _min = value; resetCache(); if (visible) _parentRenderer.redraw();
+      } }
+
+    private double _max = 100;
+    public double max { get { return _max; }
+      set {
+        if ((value <= _min)  && !YDataRenderer.minMaxCheckDisabled)
+          throw new ArgumentException("Max cannot be greater than min (" + _min.ToString() + ")");
+        _max = value; resetCache(); if (visible) _parentRenderer.redraw();
+      } }
 
   }
 
@@ -404,6 +415,7 @@ namespace YDataRendering
 
       set
       {
+        if (value <= 0) throw new ArgumentException("Size must be a positive value");
         _size.value = value;
         ResetFont(null);
         if (_fontChangeCallback != null) _fontChangeCallback(this);
@@ -489,6 +501,7 @@ namespace YDataRendering
   {
     private RegisterHotKeyClass _RegisKey = new RegisterHotKeyClass();
     protected int _redrawAllowed = 1;
+    
 
     public delegate void RendererDblClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
     public delegate void RendererRightClickCallBack(YDataRenderer source, MouseEventArgs eventArg);    
@@ -509,6 +522,11 @@ namespace YDataRendering
     public Object userData { get { return _userData; } set { _userData = value; } }
 
     public enum CaptureTargets { ToClipBoard, ToPng };
+
+    static private bool _disableMinMaxCheck = false;
+    static public bool minMaxCheckDisabled { get { return _disableMinMaxCheck; } set { _disableMinMaxCheck = value; }  }
+    
+
 
     private getCaptureParamaters _getCaptureParameters = null;
     public getCaptureParamaters getCaptureParameters { get { return _getCaptureParameters; } set { _getCaptureParameters = value; } }

@@ -386,7 +386,7 @@ namespace YoctoVisualisation
     private void button4_Click(object sender, EventArgs e)
     {
       NewAngularGaugeForm(null);
-	if (!constants.MonoRunning) this.ShowInTaskbar = false;
+	    if (!constants.MonoRunning) this.ShowInTaskbar = false;
       Hide();
 
     }

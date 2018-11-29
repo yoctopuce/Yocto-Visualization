@@ -44,6 +44,7 @@ using System.Windows.Forms;
 using YDataRendering;
 using YoctoVisualization.Properties;
 using System.Drawing;
+using System.Reflection;
 
 namespace YoctoVisualisation
 {
@@ -148,8 +149,11 @@ namespace YoctoVisualisation
         Rectangle s = Screen.FromControl(this).Bounds;
         this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
       }
-      prop.ApplyAllProperties(_cartesianChart);
-      
+
+      YDataRenderer.minMaxCheckDisabled = true;
+      try { prop.ApplyAllProperties(_cartesianChart); }
+      catch (TargetInvocationException e) { LogManager.Log("Graph init raised an exception (" + e.InnerException.Message + ")"); }
+      YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
       _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;

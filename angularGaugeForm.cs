@@ -48,7 +48,7 @@ using System.Text;
 using System.Xml;
 using System.Windows.Forms;
 using YDataRendering;
-
+using System.Reflection;
 
 namespace YoctoVisualisation
 {
@@ -110,7 +110,11 @@ namespace YoctoVisualisation
         this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
       }
 
-      prop.ApplyAllProperties(_angularGauge);
+      YDataRenderer.minMaxCheckDisabled = true;
+      try { prop.ApplyAllProperties(_angularGauge); }
+      catch (TargetInvocationException e) { LogManager.Log("AngularGauge init raised an exception (" + e.InnerException.Message + ")"); }
+      YDataRenderer.minMaxCheckDisabled = false;
+
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
  
     

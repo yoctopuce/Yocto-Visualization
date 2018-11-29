@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 32899 2018-11-02 10:12:03Z seb $
+ * $Id: yocto_api.cs 33400 2018-11-27 07:58:29Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -67,6 +67,7 @@ using yBlkHdl = System.Char;
 using yStrRef = System.Int16;
 using yUrlRef = System.Int16;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 
@@ -302,9 +303,6 @@ internal static class SafeNativeMethods
     [DllImport("yapi", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
     private extern static void _yapiRegisterDeviceLogCallback32(IntPtr fct);
 
-    [DllImport("yapi", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiStartStopDeviceLogCallback32(StringBuilder errmsg, int start_stop);
-
     // 64 bits dll entry points
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiInitAPI64(int mode, StringBuilder errmsg);
@@ -422,9 +420,6 @@ internal static class SafeNativeMethods
 
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
     private extern static void _yapiRegisterDeviceLogCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiStartStopDeviceLogCallback64(StringBuilder errmsg, int start_stop);
 
     internal static int _yapiInitAPI(int mode, StringBuilder errmsg)
     {
@@ -934,21 +929,7 @@ internal static class SafeNativeMethods
             }
         }
     }
-
-    internal static int _yapiStartStopDeviceLogCallback(StringBuilder errmsg, int start_stop)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiStartStopDeviceLogCallback32(errmsg, start_stop);
-        } else {
-            try {
-                return _yapiStartStopDeviceLogCallback64(errmsg, start_stop);
-            } catch (System.DllNotFoundException) {
-                return _yapiStartStopDeviceLogCallback32(errmsg, start_stop);
-            }
-        }
-    }
-
-
+    
     //--- (generated code: YFunction dlldef)
     [DllImport("yapi", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiGetAllJsonKeys32(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
@@ -1190,6 +1171,22 @@ internal static class SafeNativeMethods
              }
         }
     }
+    [DllImport("yapi", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallback32(StringBuilder serial, int start);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallback64(StringBuilder serial, int start);
+    internal static void _yapiStartStopDeviceLogCallback(StringBuilder serial, int start)
+    {
+        if (IntPtr.Size == 4) {
+             _yapiStartStopDeviceLogCallback32(serial, start);
+        } else {
+             try {
+                 _yapiStartStopDeviceLogCallback64(serial, start);
+             } catch (System.DllNotFoundException) {
+                 _yapiStartStopDeviceLogCallback32(serial, start);
+             }
+        }
+    }
 //--- (end of generated code: YFunction dlldef)
 }
 
@@ -1235,7 +1232,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "32988";
+    public const string YOCTO_API_BUILD_NO = "33423";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -4631,21 +4628,17 @@ public class YDataStream
     protected long _utcStamp = 0;
     protected int _nCols = 0;
     protected int _nRows = 0;
-    protected int _duration = 0;
+    protected double _startTime = 0;
+    protected double _duration = 0;
+    protected double _dataSamplesInterval = 0;
+    protected double _firstMeasureDuration = 0;
     protected List<string> _columnNames = new List<string>();
     protected string _functionId;
     protected bool _isClosed;
     protected bool _isAvg;
-    protected bool _isScal;
-    protected bool _isScal32;
-    protected int _decimals = 0;
-    protected double _offset = 0;
-    protected double _scale = 0;
-    protected int _samplesPerHour = 0;
     protected double _minVal = 0;
     protected double _avgVal = 0;
     protected double _maxVal = 0;
-    protected double _decexp = 0;
     protected int _caltyp = 0;
     protected List<int> _calpar = new List<int>();
     protected List<double> _calraw = new List<double>();
@@ -4679,51 +4672,45 @@ public class YDataStream
         int val;
         int i;
         int maxpos;
-        int iRaw;
-        int iRef;
+        int ms_offset;
+        int samplesPerHour;
         double fRaw;
         double fRef;
-        double duration_float;
         List<int> iCalib = new List<int>();
         // decode sequence header to extract data
         this._runNo = encoded[0] + (((encoded[1]) << (16)));
         this._utcStamp = encoded[2] + (((encoded[3]) << (16)));
         val = encoded[4];
         this._isAvg = (((val) & (0x100)) == 0);
-        this._samplesPerHour = ((val) & (0xff));
+        samplesPerHour = ((val) & (0xff));
         if (((val) & (0x100)) != 0) {
-            this._samplesPerHour = this._samplesPerHour * 3600;
+            samplesPerHour = samplesPerHour * 3600;
         } else {
             if (((val) & (0x200)) != 0) {
-                this._samplesPerHour = this._samplesPerHour * 60;
+                samplesPerHour = samplesPerHour * 60;
             }
         }
-        val = encoded[5];
-        if (val > 32767) {
-            val = val - 65536;
+        this._dataSamplesInterval = 3600.0 / samplesPerHour;
+        ms_offset = encoded[6];
+        if (ms_offset < 1000) {
+            // new encoding . add the ms to the UTC timestamp
+            this._startTime = this._utcStamp + (ms_offset / 1000.0);
+        } else {
+            // legacy encoding subtract the measure interval form the UTC timestamp
+            this._startTime = this._utcStamp -  this._dataSamplesInterval;
         }
-        this._decimals = val;
-        this._offset = val;
-        this._scale = encoded[6];
-        this._isScal = (this._scale != 0);
-        this._isScal32 = (encoded.Count >= 14);
+        this._firstMeasureDuration = encoded[5];
+        if (!(this._isAvg)) {
+            this._firstMeasureDuration = this._firstMeasureDuration / 1000.0;
+        }
         val = encoded[7];
         this._isClosed = (val != 0xffff);
         if (val == 0xffff) {
             val = 0;
         }
         this._nRows = val;
-        duration_float = this._nRows * 3600 / this._samplesPerHour;
-        this._duration = (int) Math.Round(duration_float);
+        this._duration = this._nRows * this._dataSamplesInterval;
         // precompute decoding parameters
-        this._decexp = 1.0;
-        if (this._scale == 0) {
-            i = 0;
-            while (i < this._decimals) {
-                this._decexp = this._decexp * 10.0;
-                i = i + 1;
-            }
-        }
         iCalib = dataset._get_calibration();
         this._caltyp = iCalib[0];
         if (this._caltyp != 0) {
@@ -4732,42 +4719,20 @@ public class YDataStream
             this._calpar.Clear();
             this._calraw.Clear();
             this._calref.Clear();
-            if (this._isScal32) {
-                i = 1;
-                while (i < maxpos) {
-                    this._calpar.Add(iCalib[i]);
-                    i = i + 1;
-                }
-                i = 1;
-                while (i + 1 < maxpos) {
-                    fRaw = iCalib[i];
-                    fRaw = fRaw / 1000.0;
-                    fRef = iCalib[i + 1];
-                    fRef = fRef / 1000.0;
-                    this._calraw.Add(fRaw);
-                    this._calref.Add(fRef);
-                    i = i + 2;
-                }
-            } else {
-                i = 1;
-                while (i + 1 < maxpos) {
-                    iRaw = iCalib[i];
-                    iRef = iCalib[i + 1];
-                    this._calpar.Add(iRaw);
-                    this._calpar.Add(iRef);
-                    if (this._isScal) {
-                        fRaw = iRaw;
-                        fRaw = (fRaw - this._offset) / this._scale;
-                        fRef = iRef;
-                        fRef = (fRef - this._offset) / this._scale;
-                        this._calraw.Add(fRaw);
-                        this._calref.Add(fRef);
-                    } else {
-                        this._calraw.Add(YAPI._decimalToDouble(iRaw));
-                        this._calref.Add(YAPI._decimalToDouble(iRef));
-                    }
-                    i = i + 2;
-                }
+            i = 1;
+            while (i < maxpos) {
+                this._calpar.Add(iCalib[i]);
+                i = i + 1;
+            }
+            i = 1;
+            while (i + 1 < maxpos) {
+                fRaw = iCalib[i];
+                fRaw = fRaw / 1000.0;
+                fRef = iCalib[i + 1];
+                fRef = fRef / 1000.0;
+                this._calraw.Add(fRaw);
+                this._calref.Add(fRef);
+                i = i + 2;
             }
         }
         // preload column names for backward-compatibility
@@ -4785,15 +4750,9 @@ public class YDataStream
         }
         // decode min/avg/max values for the sequence
         if (this._nRows > 0) {
-            if (this._isScal32) {
-                this._avgVal = this._decodeAvg(encoded[8] + (((((encoded[9]) ^ (0x8000))) << (16))), 1);
-                this._minVal = this._decodeVal(encoded[10] + (((encoded[11]) << (16))));
-                this._maxVal = this._decodeVal(encoded[12] + (((encoded[13]) << (16))));
-            } else {
-                this._minVal = this._decodeVal(encoded[8]);
-                this._maxVal = this._decodeVal(encoded[9]);
-                this._avgVal = this._decodeAvg(encoded[10] + (((encoded[11]) << (16))), this._nRows);
-            }
+            this._avgVal = this._decodeAvg(encoded[8] + (((((encoded[9]) ^ (0x8000))) << (16))), 1);
+            this._minVal = this._decodeVal(encoded[10] + (((encoded[11]) << (16))));
+            this._maxVal = this._decodeVal(encoded[12] + (((encoded[13]) << (16))));
         }
         return 0;
     }
@@ -4814,34 +4773,18 @@ public class YDataStream
         if (this._isAvg) {
             while (idx + 3 < udat.Count) {
                 dat.Clear();
-                if (this._isScal32) {
-                    dat.Add(this._decodeVal(udat[idx + 2] + (((udat[idx + 3]) << (16)))));
-                    dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
-                    dat.Add(this._decodeVal(udat[idx + 4] + (((udat[idx + 5]) << (16)))));
-                    idx = idx + 6;
-                } else {
-                    dat.Add(this._decodeVal(udat[idx]));
-                    dat.Add(this._decodeAvg(udat[idx + 2] + (((udat[idx + 3]) << (16))), 1));
-                    dat.Add(this._decodeVal(udat[idx + 1]));
-                    idx = idx + 4;
-                }
+                dat.Add(this._decodeVal(udat[idx + 2] + (((udat[idx + 3]) << (16)))));
+                dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
+                dat.Add(this._decodeVal(udat[idx + 4] + (((udat[idx + 5]) << (16)))));
+                idx = idx + 6;
                 this._values.Add(new List<double>(dat));
             }
         } else {
-            if (this._isScal && !(this._isScal32)) {
-                while (idx < udat.Count) {
-                    dat.Clear();
-                    dat.Add(this._decodeVal(udat[idx]));
-                    this._values.Add(new List<double>(dat));
-                    idx = idx + 1;
-                }
-            } else {
-                while (idx + 1 < udat.Count) {
-                    dat.Clear();
-                    dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
-                    this._values.Add(new List<double>(dat));
-                    idx = idx + 2;
-                }
+            while (idx + 1 < udat.Count) {
+                dat.Clear();
+                dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
+                this._values.Add(new List<double>(dat));
+                idx = idx + 2;
             }
         }
 
@@ -4866,15 +4809,7 @@ public class YDataStream
     {
         double val;
         val = w;
-        if (this._isScal32) {
-            val = val / 1000.0;
-        } else {
-            if (this._isScal) {
-                val = (val - this._offset) / this._scale;
-            } else {
-                val = YAPI._decimalToDouble(w);
-            }
-        }
+        val = val / 1000.0;
         if (this._caltyp != 0) {
             if (this._calhdl != null) {
                 val = this._calhdl(val, this._caltyp, this._calpar, this._calraw, this._calref);
@@ -4887,15 +4822,7 @@ public class YDataStream
     {
         double val;
         val = dw;
-        if (this._isScal32) {
-            val = val / 1000.0;
-        } else {
-            if (this._isScal) {
-                val = (val / (100 * count) - this._offset) / this._scale;
-            } else {
-                val = val / (count * this._decexp);
-            }
-        }
+        val = val / 1000.0;
         if (this._caltyp != 0) {
             if (this._calhdl != null) {
                 val = this._calhdl(val, this._caltyp, this._calpar, this._calraw, this._calref);
@@ -4937,7 +4864,10 @@ public class YDataStream
      *   If the device uses a firmware older than version 13000, value is
      *   relative to the start of the time the device was powered on, and
      *   is always positive.
-     *   If you need an absolute UTC timestamp, use <c>get_startTimeUTC()</c>.
+     *   If you need an absolute UTC timestamp, use <c>get_realStartTimeUTC()</c>.
+     * </para>
+     * <para>
+     *   <b>DEPRECATED</b>: This method has been replaced by <c>get_realStartTimeUTC()</c>.
      * </para>
      * <para>
      * </para>
@@ -4961,6 +4891,9 @@ public class YDataStream
      *   of this data stream, this method returns 0.
      * </para>
      * <para>
+     *   <b>DEPRECATED</b>: This method has been replaced by <c>get_realStartTimeUTC()</c>.
+     * </para>
+     * <para>
      * </para>
      * </summary>
      * <returns>
@@ -4971,7 +4904,28 @@ public class YDataStream
      */
     public virtual long get_startTimeUTC()
     {
-        return this._utcStamp;
+        return (int) Math.Round(this._startTime);
+    }
+
+    /**
+     * <summary>
+     *   Returns the start time of the data stream, relative to the Jan 1, 1970.
+     * <para>
+     *   If the UTC time was not set in the datalogger at the time of the recording
+     *   of this data stream, this method returns 0.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a floating-point number  corresponding to the number of seconds
+     *   between the Jan 1, 1970 and the beginning of this data
+     *   stream (i.e. Unix time representation of the absolute time).
+     * </returns>
+     */
+    public virtual double get_realStartTimeUTC()
+    {
+        return this._startTime;
     }
 
     /**
@@ -4992,12 +4946,17 @@ public class YDataStream
      */
     public virtual int get_dataSamplesIntervalMs()
     {
-        return ((3600000) / (this._samplesPerHour));
+        return (int) Math.Round(this._dataSamplesInterval*1000);
     }
 
     public virtual double get_dataSamplesInterval()
     {
-        return 3600.0 / this._samplesPerHour;
+        return this._dataSamplesInterval;
+    }
+
+    public virtual double get_firstDataSamplesInterval()
+    {
+        return this._firstMeasureDuration;
     }
 
     /**
@@ -5164,27 +5123,12 @@ public class YDataStream
         return this._maxVal;
     }
 
-    /**
-     * <summary>
-     *   Returns the approximate duration of this stream, in seconds.
-     * <para>
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <returns>
-     *   the number of seconds covered by this stream.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns YDataStream.DURATION_INVALID.
-     * </para>
-     */
-    public virtual int get_duration()
+    public virtual double get_realDuration()
     {
         if (this._isClosed) {
             return this._duration;
         }
-        return (int)(Convert.ToUInt32((DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds) - this._utcStamp);
+        return (double) Convert.ToUInt32((DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds) - this._utcStamp;
     }
 
     /**
@@ -5458,8 +5402,8 @@ public class YDataSet
     protected string _hardwareId;
     protected string _functionId;
     protected string _unit;
-    protected long _startTime = 0;
-    protected long _endTime = 0;
+    protected double _startTime = 0;
+    protected double _endTime = 0;
     protected int _progress = 0;
     protected List<int> _calib = new List<int>();
     protected List<YDataStream> _streams = new List<YDataStream>();
@@ -5469,7 +5413,7 @@ public class YDataSet
     //--- (end of generated code: YDataSet definitions)
 
     // YDataSet constructor, when instantiated directly by a function
-    public YDataSet(YFunction parent, string functionId, string unit, long startTime, long endTime)
+    public YDataSet(YFunction parent, string functionId, string unit, double startTime, double endTime)
     {
         //--- (generated code: YDataSet attributes initialization)
         //--- (end of generated code: YDataSet attributes initialization)
@@ -5509,10 +5453,10 @@ public class YDataSet
         }
 
         YDataStream stream;
-        long streamStartTime;
-        long streamEndTime;
-        long startTime = 0x7fffffff;
-        long endTime = 0;
+        double streamStartTime;
+        double streamEndTime;
+        double startTime = 0x7fffffff;
+        double endTime = 0;
         double summaryMinVal = Double.MaxValue;
         double summaryMaxVal = -Double.MaxValue;
         double summaryTotalTime = 0;
@@ -5533,11 +5477,11 @@ public class YDataSet
         this._measures = new List<YMeasure>();
         for (int i = 0; i < arr.Length; i++) {
             stream = _parent._findDataStream(this, arr.getString(i));
-            streamStartTime = stream.get_startTimeUTC() - stream.get_dataSamplesIntervalMs() / 1000;
-            streamEndTime = stream.get_startTimeUTC() + stream.get_duration();
+            streamStartTime = stream.get_realStartTimeUTC();
+            streamEndTime = streamStartTime + stream.get_realDuration();
             if (_startTime > 0 && streamEndTime <= _startTime) {
                 // this stream is too early, drop it
-            } else if (_endTime > 0 && stream.get_startTimeUTC() > this._endTime) {
+            } else if (_endTime > 0 && streamStartTime >= this._endTime) {
                 // this stream is too late, drop it
             } else {
                 _streams.Add(stream);
@@ -5549,7 +5493,7 @@ public class YDataSet
                     endTime = streamEndTime;
                 }
 
-                if (stream.isClosed() && stream.get_startTimeUTC() >= this._startTime && (this._endTime == 0 || streamEndTime <= this._endTime)) {
+                if (stream.isClosed() && streamStartTime  >= this._startTime && (this._endTime == 0 || streamEndTime <= this._endTime)) {
                     if (summaryMinVal > stream.get_minValue()) {
                         summaryMinVal = stream.get_minValue();
                     }
@@ -5558,10 +5502,10 @@ public class YDataSet
                         summaryMaxVal = stream.get_maxValue();
                     }
 
-                    summaryTotalAvg += stream.get_averageValue() * stream.get_duration();
-                    summaryTotalTime += stream.get_duration();
+                    summaryTotalAvg += stream.get_averageValue() * stream.get_realDuration();
+                    summaryTotalTime += stream.get_realDuration();
 
-                    YMeasure rec = new YMeasure(stream.get_startTimeUTC(), streamEndTime, stream.get_minValue(), stream.get_averageValue(), stream.get_maxValue());
+                    YMeasure rec = new YMeasure(streamStartTime, streamEndTime, stream.get_minValue(), stream.get_averageValue(), stream.get_maxValue());
                     this._preview.Add(rec);
                 }
             }
@@ -5599,10 +5543,13 @@ public class YDataSet
         string strdata;
         double tim;
         double itv;
+        double fitv;
+        double end_;
         int nCols;
         int minCol;
         int avgCol;
         int maxCol;
+        bool firstMeasure;
 
         if (progress != this._progress) {
             return this._progress;
@@ -5622,8 +5569,12 @@ public class YDataSet
         if (dataRows.Count == 0) {
             return this.get_progress();
         }
-        tim = (double) stream.get_startTimeUTC();
+        tim = stream.get_realStartTimeUTC();
+        fitv = stream.get_firstDataSamplesInterval();
         itv = stream.get_dataSamplesInterval();
+        if (fitv == 0) {
+            fitv = itv;
+        }
         if (tim < itv) {
             tim = itv;
         }
@@ -5640,12 +5591,18 @@ public class YDataSet
             maxCol = 0;
         }
 
+        firstMeasure = true;
         for (int ii = 0; ii < dataRows.Count; ii++) {
-            if ((tim >= this._startTime) && ((this._endTime == 0) || (tim <= this._endTime))) {
-                this._measures.Add(new YMeasure(tim - itv, tim, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
+            if (firstMeasure) {
+                end_ = tim + fitv;
+                firstMeasure = false;
+            } else {
+                end_ = tim + itv;
             }
-            tim = tim + itv;
-            tim = Math.Round(tim * 1000) / 1000.0;
+            if ((tim >= this._startTime) && ((this._endTime == 0) || (end_ <= this._endTime))) {
+                this._measures.Add(new YMeasure(tim, end_, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
+            }
+            tim = end_;
         }
         return this.get_progress();
     }
@@ -5735,6 +5692,10 @@ public class YDataSet
      *   dataLogger within the specified range.
      * </para>
      * <para>
+     *   <b>DEPRECATED</b>: This method has been replaced by <c>get_summary()</c>
+     *   which contain more precise informations on the YDataSet.
+     * </para>
+     * <para>
      * </para>
      * </summary>
      * <returns>
@@ -5745,7 +5706,12 @@ public class YDataSet
      */
     public virtual long get_startTimeUTC()
     {
-        return this._startTime;
+        return this.imm_get_startTimeUTC();
+    }
+
+    public virtual long imm_get_startTimeUTC()
+    {
+        return (long) this._startTime;
     }
 
     /**
@@ -5759,6 +5725,12 @@ public class YDataSet
      *   dataLogger within the specified range.
      * </para>
      * <para>
+     *   <b>DEPRECATED</b>: This method has been replaced by <c>get_summary()</c>
+     *   which contain more precise informations on the YDataSet.
+     * </para>
+     * <para>
+     * </para>
+     * <para>
      * </para>
      * </summary>
      * <returns>
@@ -5769,7 +5741,12 @@ public class YDataSet
      */
     public virtual long get_endTimeUTC()
     {
-        return this._endTime;
+        return this.imm_get_endTimeUTC();
+    }
+
+    public virtual long imm_get_endTimeUTC()
+    {
+        return (long) Math.Round(this._endTime);
     }
 
     /**
@@ -5824,10 +5801,10 @@ public class YDataSet
         if (this._progress < 0) {
             url = "logger.json?id="+this._functionId;
             if (this._startTime != 0) {
-                url = ""+url+"&from="+Convert.ToString(this._startTime);
+                url = ""+url+"&from="+Convert.ToString(this.imm_get_startTimeUTC());
             }
             if (this._endTime != 0) {
-                url = ""+url+"&to="+Convert.ToString(this._endTime);
+                url = ""+url+"&to="+Convert.ToString(this.imm_get_endTimeUTC()+1);
             }
         } else {
             if (this._progress >= this._streams.Count) {
@@ -5929,21 +5906,22 @@ public class YDataSet
      */
     public virtual List<YMeasure> get_measuresAt(YMeasure measure)
     {
-        long startUtc;
+        double startUtc;
         YDataStream stream;
         List<List<double>> dataRows = new List<List<double>>();
         List<YMeasure> measures = new List<YMeasure>();
         double tim;
         double itv;
+        double end_;
         int nCols;
         int minCol;
         int avgCol;
         int maxCol;
 
-        startUtc = (long) Math.Round(measure.get_startTimeUTC());
+        startUtc = measure.get_startTimeUTC();
         stream = null;
         for (int ii = 0; ii < this._streams.Count; ii++) {
-            if (this._streams[ii].get_startTimeUTC() == startUtc) {
+            if (this._streams[ii].get_realStartTimeUTC() == startUtc) {
                 stream = this._streams[ii];
             }
         }
@@ -5954,7 +5932,7 @@ public class YDataSet
         if (dataRows.Count == 0) {
             return measures;
         }
-        tim = (double) stream.get_startTimeUTC();
+        tim = stream.get_realStartTimeUTC();
         itv = stream.get_dataSamplesInterval();
         if (tim < itv) {
             tim = itv;
@@ -5973,10 +5951,11 @@ public class YDataSet
         }
 
         for (int ii = 0; ii < dataRows.Count; ii++) {
-            if ((tim >= this._startTime) && ((this._endTime == 0) || (tim <= this._endTime))) {
-                measures.Add(new YMeasure(tim - itv, tim, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
+            end_ = tim + itv;
+            if ((tim >= this._startTime) && ((this._endTime == 0) || (end_ <= this._endTime))) {
+                measures.Add(new YMeasure(tim, end_, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
             }
-            tim = tim + itv;
+            tim = end_;
         }
         return measures;
     }
@@ -6514,8 +6493,12 @@ public class YFunction
         string key = dataset.get_functionId() + ":" + def;
         if (_dataStreams.ContainsKey(key))
             return (YDataStream) _dataStreams[key];
-
-        YDataStream newDataStream = new YDataStream(this, dataset, YAPI._decodeWords(def));
+        List<int> words = YAPI._decodeWords(def);
+        if (words.Count < 14) { 
+            _throw(YAPI.VERSION_MISMATCH,"device firmware too old");
+            return null;
+        }
+        YDataStream newDataStream = new YDataStream(this, dataset, words);
         _dataStreams.Add(key, newDataStream);
         return newDataStream;
     }
@@ -7646,44 +7629,6 @@ public class YModule : YFunction
         //--- (end of generated code: YModule attributes initialization)
     }
 
-    /**
-     * <summary>
-     *   Registers a device log callback function.
-     * <para>
-     *   This callback will be called each time
-     *   that a module sends a new log message. Mostly useful to debug a Yoctopuce module.
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="callback">
-     *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the module object that emitted the log message, and the character string containing the log.
-     * @noreturn
-     * </param>
-     */
-    public int registerLogCallback(LogCallback callback)
-    {
-        lock (_thisLock) {
-            _logCallback = callback;
-            if (_logCallback == null) {
-                SafeNativeMethods._yapiStartStopDeviceLogCallback(new StringBuilder(_serialNumber), 0);
-            } else {
-                SafeNativeMethods._yapiStartStopDeviceLogCallback(new StringBuilder(_serialNumber), 1);
-            }
-
-            return YAPI.SUCCESS;
-        }
-    }
-
-    public LogCallback get_logCallback()
-    {
-        lock (_thisLock) {
-            return _logCallback;
-        }
-    }
-
-
     static void _updateModuleCallbackList(YModule module, bool add)
     {
         if (add) {
@@ -8395,6 +8340,52 @@ public class YModule : YFunction
         return this.set_rebootCountdown(-secBeforeReboot);
     }
 
+    public virtual void _startStopDevLog(string serial, bool start)
+    {
+        int i_start;
+        if (start) {
+            i_start = 1;
+        } else {
+            i_start = 0;
+        }
+
+        SafeNativeMethods._yapiStartStopDeviceLogCallback(new StringBuilder(serial), i_start);
+    }
+
+    /**
+     * <summary>
+     *   Registers a device log callback function.
+     * <para>
+     *   This callback will be called each time
+     *   that a module sends a new log message. Mostly useful to debug a Yoctopuce module.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="callback">
+     *   the callback function to call, or a null pointer. The callback function should take two
+     *   arguments: the module object that emitted the log message, and the character string containing the log.
+     *   On failure, throws an exception or returns a negative error code.
+     * </param>
+     */
+    public virtual int registerLogCallback(LogCallback callback)
+    {
+        string serial;
+
+        serial = this.get_serialNumber();
+        if (serial == YAPI.INVALID_STRING) {
+            return YAPI.DEVICE_NOT_FOUND;
+        }
+        this._logCallback = callback;
+        this._startStopDevLog(serial, callback != null);
+        return 0;
+    }
+
+    public virtual LogCallback get_logCallback()
+    {
+        return this._logCallback;
+    }
+
     /**
      * <summary>
      *   Register a callback function, to be called when a persistent settings in
@@ -8758,6 +8749,8 @@ public class YModule : YFunction
                 this._upload(name, YAPI._hexStrToBin(data));
             }
         }
+        // Apply settings a second time for file-dependent settings and dynamic sensor nodes
+        this.set_allSettings(YAPI.DefaultEncoding.GetBytes(json_api));
         return YAPI.SUCCESS;
     }
 
@@ -10071,8 +10064,6 @@ public class YSensor : YFunction
     protected double _offset = 0;
     protected double _scale = 0;
     protected double _decexp = 0;
-    protected bool _isScal;
-    protected bool _isScal32;
     protected int _caltyp = 0;
     protected List<int> _calpar = new List<int>();
     protected List<double> _calraw = new List<double>();
@@ -10783,7 +10774,6 @@ public class YSensor : YFunction
         double fRef;
         this._caltyp = -1;
         this._scale = -1;
-        this._isScal32 = false;
         this._calpar.Clear();
         this._calraw.Clear();
         this._calref.Clear();
@@ -10817,8 +10807,6 @@ public class YSensor : YFunction
                 }
             }
             // New 32bit text format
-            this._isScal = true;
-            this._isScal32 = true;
             this._offset = 0;
             this._scale = 1000;
             maxpos = iCalib.Count;
@@ -10849,23 +10837,13 @@ public class YSensor : YFunction
                 return 0;
             }
             // Save variable format (scale for scalar, or decimal exponent)
-            this._isScal = (iCalib[1] > 0);
-            if (this._isScal) {
-                this._offset = iCalib[0];
-                if (this._offset > 32767) {
-                    this._offset = this._offset - 65536;
-                }
-                this._scale = iCalib[1];
-                this._decexp = 0;
-            } else {
-                this._offset = 0;
-                this._scale = 1;
-                this._decexp = 1.0;
-                position = iCalib[0];
-                while (position > 0) {
-                    this._decexp = this._decexp * 10;
-                    position = position - 1;
-                }
+            this._offset = 0;
+            this._scale = 1;
+            this._decexp = 1.0;
+            position = iCalib[0];
+            while (position > 0) {
+                this._decexp = this._decexp * 10;
+                position = position - 1;
             }
             // Shortcut when there is no calibration parameter
             if (iCalib.Count == 2) {
@@ -10897,17 +10875,8 @@ public class YSensor : YFunction
                 iRef = iCalib[position + 1];
                 this._calpar.Add(iRaw);
                 this._calpar.Add(iRef);
-                if (this._isScal) {
-                    fRaw = iRaw;
-                    fRaw = (fRaw - this._offset) / this._scale;
-                    fRef = iRef;
-                    fRef = (fRef - this._offset) / this._scale;
-                    this._calraw.Add(fRaw);
-                    this._calref.Add(fRef);
-                } else {
-                    this._calraw.Add(YAPI._decimalToDouble(iRaw));
-                    this._calref.Add(YAPI._decimalToDouble(iRef));
-                }
+                this._calraw.Add(YAPI._decimalToDouble(iRaw));
+                this._calref.Add(YAPI._decimalToDouble(iRef));
                 position = position + 2;
             }
         }
@@ -11051,7 +11020,7 @@ public class YSensor : YFunction
      *   using methods from the YDataSet object.
      * </returns>
      */
-    public virtual YDataSet get_recordedData(long startTime, long endTime)
+    public virtual YDataSet get_recordedData(double startTime, double endTime)
     {
         string funcid;
         string funit;
@@ -11203,8 +11172,6 @@ public class YSensor : YFunction
         string res;
         int npt;
         int idx;
-        int iRaw;
-        int iRef;
         npt = rawValues.Count;
         if (npt != refValues.Count) {
             this._throw(YAPI.INVALID_ARGUMENT, "Invalid calibration parameters (size mismatch)");
@@ -11225,36 +11192,12 @@ public class YSensor : YFunction
             this._throw(YAPI.NOT_SUPPORTED, "Calibration parameters format mismatch. Please upgrade your library or firmware.");
             return "0";
         }
-        if (this._isScal32) {
-            // 32-bit fixed-point encoding
-            res = ""+Convert.ToString(YAPI.YOCTO_CALIB_TYPE_OFS);
-            idx = 0;
-            while (idx < npt) {
-                res = ""+ res+","+YAPI._floatToStr( rawValues[idx])+","+YAPI._floatToStr(refValues[idx]);
-                idx = idx + 1;
-            }
-        } else {
-            if (this._isScal) {
-                // 16-bit fixed-point encoding
-                res = ""+Convert.ToString(npt);
-                idx = 0;
-                while (idx < npt) {
-                    iRaw = (int) Math.Round(rawValues[idx] * this._scale + this._offset);
-                    iRef = (int) Math.Round(refValues[idx] * this._scale + this._offset);
-                    res = ""+ res+","+Convert.ToString( iRaw)+","+Convert.ToString(iRef);
-                    idx = idx + 1;
-                }
-            } else {
-                // 16-bit floating-point decimal encoding
-                res = ""+Convert.ToString(10 + npt);
-                idx = 0;
-                while (idx < npt) {
-                    iRaw = (int) YAPI._doubleToDecimal(rawValues[idx]);
-                    iRef = (int) YAPI._doubleToDecimal(refValues[idx]);
-                    res = ""+ res+","+Convert.ToString( iRaw)+","+Convert.ToString(iRef);
-                    idx = idx + 1;
-                }
-            }
+        // 32-bit fixed-point encoding
+        res = ""+Convert.ToString(YAPI.YOCTO_CALIB_TYPE_OFS);
+        idx = 0;
+        while (idx < npt) {
+            res = ""+ res+","+YAPI._floatToStr( rawValues[idx])+","+YAPI._floatToStr(refValues[idx]);
+            idx = idx + 1;
         }
         return res;
     }
@@ -11280,12 +11223,12 @@ public class YSensor : YFunction
     {
         int i;
         int byteVal;
-        int poww;
-        int minRaw;
-        int avgRaw;
-        int maxRaw;
+        double poww;
+        double minRaw;
+        double avgRaw;
+        double maxRaw;
         int sublen;
-        int difRaw;
+        double difRaw;
         double startTime;
         double endTime;
         double minVal;
@@ -11301,119 +11244,78 @@ public class YSensor : YFunction
         if (startTime == 0) {
             startTime = endTime;
         }
-        if (report[0] == 2) {
-            // 32bit timed report format
-            if (report.Count <= 5) {
-                // sub-second report, 1-4 bytes
-                poww = 1;
-                avgRaw = 0;
-                byteVal = 0;
-                i = 1;
-                while (i < report.Count) {
-                    byteVal = report[i];
-                    avgRaw = avgRaw + poww * byteVal;
-                    poww = poww * 0x100;
-                    i = i + 1;
-                }
-                if (((byteVal) & (0x80)) != 0) {
-                    avgRaw = avgRaw - poww;
-                }
-                avgVal = avgRaw / 1000.0;
-                if (this._caltyp != 0) {
-                    if (this._calhdl != null) {
-                        avgVal = this._calhdl(avgVal, this._caltyp, this._calpar, this._calraw, this._calref);
-                    }
-                }
-                minVal = avgVal;
-                maxVal = avgVal;
-            } else {
-                // averaged report: avg,avg-min,max-avg
-                sublen = 1 + ((report[1]) & (3));
-                poww = 1;
-                avgRaw = 0;
-                byteVal = 0;
-                i = 2;
-                while ((sublen > 0) && (i < report.Count)) {
-                    byteVal = report[i];
-                    avgRaw = avgRaw + poww * byteVal;
-                    poww = poww * 0x100;
-                    i = i + 1;
-                    sublen = sublen - 1;
-                }
-                if (((byteVal) & (0x80)) != 0) {
-                    avgRaw = avgRaw - poww;
-                }
-                sublen = 1 + ((((report[1]) >> (2))) & (3));
-                poww = 1;
-                difRaw = 0;
-                while ((sublen > 0) && (i < report.Count)) {
-                    byteVal = report[i];
-                    difRaw = difRaw + poww * byteVal;
-                    poww = poww * 0x100;
-                    i = i + 1;
-                    sublen = sublen - 1;
-                }
-                minRaw = avgRaw - difRaw;
-                sublen = 1 + ((((report[1]) >> (4))) & (3));
-                poww = 1;
-                difRaw = 0;
-                while ((sublen > 0) && (i < report.Count)) {
-                    byteVal = report[i];
-                    difRaw = difRaw + poww * byteVal;
-                    poww = poww * 0x100;
-                    i = i + 1;
-                    sublen = sublen - 1;
-                }
-                maxRaw = avgRaw + difRaw;
-                avgVal = avgRaw / 1000.0;
-                minVal = minRaw / 1000.0;
-                maxVal = maxRaw / 1000.0;
-                if (this._caltyp != 0) {
-                    if (this._calhdl != null) {
-                        avgVal = this._calhdl(avgVal, this._caltyp, this._calpar, this._calraw, this._calref);
-                        minVal = this._calhdl(minVal, this._caltyp, this._calpar, this._calraw, this._calref);
-                        maxVal = this._calhdl(maxVal, this._caltyp, this._calpar, this._calraw, this._calref);
-                    }
+        // 32bit timed report format
+        if (report.Count <= 5) {
+            // sub-second report, 1-4 bytes
+            poww = 1;
+            avgRaw = 0;
+            byteVal = 0;
+            i = 1;
+            while (i < report.Count) {
+                byteVal = report[i];
+                avgRaw = avgRaw + poww * byteVal;
+                poww = poww * 0x100;
+                i = i + 1;
+            }
+            if (((byteVal) & (0x80)) != 0) {
+                avgRaw = avgRaw - poww;
+            }
+            avgVal = avgRaw / 1000.0;
+            if (this._caltyp != 0) {
+                if (this._calhdl != null) {
+                    avgVal = this._calhdl(avgVal, this._caltyp, this._calpar, this._calraw, this._calref);
                 }
             }
+            minVal = avgVal;
+            maxVal = avgVal;
         } else {
-            // 16bit timed report format
-            if (report[0] == 0) {
-                // sub-second report, 1-4 bytes
-                poww = 1;
-                avgRaw = 0;
-                byteVal = 0;
-                i = 1;
-                while (i < report.Count) {
-                    byteVal = report[i];
-                    avgRaw = avgRaw + poww * byteVal;
-                    poww = poww * 0x100;
-                    i = i + 1;
+            // averaged report: avg,avg-min,max-avg
+            sublen = 1 + ((report[1]) & (3));
+            poww = 1;
+            avgRaw = 0;
+            byteVal = 0;
+            i = 2;
+            while ((sublen > 0) && (i < report.Count)) {
+                byteVal = report[i];
+                avgRaw = avgRaw + poww * byteVal;
+                poww = poww * 0x100;
+                i = i + 1;
+                sublen = sublen - 1;
+            }
+            if (((byteVal) & (0x80)) != 0) {
+                avgRaw = avgRaw - poww;
+            }
+            sublen = 1 + ((((report[1]) >> (2))) & (3));
+            poww = 1;
+            difRaw = 0;
+            while ((sublen > 0) && (i < report.Count)) {
+                byteVal = report[i];
+                difRaw = difRaw + poww * byteVal;
+                poww = poww * 0x100;
+                i = i + 1;
+                sublen = sublen - 1;
+            }
+            minRaw = avgRaw - difRaw;
+            sublen = 1 + ((((report[1]) >> (4))) & (3));
+            poww = 1;
+            difRaw = 0;
+            while ((sublen > 0) && (i < report.Count)) {
+                byteVal = report[i];
+                difRaw = difRaw + poww * byteVal;
+                poww = poww * 0x100;
+                i = i + 1;
+                sublen = sublen - 1;
+            }
+            maxRaw = avgRaw + difRaw;
+            avgVal = avgRaw / 1000.0;
+            minVal = minRaw / 1000.0;
+            maxVal = maxRaw / 1000.0;
+            if (this._caltyp != 0) {
+                if (this._calhdl != null) {
+                    avgVal = this._calhdl(avgVal, this._caltyp, this._calpar, this._calraw, this._calref);
+                    minVal = this._calhdl(minVal, this._caltyp, this._calpar, this._calraw, this._calref);
+                    maxVal = this._calhdl(maxVal, this._caltyp, this._calpar, this._calraw, this._calref);
                 }
-                if (this._isScal) {
-                    avgVal = this._decodeVal(avgRaw);
-                } else {
-                    if (((byteVal) & (0x80)) != 0) {
-                        avgRaw = avgRaw - poww;
-                    }
-                    avgVal = this._decodeAvg(avgRaw);
-                }
-                minVal = avgVal;
-                maxVal = avgVal;
-            } else {
-                // averaged report 2+4+2 bytes
-                minRaw = report[1] + 0x100 * report[2];
-                maxRaw = report[3] + 0x100 * report[4];
-                avgRaw = report[5] + 0x100 * report[6] + 0x10000 * report[7];
-                byteVal = report[8];
-                if (((byteVal) & (0x80)) == 0) {
-                    avgRaw = avgRaw + 0x1000000 * byteVal;
-                } else {
-                    avgRaw = avgRaw - 0x1000000 * (0x100 - byteVal);
-                }
-                minVal = this._decodeVal(minRaw);
-                avgVal = this._decodeAvg(avgRaw);
-                maxVal = this._decodeVal(maxRaw);
             }
         }
         return new YMeasure(startTime, endTime, minVal, avgVal, maxVal);
@@ -11423,11 +11325,6 @@ public class YSensor : YFunction
     {
         double val;
         val = w;
-        if (this._isScal) {
-            val = (val - this._offset) / this._scale;
-        } else {
-            val = YAPI._decimalToDouble(w);
-        }
         if (this._caltyp != 0) {
             if (this._calhdl != null) {
                 val = this._calhdl(val, this._caltyp, this._calpar, this._calraw, this._calref);
@@ -11440,11 +11337,6 @@ public class YSensor : YFunction
     {
         double val;
         val = dw;
-        if (this._isScal) {
-            val = (val / 100 - this._offset) / this._scale;
-        } else {
-            val = val / this._decexp;
-        }
         if (this._caltyp != 0) {
             if (this._calhdl != null) {
                 val = this._calhdl(val, this._caltyp, this._calpar, this._calraw, this._calref);
@@ -11527,235 +11419,6 @@ public class YSensor : YFunction
 
 
     //--- (end of generated code: YSensor functions)
-}
-
-
-/**
- * YOldDataStream Class: Sequence of measured data, returned by the data logger
- *
- * A data stream is a small collection of consecutive measures for a set
- * of sensors. A few properties are available directly from the object itself
- * (they are preloaded at instantiation time), while most other properties and
- * the actual data are loaded on demand when accessed for the first time.
- *
- * This is the old version of the YDataStream class, used for backward-compatibility
- * with devices with firmware < 13000
- */
-public class YOldDataStream : YDataStream
-{
-    protected YDataLogger _dataLogger;
-    protected int _timeStamp;
-    protected int _interval;
-
-    public YOldDataStream(YDataLogger parent, int run, int stamp, UInt32 utc, int itv) : base(parent)
-    {
-        this._dataLogger = parent;
-        this._runNo = run;
-        this._timeStamp = stamp;
-        this._utcStamp = utc;
-        this._interval = itv;
-        this._samplesPerHour = (int) (3600 / _interval);
-        this._isClosed = true;
-        this._minVal = DATA_INVALID;
-        this._avgVal = DATA_INVALID;
-        this._maxVal = DATA_INVALID;
-    }
-
-    /**
-     * <summary>
-     *   Returns the relative start time of the data stream, measured in seconds.
-     * <para>
-     *   For recent firmwares, the value is relative to the present time,
-     *   which means the value is always negative.
-     *   If the device uses a firmware older than version 13000, value is
-     *   relative to the start of the time the device was powered on, and
-     *   is always positive.
-     *   If you need an absolute UTC timestamp, use <c>get_startTimeUTC()</c>.
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <returns>
-     *   an unsigned number corresponding to the number of seconds
-     *   between the start of the run and the beginning of this data
-     *   stream.
-     * </returns>
-     */
-    public new int get_startTime()
-    {
-        return (int) this._timeStamp;
-    }
-
-    /**
-     * <summary>
-     *   Returns the number of seconds elapsed between  two consecutive
-     *   rows of this data stream.
-     * <para>
-     *   By default, the data logger records one row
-     *   per second, but there might be alternative streams at lower resolution
-     *   created by summarizing the original stream for archiving purposes.
-     * </para>
-     * <para>
-     *   This method does not cause any access to the device, as the value
-     *   is preloaded in the object at instantiation time.
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <returns>
-     *   an unsigned number corresponding to a number of seconds.
-     * </returns>
-     */
-    public new int get_dataSamplesInterval()
-    {
-        return (int) this._interval;
-    }
-
-    public new int loadStream()
-    {
-        YAPI.YJSONContent raw_json;
-        YAPI.YJSONObject json;
-        int res = 0;
-        List<int> coldiv = new List<int>();
-        List<int> coltype = new List<int>();
-        List<int> udat = new List<int>();
-        List<double> date = new List<double>();
-        List<double> colscl = new List<double>();
-        List<int> colofs = new List<int>();
-        List<int> caltyp = new List<int>();
-        List<YAPI.yCalibrationHandler> calhdl = new List<YAPI.yCalibrationHandler>();
-        List<List<int>> calpar = new List<List<int>>();
-        List<List<double>> calraw = new List<List<double>>();
-        List<List<double>> calref = new List<List<double>>();
-
-        int x = 0;
-        int j = 0;
-
-        res = _dataLogger.getData(_runNo, _timeStamp, out raw_json);
-        if ((res != YAPI.SUCCESS)) {
-            return res;
-        }
-
-        _nRows = 0;
-        _nCols = 0;
-        _columnNames.Clear();
-        _values = new List<List<double>>();
-        json = (YAPI.YJSONObject) raw_json;
-
-
-        if (json.has("time")) {
-            _timeStamp = json.getInt("time");
-        }
-
-        if (json.has("UTC")) {
-            _utcStamp = json.getLong("UTC");
-        }
-
-        if (json.has("interval")) {
-            _interval = json.getInt("interval");
-        }
-
-        if (json.has("nRows")) {
-            _nRows = json.getInt("nRows");
-        }
-
-        if (json.has("keys")) {
-            YAPI.YJSONArray jsonkeys = json.getYJSONArray("keys");
-            _nCols = jsonkeys.Length;
-            for (j = 0; j < _nCols; j++) {
-                _columnNames.Add(jsonkeys.getString(j));
-            }
-        }
-
-        if (json.has("div")) {
-            YAPI.YJSONArray arr = json.getYJSONArray("div");
-            _nCols = arr.Length;
-            for (j = 0; j < _nCols; j++) {
-                coldiv.Add(arr.getInt(j));
-            }
-        }
-
-        if (json.has("type")) {
-            YAPI.YJSONArray arr = json.getYJSONArray("type");
-            _nCols = arr.Length;
-            for (j = 0; j < _nCols; j++) {
-                coltype.Add(arr.getInt(j));
-            }
-        }
-
-        if (json.has("scal")) {
-            YAPI.YJSONArray arr = json.getYJSONArray("type");
-            _nCols = arr.Length;
-            for (j = 0; j < _nCols; j++) {
-                colscl.Add(arr.getInt(j) / 65536.0);
-                if (coltype[j] != 0)
-                    colofs.Add(-32767);
-                else
-                    colofs.Add(0);
-            }
-        }
-
-        if (json.has("cal")) {
-            //fixme no calibration
-        }
-
-        if (json.has("data")) {
-            if (colscl.Count <= 0) {
-                for (j = 0; j <= _nCols - 1; j++) {
-                    colscl.Add(1.0 / coldiv[j]);
-                    if (coltype[j] != 0)
-                        colofs.Add(-32767);
-                    else
-                        colofs.Add(0);
-                }
-            }
-
-            udat.Clear();
-            string data = null;
-            try {
-                data = json.getString("data");
-                udat = YAPI._decodeWords(data);
-            } catch (Exception) { }
-
-            if (data == null) {
-                YAPI.YJSONArray jsonData = json.getYJSONArray("data");
-                for (j = 0; j < jsonData.Length; j++) {
-                    int tmp = (int) (jsonData.getInt(j));
-                    udat.Add(tmp);
-                }
-            }
-
-            _values = new List<List<double>>();
-            List<double> dat = new List<double>();
-            foreach (int uval in udat) {
-                double value;
-                if (coltype[x] < 2) {
-                    value = (uval + colofs[x]) * colscl[x];
-                } else {
-                    value = YAPI._decimalToDouble(uval - 32767);
-                }
-
-                if (caltyp[x] > 0 && calhdl[x] != null) {
-                    YAPI.yCalibrationHandler handler = calhdl[x];
-                    if (caltyp[x] <= 10) {
-                        value = handler((uval + colofs[x]) / coldiv[x], caltyp[x], calpar[x], calraw[x], calref[x]);
-                    } else if (caltyp[x] > 20) {
-                        value = handler(value, caltyp[x], calpar[x], calraw[x], calref[x]);
-                    }
-                }
-
-                dat.Add(value);
-                x++;
-                if (x == _nCols) {
-                    _values.Add(dat);
-                    dat.Clear();
-                    x = 0;
-                }
-            }
-        }
-
-        return YAPI.SUCCESS;
-    }
 }
 
 
@@ -12406,72 +12069,6 @@ public class YDataLogger : YFunction
         return YAPI.SUCCESS;
     }
 
-    /**
-     * <summary>
-     *   Builds a list of all data streams hold by the data logger (legacy method).
-     * <para>
-     *   The caller must pass by reference an empty array to hold YDataStream
-     *   objects, and the function fills it with objects describing available
-     *   data sequences.
-     * </para>
-     * <para>
-     *   This is the old way to retrieve data from the DataLogger.
-     *   For new applications, you should rather use <c>get_dataSets()</c>
-     *   method, or call directly <c>get_recordedData()</c> on the
-     *   sensor object.
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="v">
-     *   an array of YDataStream objects to be filled in
-     * </param>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public int get_dataStreams(List<YDataStream> v)
-    {
-        YAPI.YJSONContent raw_json;
-        YAPI.YJSONArray root;
-        int i = 0;
-        int res = 0;
-
-        v.Clear();
-        res = getData(0, 0, out raw_json);
-        if (res != YAPI.SUCCESS) {
-            return res;
-        }
-
-        root = (YAPI.YJSONArray) raw_json;
-
-
-        if (root.Length == 0)
-            return YAPI.SUCCESS;
-        if (root.get(0).getJSONType() == YAPI.YJSONContent.YJSONType.ARRAY) {
-            // old datalogger format: [runIdx, timerel, utc, interval]
-            for (i = 0; i < root.Length; i++) {
-                YAPI.YJSONArray el = root.getYJSONArray(i);
-                v.Add(new YOldDataStream(this, el.getInt(0), el.getInt(1), (uint) el.getLong(2), el.getInt(1)));
-            }
-        } else {
-            // new datalogger format: {"id":"...","unit":"...","streams":["...",...]}
-
-            string json_buffer = root.toJSON();
-            List<YDataSet> sets = this.parse_dataSets(YAPI.DefaultEncoding.GetBytes(json_buffer));
-            for (int sj = 0; sj < sets.Count; sj++) {
-                List<YDataStream> ds = sets[sj].get_privateDataStreams();
-                for (int si = 0; si < ds.Count; si++) {
-                    v.Add(ds[si]);
-                }
-            }
-        }
-
-        return YAPI.SUCCESS;
-    }
 
 
     //--- (generated code: YDataLogger functions)

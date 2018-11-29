@@ -1038,7 +1038,7 @@ namespace YoctoVisualisation
 
     public static void deviceConfigChanged(YModule m)
     {
-      LogManager.Log("Config change omn device  " + m.get_serialNumber());
+      LogManager.Log("Config change on device  " + m.get_serialNumber());
       string serialprefix = m.get_serialNumber().Substring(0, 8);
       for (int i = 0; i < sensorList.Count; i++)
         if (sensorList[i].get_hardwareId().Substring(0, 8) == serialprefix)

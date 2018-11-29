@@ -39,6 +39,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using System.Windows.Forms;
@@ -75,14 +76,17 @@ namespace YoctoVisualisation
           catch (OutOfMemoryException)
           {
             string msg = ("Yocto-Visualization ran out of memory");
-            Console.Write(msg);
+            Console.Write(msg, "Oops", MessageBoxButtons.OK,
+                                 MessageBoxIcon.Exclamation);
             MessageBox.Show(msg);
           }
           catch (Exception e)
           {
-            string msg = "Yocto-Visualization raised an exception:\r\n" + e.Message + "\r\n" + e.StackTrace.ToString();
-            Console.Write(msg);
-            MessageBox.Show(msg);
+            MessageBox.Show( constants.DumpException(e), "Oops",
+                             MessageBoxButtons.OK,
+                             MessageBoxIcon.Exclamation);
+
+
           }
         }
         else MessageBox.Show("Init error: " + errmsg);

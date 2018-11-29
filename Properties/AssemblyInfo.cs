@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Yocto-Visualization V2")]
-[assembly: AssemblyDescription("Data visualization for Yocotpuce sensors")]
+[assembly: AssemblyDescription("Data visualization for Yoctopuce sensors")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Yoctopuce")]
 [assembly: AssemblyProduct("YoctoVisualization")]

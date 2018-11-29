@@ -400,7 +400,10 @@ namespace YDataRendering
     public Color color { get { return _color; } set { _color = value; _pen = null; _brush = null; _navigatorpen = null; parent.redraw(); } }
 
     private double _thickness = 1.0;
-    public double thickness { get { return _thickness; } set { _thickness = value; _pen = null; parent.redraw(); } }
+    public double thickness { get { return _thickness; }
+      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+            _thickness = value; _pen = null; parent.redraw();
+      } }
 
     private string _legend = "";
     public string legend { get { return _legend; } set { _legend = value; parent.redraw(); } }
@@ -657,10 +660,16 @@ namespace YDataRendering
     public double diameter { get { return _diameter; } set { _diameter = value; _parentRenderer.redraw(); } }
 
     private double _handleLength = 25;
-    public double handleLength { get { return _handleLength; } set { _handleLength = value; _parentRenderer.redraw(); } }
+    public double handleLength { get { return _handleLength; }
+      set { if (value <= 0) throw new ArgumentException("Diameter must be a positive value");
+        _handleLength = value; _parentRenderer.redraw();
+      } }
 
     private int _detectionDistance = 50;
-    public int detectionDistance { get { return _detectionDistance; } set { _detectionDistance = value; } }
+    public int detectionDistance { get { return _detectionDistance; }
+      set { if (value <= 0) throw new ArgumentException("Distance must be a positive value");
+        _detectionDistance = value;
+      } }
 
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
@@ -670,16 +679,24 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; _parentRenderer.redraw(); } }
+    public double borderthickness { get { return _borderthickness; }
+      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+           _borderthickness = value; _pen = null; _parentRenderer.redraw();
+      } }
 
     private double _padding = 10;
     public double padding { get { return _padding; } set { _padding = value; _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; _parentRenderer.redraw(); } }
+    public double verticalMargin { get { return _verticalMargin; }
+      set { if (value < 0) throw new ArgumentException("Margin must be a positive value");
+         _verticalMargin = value; _parentRenderer.redraw();
+      } }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; _parentRenderer.redraw(); } }
+    public double horizontalMargin { get { return _horizontalMargin; }
+      set { if (value < 0) throw new ArgumentException("Margin must be a positive value");
+         _horizontalMargin = value; _parentRenderer.redraw(); } }
 
 
 
@@ -752,16 +769,28 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; _parentRenderer.redraw(); } }
+    public double borderthickness { get { return _borderthickness; }
+      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+           _borderthickness = value; _pen = null; _parentRenderer.redraw();
+      } }
 
     private double _padding = 10;
-    public double padding { get { return _padding; } set { _padding = value; _parentRenderer.redraw(); } }
+    public double padding { get { return _padding; }
+      set { if (value < 0) throw new ArgumentException("Padding must be a positive value");
+         _padding = value; _parentRenderer.redraw();
+      } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; _parentRenderer.redraw(); } }
+    public double verticalMargin { get { return _verticalMargin; }
+      set { if (value < 0) throw new ArgumentException("Margin must be a positive value");
+            _verticalMargin = value; _parentRenderer.redraw();
+      } }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; _parentRenderer.redraw(); } }
+    public double horizontalMargin { get { return _horizontalMargin; }
+      set { if (value <0) throw new ArgumentException("Margin must be a positive value");
+            _horizontalMargin = value; _parentRenderer.redraw();
+      } }
 
 
 
@@ -906,7 +935,10 @@ namespace YDataRendering
     public Color xAxisColor { get { return _xAxisColor; } set { _xAxisColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _xAxisThickness = 1.0;
-    public double xAxisThickness { get { return _xAxisThickness; } set { _xAxisThickness = value; _pen = null; _parentRenderer.redraw(); } }
+    public double xAxisThickness { get { return _xAxisThickness; }
+      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+            _xAxisThickness = value; _pen = null; _parentRenderer.redraw();
+      } }
 
 
     private Pen _borderPen = null;
@@ -923,7 +955,10 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderPen = null; _parentRenderer.redraw(); } }
 
     private Double _borderThickness = 1.0;
-    public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; _borderPen = null; _parentRenderer.redraw(); } }
+    public Double borderThickness { get { return _borderThickness; }
+      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+            _borderThickness = value; _borderPen = null; _parentRenderer.redraw();
+          } }
 
 
     private LinearGradientBrush _bgBrush = null;
@@ -1082,19 +1117,45 @@ namespace YDataRendering
     public void AutoShow() { if (_AllowAutoShow) { visible = true; if (_AxisChanged != null) _AxisChanged(this); } } 
 
     
+    public void  set_minMax(double value_min,double value_max)
+    {
+      if (!Double.IsNaN(value_min) && !Double.IsNaN(value_max) && (value_min>=value_max))
+        throw new ArgumentException("Min ("+ value_min.ToString()+ ") cannot be greater than max (" + value_max.ToString() + ")");
 
+      _min = value_min;
+      _max = value_max;
+      _parentRenderer.redraw();
+    }
 
     protected Double _min = Double.NaN;
-    public Double min { get { return _min; } set { _min = value; _parentRenderer.redraw(); } }
+    public Double min { get { return _min; }
+
+      set {
+          if (!Double.IsNaN(value) && !Double.IsNaN(_max) && !YDataRenderer.minMaxCheckDisabled)
+             if (value >= _max)
+                throw new ArgumentException("Min cannot be greater than max (" + _max.ToString() + ")");
+           _min = value; _parentRenderer.redraw();
+          }
+    }
 
     protected Double _max = Double.NaN;
-    public Double max { get { return _max; } set { _max = value; _parentRenderer.redraw(); } }
+    public Double max { get { return _max; }
+      set {
+        if (!Double.IsNaN(value) && !Double.IsNaN(_min) && !YDataRenderer.minMaxCheckDisabled)
+          if (value <= _min) throw new ArgumentException("Max cannot be less than min (" + _min.ToString() + ")");
+
+        _max = value;
+        _parentRenderer.redraw();
+      } }
 
     protected Double _step = Double.NaN;
     public Double step { get { return _step; } set { _step = value; _parentRenderer.redraw(); } }
 
     protected Double _thickness = 1.0;
-    public Double thickness { get { return _thickness; } set { _thickness = value; _pen = null; _parentRenderer.redraw(); } }
+    public Double thickness { get { return _thickness; }
+      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+           _thickness = value; _pen = null; _parentRenderer.redraw();
+      } }
 
     protected Color _color = Color.Black;
     public Color color { get { return _color; } set { _color = value; _pen = null; _parentRenderer.redraw(); } }
@@ -1107,7 +1168,10 @@ namespace YDataRendering
     public Color gridColor { get { return _gridColor; } set { _gridColor = value; _gridPen = null; _parentRenderer.redraw(); } }
 
     protected Double _gridThickness = 1.0;
-    public Double gridThickness { get { return _gridThickness; } set { _gridThickness = value; _gridPen = null; _parentRenderer.redraw(); } }
+    public Double gridThickness { get { return _gridThickness; }
+      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+            _gridThickness = value; _gridPen = null; _parentRenderer.redraw();
+      } }
 
 
     YFontParams _font = null;
@@ -1292,7 +1356,9 @@ namespace YDataRendering
     public VrtPosition position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
     private double _initialZoom = 300;
-    public double initialZoom { get { return _initialZoom; } set { _initialZoom = value; max = min + initialZoom; _parentRenderer.redraw(); } }
+    public double initialZoom { get { return _initialZoom; }
+      set { if (value <= 0) throw new ArgumentException("Zoom must be a positive value");
+          _initialZoom = value; max = min + initialZoom; _parentRenderer.redraw(); } }
 
 
 
@@ -1407,8 +1473,7 @@ namespace YDataRendering
         { case XAxis.OverflowHandling.SCROLL:
             if (max > xAxis.min + ((xAxis.max - xAxis.min) * 0.85) && (max <= xAxis.max))
              {  DisableRedraw();
-                xAxis.min += ofset;
-                xAxis.max += ofset;
+                xAxis.set_minMax(xAxis.min + ofset, xAxis.max + ofset);
                 AllowRedraw();
              }
           break;
@@ -1518,8 +1583,10 @@ namespace YDataRendering
         else
         {
           DisableRedraw();
-          _xAxis.min = p.x - (p3.x - p2.x) / 2;
-          _xAxis.max = _xAxis.min + (p3.x - p2.x);
+          double min = p.x - (p3.x - p2.x) / 2;
+          double max = min + (p3.x - p2.x);
+          _xAxis.set_minMax(min,max); 
+        
           AllowRedraw();
         //  log("Jump to " + mainViewPort.IRLx.ToString());
           Draw();
@@ -1557,10 +1624,10 @@ namespace YDataRendering
         double halfAxisDelta =( mainViewPort.OriginalXAxisMax - mainViewPort.OriginalXAxisMin) / 2;
         double Axismiddle = (mainViewPort.OriginalXAxisMax + mainViewPort.OriginalXAxisMin) / 2;
         double deltaCoef = (YGraph.VerticalDragZoomEnabled && (Math.Abs(deltaY)  > 10)) ? Math.Pow(1.01, deltaY) : 1;
-     
 
-        _xAxis.min = Axismiddle - halfAxisDelta * deltaCoef - deltaX;
-        _xAxis.max = Axismiddle + halfAxisDelta * deltaCoef - deltaX;
+
+        _xAxis.set_minMax(Axismiddle - halfAxisDelta * deltaCoef - deltaX,
+                           Axismiddle + halfAxisDelta * deltaCoef - deltaX);
         AllowRedraw();
         redraw();
         return;
@@ -1570,8 +1637,8 @@ namespace YDataRendering
         double x1 = _navigator.viewport.OriginalIRLx + (double)(e.X - _navigator.viewport.OriginalLmargin) / _navigator.viewport.OriginalZoomx;
         double delta = (x1 - _navigator.viewport.IRLCaptureStartX);
         DisableRedraw();
-        _xAxis.min = _navigator.viewport.OriginalXAxisMin + delta;
-        _xAxis.max = _navigator.viewport.OriginalXAxisMax + delta;
+        _xAxis.set_minMax(_navigator.viewport.OriginalXAxisMin + delta,
+                          _navigator.viewport.OriginalXAxisMax + delta);
         AllowRedraw();
         redraw();
         return;
@@ -2724,15 +2791,15 @@ namespace YDataRendering
       if (e.KeyCode == Keys.Left)
       {
         double delta = 0.2 * (_xAxis.max - _xAxis.min);
-        _xAxis.min -= delta;
-        _xAxis.max -= delta;
+        _xAxis.set_minMax(_xAxis.min - delta,
+                          _xAxis.max - delta);
         redraw();
       }
       if (e.KeyCode == Keys.Right)
       {
         double delta = 0.2 * (_xAxis.max - _xAxis.min);
-        _xAxis.min += delta;
-        _xAxis.max += delta;
+        _xAxis.set_minMax(  _xAxis.min + delta,
+                            _xAxis.max + delta);
         redraw();
       }
       if (e.KeyCode == Keys.Up)
@@ -2757,8 +2824,8 @@ namespace YDataRendering
       if ((NextZoomX > mainViewPort.zoomx) && (NextZoomX > 1000)) return;
       mainViewPort.IRLx += ((pos.X - mainViewPort.Lmargin) / mainViewPort.zoomx) - ((pos.X - mainViewPort.Lmargin) / NextZoomX);
       double range = _xAxis.max - _xAxis.min;
-      _xAxis.min = mainViewPort.IRLx;
-      _xAxis.max = mainViewPort.IRLx + range / ZoomFactor;
+      _xAxis.set_minMax ( mainViewPort.IRLx,
+                          mainViewPort.IRLx + range / ZoomFactor);
       mainViewPort.zoomx = NextZoomX;
    //   log("ZoomX=" + mainViewPort.zoomx.ToString());
       redraw();

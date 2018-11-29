@@ -69,10 +69,19 @@ namespace YDataRendering
 
 
     protected Double _min =0;
-    public Double min { get { return _min; } set { _min = value; if (_shownValue < _min) _shownValue = _min; redraw(); } }
+    public Double min { get { return _min; }
+      set {
+         if ((value >= _max) && !minMaxCheckDisabled) 
+        throw new ArgumentException("Min cannot be greater than max (" + _max.ToString() + ")");
+        _min = value; if (_shownValue < _min) _shownValue = _min; redraw();
+      } }
 
     protected Double _max = 100;
-    public Double max { get { return _max; } set { _max = value; if (_shownValue > _max) _shownValue = _max;  redraw(); } }
+    public Double max { get { return _max; }
+      set {
+        if ((value <= _min) && !minMaxCheckDisabled)  throw new ArgumentException("Max cannot be less than min (" + _min.ToString() + ")");
+        _max = value; if (_shownValue > _max) _shownValue = _max;  redraw();
+      } }
 
     const int SegmentMaxLength = 8;  
 
@@ -110,7 +119,9 @@ namespace YDataRendering
 
 
     private double _borderThickness = 5;
-    public double borderThickness { get { return _borderThickness; } set { _borderThickness = value; _borderpen = null; _path = null; redraw(); } }
+    public double borderThickness { get { return _borderThickness; }
+      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+            _borderThickness = value; _borderpen = null; _path = null; redraw(); } }
 
     private ValueFormater _valueFormater = null;
     public ValueFormater valueFormater
@@ -129,14 +140,16 @@ namespace YDataRendering
 
     private double _thickness = 25;
     public double thickness { get { return _thickness; }
-      set { _thickness = Math.Max(Math.Min(value,80),1); _path = null; redraw(); } }
+      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+           _thickness = Math.Max(Math.Min(value,80),1); _path = null; redraw(); } }
 
 
     private double _maxSpeed = 0.1;
     public double maxSpeed
     {
       get { return _maxSpeed; }
-      set { if (value>0) _maxSpeed = value ;  }
+      set { if (value <= 0) throw new ArgumentException("Speed must be a positive value");
+            _maxSpeed = value ;  }
     }
 
     private double _value = 0;

@@ -55,7 +55,7 @@ namespace YoctoVisualisation
   class constants
   {
 
-    public static string buildVersion = "32988";
+    public static string buildVersion = "33423";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
@@ -92,12 +92,52 @@ namespace YoctoVisualisation
           if (displayName != null)
             return displayName.Invoke(null, null).ToString();
           else
-            return "unknow";
+            return "unknown";
         }
         return "Not in Mono";
       }
     }
 
+    public static string DumpException(Exception e)
+    {
+      string UserMsg = "";
+      string contentsDump = "";
+      string InnerMessage = "";
+
+      while (e!=null)
+       {
+        InnerMessage = e.Message;
+        UserMsg = e.Message + "\r\n" + UserMsg;
+         contentsDump = "<b>" + e.Message + "</b><br><tt>" + e.StackTrace.ToString().Replace("\n", "<br>\n") + "</tt>\r\n";
+         e = e.InnerException;
+
+
+       }
+
+      string filename = Path.Combine(Application.UserAppDataPath, "YoctoVisualization.last.crash.html");
+      UserMsg = "Yocto-Visualization raised an exception: "
+                + UserMsg
+                + "\r\nDetails about this mishap has been saved in:\r\n\r\n"
+                + filename + "\r\n\r\n"
+                + "Should this happen again, don't hesitate to contact Yoctopuce support.";
+
+
+      contentsDump = "<HTML><BODY>"
+      + "<h1>YoctoVisualisation Exception</h1>\r\n"
+      + "<hr><br><b>" + InnerMessage + "</b><hr><br>\r\n"
+      + "Occured on : " + DateTime.Now.ToString("G") + "<br>\n\n"
+      + "Build version : " + buildVersion + "<br>\r\n"
+      + "Running on :" + (MonoRunning ? MonoVersion : ".NET") + "<br>\r\n"
+      + "<HR/>"
+      + "<h2>DUMP (inner first)</h2>\r\n"
+      + contentsDump
+      + "</BODY></HTML>\r\n";
+
+      File.WriteAllText(filename, contentsDump);
+      return(UserMsg);
+
+
+    }
 
     public static bool CheckMonoVersion(out string errmsg)
     {

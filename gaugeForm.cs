@@ -43,6 +43,7 @@ using System.Xml;
 using System.Windows.Forms;
 using YDataRendering;
 using System.Drawing;
+using System.Reflection;
 
 namespace YoctoVisualisation
 {
@@ -110,10 +111,12 @@ namespace YoctoVisualisation
         Rectangle s = Screen.FromControl(this).Bounds;
         this.Location = new Point((s.Width - this.Width) >> 1, (s.Height - this.Height) >> 1);
       }
+      YDataRenderer.minMaxCheckDisabled = true;
+      try { prop.ApplyAllProperties(_solidGauge); }
+      catch (TargetInvocationException e) { LogManager.Log("SolidGauge init raised an exception (" + e.InnerException.Message + ")"); }
+      YDataRenderer.minMaxCheckDisabled = false;
 
-      prop.ApplyAllProperties(_solidGauge);
 
-     
 
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration,capture);

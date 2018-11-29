@@ -1197,9 +1197,13 @@ namespace YoctoVisualisation
     {
 
       if (input == null) return;
-      double propValue = (double)_prop.GetValue(_dataContainer, null);
-      if (double.IsNaN(propValue) && (input.Text != ""))
-      { input.Text = ""; return; }
+      double propValue = ((doubleNan)_prop.GetValue(_dataContainer, null)).value;
+      if (double.IsNaN(propValue))
+       {
+        if (input.Text != "") input.Text = "";
+        return;
+      }
+
 
       double inputValue;
       bool ok = false;
@@ -1209,9 +1213,8 @@ namespace YoctoVisualisation
       }
       if (!ok) input.Text = propValue.ToString();
 
-
-      string s = ((doubleNan)_prop.GetValue(_dataContainer, null)).ToString();
-      if (input != null) if (s != input.Text) input.Text = s;
+   
+    
     }
 
     protected virtual void Text_TextChanged(object sender, EventArgs e)
@@ -1945,8 +1948,17 @@ namespace YoctoVisualisation
     {
 
       if (checkData())
-        if (_callback!=null) _callback(sender, e);
+      {
+        try
+        {
+          if (_callback != null) _callback(sender, e);
+        }
+        catch (TargetInvocationException  ex)
+        {
+          backGroundColorFeedback(ex.InnerException.Message, false);
 
+        }
+      }
     }
 
 

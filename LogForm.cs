@@ -118,7 +118,7 @@ public class LogHandler
       Lock.WaitOne();
       while (buffer.Count > 0)
       {
-        _logWindow.AppendText(buffer[0]);
+        try { _logWindow.AppendText(buffer[0]); }  catch (Exception) { }
         buffer.RemoveAt(0);
       }
       Lock.ReleaseMutex();

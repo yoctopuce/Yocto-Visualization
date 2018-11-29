@@ -66,7 +66,11 @@ namespace YDataRendering
     protected override void resetCache() { resetPath(); }
 
     double _width = 10;
-    public double width { get { return _width; }  set { _width = value;  _path = null; _parentRenderer.redraw();  } }
+    public double width { get { return _width; }
+      set
+      { if (value <= 0)  throw new ArgumentException("Width must be a positive value");
+        _width = value;  _path = null; _parentRenderer.redraw();
+      } }
 
 
     double _outerRadius = 98;
@@ -86,7 +90,14 @@ namespace YDataRendering
 
     protected Double _min = 0;
     public Double min { get { return _min; }
-      set { _min = value;
+      set {
+
+        
+          if ((value >= _max) && (!minMaxCheckDisabled))
+           throw new ArgumentException("Min cannot be greater than max (" + _max.ToString() + ")");
+
+
+        _min = value;
         for (int i = 0; i < _zones.Count; i++) zones[i].resetPath();
           if (_needleValue < _min) { _needleValue = _min; }
         redraw(); }
@@ -98,6 +109,8 @@ namespace YDataRendering
       get { return _max; }
       set
       {
+        if ((value <= _min) && (!minMaxCheckDisabled))
+           throw new ArgumentException("Max cannot be less than min (" + _min.ToString() + ")");
         _max = value;
         for (int i = 0; i < _zones.Count; i++) zones[i].resetPath();
         if (_needleValue > _max) { _needleValue = _max; }
@@ -159,7 +172,10 @@ namespace YDataRendering
 
     private double _thickness = 20;
     public double thickness { get { return _thickness; }
-      set { _thickness = Math.Max(Math.Min(value, 80), 1); redraw(); } }
+      set {
+        if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+        _thickness = Math.Max(Math.Min(value, 80), 1); redraw();
+      } }
 
     private double _value = 0;
     private double _needleValue = 0;
@@ -180,14 +196,16 @@ namespace YDataRendering
     public double graduationThickness
     {
       get { return _graduationThickness; }
-      set { _graduationThickness = value; _graduationPen = null; redraw(); }
+      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+           _graduationThickness = value; _graduationPen = null; redraw(); }
     }
 
     private double _graduationSize = 10;
     public double graduationSize
     {
       get { return _graduationSize; }
-      set { _graduationSize = value; redraw(); }
+      set { if (value <= 0) throw new ArgumentException("Graduation size must be a positive value");
+          _graduationSize = value; redraw(); }
 
     }
 
@@ -203,7 +221,11 @@ namespace YDataRendering
     public double unitFactor
     {
       get { return _unitFactor; }
-      set { if (value != 0) { _unitFactor = value; redraw(); } }
+      set
+      {
+        if (value == 0) throw new ArgumentException("Factor cannot be zero.");
+         _unitFactor = value; redraw();
+      }
 
     }
 
@@ -234,14 +256,16 @@ namespace YDataRendering
     public double subgraduationThickness
     {
       get { return _subgraduationThickness; }
-      set { _subgraduationThickness = value; _subgraduationPen = null; redraw(); }
+      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+           _subgraduationThickness = value; _subgraduationPen = null; redraw(); }
     }
 
     private double _subgraduationSize = 5;
     public double subgraduationSize
     {
       get { return _subgraduationSize; }
-      set { _subgraduationSize = value; redraw(); }
+      set { if (value <= 0) throw new ArgumentException("Size must be a positive value");
+           _subgraduationSize = value; redraw(); }
 
     }
 
@@ -258,7 +282,8 @@ namespace YDataRendering
     public double subgraduationCount
     {
       get { return _subgraduationCount; }
-      set { _subgraduationCount = value; redraw(); }
+      set { if (value <= 0) throw new ArgumentException("Count must be a positive value");
+            _subgraduationCount = value; redraw(); }
 
     }
 
@@ -284,7 +309,17 @@ namespace YDataRendering
 
 
     private double _needleMaxSpeed = 5;
-    public double needleMaxSpeedh { get { return _needleMaxSpeed; } set { if (value > 0) { _needleMaxSpeed = value; redraw(); } } }
+    public double needleMaxSpeedh
+    {
+
+      get { return _needleMaxSpeed; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Speed must be a positive value");
+        _needleMaxSpeed = value; redraw();
+      }
+    }
+
 
     private double _needleLength1 = 90;
     public double needleLength1 { get { return _needleLength1; } set { _needleLength1 = value; redraw(); } }
@@ -292,14 +327,20 @@ namespace YDataRendering
     public double needleLength2 { get { return _needleLength2; } set { _needleLength2 = value; redraw(); } }
 
     private double _needleWidth = 5;
-    public double needleWidth { get { return _needleWidth; } set { _needleWidth = value; redraw(); } }
+    public double needleWidth { get { return _needleWidth; }
+      set { if (value <= 0) throw new ArgumentException("Width must be a positive value");
+        _needleWidth = value; redraw();
+      } }
 
     private Pen _needleContourPen = null;
     private Color _needleContourColor = Color.DarkRed;
     public Color needleContourColor { get { return _needleContourColor; } set { _needleContourColor = value; _needleContourPen = null; redraw(); } }
 
     private double _needleContourThickness = 1;
-    public double needleContourThickness { get { return _needleContourThickness; } set { _needleContourThickness = value; _needleContourPen = null; redraw(); } }
+    public double needleContourThickness { get { return _needleContourThickness; }
+      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+            _needleContourThickness = value; _needleContourPen = null; redraw();
+      } }
 
     // public FontParams font;
     YFontParams _graduationFont;
