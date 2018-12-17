@@ -73,7 +73,7 @@ namespace YoctoVisualisation
 
   public static class GenericHints
   {
-    public const string ColorMsg = " You can use the color chooser dropdown or type direcly the color as HSL:xxx or HSL:xxx where xxx is a 8 digit hex number (Alpha transparence is supported). You can also type a color litteral name (Red, Yellow etc...).";
+    public const string ColorMsg = " You can use the color chooser drop-down or type directly the color as HSL:xxx or HSL:xxx where xxx is a 8 digit hex number (Alpha transparency is supported). You can also type a color literal name (Red, Yellow etc...).";
    
     public const string DevConfAffected = " Changing this value will affect the device configuration.";
     public const string CheckSensor = "If the sensor you want to use is connected, but not listed or listed as OFFLINE, check USB / Network configuration in the global configuration.";
@@ -290,7 +290,7 @@ public static class sensorPrecisionTypeDescription
 
 
     private double _SolidGauge_min = 0;
-    [DisplayName("Minimium value"),
+    [DisplayName("Minimum value"),
      CategoryAttribute("Values range"),
      DescriptionAttribute("Minimum value displayable by the gauge.")]
     public double SolidGauge_min
@@ -410,7 +410,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial background gradiant color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 1." + GenericHints.ColorMsg)]
     public YColor SolidGauge_backgroundColor1
     {
       get { return _SolidGauge_backgroundColor1; }
@@ -421,7 +421,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Dial"),
     
-     DescriptionAttribute("Dial background gradiant color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 2." + GenericHints.ColorMsg)]
     public YColor SolidGauge_backgroundColor2
     {
       get { return _SolidGauge_backgroundColor2; }
@@ -562,8 +562,8 @@ public static class sensorPrecisionTypeDescription
 
 
     private double _AngularGauge_min = 0;
-    [DisplayName("Minimium value"),
-     CategoryAttribute("Gauge graduations"),
+    [DisplayName("Minimum value"),
+     CategoryAttribute("Gauge gradations"),
      DescriptionAttribute("Minimum value displayable by the gauge.")]
     public double AngularGauge_min
     {
@@ -573,7 +573,7 @@ public static class sensorPrecisionTypeDescription
 
     private double _AngularGauge_max = 100;
     [DisplayName("Maximum value"),
-     CategoryAttribute("Gauge graduations"),
+     CategoryAttribute("Gauge gradations"),
      DescriptionAttribute("Maximum value displayable by the gauge.")]
     public double AngularGauge_max
     {
@@ -584,8 +584,8 @@ public static class sensorPrecisionTypeDescription
 
     private double _AngularGauge_unitFactor = 1;
     [DisplayName("Unit factor"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Data  will be divided by this value before being displayed, this allows simpler graduation marks.")]
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Data  will be divided by this value before being displayed, this allows simpler gradation marks.")]
      public double AngularGauge_unitFactor
     {
         get { return _AngularGauge_unitFactor; }
@@ -593,9 +593,9 @@ public static class sensorPrecisionTypeDescription
       }
 
     private double _AngularGauge_graduation = 10;
-    [DisplayName("Main graduation steps"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Difference between two consecutive main graduation marks")]
+    [DisplayName("Main gradation steps"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Difference between two consecutive main gradation marks")]
     public double AngularGauge_graduation
     {
       get { return _AngularGauge_graduation; }
@@ -608,9 +608,9 @@ public static class sensorPrecisionTypeDescription
 
 
     private double _AngularGauge_graduationSize = 10;
-    [DisplayName("Main graduation size (%)"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Main graduation marks size in percent, relative to dial radius")]
+    [DisplayName("Main gradation size (%)"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Main gradation marks size in percent, relative to dial radius")]
     public double AngularGauge_graduationSize
     {
       get { return _AngularGauge_graduationSize; }
@@ -618,9 +618,9 @@ public static class sensorPrecisionTypeDescription
     }
 
     private double _AngularGauge_graduationOuterRadius = 98;
-    [DisplayName("Main graduation radius (%)"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Main graduation marks outter radius in percent, relative to dial radius")]
+    [DisplayName("Main gradation radius (%)"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Main gradation marks outer radius in percent, relative to dial radius")]
     public double AngularGauge_graduationOuterRadius
     {
       get { return _AngularGauge_graduationOuterRadius; }
@@ -630,9 +630,9 @@ public static class sensorPrecisionTypeDescription
   
 
     private double _AngularGauge_graduationThickness = 2;
-    [DisplayName("Main graduation thickness"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Main gradduation marks thickness")]
+    [DisplayName("Main gradation thickness"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Main gradation marks thickness")]
     public double AngularGauge_graduationThickness
     {
       get { return _AngularGauge_graduationThickness; }
@@ -641,10 +641,10 @@ public static class sensorPrecisionTypeDescription
 
 
     private YColor _AngularGauge_graduationColor = YColor.fromColor(Color.Black);
-    [DisplayName("Main graduation color"),
-     CategoryAttribute("Gauge graduations"),
+    [DisplayName("Main gradation color"),
+     CategoryAttribute("Gauge gradations"),
      
-     DescriptionAttribute("Main gradduation marks color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Main gradation marks color." + GenericHints.ColorMsg)]
     public YColor AngularGauge_graduationColor
     {
       get { return _AngularGauge_graduationColor; }
@@ -652,10 +652,10 @@ public static class sensorPrecisionTypeDescription
     }
 
     private FontDescription _AngularGauge_graduationFont = new FontDescription("Arial", 20, YColor.fromColor(Color.Black), false, true);
-    [DisplayName("Main graduation font"),
-     CategoryAttribute("Gauge graduations"),
+    [DisplayName("Main gradation font"),
+     CategoryAttribute("Gauge gradations"),
       ReadOnlyAttribute(true),
-     DescriptionAttribute("Font used for graduation labels")]
+     DescriptionAttribute("Font used for gradation labels")]
     public FontDescription AngularGauge_graduationFont
     {
       get { return _AngularGauge_graduationFont; }
@@ -663,9 +663,9 @@ public static class sensorPrecisionTypeDescription
     }
 
     private int _AngularGauge_subgraduationCount = 5;
-    [DisplayName("Sub-graduation count"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("How many sub-graduation (+1) marks between two consecutive main graduation marks")]
+    [DisplayName("Sub-gradation count"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("How many sub-gradation (+1) marks between two consecutive main graduation marks")]
     public int AngularGauge_subgraduationCount
     {
       get { return _AngularGauge_subgraduationCount; }
@@ -673,9 +673,9 @@ public static class sensorPrecisionTypeDescription
     }
 
     private double _AngularGauge_subgraduationSize = 5;
-    [DisplayName("Sub-graduation size (%)"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Sub-graduation marks size in percent, relative to dial radius")]
+    [DisplayName("Sub-gradation size (%)"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Sub-gradation marks size in percent, relative to dial radius")]
     public double AngularGauge_subgraduationSize
     {
       get { return _AngularGauge_subgraduationSize; }
@@ -684,9 +684,9 @@ public static class sensorPrecisionTypeDescription
 
 
     private double _AngularGauge_subgraduationThickness = 1;
-    [DisplayName("Sub-graduation thickness"),
-     CategoryAttribute("Gauge graduations"),
-     DescriptionAttribute("Subgraduation marks thickness")]
+    [DisplayName("Sub-gradation thickness"),
+     CategoryAttribute("Gauge gradations"),
+     DescriptionAttribute("Sub-gradation marks thickness")]
     public double AngularGauge_subgraduationThickness
     {
       get { return _AngularGauge_subgraduationThickness; }
@@ -695,10 +695,10 @@ public static class sensorPrecisionTypeDescription
 
 
     private YColor _AngularGauge_subgraduationColor = YColor.fromColor(Color.Black);
-    [DisplayName("Sub-graduation color"),
-     CategoryAttribute("Gauge graduations"),
+    [DisplayName("Sub-gradation color"),
+     CategoryAttribute("Gauge gradations"),
     
-     DescriptionAttribute("Sub-graduation marks color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Sub-gradation marks color." + GenericHints.ColorMsg)]
     public YColor AngularGauge_subgraduationColor
     {
       get { return _AngularGauge_subgraduationColor; }
@@ -730,7 +730,7 @@ public static class sensorPrecisionTypeDescription
      }
 
     private double _AngularGauge_needleContourThickness = 1;
-    [DisplayName("Neddle contour thickness"),
+    [DisplayName("Needle contour thickness"),
      CategoryAttribute("Needle"),
      DescriptionAttribute("Thickness of the needle contour")]
      public double AngularGauge_needleContourThickness
@@ -743,9 +743,9 @@ public static class sensorPrecisionTypeDescription
 
 
     private double _AngularGauge_needleLength1 = 90;
-    [DisplayName("Neddle main size (%)"),
+    [DisplayName("Needle main size (%)"),
      CategoryAttribute("Needle"),
-     DescriptionAttribute("Length of the needle part pointing to graduations, in % relative to radius")]
+     DescriptionAttribute("Length of the needle part pointing to gradations, in % relative to radius")]
     public double AngularGauge_needleLength1
     {
       get { return _AngularGauge_needleLength1; }
@@ -753,9 +753,9 @@ public static class sensorPrecisionTypeDescription
     }
 
     private double _AngularGauge_needleLength2 = 15;
-    [DisplayName("Neddle foot size (%)"),
+    [DisplayName("Needle foot size (%)"),
      CategoryAttribute("Needle"),
-     DescriptionAttribute("Length of the needle part not pointing to graduations, in % relative to radius")]
+     DescriptionAttribute("Length of the needle part not pointing to gradations, in % relative to radius")]
      public double AngularGauge_needleLength2
       {
         get { return _AngularGauge_needleLength2; }
@@ -789,7 +789,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Unit Line Font"),
      CategoryAttribute("Text lines"),
       ReadOnlyAttribute(true),
-     DescriptionAttribute("Font used in the text line discribing unit")]
+     DescriptionAttribute("Font used in the text line describing unit")]
     public FontDescription AngularGauge_unitFont
     {
       get { return _AngularGauge_unitFont; }
@@ -835,7 +835,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial background gradiant color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 1." + GenericHints.ColorMsg)]
      public YColor AngularGauge_backgroundColor1
      {
        get { return _AngularGauge_backgroundColor1; }
@@ -846,7 +846,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial background gradiant color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 2." + GenericHints.ColorMsg)]
      public YColor AngularGauge_backgroundColor2
      {
        get { return _AngularGauge_backgroundColor2; }
@@ -1196,7 +1196,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Display"),
      
-     DescriptionAttribute("Display background gradiant color1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Display background gradient color1." + GenericHints.ColorMsg)]
      public YColor display_backgroundColor1
     {
        get { return _backgroundColor1; }
@@ -1207,7 +1207,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Display"),
      
-     DescriptionAttribute("Display background gradiant color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Display background gradient color 2." + GenericHints.ColorMsg)]
     public YColor display_backgroundColor2
     {
       get { return _backgroundColor2; }
@@ -1251,7 +1251,7 @@ public static class sensorPrecisionTypeDescription
     private doubleNan _outOfRangeMax = new doubleNan(Double.NaN);
     [DisplayName("Maximum value"),
      CategoryAttribute("Range Control"),
-     DescriptionAttribute("Regular range maximxum value. if value is outside regular range, color will turn to \"Out of range Color\". Leave blank if you don't want to define such a range. ")]
+     DescriptionAttribute("Regular range maximum value. if value is outside regular range, color will turn to \"Out of range Color\". Leave blank if you don't want to define such a range. ")]
     public doubleNan display_outOfRangeMax
     {
       get { return _outOfRangeMax; }
@@ -1312,7 +1312,7 @@ public static class sensorPrecisionTypeDescription
    
     NotSavedInXMLAttribute(true),
     ParamExtraDescription(typeof(sensorDataTypeDescription)),
-    DescriptionAttribute("Alarm sensor data source (Average, minimum or maximimum value during last interval)")]
+    DescriptionAttribute("Alarm sensor data source (Average, minimum or maximum value during last interval)")]
     public int source
     {
       get
@@ -1484,7 +1484,7 @@ public static class sensorPrecisionTypeDescription
 
     [DisplayName("Sensor recording"),
      NotSavedInXMLAttribute(true),
-     DescriptionAttribute("Enable/ disable sensor data recording in the device onboard datalogger."+  GenericHints.DevConfAffected  )]
+     DescriptionAttribute("Enable/ disable sensor data recording in the device on-board datalogger."+  GenericHints.DevConfAffected  )]
 
     public bool DataSource_recording
     {
@@ -1495,7 +1495,7 @@ public static class sensorPrecisionTypeDescription
 
     private double _thickness = 2.0;
     [DisplayName("Thickness"),
-     DescriptionAttribute("Line thikhness.")]
+     DescriptionAttribute("Line thickness.")]
     public double thickness
     {
       get { return _thickness; }
@@ -1504,7 +1504,7 @@ public static class sensorPrecisionTypeDescription
 
     private string _legend = "";
     [DisplayName("Legend"),
-     DescriptionAttribute("Short description of the serie.")]
+     DescriptionAttribute("Short description of the series.")]
     public string legend
     {
       get { return _legend; }
@@ -1581,7 +1581,7 @@ public static class sensorPrecisionTypeDescription
 
     private bool _overlap = false;
     [DisplayName("Overlap"),
-     DescriptionAttribute("Can the panel ovelap the graph data, or should we explicitely make space for it?"  )]
+     DescriptionAttribute("Can the panel overlap the graph data, or should we explicitly make space for it?"  )]
     public bool overlap { get { return _overlap; } set { _overlap = value; } }
 
     private LegendPanel.Position _position = LegendPanel.Position.RIGHT;
@@ -1604,7 +1604,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
     [DisplayName("Background color "),
     
-    DescriptionAttribute("Legend panel backgound color." + GenericHints.ColorMsg)]
+    DescriptionAttribute("Legend panel background color." + GenericHints.ColorMsg)]
     public YColor bgColor { get { return _bgColor; } set { _bgColor = value;  } }
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
@@ -1630,7 +1630,7 @@ public static class sensorPrecisionTypeDescription
 
     private double _horizontalMargin = 10;
     [DisplayName("Horizontal margin "),
-    DescriptionAttribute("Dispance distance between the panel border and its surroundings")]
+    DescriptionAttribute("Distance between the panel border and its surroundings")]
     public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; } }
 
  
@@ -1735,7 +1735,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _bgColor1 = YColor.FromArgb(255, 225, 225, 225);
     [DisplayName("Background color 1"),
      
-     DescriptionAttribute("Navigator background gradiant color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Navigator background gradient color 1." + GenericHints.ColorMsg)]
     public YColor bgColor1
     {
       get { return _bgColor1; }
@@ -1746,7 +1746,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _bgColor2 = YColor.FromArgb(255, 225, 225, 225);
     [DisplayName("Background color 2"),
      
-     DescriptionAttribute("Navigator background gradiant color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Navigator background gradient color 2." + GenericHints.ColorMsg)]
     public YColor bgColor2
     {
       get { return _bgColor2; }
@@ -1875,7 +1875,7 @@ public static class sensorPrecisionTypeDescription
 
 
     //****************************
-    //  graph Yaxis
+    //  graph Y-axis
     //  
     //****************************
 
@@ -1926,7 +1926,7 @@ public static class sensorPrecisionTypeDescription
     }
 
     private doubleNan _max = new doubleNan(Double.NaN);
-    [DisplayName("Maximim value"),
+    [DisplayName("Maximum value"),
     
      DescriptionAttribute("YAxis maximum value, leave blank for automatic behavior.")]
     public doubleNan max
@@ -2050,7 +2050,7 @@ public static class sensorPrecisionTypeDescription
   }
 
   //****************************
-  //  graph Xaxis
+  //  graph X-axis
   //  
   //****************************
 
@@ -2060,7 +2060,7 @@ public static class sensorPrecisionTypeDescription
     private double _initialZoom = 60;
     [
      DisplayName("Initial Zoom"),
-     DescriptionAttribute("Zoom level at application startup, i.e. width of the viewport in seconds.")]
+     DescriptionAttribute("Zoom level at application startup, i.e. width of the view-port in seconds.")]
     public double initialZoom
     {
       get { return _initialZoom; }
@@ -2080,7 +2080,7 @@ public static class sensorPrecisionTypeDescription
 
     private TimeConverter.TimeReference _timeReference = TimeConverter.TimeReference.ABSOLUTE;
     [DisplayName("Time reference"),
-    DescriptionAttribute("Are gradutation timestamps absolute or relative to experiment start time? ")]
+    DescriptionAttribute("Are gradation timestamps absolute or relative to experiment start time? ")]
     public TimeConverter.TimeReference timeReference
     {
       get { return _timeReference; }
@@ -2247,7 +2247,7 @@ public static class sensorPrecisionTypeDescription
       set { _Graph_series3 = value; }
     }
 
-    // Wanna add a 5th serie? just uncomment the section below
+    // Wanna add a 5th series? just uncomment the section below
    /*
     ChartSerie _Graph_series4 = new ChartSerie(YColor.fromColor(Color.Orange));
     [
@@ -2306,7 +2306,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Graph"),
      
-     DescriptionAttribute("Background gradiant color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Background gradient color 1." + GenericHints.ColorMsg)]
     public YColor Graph_bgColor1
     {
       get { return _Graph_bgColor1; }
@@ -2317,7 +2317,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Graph"),
     
-     DescriptionAttribute("Background gradiant color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Background gradient color 2." + GenericHints.ColorMsg)]
     public YColor Graph_bgColor2
     {
       get { return _Graph_bgColor2; }
@@ -2417,7 +2417,7 @@ public static class sensorPrecisionTypeDescription
       DisplayName("Navigator"),
       CategoryAttribute("Graph"),
       ReadOnlyAttribute(true),
-      DescriptionAttribute("Small additionnal graph showing the whole data set and allowing to quickly navigate among data. Expand for more.")]
+      DescriptionAttribute("Small additional graph showing the whole data set and allowing to quickly navigate among data. Expand for more.")]
     public NavigatorDescription Graph_navigator
     {
       get { return _Graph_navigator; }

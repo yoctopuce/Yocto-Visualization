@@ -638,7 +638,7 @@ namespace YoctoVisualisation
       for (int i = 0; i < previewMinData.Count - 1; i++)
       {
         if (previewMinData[i].DateTime >= previewMinData[i + 1].DateTime)
-          throw new Exception("Timestamp inconsistency");
+          throw new Exception("Time-stamp inconsistency");
       }
 
      
@@ -685,7 +685,7 @@ namespace YoctoVisualisation
 
       if ((e.Cancelled == true))
       {
-        LogManager.Log(hwdName + " : datalogger loading was cancelled");
+        LogManager.Log(hwdName + " : datalogger loading was canceled");
         previewMinData.Clear();
         previewCurData.Clear();
         previewMaxData.Clear();
@@ -789,7 +789,7 @@ namespace YoctoVisualisation
             lastGetConfig = YAPI.GetTickCount();
             mustReloadConfig = false;
           }
-          catch (Exception e) { LogManager.Log("reload config error: " + e.Message); }
+          catch (Exception e) { LogManager.Log("reload configuration error: " + e.Message); }
         }
         else online = false;
       }
@@ -1001,7 +1001,7 @@ namespace YoctoVisualisation
     
     public static List<CustomYSensor> sensorList;  // actual list of sensors
     public static CustomYSensor NullSensor;
-    private static XmlNode KnownSensors = null;  // sensors list picked up from xml config file
+    private static XmlNode KnownSensors = null;  // sensors list picked up from XML configuration file
 
     private static SensorManagerChangeCallback _changeCallback=null;
 
@@ -1038,7 +1038,7 @@ namespace YoctoVisualisation
 
     public static void deviceConfigChanged(YModule m)
     {
-      LogManager.Log("Config change on device  " + m.get_serialNumber());
+      LogManager.Log("Configuration change on device  " + m.get_serialNumber());
       string serialprefix = m.get_serialNumber().Substring(0, 8);
       for (int i = 0; i < sensorList.Count; i++)
         if (sensorList[i].get_hardwareId().Substring(0, 8) == serialprefix)
@@ -1108,7 +1108,7 @@ namespace YoctoVisualisation
           }
         }
 
-        // register config change callback then tries to trigger a configuration 
+        // register configuration change callback then tries to trigger a configuration 
         // change to check to the devices supports that feature 
         // (depends on firmware version)
 

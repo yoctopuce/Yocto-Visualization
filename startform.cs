@@ -83,7 +83,7 @@ namespace YoctoVisualisation
       LogManager.LogNoTS("                         be overwritten in V2 format.");
       LogManager.LogNoTS("-log                     Automatically open log window");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
-      LogManager.Log("Current config file is " + constants.configfile);
+      LogManager.Log("Current configuration file is " + constants.configfile);
       LogManager.Log("Yocto-Visualization version is "+constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
       LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits (platform "+ Environment.OSVersion.Platform.ToString()+")");
@@ -103,7 +103,7 @@ namespace YoctoVisualisation
       {
         LogManager.Log("Running on .NET");
 #if NET35
-        LogManager.Log("WARNING! this exe was specificaly compiled for .NET 3.5 (Windows XP compatibility)");
+        LogManager.Log("WARNING! this .EXE was specifically compiled for .NET 3.5 (Windows XP compatibility)");
 #endif
       }
       string cfgFile = constants.configfile;
@@ -112,7 +112,7 @@ namespace YoctoVisualisation
       {
         string alternateCfgFile = Path.GetDirectoryName(cfgFile) + "\\..\\..\\YoctoVisualization\\1.0.0.0\\config.xml";
         if (File.Exists(alternateCfgFile))
-          if  (MessageBox.Show("No Yocto-Visualisation V2 configuration available, but a configuration file from version 1 was found, do you want to import it?", "Yocto-Visualisation V2",
+          if  (MessageBox.Show("No Yocto-Visualization V2 configuration available, but a configuration file from version 1 was found, do you want to import it?", "Yocto-Visualization V2",
               MessageBoxButtons.YesNo, MessageBoxIcon.Question,
               MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
           {
@@ -127,6 +127,7 @@ namespace YoctoVisualisation
       { try
         {
           XmlDocument doc = new XmlDocument();
+         
           doc.Load(cfgFile);
 
           double version = 1;
@@ -143,7 +144,7 @@ namespace YoctoVisualisation
             doc.LoadXml(configdata);
           }
 
-            // sensor config must be loaded first
+            // sensor configuration must be loaded first
             foreach (XmlNode node in doc.DocumentElement.ChildNodes)
              if (node.Name == "Sensors")
                sensorsManager.setKnownSensors(node);
@@ -164,7 +165,7 @@ namespace YoctoVisualisation
 
           }
         }
-        catch (Exception e) { LogManager.Log("Cannot load config file " + constants.configfile + ": " + e.Message); }
+        catch (Exception e) { LogManager.Log("Cannot load configuration file " + constants.configfile + ": " + e.Message); }
 
         } else configWindow.DefaultInit();
      
@@ -298,12 +299,21 @@ namespace YoctoVisualisation
       configWindow.removal(serial);
     }
 
-    public void ShowPropertyForm(Form caller, GenericProperties prop,  SetValueCallBack2 PropertyChanged2, bool forceToShow)
-    {     
-     
+    public void widgetLostFocus(Form caller)
+    {
+      propWindow2.setTopmost(false);
+    }
 
-     
-      if (propWindow2 != null) propWindow2.showWindow(caller, prop, PropertyChanged2, forceToShow);
+    public void ShowPropertyForm(Form caller, GenericProperties prop,  SetValueCallBack2 PropertyChanged2, bool forceToShow)
+    {
+
+
+
+      if (propWindow2 != null)
+      {
+        propWindow2.showWindow(caller, prop, PropertyChanged2, forceToShow);
+        propWindow2.setTopmost(true);
+      }
 
     }
 
@@ -424,7 +434,7 @@ namespace YoctoVisualisation
       }
       catch (Exception e)
       {
-        MessageBox.Show("Can't save config file:\n"+e.Message+"\nSorry.");
+        MessageBox.Show("Can't save configuration file:\n"+e.Message+"\nSorry.");
       }
 
     }

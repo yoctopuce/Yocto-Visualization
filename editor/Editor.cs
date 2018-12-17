@@ -33,8 +33,16 @@ namespace YoctoVisualisation
 
     }
 
-
-
+    // a way to keep the properties editor on top of
+    // others windows only when it matters
+    public void setTopmost(bool state)
+    { if (state)
+      {
+        if (!Visible) return;
+        if (currentEditedDataSource == null) return;
+      }
+      if (state!= TopMost) TopMost = state;
+    }
 
 
     public PropertiesForm2()
@@ -48,10 +56,10 @@ namespace YoctoVisualisation
       }
 
       panel1.AutoSize = false;
-      TopMost = true;
+     // TopMost = true;
     
       if (constants.OSX_Running)
-      { // awfull clipping problems in the Mac version
+      { // awful clipping problems in the Mac version
         outterpanel.Top += panel2.Height + 4;
         panel2.Top = 2;
         panel2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;

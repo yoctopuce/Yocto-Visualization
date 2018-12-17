@@ -1,3 +1,3 @@
-Yocto-Visualization v2.0.33576
+Yocto-Visualization v2.0.33736
 
-- Improve disconnection detection of YoctoHubs/VirtualHub.
+- Add SVG export feature

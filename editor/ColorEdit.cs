@@ -115,7 +115,7 @@ namespace YColors
      
 
 
-      // WTF???   System.Drawing.Color predefinded values contains duplicates
+      // WTF???   System.Drawing.Color predefined values contains duplicates
       for(int i = 0;i < predefinedColorProperties.Count;i++)
       {
         Color c =  (Color)predefinedColorProperties[i].GetValue(null, null);
@@ -585,7 +585,7 @@ namespace YColors
     ColorCursorChangeCallBack _callback;
     YColor _color;
     ColorFunction _colorFunction;
-    //  ToolTip _tt; looks like tooltips messes with mouse events.
+    //  ToolTip _tt; looks like tool-tips messes with mouse events.
 
 
     public ColorCursor(ColorFunction colorFunction, PictureBox bitmap, TextBox textbox, ColorCursorChangeCallBack callback, YColor initialColor)

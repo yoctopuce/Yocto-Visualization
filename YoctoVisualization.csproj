@@ -166,15 +166,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="configure.resx">
       <DependentUpon>configure.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="digitalDisplayForm.resx">
       <DependentUpon>digitalDisplayForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="editor\ColorEdit.resx">
       <DependentUpon>ColorEdit.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="editor\Editor.resx">
       <DependentUpon>Editor.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="gaugeForm.resx">
       <DependentUpon>gaugeForm.cs</DependentUpon>

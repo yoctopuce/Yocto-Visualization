@@ -86,7 +86,7 @@ namespace YoctoVisualisation
       }
       YDataRenderer.minMaxCheckDisabled = true;
       try { prop.ApplyAllProperties(_display); }
-      catch (TargetInvocationException e) { LogManager.Log("DigitalDisplay init raised an exception (" + e.InnerException.Message + ")"); }
+      catch (TargetInvocationException e) { LogManager.Log("DigitalDisplay initialization raised an exception (" + e.InnerException.Message + ")"); }
       YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
@@ -243,7 +243,7 @@ namespace YoctoVisualisation
       else  if (source == prop.DataSource_source)
       {
         _display.DisableRedraw();
-        source.get_unit();  // make sure unit is in cache before ui is refresh (redraw might call value formater, which  will call get_unit) 
+        source.get_unit();  // make sure unit is in cache before UI is refresh (redraw might call value formatter, which  will call get_unit) 
         _display.alternateValue = null;
          _display.value =  M.get_averageValue();
         _display.AllowRedraw();
@@ -254,6 +254,11 @@ namespace YoctoVisualisation
     private void digitalDisplayForm_Enter(object sender, EventArgs e)
     {
       mainForm.ShowPropertyForm(this, prop,  PropertyChanged2, false);
+    }
+
+    private void digitalDisplayForm_Deactivate(object sender, EventArgs e)
+    {
+      mainForm.widgetLostFocus(this);
     }
   }
 

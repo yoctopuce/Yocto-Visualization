@@ -53,6 +53,13 @@
       this.UseVirtualHub = new System.Windows.Forms.CheckBox();
       this.useUSB = new System.Windows.Forms.CheckBox();
       this.tabPage2 = new System.Windows.Forms.TabPage();
+      this.panel2 = new System.Windows.Forms.Panel();
+      this.ExportToClipboard = new System.Windows.Forms.RadioButton();
+      this.ExportToPNG = new System.Windows.Forms.RadioButton();
+      this.panel1 = new System.Windows.Forms.Panel();
+      this.vectorType = new System.Windows.Forms.RadioButton();
+      this.rasterType = new System.Windows.Forms.RadioButton();
+      this.label19 = new System.Windows.Forms.Label();
       this.copyWarning = new System.Windows.Forms.Label();
       this.copyWarning2 = new System.Windows.Forms.Label();
       this.heightUnit = new System.Windows.Forms.Label();
@@ -69,8 +76,6 @@
       this.CaptureFolderbutton = new System.Windows.Forms.Button();
       this.targetFolder = new System.Windows.Forms.TextBox();
       this.label6 = new System.Windows.Forms.Label();
-      this.ExportToPNG = new System.Windows.Forms.RadioButton();
-      this.ExportToClipboard = new System.Windows.Forms.RadioButton();
       this.label5 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -102,6 +107,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.usbFailed)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.usbOk)).BeginInit();
       this.tabPage2.SuspendLayout();
+      this.panel2.SuspendLayout();
+      this.panel1.SuspendLayout();
       this.tabPage3.SuspendLayout();
       this.UserInterface.SuspendLayout();
       this.SuspendLayout();
@@ -130,7 +137,7 @@
       this.editThisHubConnectionToolStripMenuItem.Text = "Edit This hub connection";
       this.editThisHubConnectionToolStripMenuItem.Click += new System.EventHandler(this.editThisHubConnectionToolStripMenuItem_Click);
       // 
-      // Menuitemremove
+      // Menu item remove
       // 
       this.Menuitemremove.Name = "Menuitemremove";
       this.Menuitemremove.Size = new System.Drawing.Size(253, 22);
@@ -307,7 +314,7 @@
       this.listView1.View = System.Windows.Forms.View.Details;
       this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
       // 
-      // Adresse
+      // Address
       // 
       this.Adresse.Text = "Address";
       this.Adresse.Width = 252;
@@ -339,6 +346,9 @@
       // 
       // tabPage2
       // 
+      this.tabPage2.Controls.Add(this.panel2);
+      this.tabPage2.Controls.Add(this.panel1);
+      this.tabPage2.Controls.Add(this.label19);
       this.tabPage2.Controls.Add(this.copyWarning);
       this.tabPage2.Controls.Add(this.copyWarning2);
       this.tabPage2.Controls.Add(this.heightUnit);
@@ -355,8 +365,6 @@
       this.tabPage2.Controls.Add(this.CaptureFolderbutton);
       this.tabPage2.Controls.Add(this.targetFolder);
       this.tabPage2.Controls.Add(this.label6);
-      this.tabPage2.Controls.Add(this.ExportToPNG);
-      this.tabPage2.Controls.Add(this.ExportToClipboard);
       this.tabPage2.Controls.Add(this.label5);
       this.tabPage2.Controls.Add(this.label4);
       this.tabPage2.Location = new System.Drawing.Point(4, 22);
@@ -365,7 +373,79 @@
       this.tabPage2.Size = new System.Drawing.Size(483, 313);
       this.tabPage2.TabIndex = 1;
       this.tabPage2.Text = "Screen capture";
-      this.tabPage2.UseVisualStyleBackColor = true;
+      // 
+      // panel2
+      // 
+      this.panel2.Controls.Add(this.ExportToClipboard);
+      this.panel2.Controls.Add(this.ExportToPNG);
+      this.panel2.Location = new System.Drawing.Point(102, 59);
+      this.panel2.Name = "panel2";
+      this.panel2.Size = new System.Drawing.Size(375, 22);
+      this.panel2.TabIndex = 26;
+      // 
+      // ExportToClipboard
+      // 
+      this.ExportToClipboard.AutoSize = true;
+      this.ExportToClipboard.Checked = true;
+      this.ExportToClipboard.Location = new System.Drawing.Point(58, 3);
+      this.ExportToClipboard.Name = "ExportToClipboard";
+      this.ExportToClipboard.Size = new System.Drawing.Size(84, 17);
+      this.ExportToClipboard.TabIndex = 2;
+      this.ExportToClipboard.TabStop = true;
+      this.ExportToClipboard.Text = "Clipboard (2)";
+      this.ExportToClipboard.UseVisualStyleBackColor = true;
+      this.ExportToClipboard.CheckedChanged += new System.EventHandler(this.ExportToClipboard_CheckedChanged);
+      // 
+      // ExportToPNG
+      // 
+      this.ExportToPNG.AutoSize = true;
+      this.ExportToPNG.Location = new System.Drawing.Point(3, 3);
+      this.ExportToPNG.Name = "ExportToPNG";
+      this.ExportToPNG.Size = new System.Drawing.Size(41, 17);
+      this.ExportToPNG.TabIndex = 3;
+      this.ExportToPNG.Text = "File";
+      this.ExportToPNG.UseVisualStyleBackColor = true;
+      // 
+      // panel1
+      // 
+      this.panel1.Controls.Add(this.vectorType);
+      this.panel1.Controls.Add(this.rasterType);
+      this.panel1.Location = new System.Drawing.Point(102, 33);
+      this.panel1.Name = "panel1";
+      this.panel1.Size = new System.Drawing.Size(265, 23);
+      this.panel1.TabIndex = 25;
+      // 
+      // vectorType
+      // 
+      this.vectorType.AutoSize = true;
+      this.vectorType.Location = new System.Drawing.Point(122, 3);
+      this.vectorType.Name = "vectorType";
+      this.vectorType.Size = new System.Drawing.Size(87, 17);
+      this.vectorType.TabIndex = 22;
+      this.vectorType.Text = "Vector (SVG)";
+      this.vectorType.UseVisualStyleBackColor = true;
+      // 
+      // rasterType
+      // 
+      this.rasterType.AutoSize = true;
+      this.rasterType.Checked = true;
+      this.rasterType.Location = new System.Drawing.Point(3, 3);
+      this.rasterType.Name = "rasterType";
+      this.rasterType.Size = new System.Drawing.Size(88, 17);
+      this.rasterType.TabIndex = 21;
+      this.rasterType.TabStop = true;
+      this.rasterType.Text = "Raster (PNG)";
+      this.rasterType.UseVisualStyleBackColor = true;
+      this.rasterType.CheckedChanged += new System.EventHandler(this.rasterType_CheckedChanged);
+      // 
+      // label19
+      // 
+      this.label19.AutoSize = true;
+      this.label19.Location = new System.Drawing.Point(23, 38);
+      this.label19.Name = "label19";
+      this.label19.Size = new System.Drawing.Size(62, 13);
+      this.label19.TabIndex = 20;
+      this.label19.Text = "Image type:";
       // 
       // copyWarning
       // 
@@ -375,19 +455,20 @@
       this.copyWarning.Name = "copyWarning";
       this.copyWarning.Size = new System.Drawing.Size(456, 33);
       this.copyWarning.TabIndex = 19;
-      this.copyWarning.Text = "(2) Due to technical limitations , images copied to clipboard can\'t keep their ba" +
-    "ckground transparency, window background color will be used instead. \r\n\r\n";
+      this.copyWarning.Text = "(2) Due to technical limitations , raster images copied to clipboard can\'t keep t" +
+    "heir background transparency, window background color will be used instead. \r\n\r\n" +
+    "";
       // 
       // copyWarning2
       // 
       this.copyWarning2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.copyWarning2.Location = new System.Drawing.Point(11, 252);
+      this.copyWarning2.Location = new System.Drawing.Point(11, 242);
       this.copyWarning2.Name = "copyWarning2";
-      this.copyWarning2.Size = new System.Drawing.Size(466, 20);
+      this.copyWarning2.Size = new System.Drawing.Size(466, 30);
       this.copyWarning2.TabIndex = 18;
       this.copyWarning2.Text = "(1) PrintScreen key may not work if it is already captured by an other screen cap" +
-    "ture utility, in that case,  use the right-clic contextual  menu.\r\n\r\n";
+    "ture utility, in that case,  use the right-click contextual  menu.\r\n\r\n";
       this.copyWarning2.Click += new System.EventHandler(this.label10_Click_1);
       // 
       // heightUnit
@@ -523,33 +604,10 @@
       this.label6.TabIndex = 4;
       this.label6.Text = "Folder:";
       // 
-      // ExportToPNG
-      // 
-      this.ExportToPNG.AutoSize = true;
-      this.ExportToPNG.Location = new System.Drawing.Point(102, 60);
-      this.ExportToPNG.Name = "ExportToPNG";
-      this.ExportToPNG.Size = new System.Drawing.Size(64, 17);
-      this.ExportToPNG.TabIndex = 3;
-      this.ExportToPNG.Text = "PNG file";
-      this.ExportToPNG.UseVisualStyleBackColor = true;
-      // 
-      // ExportToClipboard
-      // 
-      this.ExportToClipboard.AutoSize = true;
-      this.ExportToClipboard.Checked = true;
-      this.ExportToClipboard.Location = new System.Drawing.Point(102, 37);
-      this.ExportToClipboard.Name = "ExportToClipboard";
-      this.ExportToClipboard.Size = new System.Drawing.Size(84, 17);
-      this.ExportToClipboard.TabIndex = 2;
-      this.ExportToClipboard.TabStop = true;
-      this.ExportToClipboard.Text = "Clipboard (2)";
-      this.ExportToClipboard.UseVisualStyleBackColor = true;
-      this.ExportToClipboard.CheckedChanged += new System.EventHandler(this.ExportToClipboard_CheckedChanged);
-      // 
       // label5
       // 
       this.label5.AutoSize = true;
-      this.label5.Location = new System.Drawing.Point(22, 39);
+      this.label5.Location = new System.Drawing.Point(22, 65);
       this.label5.Name = "label5";
       this.label5.Size = new System.Drawing.Size(59, 13);
       this.label5.TabIndex = 1;
@@ -585,7 +643,7 @@
       this.tabPage3.Name = "tabPage3";
       this.tabPage3.Size = new System.Drawing.Size(483, 313);
       this.tabPage3.TabIndex = 2;
-      this.tabPage3.Text = "Ressources";
+      this.tabPage3.Text = "Resources";
       this.tabPage3.UseVisualStyleBackColor = true;
       // 
       // label17
@@ -788,6 +846,10 @@
       ((System.ComponentModel.ISupportInitialize)(this.usbOk)).EndInit();
       this.tabPage2.ResumeLayout(false);
       this.tabPage2.PerformLayout();
+      this.panel2.ResumeLayout(false);
+      this.panel2.PerformLayout();
+      this.panel1.ResumeLayout(false);
+      this.panel1.PerformLayout();
       this.tabPage3.ResumeLayout(false);
       this.tabPage3.PerformLayout();
       this.UserInterface.ResumeLayout(false);
@@ -860,5 +922,10 @@
     private System.Windows.Forms.Label label18;
     private System.Windows.Forms.CheckBox VerticalDragZoom;
     private System.Windows.Forms.CheckBox dbleClickBringsUpContextMenu;
+    private System.Windows.Forms.RadioButton vectorType;
+    private System.Windows.Forms.RadioButton rasterType;
+    private System.Windows.Forms.Label label19;
+    private System.Windows.Forms.Panel panel2;
+    private System.Windows.Forms.Panel panel1;
   }
 }

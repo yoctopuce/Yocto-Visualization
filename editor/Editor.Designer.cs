@@ -49,7 +49,7 @@
       this.label1.Text = "Please wait...";
       this.label1.Click += new System.EventHandler(this.label1_Click);
       // 
-      // outterpanel
+      // outer panel
       // 
       this.outterpanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 

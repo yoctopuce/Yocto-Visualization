@@ -146,7 +146,7 @@
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(398, 13);
       this.label1.TabIndex = 7;
-      this.label1.Text = "Here are the XXX last data row.  Use the export feasture to  get the whole data s" +
+      this.label1.Text = "Here are the XXX last data row.  Use the export feature to  get the whole data s" +
     "et.";
       // 
       // saveFileDialog1

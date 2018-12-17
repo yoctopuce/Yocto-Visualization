@@ -122,7 +122,7 @@
       this.label5.Name = "label5";
       this.label5.Size = new System.Drawing.Size(58, 13);
       this.label5.TabIndex = 8;
-      this.label5.Text = "Username:";
+      this.label5.Text = "User-name:";
       // 
       // usernameChooser
       // 
@@ -154,7 +154,7 @@
       this.button1.Name = "button1";
       this.button1.Size = new System.Drawing.Size(75, 23);
       this.button1.TabIndex = 12;
-      this.button1.Text = "Ok";
+      this.button1.Text = "OK";
       this.button1.UseVisualStyleBackColor = true;
       this.button1.Click += new System.EventHandler(this.button1_Click);
       // 

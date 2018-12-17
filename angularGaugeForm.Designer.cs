@@ -61,6 +61,7 @@
       this.Name = "angularGaugeForm";
       this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Activated += new System.EventHandler(this.switchConfiguration);
+      this.Deactivate += new System.EventHandler(this.angularGaugeForm_Deactivate);
       this.Load += new System.EventHandler(this.angularGaugeForm_Load_1);
       this.LocationChanged += new System.EventHandler(this.angularGaugeForm_LocationChanged);
       ((System.ComponentModel.ISupportInitialize)(this.rendererCanvas)).EndInit();

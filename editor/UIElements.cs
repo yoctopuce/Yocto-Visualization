@@ -374,7 +374,7 @@ namespace YoctoVisualisation
         index = fullpropname.IndexOf("_");
         if (index < 0)
         {
-          if  (fullpropname!= ARTIFICIALSECTIONNAME) path.Insert(0, fullpropname); // ignore articial sections
+          if  (fullpropname!= ARTIFICIALSECTIONNAME) path.Insert(0, fullpropname); // ignore artificial sections
           p = p.parentNode;
           if (p == null) throw new System.ArgumentException("invalid Property name");
         }

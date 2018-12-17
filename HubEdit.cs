@@ -91,7 +91,7 @@ namespace YoctoVisualization
            && (portChooser.Text.Trim() == "")
            && (pathChooser.Text.Trim() == ""))
       {
-        MessageBox.Show("Use the checkbox above the connection list to use a local VirtualHub with default parameters.");
+        MessageBox.Show("Use the check-box above the connection list to use a local VirtualHub with default parameters.");
         return;
       }
 

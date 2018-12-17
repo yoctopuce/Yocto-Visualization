@@ -89,7 +89,7 @@ namespace YoctoVisualisation
 
           }
         }
-        else MessageBox.Show("Init error: " + errmsg);
+        else MessageBox.Show("Initialization error: " + errmsg);
       }
       else MessageBox.Show(errmsg);
     }

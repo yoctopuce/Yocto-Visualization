@@ -172,7 +172,7 @@ namespace YDataRendering
 
 
     private bool _showMinMax = true;
-    public bool showMinMax { get { return _showMinMax; } set { _showMinMax = value; redraw(); } }
+    public bool showMinMax { get { return _showMinMax; } set { _showMinMax = value; _path = null; redraw(); } }
 
 
     PointF[] _path = null;
@@ -217,7 +217,7 @@ namespace YDataRendering
       this._font = new YFontParams(this, this, Math.Min(ChartContainer.Width, ChartContainer.Height) / 5,null);
      
 
-      Graphics g = ChartContainer.CreateGraphics();
+      YGraphics g = new YGraphics(ChartContainer);
       DrawPrameters p = ComputeDrawParameters(g, UIContainer.Size.Width, UIContainer.Size.Height);
       g.Dispose();
       
@@ -237,7 +237,7 @@ namespace YDataRendering
     
 
 
-    private DrawPrameters ComputeDrawParameters(Graphics g, int UIw, int UIh)
+    private DrawPrameters ComputeDrawParameters(YGraphics g, int UIw, int UIh)
     {
      
       double w = UIw - 5 - _borderThickness;
@@ -423,7 +423,7 @@ namespace YDataRendering
 
     }
 
-    protected override int Render(Graphics g, int w, int h)
+    protected override int Render(YGraphics g, int w, int h)
     {
       
      

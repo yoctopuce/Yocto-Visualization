@@ -138,7 +138,7 @@ namespace YDataRendering
 
 
 
-    protected override int Render(Graphics g, int w, int h)
+    protected override int Render(YGraphics g, int w, int h)
     {
      
       g.SmoothingMode = SmoothingMode.HighQuality;

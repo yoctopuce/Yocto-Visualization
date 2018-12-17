@@ -60,6 +60,7 @@
       this.Name = "gaugeForm";
       this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Activated += new System.EventHandler(this.switchConfiguration);
+      this.Deactivate += new System.EventHandler(this.gaugeForm_Deactivate);
       this.Load += new System.EventHandler(this.gaugeForm_Load_1);
       ((System.ComponentModel.ISupportInitialize)(this.rendererCanvas)).EndInit();
       this.ResumeLayout(false);

@@ -63,6 +63,7 @@
       this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Text = "digitalDisplayForm";
       this.Activated += new System.EventHandler(this.switchConfiguration);
+      this.Deactivate += new System.EventHandler(this.digitalDisplayForm_Deactivate);
       this.Load += new System.EventHandler(this.digitalDisplayForm_Load);
       ((System.ComponentModel.ISupportInitialize)(this.rendererCanvas)).EndInit();
       this.ResumeLayout(false);

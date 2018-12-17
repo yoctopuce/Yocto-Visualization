@@ -204,7 +204,7 @@ namespace YDataRendering
     public double graduationSize
     {
       get { return _graduationSize; }
-      set { if (value <= 0) throw new ArgumentException("Graduation size must be a positive value");
+      set { if (value <= 0) throw new ArgumentException("Gradation size must be a positive value");
           _graduationSize = value; redraw(); }
 
     }
@@ -282,7 +282,7 @@ namespace YDataRendering
     public double subgraduationCount
     {
       get { return _subgraduationCount; }
-      set { if (value <= 0) throw new ArgumentException("Count must be a positive value");
+      set { if (value < 0) throw new ArgumentException("Count must be a positive value");
             _subgraduationCount = value; redraw(); }
 
     }
@@ -370,7 +370,7 @@ namespace YDataRendering
     }
 
     protected override void clearCachedObjects()
-    {
+    { 
       if (_zones!=null) for (int i = 0; i < _zones.Count; i++) _zones[i].resetPath();
       _path = null;
       _bgBrush = null;
@@ -394,14 +394,15 @@ namespace YDataRendering
 
  
 
-    protected override int Render(Graphics g, int w, int h)
+    protected override int Render(YGraphics g, int w, int h)
     {
 
       g.SmoothingMode = SmoothingMode.HighQuality;
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-
+      StringFormat stringFormat4Sizing = new StringFormat(StringFormatFlags.NoClip);
       StringFormat stringFormat = new StringFormat(StringFormatFlags.NoClip);
       stringFormat.Alignment = StringAlignment.Center;
+      stringFormat.LineAlignment = StringAlignment.Center;
 
       double xcenter = w / 2;
       double ycenter = h / 2;
@@ -445,14 +446,14 @@ namespace YDataRendering
 
       // draw unit
       string unitDesc = ((_unitFactor != 1) ? "x" + _unitFactor.ToString() + " " : "") + _unit;
-      SizeF size = g.MeasureString(unitDesc.ToString(), _unitFont.fontObject, 10000, stringFormat);
+      SizeF size = g.MeasureString(unitDesc.ToString(), _unitFont.fontObject, 10000, stringFormat4Sizing);
       Rectangle unitPos = new Rectangle((int)(xcenter - size.Width / 2), (int)(ycenter + radius / 2 - size.Height / 2), (int)(size.Width + 1), (int)(size.Height + 1));
       g.DrawString(unitDesc, _unitFont.fontObject, _unitFont.brushObject, unitPos, stringFormat);
 
       // draw status line
       if (_statusLine != "")
       {
-        size = g.MeasureString(_statusLine, _statusFont.fontObject, 10000, stringFormat);
+        size = g.MeasureString(_statusLine, _statusFont.fontObject, 10000, stringFormat4Sizing);
         Rectangle statusPos = new Rectangle((int)(xcenter - size.Width / 2), (int)(ycenter - radius / 3 - size.Height / 2), (int)(size.Width + 1), (int)(size.Height + 1));
         g.DrawString(_statusLine, _statusFont.fontObject, _statusFont.brushObject, statusPos, stringFormat);
       }
@@ -565,18 +566,14 @@ namespace YDataRendering
           g.DrawLine(_graduationPen, (float)(xcenter - R1 * C), (float)(ycenter - R1 * S),
                                      (float)(xcenter - R2 * C), (float)(ycenter - R2 * S));
 
-          size = g.MeasureString(gvalue.ToString().Trim(), _graduationFont.fontObject, 1000, stringFormat);
-
-
-
-
+          size = g.MeasureString(gvalue.ToString().Trim(), _graduationFont.fontObject, 1000, stringFormat4Sizing);
 
           double HalfDiagonal = 0.4 * Math.Sqrt(size.Width * size.Width + size.Height * size.Height);
           Rectangle position = new Rectangle((int)(xcenter - (R2 - HalfDiagonal) * C - (size.Width / 2)),
                                              (int)(ycenter - (R2 - HalfDiagonal) * S - (size.Height / 2)),
                                              (int)size.Width + 1, (int)size.Height);
 
-          // g.DrawRectangle(new Pen(Color.Red, 1), position);
+         //  g.DrawRectangle(new Pen(Color.Red, 1), position);
 
 
           g.DrawString(gvalue.ToString(), _graduationFont.fontObject, _graduationFont.brushObject, position, stringFormat);

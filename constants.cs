@@ -55,7 +55,7 @@ namespace YoctoVisualisation
   class constants
   {
 
-    public static string buildVersion = "33576";
+    public static string buildVersion = "33736";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
@@ -64,6 +64,8 @@ namespace YoctoVisualisation
     public  static string  loginCypherPassword = "YouShouldReallyChangeThis!";
     public static YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
     public static YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
+    public static YDataRenderer.CaptureType captureType = YDataRenderer.CaptureType.PNG;
+
     public static string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
     public static int captureWidth  = 1024;
     public static int captureHeight = 1024;
@@ -125,7 +127,7 @@ namespace YoctoVisualisation
       contentsDump = "<HTML><BODY>"
       + "<h1>YoctoVisualisation Exception</h1>\r\n"
       + "<hr><br><b>" + InnerMessage + "</b><hr><br>\r\n"
-      + "Occured on : " + DateTime.Now.ToString("G") + "<br>\n\n"
+      + "Occurred on : " + DateTime.Now.ToString("G") + "<br>\n\n"
       + "Build version : " + buildVersion + "<br>\r\n"
       + "Running on :" + (MonoRunning ? MonoVersion : ".NET") + "<br>\r\n"
       + "<HR/>"
@@ -163,6 +165,7 @@ namespace YoctoVisualisation
 
 
     public static  void getCaptureParametersCallback(YDataRenderer source,
+                                              out YDataRenderer.CaptureType pcapturetype,
                                               out YDataRenderer.CaptureTargets pcaptureTarget,
                                               out string pcaptureFolder,
                                               out YDataRenderer.CaptureFormats pcaptureSizePolicy,
@@ -170,6 +173,7 @@ namespace YoctoVisualisation
                                               out int pcaptureWidth,
                                               out int pcaptureHeight)
       {
+      pcapturetype = captureType;
       pcaptureTarget = captureTarget;
       pcaptureFolder = captureFolder;
       pcaptureSizePolicy = captureSizePolicy;
@@ -191,7 +195,7 @@ namespace YoctoVisualisation
 
     public static void init(String[] args)
     {
-      if (_MonoRunning) captureTarget = YDataRenderer.CaptureTargets.ToPng;
+      if (_MonoRunning) captureTarget = YDataRenderer.CaptureTargets.ToFile;
 
       for (int i = 0; i < args.Length; i++)
       {
@@ -210,9 +214,9 @@ namespace YoctoVisualisation
     }
 
     // ...
-    public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)  // thanks stackoverflow
+    public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)  // thanks Stackoverflow
     {
-      // Unix timestamp is seconds past epoch
+      // Unix time-stamp is seconds past epoch
       System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
       dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
       return dtDateTime;

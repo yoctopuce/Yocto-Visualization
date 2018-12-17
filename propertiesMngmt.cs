@@ -357,7 +357,7 @@ namespace YoctoVisualisation
 
                       break;
                     default:
-                      throw new ArgumentException("Init from XML file: Unhandled data type: (" + p.PropertyType.ToString() + ")");
+                      throw new ArgumentException("Initialization from XML file: unhandled data type: (" + p.PropertyType.ToString() + ")");
                   }
               }
             }
@@ -487,7 +487,7 @@ namespace YoctoVisualisation
                 value = ((s == null) || (s is NullYSensor)) ? "NULL" : s.get_hardwareId();
                 break;
               default:
-                throw new ArgumentException("XML generation : ubhandled type (" + type + ")");
+                throw new ArgumentException("XML generation : unhandled type (" + type + ")");
             }
             res = res + new String(' ', 2 * deep) + "<" + p.Name + " value=\"" + value + "\"/>\n";
           }
@@ -626,7 +626,7 @@ namespace YoctoVisualisation
         tinfo = rootTarget.GetType().GetProperty(targetname);
 
       }
-      if (tinfo == null) return; // the propertie does not exists in the widget
+      if (tinfo == null) return; // the property does not exists in the widget
       ttype = tinfo.PropertyType.FullName;
 
 
@@ -737,7 +737,7 @@ namespace YoctoVisualisation
       }
       else
       {
-        // map all target's userdata to its mirrored source 
+        // map all target's user data to its mirrored source 
         List<String> path2 = new List<String>(path);
         path2.Add("");
         object target = getObjectFromPath(rootTarget, path2);

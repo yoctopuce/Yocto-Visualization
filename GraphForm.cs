@@ -87,7 +87,7 @@ namespace YoctoVisualisation
               + " 2 - Do a right-click on this window.\n"
               + " 3 - Choose \"Configure this graph\" to bring up the properties editor.\n"
               + " 4 - Choose a data source\n";
-      
+
       offLineSourcesPanel = _cartesianChart.addMessagePanel();
       offLineSourcesPanel.bgColor = System.Drawing.Color.FromArgb(192, 255, 192, 192);
       offLineSourcesPanel.borderColor = System.Drawing.Color.DarkRed;
@@ -114,14 +114,14 @@ namespace YoctoVisualisation
         }
       }
 
-      if (YAxisCount ==0)
+      if (YAxisCount == 0)
         foreach (var p in typeof(GraphFormProperties).GetProperties())
-         {
-           string name = p.Name;
-           if (name.StartsWith("Graph_yAxes")) YAxisCount++;
-         }
+        {
+          string name = p.Name;
+          if (name.StartsWith("Graph_yAxes")) YAxisCount++;
+        }
 
-     
+
       for (int i = 0; i < YAxisCount; i++)
       {
         YAxis axis = _cartesianChart.addYAxis();
@@ -152,7 +152,7 @@ namespace YoctoVisualisation
 
       YDataRenderer.minMaxCheckDisabled = true;
       try { prop.ApplyAllProperties(_cartesianChart); }
-      catch (TargetInvocationException e) { LogManager.Log("Graph init raised an exception (" + e.InnerException.Message + ")"); }
+      catch (TargetInvocationException e) { LogManager.Log("Graph initialization raised an exception (" + e.InnerException.Message + ")"); }
       YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
@@ -172,19 +172,19 @@ namespace YoctoVisualisation
 
       for (int i = 0; i < YAxisCount; i++)
       {
-        
+
         _cartesianChart.yAxes[i].AxisChanged = AxisParamtersChangedAutomatically;
         _cartesianChart.yAxes[i].AllowAutoShow = true;
       }
-        _cartesianChart.AllowPrintScreenCapture = true;
+      _cartesianChart.AllowPrintScreenCapture = true;
       _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _cartesianChart.AllowRedraw();
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Clear dataloggers", Resources.cleardatalogger, clearDataLogger));
-      contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset dataview", Resources.resetdataview, resetDataView));
+      contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset data view", Resources.resetdataview, resetDataView));
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
 
       _cartesianChart.OnDblClick += rendererCanvas_DoubleClick;
-      if(constants.OSX_Running) 
+      if (constants.OSX_Running)
       {
         _cartesianChart.OnRightClick += rendererCanvas_RightClick;
       }
@@ -195,7 +195,7 @@ namespace YoctoVisualisation
       if (!constants.dbleClickBringsUpContextMenu) return;
       MouseEventArgs m = (MouseEventArgs)e;
       ContextMenuStrip.Show(this, new Point(m.X, m.Y));
-  
+
     }
 
     private void rendererCanvas_RightClick(object sender, EventArgs e)
@@ -203,7 +203,7 @@ namespace YoctoVisualisation
       MouseEventArgs m = (MouseEventArgs)e;
       ContextMenuStrip.Show(this, new Point(m.X, m.Y));
     }
-  
+
 
     private void capture(object sender, EventArgs e)
     {
@@ -294,7 +294,7 @@ namespace YoctoVisualisation
 
     private void GraphForm_Load(object sender, EventArgs e)
     {
-     
+
     }
 
     void PropertyChanged2(UIElement src)
@@ -303,8 +303,8 @@ namespace YoctoVisualisation
       string propType = "";
       string OriginalPropName = "";
 
-     
-      List<string> path = src.ExtractPropPath( ref OriginalPropName, ref fullpropname, ref propType);
+
+      List<string> path = src.ExtractPropPath(ref OriginalPropName, ref fullpropname, ref propType);
 
 
       switch (propType)
@@ -587,7 +587,7 @@ namespace YoctoVisualisation
 
       }
       if (message == "" && offLineSourcesPanel.enabled) offLineSourcesPanel.enabled = false;
-      if (message != "" && ((offLineSourcesPanel.text != message) || (!offLineSourcesPanel.enabled))) { offLineSourcesPanel.text = message ; offLineSourcesPanel.enabled = true;}
+      if (message != "" && ((offLineSourcesPanel.text != message) || (!offLineSourcesPanel.enabled))) { offLineSourcesPanel.text = message; offLineSourcesPanel.enabled = true; }
 
 
     }
@@ -598,7 +598,7 @@ namespace YoctoVisualisation
     {
       if (prop == null) return;
 
- //     if (FirstLiveValue == 0) FirstLiveValue = M.get_endTimeUTC();
+      //     if (FirstLiveValue == 0) FirstLiveValue = M.get_endTimeUTC();
 
       for (int i = 0; i < SeriesCount; i++)
       {
@@ -607,7 +607,7 @@ namespace YoctoVisualisation
         {
           if (!s.DataSource_source.isOnline())
           {
-            offlineMessages[i] = s.DataSource_source.get_friendlyName()+" is OFFLINE";
+            offlineMessages[i] = s.DataSource_source.get_friendlyName() + " is OFFLINE";
             showOffline[i] = true;
             updateOfflinePanel();
 
@@ -620,13 +620,13 @@ namespace YoctoVisualisation
 
           int index = s.DataSource_source.curData.Count - 1;
 
-          
+
           switch (s.DataSource_datatype)
           {
             case 1: _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.minData[index].DateTime, y = s.DataSource_source.minData[index].Value }); break;
-            case 2: _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.maxData[index].DateTime, y = s.DataSource_source.maxData[index].Value }); break;            
+            case 2: _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.maxData[index].DateTime, y = s.DataSource_source.maxData[index].Value }); break;
             default:
-               _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.curData[index].DateTime, y = s.DataSource_source.curData[index].Value }); break;            
+              _cartesianChart.series[i].AddPoint(new pointXY { x = s.DataSource_source.curData[index].DateTime, y = s.DataSource_source.curData[index].Value }); break;
           }
           _cartesianChart.series[i].unit = s.DataSource_source.get_unit();
 
@@ -638,13 +638,20 @@ namespace YoctoVisualisation
 
     private void GraphForm_Enter(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop,  PropertyChanged2, false);
+      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, false);
     }
 
-    private void GraphForm_Load_1(object sender, EventArgs e)
+    private void GraphForm_Deactivate(object sender, EventArgs e)
     {
-      manager.initForm();
+      mainForm.widgetLostFocus(this);
     }
+  
+
+  private void GraphForm_Load_1(object sender, EventArgs e)
+  {
+    manager.initForm();
   }
+
+} 
 
 }

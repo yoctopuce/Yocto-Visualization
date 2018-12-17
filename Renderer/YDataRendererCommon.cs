@@ -10,6 +10,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.Text;
+using System.Drawing.Text;
 
 namespace YDataRendering
 {
@@ -86,6 +89,7 @@ namespace YDataRendering
 
 
   public delegate void getCaptureParamaters(YDataRenderer source,
+                                              out YDataRenderer.CaptureType capturetype,
                                               out YDataRenderer.CaptureTargets captureTarget,
                                               out string captureFolder,
                                               out YDataRenderer.CaptureFormats captureSizePolicy,
@@ -268,6 +272,7 @@ namespace YDataRendering
     double _refWidth = 1;
     double _refHeight = 1;
     double _refValue;
+    List<double> valueStack = new List<double>();
 
 
     public Object directParent { get { return _directParent; } }
@@ -294,29 +299,40 @@ namespace YDataRendering
       }
 
     }
+    public void containerResizedPushNewCoef(double coef)
+    {
+      valueStack.Add(_value);
+      _value = _value* coef;
+      if (_reset != null) _reset(this);
+    }
+   
+
+    public void containerResizedPop()
+    {  if (valueStack.Count <= 0) throw new InvalidOperationException("Can't pop, empty stack.");
+      _value = valueStack[valueStack.Count - 1];
+      valueStack.RemoveAt(valueStack.Count - 1);
+      if (_reset != null) _reset(this);
+    }
+
+    public static  double resizeCoef(ResizeRule rule, double refWidth, double refHeight,  double newWidth, double newHeight)
+    {
+      switch (rule)
+      {
+       
+        case ResizeRule.RELATIVETOWIDTH:  return   newWidth / refWidth;      
+        case ResizeRule.RELATIVETOHEIGHT: return   newHeight / refHeight;
+        case ResizeRule.RELATIVETOBOTH:   return Math.Min(newHeight / refHeight, newWidth / refWidth);
+        
+
+      }
+      return 1.0;
+    }
+
 
 
     public void containerResized(double newWidth, double newHeight)
     {
-
-      switch (_resizeRule)
-      {
-        case ResizeRule.FIXED: return;
-        case ResizeRule.RELATIVETOWIDTH:
-
-          _value = _refValue * newWidth / _refWidth;
-          break;
-        case ResizeRule.RELATIVETOHEIGHT:
-
-          _value = _refValue * newHeight / _refHeight;
-          break;
-        case ResizeRule.RELATIVETOBOTH:
-
-          _value = _refValue * Math.Min(newHeight / _refHeight, newWidth / _refWidth);
-          break;
-
-      }
-
+      _value = resizeCoef(_resizeRule, _refWidth,_refHeight, newWidth, newHeight);  
       if (_reset != null) _reset(this);
     }
 
@@ -465,6 +481,8 @@ namespace YDataRendering
           if (!f.IsStyleAvailable(FontStyle.Bold)) b = false;
           float s = _size.value > 0 ? (float)_size.value : 1;
 
+          
+
           try
           {
             _font = new Font(f, s, (b ? FontStyle.Bold : 0) | (i ? FontStyle.Italic : 0));
@@ -518,10 +536,20 @@ namespace YDataRendering
       FixedHeight
     };
 
+    public enum CaptureType
+    {
+      [Description("Bitmap (PNG)")]
+      PNG,
+      [Description("Vector (SVG)")]
+      SVG,
+     
+    };
+   
+
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
-    public enum CaptureTargets { ToClipBoard, ToPng };
+    public enum CaptureTargets { ToClipBoard, ToFile };
 
     static private bool _disableMinMaxCheck = false;
     static public bool minMaxCheckDisabled { get { return _disableMinMaxCheck; } set { _disableMinMaxCheck = value; }  }
@@ -644,11 +672,11 @@ namespace YDataRendering
 
       Bitmap DrawArea = new Bitmap(w, h);
       UIContainer.Image = DrawArea;
-      Graphics g;
+      YGraphics g;
 
       watch.Reset();
       watch.Start();
-      g = Graphics.FromImage(DrawArea);
+      g = new  YGraphics(DrawArea);
 
       try {
         Render(g, w, h);
@@ -666,7 +694,7 @@ namespace YDataRendering
 
     protected virtual void renderingPostProcessing() { }
 
-    protected abstract int Render(Graphics g, int w, int h);
+    protected abstract int Render(YGraphics g, int w, int h);
 
 
 
@@ -742,6 +770,29 @@ namespace YDataRendering
 
     public virtual int usableUiWidth() { return UIContainer.Width; }
     public virtual int usableUiHeight() { return UIContainer.Height; }
+
+    protected void resetProportionalSizeObjectsCachePush(double newcoef)
+    {
+      clearCachedObjects();
+      if (_resizeRule != Proportional.ResizeRule.FIXED)
+        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+          ProportionalToSizeValues[i].containerResizedPushNewCoef(newcoef);
+    }
+
+
+  
+
+    
+
+    protected void resetProportionalSizeObjectsCachePop()
+    {
+      clearCachedObjects();
+      if (_resizeRule != Proportional.ResizeRule.FIXED)
+        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+          ProportionalToSizeValues[i].containerResizedPop();
+    }
+
+
 
     protected void resetProportionalSizeObjectsCache(double w, double h)
     {
@@ -897,17 +948,30 @@ namespace YDataRendering
     void _Regis_HotKey()
     {
 
-      string error = "";
-
+     
+      YDataRenderer.CaptureType captureType = YDataRenderer.CaptureType.SVG;
       YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
       YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
       string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
       int captureWidth = 1024;
       int captureHeight = 1024;
       int captureDPI = 70;
-      if (_getCaptureParameters != null) _getCaptureParameters(this, out captureTarget, out captureFolder, out captureSizePolicy,
-                                                  out captureDPI, out captureWidth, out captureHeight);
+      if (_getCaptureParameters != null) _getCaptureParameters(this, out captureType, out captureTarget,
+                                                                     out captureFolder, out captureSizePolicy,
+                                                                     out captureDPI, out captureWidth, out captureHeight);
 
+      capture(captureType, captureTarget, captureFolder, captureSizePolicy, captureDPI, captureWidth, captureHeight);
+
+    }
+    public void  capture (CaptureType captureType, CaptureTargets captureTarget,
+                                               string captureFolder,
+                                               YDataRenderer.CaptureFormats captureSizePolicy,
+                                                int captureDPI,
+                                               int captureWidth,
+                                               int captureHeight)
+
+    {
+      string error = "";
       int w = 0;
       int h = 0;
       switch (captureSizePolicy)
@@ -926,16 +990,25 @@ namespace YDataRendering
       DisableRedraw();
 
       Bitmap DrawArea = new Bitmap(w, h);
-      DrawArea.SetResolution(captureDPI, captureDPI);
+     
 
-      Graphics g;
+      YGraphics g;
+      switch (captureType)
+      { case CaptureType.PNG :g = new YGraphics(Graphics.FromImage(DrawArea), w, h, captureDPI); break;
+        case CaptureType.SVG : g = new YGraphicsSVG(Graphics.FromImage(DrawArea), w, h, captureDPI);break;
+         default: throw new InvalidOperationException("capture :unknow type");
+      }
 
-
-      g = Graphics.FromImage(DrawArea);
-      if (captureTarget == YDataRenderer.CaptureTargets.ToClipBoard)
+     
+      if ((captureTarget == YDataRenderer.CaptureTargets.ToClipBoard) && (captureType== CaptureType.PNG))
         g.FillRectangle(new SolidBrush(parentForm.BackColor), 0, 0, w, h);
 
-      resetProportionalSizeObjectsCache(w, h);  // reset all size related cached objects
+
+
+      double newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, UIContainer.Size.Width, UIContainer.Size.Height, w, h);
+
+      log("start capture");
+      resetProportionalSizeObjectsCachePush(newCoef);  // reset all size related cached objects
       bool renderok = false;
       _snapshotPanel.enabled = false;
       try
@@ -946,45 +1019,88 @@ namespace YDataRendering
 
       }
       catch (Exception e) { error = e.Message; log("Render error: " + error); }
-
-      resetProportionalSizeObjectsCache(UIContainer.Size.Width, UIContainer.Size.Height); // reset all size related cached objects, again
+      log("capture completed");
+      resetProportionalSizeObjectsCachePop(); // reset all size related cached objects, again
       g.Dispose();
 
 
-
+      DrawArea.SetResolution(captureDPI, captureDPI);  // note : this affects the behavior of graphics.MeasureString
 
       if (renderok)
       {
 
         if (captureTarget == YDataRenderer.CaptureTargets.ToClipBoard)
-          Clipboard.SetImage(DrawArea);
+        {
+          Clipboard.Clear();
+          if (captureType == CaptureType.PNG)   Clipboard.SetImage(DrawArea);
+          if (captureType == CaptureType.SVG)
+          {
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(((YGraphicsSVG)g).get_svgContents());
+
+            MemoryStream stream = new MemoryStream(bytes);
+          
+            Clipboard.SetData("image/svg+xml", stream);
+          }
+
+        
+        }
         else
         {
           renderok = false;
           string[] f = new String[0];
+          string filenamePNG = "";
+          string filenameSVG = "";
 
-          if (Directory.Exists(captureFolder)) f = Directory.GetFiles(captureFolder);
+          FileAttributes attr = 0;
+          bool pathCheckOk = false;
 
-          List<string> files = new List<string>();
-          for (int i = 0; i < f.Length; i++) files.Add(f[i]);
-          string filename;
-          int n = 0;
-          do
+          // get the file attributes for file or directory
+          try
           {
-            n++;
-            filename = Path.Combine(captureFolder, "YoctoVisualisationCapture-" + n.ToString("D4") + ".png");
+            attr = File.GetAttributes(captureFolder);
+            pathCheckOk = true;
+          }
+          catch (Exception) { };
 
-          } while (files.Contains(filename));
+          //detect whether its a directory or file
+          if ((pathCheckOk) && (attr & FileAttributes.Directory) == FileAttributes.Directory)
+          {
+            if (Directory.Exists(captureFolder)) f = Directory.GetFiles(captureFolder);
+
+            List<string> files = new List<string>();
+            for (int i = 0; i < f.Length; i++) files.Add(f[i]);
+
+            int n = 0;
+            do
+            {
+              n++;
+              filenamePNG = Path.Combine(captureFolder, "YoctoVisualisationCapture-" + n.ToString("D4") + ".png");
+              filenameSVG = Path.Combine(captureFolder, "YoctoVisualisationCapture-" + n.ToString("D4") + ".svg");
+
+            } while (files.Contains(filenamePNG) || files.Contains(filenameSVG));
+          }
+          else
+          {
+            filenamePNG = captureFolder;
+            filenameSVG = captureFolder;
+
+            captureFolder = Path.GetDirectoryName(captureFolder);
+
+          }
 
           if (Directory.Exists(captureFolder))
             try
             {
 
-              DrawArea.Save(filename, ImageFormat.Png);
+              if (captureType == CaptureType.PNG) DrawArea.Save(filenamePNG, ImageFormat.Png);
+
+              if (captureType == CaptureType.SVG) ((YGraphicsSVG)g).save(filenameSVG);
+
+
               renderok = true;
             }
-            catch (Exception e) { error = e.Message; log("PNG file save error: " + error); }
-          else { error = "PNG file save error:\nFolder \"" + captureFolder + "\"does not exists."; }
+            catch (Exception e) { error = e.Message; log("File save error: " + error); }
+          else { error = "File save error:\nFolder \"" + captureFolder + "\"does not exists."; }
 
         }
       }
@@ -1120,7 +1236,7 @@ namespace YDataRendering
 
     }
 
-    public void drawMessagePanels(Graphics g, int viewPortWidth, int viewPortHeight)
+    public void drawMessagePanels(YGraphics g, int viewPortWidth, int viewPortHeight)
     {
 
 
@@ -1304,6 +1420,552 @@ namespace YDataRendering
     [DllImport("kernel32.dll")]
     static extern uint GetLastError();
   }
+
+  /*
+   *  abstraction layer allowing to render in both bitmap and Vector(SVG) format 
+   * 
+   */
+  public class YGraphics
+  {
+    protected Graphics _g;
+    protected int _width = 0;
+    protected int _height = 0;
+    protected double _dpi = 0;
+    protected Image _image = null;
+
+
+
+
+    public YGraphics(Graphics g, int width, int height, double dpi)
+    {
+      _g = g;
+      _width = width;
+      _height = height;
+      _dpi = dpi;
+
+    }
+
+    public YGraphics(Image img)
+    {
+      _image = img;
+      _g = Graphics.FromImage(img);
+      _width = img.Width;
+      _height = img.Height;
+      _dpi = img.HorizontalResolution;
+
+    }
+
+    public YGraphics(PictureBox container)
+    {
+      _image = null;
+      _g = container.CreateGraphics();
+      _width = container.Width;
+      _height = container.Height;
+      _dpi = 90;
+
+    }
+
+
+    public Graphics graphics { get { return _g; } }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawLine(Pen p, float x1, float y1, float x2, float y2) { _g.DrawLine(p, x1, y1, x2, y2); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawLine(Pen p, PointF p1, PointF p2) { _g.DrawLine(p, p1, p2); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void SetClip(Rectangle rect) { _g.SetClip(rect); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void ResetClip() { _g.ResetClip(); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public SizeF MeasureString(string text, Font font, int width)
+    { return _g.MeasureString(text, font, width); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void FillRectangle(Brush brush, Rectangle rect) { _g.FillRectangle(brush, rect); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void FillRectangle(Brush brush, float x, float y, float width, float height) { _g.FillRectangle(brush, x, y, width, height); }
+
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawRectangle(Pen pen, Rectangle rect) { _g.DrawRectangle(pen, rect); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawRectangle(Pen pen, float x, float y, float width, float height) { _g.DrawRectangle(pen, x, y, width, height); }
+
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawString(string s, Font font, Brush brush, float x, float y) { _g.DrawString(s, font, brush, x, y); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawString(string s, Font font, Brush brush, PointF point, StringFormat format) { _g.DrawString(s, font, brush, point, format); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawString(string s, Font font, Brush brush, PointF point) { _g.DrawString(s, font, brush, point); }
+
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawString(string s, Font font, Brush brush, RectangleF layoutRectangle, StringFormat format) { _g.DrawString(s, font, brush, layoutRectangle, format); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void Transform(float dx, float dy, float angle) { _g.TranslateTransform(dx, dy); _g.RotateTransform(angle); }
+
+
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void ResetTransform() { _g.ResetTransform(); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void FillEllipse(Brush brush, int x, int y, int width, int height) { _g.FillEllipse(brush, x, y, width, height); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawEllipse(Pen pen, int x, int y, int width, int height) { _g.DrawEllipse(pen, x, y, width, height); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void FillPolygon(Brush brush, PointF[] points) { _g.FillPolygon(brush, points); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawPolygon(Pen pen, PointF[] points) { _g.DrawPolygon(pen, points); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawLines(Pen pen, PointF[] points) { _g.DrawLines(pen, points); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawLines(Pen pen, Point[] points) { _g.DrawLines(pen, points); }
+
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual SizeF MeasureString(string text, Font font, int width, StringFormat stringFormat) { return _g.MeasureString(text, font, width, stringFormat); }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void Dispose() { _g.Dispose(); }
+
+    public TextRenderingHint TextRenderingHint { get { return _g.TextRenderingHint; } set { _g.TextRenderingHint = value; } }
+
+    public SmoothingMode SmoothingMode { get { return _g.SmoothingMode; } set { _g.SmoothingMode = value; } }
+
+    public int width { get { return _width; } }
+    public int height { get { return _height; } }
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void DrawImage(Image image, Rectangle destRect, Rectangle srcRect, GraphicsUnit srcUnit)
+    { _g.DrawImage(image, destRect, srcRect, srcUnit); }
+
+
+#if !NET35
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public virtual void comment(string s) { }
+
+  }
+
+  public class YGraphicsSVG : YGraphics
+  {
+    StringBuilder SVGdefs = null;
+    StringBuilder SVGcontents = null;
+    int clipcount = 0;
+    int clipSectionsToClose = 0;
+    int transformSectionsToClose = 0;
+    int gradientCount = 0;
+    static int SVGID = 0;
+    private string color2svg(Color c) { return "rgb(" + c.R.ToString() + ", " + c.G.ToString() + ", " + c.B.ToString() + ")"; }
+    private string alpha2svg(Color c) { return (c.A / 255.0).ToString("0.000"); }
+
+    public YGraphicsSVG(Graphics g, int width, int height, double dpi) : base(g, width, height, dpi)
+    {
+      SVGID++;
+      SVGdefs = new StringBuilder();
+      SVGcontents = new StringBuilder();
+      SVGdefs.AppendLine("<clipPath id=\"pageClip_" + SVGID.ToString() + "\"><rect x=\"0\" y=\"0\"  width=\"" + width.ToString() + "\" height=\"" + height.ToString() + "\"/></clipPath>");
+    }
+
+    public override void DrawLine(Pen p, float x1, float y1, float x2, float y2)
+    {
+      SVGcontents.AppendLine("<line x1=\"" + x1.ToString() + "\" "
+                        + " y1 =\"" + y1.ToString() + "\" "
+                        + " x2 =\"" + x2.ToString() + "\" "
+                        + " y2 =\"" + y2.ToString() + "\" "
+                        + "style = \"stroke:" + color2svg(p.Color) + ";stroke-opacity:" + alpha2svg(p.Color) + "; stroke-width:" + p.Width.ToString() + "\"/>");
+    }
+
+    public override void DrawLine(Pen p, PointF p1, PointF p2)
+    { DrawLine(p, p1.X, p1.Y, p2.X, p2.Y); }
+
+    public override void SetClip(Rectangle rect)
+    {
+      ResetClip();
+
+      SVGdefs.AppendLine("<clipPath id=\"clip_" + SVGID.ToString() + "_" + clipcount.ToString() + "\"><rect x=\"" + rect.Left.ToString() + "\" y=\"" + rect.Top.ToString()
+                                  + "\"  width=\"" + rect.Width.ToString() + "\" height=\"" + rect.Height.ToString() + "\"/></clipPath>");
+      SVGcontents.AppendLine("<g clip-path=\"url(#clip_" + SVGID.ToString() + "_" + clipcount.ToString() + ")\">");
+      clipcount++;
+      clipSectionsToClose++;
+    }
+
+    public override void ResetClip()
+    {
+      if (clipSectionsToClose > 0)
+      {
+        SVGcontents.AppendLine("</g>");
+        clipSectionsToClose--;
+      }
+    }
+
+    private String BrushToSVG(Brush brush, bool revert)
+    {
+      string fillParam = "";
+      if (brush is SolidBrush)
+        fillParam = "fill = \"" + color2svg(((SolidBrush)brush).Color) + "\" fill-opacity=\"" + alpha2svg(((SolidBrush)brush).Color) + "\" ";
+      else if (brush is LinearGradientBrush)
+      {
+        LinearGradientBrush br = (LinearGradientBrush)brush;
+
+
+        SVGdefs.AppendLine("<linearGradient id=\"grad_" + SVGID.ToString() + "_" + gradientCount + "\" "
+                 + "x1=\"0%\" "                                 // over-simplified gradient transaltion as we only use full size vertical gradients.
+                 + (revert ? "y1=\"100%\" " : "y1=\"0%\" ")    // Yes, I know, it's cheap, but i couldn't find any reliable .NET 3.5 way to retreive  
+                 + "x2=\"0%\" "                                // LinearGradientBrush's stop points
+                 + (revert ? "y2=\"0%\" " : "y2=\"100%\" ") + ">\r\n"
+                 + "<stop offset=\"0%\" style =\"stop-color:" + color2svg(br.LinearColors[0]) + ";stop-opacity:" + alpha2svg(br.LinearColors[0]) + "\"/>\r\n"
+                 + "<stop offset=\"100%\" style =\"stop-color:" + color2svg(br.LinearColors[1]) + ";stop-opacity:" + alpha2svg(br.LinearColors[1]) + "\"/>\r\n"
+                 + "</linearGradient>");
+
+        fillParam = "fill=\"url(#grad_" + SVGID.ToString() + "_" + gradientCount + ")\" ";
+
+        gradientCount++;
+
+      }
+      else throw new ArgumentException("unsupported brush type.");
+      return fillParam;
+    }
+
+    public override void FillRectangle(Brush brush, Rectangle rect)
+    {
+      SVGcontents.AppendLine("<rect x=\"" + rect.Left.ToString() + "\" "
+                      + " y =\"" + rect.Top.ToString() + "\" "
+                      + " width =\"" + rect.Width.ToString() + "\" "
+                      + " height =\"" + rect.Height.ToString() + "\" "
+                      + BrushToSVG(brush, true)
+                      + "style=\"stroke-width:0\"/>");
+
+    }
+
+    public override void FillRectangle(Brush brush, float x, float y, float width, float height)
+    { FillRectangle(brush, new Rectangle((int)Math.Round(x), (int)Math.Round(y), (int)Math.Round(width), (int)Math.Round(height))); }
+
+
+    public override void DrawRectangle(Pen pen, Rectangle rect)
+    {
+      SVGcontents.AppendLine("<rect x=\"" + rect.Left.ToString() + "\" "
+                       + " y =\"" + rect.Top.ToString() + "\" "
+                       + " width =\"" + rect.Width.ToString() + "\" "
+                       + " height =\"" + rect.Height.ToString() + "\" "
+                       + " fill=\"none\" "
+                        + "style = \"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString() + "\"/>");
+
+    }
+
+    public override void DrawRectangle(Pen pen, float x, float y, float width, float height)
+    { DrawRectangle(pen, new Rectangle((int)Math.Round(x), (int)Math.Round(y), (int)Math.Round(width), (int)Math.Round(height))); }
+
+
+    public override void DrawEllipse(Pen pen, int x, int y, int width, int height)
+
+    {
+      SVGcontents.AppendLine("<ellipse  cx=\"" + (x + width / 2.0).ToString() + "\" "
+                    + " cy =\"" + (y + height / 2.0).ToString() + "\" "
+                    + " rx =\"" + (width / 2).ToString() + "\" "
+                    + " ry =\"" + (height / 2).ToString() + "\" "
+                    + " fill=\"none\" "
+                     + "style = \"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString() + "\"/>");
+    }
+
+    public override void FillEllipse(Brush brush, int x, int y, int width, int height)
+
+    {
+      SVGcontents.AppendLine("<ellipse  cx=\"" + (x + width / 2.0).ToString() + "\" "
+                    + " cy =\"" + (y + height / 2.0).ToString() + "\" "
+                    + " rx =\"" + (width / 2).ToString() + "\" "
+                    + " ry =\"" + (height / 2).ToString() + "\" "
+                    + BrushToSVG(brush, false)
+                    + "style=\"stroke-width:0\"/>");
+    }
+
+
+    public override void DrawString(string s, Font font, Brush brush, float x, float y)
+    {
+
+      SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + (y + font.Size * 1.25).ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+                    + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
+                    + "font-size=\"" + font.SizeInPoints + "pt\" "
+                    + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
+                    + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
+                    + BrushToSVG(brush, false)
+                    + "style=\"stroke-width:0\">\r\n"
+                    + System.Security.SecurityElement.Escape(s)
+                    + "\r\n</text>");
+
+
+
+    }
+
+    public override void DrawString(string s, Font font, Brush brush, PointF point) { DrawString(s, font, brush, point.X, point.Y); }
+
+    public override void DrawString(string s, Font font, Brush brush, PointF point, StringFormat format)
+    {
+
+      SizeF sz = _g.MeasureString(s, font);
+      double x = point.X;
+      double y = point.Y + font.Size * 1.25;
+      switch (format.Alignment)
+      {
+        case StringAlignment.Near: break;
+        case StringAlignment.Center: x += -sz.Width / 2; break;
+        case StringAlignment.Far: x += -sz.Width; break;
+
+      }
+      switch (format.LineAlignment)
+      {
+        case StringAlignment.Near: break;
+        case StringAlignment.Center: y += -sz.Height / 2; break;
+        case StringAlignment.Far: y += -sz.Height; break;
+
+      }
+
+
+      SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+                    + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
+                    + "font-size=\"" + font.SizeInPoints + "pt\" "
+                    + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
+                    + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
+                    + BrushToSVG(brush, false)
+                    + "style=\"stroke-width:0\">\r\n"
+                    + System.Security.SecurityElement.Escape(s)
+                    + "\r\n</text>");
+
+    }
+
+
+
+    public override void DrawString(string s, Font font, Brush brush, RectangleF layoutRectangle, StringFormat format)
+
+    {
+      SizeF sz = _g.MeasureString(s, font);
+      double x = layoutRectangle.X;
+      double y = layoutRectangle.Y + font.Size *1.25;
+      switch (format.Alignment)
+      {
+        case StringAlignment.Near: break;
+        case StringAlignment.Center: x += (layoutRectangle.Width - sz.Width) / 2; break;
+        case StringAlignment.Far: x += (layoutRectangle.Width - sz.Width); break;
+
+      }
+      switch (format.LineAlignment)
+      {
+        case StringAlignment.Near: break;
+        case StringAlignment.Center: y += (layoutRectangle.Height - sz.Height) / 2; break;
+        case StringAlignment.Far: y += (layoutRectangle.Height - sz.Height); break;
+
+      }
+
+
+      SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+                    + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
+                    + "font-size=\"" + (font.SizeInPoints *1.1).ToString() + "pt\" "
+                    + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
+                    + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
+                    + BrushToSVG(brush, false)
+                    + "style=\"stroke-width:0\">\r\n"
+                    + System.Security.SecurityElement.Escape(s)
+                    + "\r\n</text>");
+
+    }
+
+
+
+    public override void Transform(float dx, float dy, float angle)
+    {
+      SVGcontents.AppendLine("<g transform=\"translate(" + dx.ToString() + " " + dy.ToString() + ") rotate(" + angle.ToString() + ")\">");
+      transformSectionsToClose++;
+
+
+    }
+
+
+    public override void ResetTransform()
+    {
+      if (transformSectionsToClose > 0) { SVGcontents.AppendLine("</g>"); transformSectionsToClose--; }
+    }
+
+    public override void DrawPolygon(Pen pen, PointF[] points)
+    {
+      if (points.Length < 2) return;
+
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      for (int i = 1; i < points.Length; i += 1)
+        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+
+      SVGcontents.AppendLine(" z\" fill=\"none\" "
+                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString() + "\"/>");
+    }
+
+    public override void DrawLines(Pen pen, PointF[] points)
+    {
+      if (points.Length < 2) return;
+
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      for (int i = 1; i < points.Length; i += 1)
+        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+
+      SVGcontents.AppendLine("\" fill=\"none\" "
+                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-linecap:round; stroke-linejoin:round;stroke-width:" + pen.Width.ToString() + "\"/>");
+    }
+
+    public override void DrawLines(Pen pen, Point[] points)
+    {
+      if (points.Length < 2) return;
+
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      for (int i = 1; i < points.Length; i += 1)
+        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+
+      SVGcontents.AppendLine("\" fill=\"none\" "
+                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + ";stroke-linecap:round; stroke-linejoin:round;stroke-width:" + pen.Width.ToString() + "\"/>");
+    }
+
+
+    public override void FillPolygon(Brush brush, PointF[] points)
+    {
+      if (points.Length < 2) return;
+
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      for (int i = 1; i < points.Length; i += 1)
+        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+      SVGcontents.AppendLine(" z\" " + BrushToSVG(brush, false)
+                  + "style=\"stroke-width:0\"/>\r\n");
+    }
+
+    public override void DrawImage(Image image, Rectangle destRect, Rectangle srcRect, GraphicsUnit srcUnit)
+    { throw new NotSupportedException("DrawImage not supported, find an other way."); }
+
+
+
+    /*
+
+    public string getDefs() { return SVGdefs.ToString(); }
+
+    public string getContents()
+    { string close = "";
+      for (int i = 0; i < clipSectionsToClose; i++) close += "</g>";
+      for (int i = 0; i < transformSectionsToClose; i++) close += "</g>";
+      return SVGcontents.ToString() + close;
+    }
+
+
+    public  void DrawGraphics(YGraphicsSVG  src, Rectangle destRect, Rectangle srcRect, GraphicsUnit srcUnit)
+    {
+      SVGdefs.Append(src.getDefs());
+      SVGcontents.AppendLine("<g transform=\"translate(" + destRect.Top + " " + destRect.Left + ")\">");
+      SVGcontents.Append(src.getContents());
+      SVGcontents.AppendLine("</g>");
+
+    }*/
+
+
+    public void save(string filename)
+    {
+      System.IO.File.WriteAllText(filename, get_svgContents());
+    }
+
+    public override void comment(string s) { SVGcontents.AppendLine("<!--" + s + "-->"); }
+
+    public string get_svgContents()
+    {
+      string physicalWidth = (2.54 * (_width / _dpi)).ToString("0.000");
+      string physicalheight = (2.54 * (_height / _dpi)).ToString("0.000");
+
+
+      while (clipSectionsToClose > 0)
+      {
+        SVGcontents.AppendLine("</g>");
+        clipSectionsToClose--;
+      }
+      while (transformSectionsToClose > 0)
+      {
+        SVGcontents.AppendLine("</g>");
+        transformSectionsToClose--;
+      }
+
+
+
+      return "<?xml version = \"1.0\" standalone = \"no\" ?>\r\n"
+                + "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
+                 + "<svg width = \"" + physicalWidth + "cm\" height = \"" + physicalheight + "cm\" viewBox = \"0 0 " + _width.ToString() + " " + _height.ToString() + "\" "
+                 + "xmlns = \"http://www.w3.org/2000/svg\" version = \"1.1\" >\r\n"
+                 + "<defs>\r\n"
+                 + SVGdefs
+                 + "</defs>\r\n"
+                 + "<g clip-path=\"url(#pageClip_" + SVGID.ToString() + ")\">\r\n"
+                 + SVGcontents
+                 + "</g>\r\n"
+                 + "</svg>\n";
+
+    }
+  }
+
+
 
 
 }

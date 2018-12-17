@@ -113,7 +113,7 @@ namespace YoctoVisualisation
       }
       YDataRenderer.minMaxCheckDisabled = true;
       try { prop.ApplyAllProperties(_solidGauge); }
-      catch (TargetInvocationException e) { LogManager.Log("SolidGauge init raised an exception (" + e.InnerException.Message + ")"); }
+      catch (TargetInvocationException e) { LogManager.Log("SolidGauge initialization raised an exception (" + e.InnerException.Message + ")"); }
       YDataRenderer.minMaxCheckDisabled = false;
 
 
@@ -252,6 +252,11 @@ namespace YoctoVisualisation
     private void gaugeForm_Load_1(object sender, EventArgs e)
     {
       manager.initForm();
+    }
+
+    private void gaugeForm_Deactivate(object sender, EventArgs e)
+    {
+      mainForm.widgetLostFocus(this);
     }
   }
 

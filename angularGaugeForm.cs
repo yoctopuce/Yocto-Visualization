@@ -112,7 +112,7 @@ namespace YoctoVisualisation
 
       YDataRenderer.minMaxCheckDisabled = true;
       try { prop.ApplyAllProperties(_angularGauge); }
-      catch (TargetInvocationException e) { LogManager.Log("AngularGauge init raised an exception (" + e.InnerException.Message + ")"); }
+      catch (TargetInvocationException e) { LogManager.Log("AngularGauge initialization raised an exception (" + e.InnerException.Message + ")"); }
       YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
@@ -275,7 +275,7 @@ namespace YoctoVisualisation
         {
           _angularGauge.DisableRedraw();
           showStatus("");
-          source.get_unit();  // make sure unit is in cache before ui is refresh (redraw might call value formater, which  will call get_unit) 
+          source.get_unit();  // make sure unit is in cache before UI is refresh (redraw might call value formatter, which  will call get_unit) 
           _angularGauge.unit = source.get_unit();
           _angularGauge.value =  M.get_averageValue();
           _angularGauge.AllowRedraw();
@@ -304,6 +304,15 @@ namespace YoctoVisualisation
     private void angularGaugeForm_Load_1(object sender, EventArgs e)
     {
      // manager.initForm();
+    }
+
+    private void angularGaugeForm_Deactivate(object sender, EventArgs e)
+    {
+
+     
+        mainForm.widgetLostFocus(this);
+      
+
     }
   }
 }

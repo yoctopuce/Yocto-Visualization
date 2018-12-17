@@ -1,7 +1,7 @@
 ﻿/*
  *   Yocto-Visualization, a free application to visualize Yoctopuce Sensors.
  * 
- *  USB / Network configuation window
+ *  USB / Network configuration window
  * 
  *  - - - - - - - - - License information: - - - - - - - - -
  *
@@ -77,7 +77,7 @@ namespace YoctoVisualisation
 
       if (constants.MonoRunning)
       {
-        ExportToClipboard.Text = "Export to clipboard (2) (not available on linux).";
+        ExportToClipboard.Text = "Export to clipboard (2) (not available on Linux).";
         ExportToClipboard.Enabled = false;
        
         ExportToPNG.Checked = true;
@@ -186,7 +186,7 @@ namespace YoctoVisualisation
         LogManager.Log("preregistering  USB ");
         if (YAPI.RegisterHub("usb", ref errmsg) != YAPI.SUCCESS)
         {
-          LogManager.Log("[!] preregistering USB failed failed (" + errmsg + ")");
+          LogManager.Log("[!] preregistering USB failed  (" + errmsg + ")");
           ToolTip tt = new ToolTip();
           tt.SetToolTip(usbFailed, errmsg);
           usbFailed.Visible = true;
@@ -214,7 +214,7 @@ namespace YoctoVisualisation
           ToolTip tt = new ToolTip();
           tt.SetToolTip(usbFailed, errmsg);
           hubFailed.Visible = true;
-          LogManager.Log("[!] preregistering local VirtualHub failed failed (" + errmsg + ")");
+          LogManager.Log("[!] preregistering local VirtualHub failed  (" + errmsg + ")");
         }
         else
         {
@@ -268,6 +268,7 @@ namespace YoctoVisualisation
       res += "  </MemoryUsage>\n";
       res += "  <Capture>\n";
       res += "    <Target value= \"" + constants.captureTarget.ToString() + "\"/>\n";
+      res += "    <Type value= \"" + constants.captureType.ToString() + "\"/>\n";
       res += "    <Size value= \"" + constants.captureSizePolicy.ToString() + "\"/>\n";
       res += "    <Resolution value= \"" + constants.captureDPI.ToString() + "\"/>\n";
       res += "    <Folder value= \"" + System.Security.SecurityElement.Escape(constants.captureFolder) + "\"/>\n";
@@ -383,8 +384,11 @@ namespace YoctoVisualisation
         {
           case "Target":
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToClipBoard.ToString()) constants.captureTarget =YDataRenderer.CaptureTargets.ToClipBoard;
-            if ((node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToPng.ToString())||(constants.MonoRunning)) constants.captureTarget =YDataRenderer.CaptureTargets.ToPng;
-          
+            if ((node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToFile.ToString())||(constants.MonoRunning)) constants.captureTarget =YDataRenderer.CaptureTargets.ToFile;          
+            break;
+          case "Type":
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureType.PNG.ToString()) constants.captureType = YDataRenderer.CaptureType.PNG;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureType.SVG.ToString())  constants.captureType = YDataRenderer.CaptureType.SVG;
             break;
           case "Size":
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Fixed.ToString()) constants.captureSizePolicy =YDataRenderer.CaptureFormats.Fixed;
@@ -471,7 +475,13 @@ namespace YoctoVisualisation
     public void initCaptureParameters()
     {
       ExportToClipboard.Checked = constants.captureTarget == YDataRenderer.CaptureTargets.ToClipBoard;
-      ExportToPNG.Checked = constants.captureTarget ==YDataRenderer.CaptureTargets.ToPng;
+    
+
+      ExportToPNG.Checked = constants.captureTarget ==YDataRenderer.CaptureTargets.ToFile;
+      rasterType.Checked = constants.captureType == YDataRenderer.CaptureType.PNG;
+      vectorType.Checked = constants.captureType == YDataRenderer.CaptureType.SVG;
+
+
       targetFolder.Text = constants.captureFolder;
       VerticalDragZoom.Checked = YGraph.VerticalDragZoomEnabled;
       dbleClickBringsUpContextMenu.Checked = constants.dbleClickBringsUpContextMenu;
@@ -708,7 +718,7 @@ namespace YoctoVisualisation
 
     private void ExportToClipboard_CheckedChanged(object sender, EventArgs e)
     {
-      constants.captureTarget = ExportToClipboard.Checked ? YDataRendering.YDataRenderer.CaptureTargets.ToClipBoard : YDataRendering.YDataRenderer.CaptureTargets.ToPng;
+      constants.captureTarget = ExportToClipboard.Checked ? YDataRendering.YDataRenderer.CaptureTargets.ToClipBoard : YDataRendering.YDataRenderer.CaptureTargets.ToFile;
       updateCaptureUI();
 
 
@@ -717,9 +727,10 @@ namespace YoctoVisualisation
     private void CaptureFolderbutton_Click(object sender, EventArgs e)
     {
       if (Directory.Exists(targetFolder.Text)) folderBrowserDialog1.SelectedPath = targetFolder.Text;
-      folderBrowserDialog1.Description = "Choose where screenshots will be saved.";
+      folderBrowserDialog1.Description = "Choose where screen-shots will be saved.";
       folderBrowserDialog1.ShowDialog();
       targetFolder.Text = folderBrowserDialog1.SelectedPath;
+      constants.captureFolder = targetFolder.Text;
 
     }
 
@@ -744,13 +755,13 @@ namespace YoctoVisualisation
       if (Int32.TryParse(DpiTextBox.Text, out value))
       {
         if (value > 0) constants.captureDPI = value;
-        else MessageBox.Show("Resolution must be a stricly positive integer,\nchange will be ignored.",
+        else MessageBox.Show("Resolution must be a strictly positive integer,\nchange will be ignored.",
                    "Parameter error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
       }
       else
-        MessageBox.Show("Invalide resolution value,\nchange will be ignored.",
+        MessageBox.Show("Invalid resolution value,\nchange will be ignored.",
                      "Parameter error", MessageBoxButtons.OK,
                       MessageBoxIcon.Warning);
       updateCaptureUI();
@@ -768,7 +779,7 @@ namespace YoctoVisualisation
 
       }
       else
-        MessageBox.Show("Invalide width value,\nchange will be ignored.",
+        MessageBox.Show("Invalid width value,\nchange will be ignored.",
                      "Parameter error", MessageBoxButtons.OK,
                       MessageBoxIcon.Warning);
       updateCaptureUI();
@@ -786,7 +797,7 @@ namespace YoctoVisualisation
 
       }
       else
-        MessageBox.Show("Invalide height value,\nchange will be ignored.",
+        MessageBox.Show("Invalid height value,\nchange will be ignored.",
                      "Parameter error", MessageBoxButtons.OK,
                       MessageBoxIcon.Warning);
       updateCaptureUI();
@@ -822,7 +833,7 @@ namespace YoctoVisualisation
     }
 
     private void MemoryTimer_Tick(object sender, EventArgs e)
-    {/*  might not work on non english Windows
+    {/*  might not work on non English Windows
       if (constants.MonoRunning)
       {
         memoryLabel.Visible = false;
@@ -970,6 +981,12 @@ namespace YoctoVisualisation
     {
       constants.dbleClickBringsUpContextMenu = dbleClickBringsUpContextMenu.Checked;
     }
+
+    private void rasterType_CheckedChanged(object sender, EventArgs e)
+    {
+      constants.captureType = rasterType.Checked ? YDataRendering.YDataRenderer.CaptureType.PNG: YDataRendering.YDataRenderer.CaptureType.SVG;
+      updateCaptureUI();
+    }
   }
 
 
@@ -1013,7 +1030,7 @@ namespace YoctoVisualisation
     public Hub(HubType hubType)
     {
       if ((hubType  != HubType.LOCALUSB) && (hubType != HubType.LOCALHUB))
-       throw new ArgumentException("local types types allowed");
+       throw new ArgumentException("local types allowed");
       _hubType = hubType;
     }
 
@@ -1173,7 +1190,7 @@ namespace YoctoVisualisation
       // Get the complete stream of bytes that represent:
       // [32 bytes of Salt] + [32 bytes of IV] + [n bytes of CipherText]
       var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);
-      // Get the saltbytes by extracting the first 32 bytes from the supplied cipherText bytes.
+      // Get the salt bytes by extracting the first 32 bytes from the supplied cipherText bytes.
       var saltStringBytes = cipherTextBytesWithSaltAndIv.Take(Keysize / 8).ToArray();
       // Get the IV bytes by extracting the next 32 bytes from the supplied cipherText bytes.
       var ivStringBytes = cipherTextBytesWithSaltAndIv.Skip(Keysize / 8).Take(Keysize / 8).ToArray();
