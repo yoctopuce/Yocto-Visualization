@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 33723 2018-12-14 15:05:15Z seb $
+ * $Id: yocto_api.cs 33916 2018-12-28 10:38:18Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -1235,7 +1235,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "33736";
+    public const string YOCTO_API_BUILD_NO = "34131";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -3661,7 +3661,9 @@ public class YAPI
      * </para>
      * <para>
      *   This function can be called as frequently as desired to refresh the device list
-     *   and to make the application aware of hot-plug events.
+     *   and to make the application aware of hot-plug events. However, since device
+     *   detection is quite a heavy process, UpdateDeviceList shouldn't be called more
+     *   than once every two seconds.
      * </para>
      * </summary>
      * <param name="errmsg">
@@ -6939,6 +6941,26 @@ public class YFunction
         return YAPI.DefaultEncoding.GetString(attrVal);
     }
 
+    /**
+     * <summary>
+     *   Returns the serial number of the module, as set by the factory.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a string corresponding to the serial number of the module, as set by the factory.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns YModule.SERIALNUMBER_INVALID.
+     * </para>
+     */
+    public virtual string get_serialNumber()
+    {
+        YModule m;
+        m = this.get_module();
+        return m.get_serialNumber();
+    }
+
     public virtual int _parserHelper()
     {
         return 0;
@@ -7870,7 +7892,7 @@ public class YModule : YFunction
      *   On failure, throws an exception or returns <c>YModule.SERIALNUMBER_INVALID</c>.
      * </para>
      */
-    public string get_serialNumber()
+    public override string get_serialNumber()
     {
         string res;
         lock (_thisLock) {
@@ -10287,6 +10309,14 @@ public class YSensor : YFunction
      * <summary>
      *   Returns the current value of the measure, in the specified unit, as a floating point number.
      * <para>
+     *   Note that a get_currentValue() call will *not* start a measure in the device, it
+     *   will just return the last measure that occurred in the device. Indeed, internally, each Yoctopuce
+     *   devices is continuously making measurements at a hardware specific frequency.
+     * </para>
+     * <para>
+     *   If continuously calling  get_currentValue() leads you to performances issues, then
+     *   you might consider to switch to callback programming model. Check the "advanced
+     *   programming" chapter in in your device user manual for more information.
      * </para>
      * <para>
      * </para>
@@ -10510,7 +10540,9 @@ public class YSensor : YFunction
      *   The frequency can be specified as samples per second,
      *   as sample per minute (for instance "15/m") or in samples per
      *   hour (eg. "4/h"). To disable recording for this function, use
-     *   the value "OFF".
+     *   the value "OFF". Note that setting the  datalogger recording frequency
+     *   to a greater value than the sensor native sampling frequency is useless,
+     *   and even counterproductive: those two frequencies are not related.
      * </para>
      * <para>
      * </para>
@@ -10574,7 +10606,10 @@ public class YSensor : YFunction
      *   The frequency can be specified as samples per second,
      *   as sample per minute (for instance "15/m") or in samples per
      *   hour (e.g. "4/h"). To disable timed value notifications for this
-     *   function, use the value "OFF".
+     *   function, use the value "OFF". Note that setting the  timed value
+     *   notification frequency to a greater value than the sensor native
+     *   sampling frequency is unless, and even counterproductive: those two
+     *   frequencies are not related.
      * </para>
      * <para>
      * </para>
@@ -11553,7 +11588,8 @@ public class YSensor : YFunction
  *   data automatically, without requiring a permanent connection to a computer.
  * <para>
  *   The DataLogger function controls the global parameters of the internal data
- *   logger.
+ *   logger. Recording control (start/stop) as well as data retreival is done at
+ *   sensor objects level.
  * </para>
  * <para>
  * </para>
@@ -11822,8 +11858,10 @@ public class YDataLogger : YFunction
      * <summary>
      *   Changes the default activation state of the data logger on power up.
      * <para>
-     *   Remember to call the <c>saveToFlash()</c> method of the module if the
-     *   modification must be kept.
+     *   Do not forget to call the <c>saveToFlash()</c> method of the module to save the
+     *   configuration change.  Note: if the device doesn't have any time source at his disposal when
+     *   starting up, it will wait for ~8 seconds before automatically starting to record  with
+     *   an arbitrary timestamp
      * </para>
      * <para>
      * </para>
