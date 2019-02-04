@@ -63,7 +63,6 @@ namespace YoctoVisualisation
   {
     string VirtualHubSerial = "";
     List<Hub> hubList = new List<Hub>();
-    string localIP = GetLocalIPAddress();
     bool initdone = false;
 
     // might not work on non English Windows 
@@ -99,35 +98,13 @@ namespace YoctoVisualisation
 
     }
 
-    public static string GetLocalIPAddress()
-    {
-
-      if (!NetworkInterface.GetIsNetworkAvailable())
-        return "";
-
-      var host = Dns.GetHostEntry(Dns.GetHostName());
-      foreach (var ip in host.AddressList)
-      {
-        if (ip.AddressFamily == AddressFamily.InterNetwork)
-        {
-          return ip.ToString();
-        }
-      }
-      return "";
-    }
-
-
     private void Add_Click(object sender, EventArgs e)
     {
 
       HubEdit editor = new HubEdit();
       Hub h;
       if (editor.newHub(out h)) AddHub(h);
-    
-      
     }
-
-
 
     private void RemoveHub(Hub.HubType t, string fullURL)
     {  if  (t == Hub.HubType.LOCALUSB)
@@ -563,6 +540,7 @@ namespace YoctoVisualisation
       string netname = net.get_logicalName();
       string loginame = net.get_module().get_logicalName();
       string url = net.get_module().get_url();
+      bool isLocalIP;
 
       for (int j=0;j<hubList.Count;j++)
         if (hubList[j].get_connexionUrl() == url)
@@ -578,7 +556,20 @@ namespace YoctoVisualisation
 
          }
 
-      if ((ip == "127.0.0.1") || (ip == localIP) || (ip == "0.0.0.0"))
+      isLocalIP = (ip == "127.0.0.1") || (ip == "0.0.0.0");
+      foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+      {
+        if(nic.Supports(NetworkInterfaceComponent.IPv4))
+        {
+          IPInterfaceProperties ipinfo = nic.GetIPProperties();
+          IPAddressInformationCollection ipaddr = ipinfo.AnycastAddresses;
+          foreach (IPAddressInformation any in ipaddr)
+          {
+            if (ip == any.Address.ToString()) isLocalIP = true;
+          }
+        }
+      }
+      if (isLocalIP)
       {
         hubFailed.Visible = false;
         hubOk.Visible = true;
@@ -591,10 +582,6 @@ namespace YoctoVisualisation
 
     public void removal(string serialNumber)
     {
-
-      
-
-
       if (serialNumber == VirtualHubSerial)
       {
         ToolTip tt = new ToolTip();

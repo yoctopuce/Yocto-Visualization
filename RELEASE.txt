@@ -1,3 +1,4 @@
-Yocto-Visualization v2.0.34131
+Yocto-Visualization v2.0.34302
 
-- Improve network discovery of YoctoHubs
+- Add support for sub-second time synchronization, now aligned up to +/- 0.02s
+- Fix retrieval of local IP address
