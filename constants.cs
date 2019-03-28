@@ -50,16 +50,25 @@ using System.IO;
 using YDataRendering;
 using System.Reflection;
 
+
 namespace YoctoVisualisation 
 {
   class constants
   {
-
-    public static string buildVersion = "34302";
+    public static string appVersion = "2.0";
+    public static string buildVersion = "34827";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
     public static bool OpenLogWindowAtStartUp = false;
+
+    // note : automatic check for updates is not implemented on the GitHub version.
+    private static bool _forceCheckForUpdate = false;
+    private static bool _checkforUpdate = true; 
+    public static bool checkForUpdate { get {return _checkforUpdate || _forceCheckForUpdate; } set { _checkforUpdate = value; } }   
+    private static int _UpdateIgnoreBuild = 0;
+    public static int updateIgnoreBuild { get { return _UpdateIgnoreBuild; } set { _UpdateIgnoreBuild = value; } }
+
 
     public  static string  loginCypherPassword = "YouShouldReallyChangeThis!";
     public static YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
@@ -204,6 +213,9 @@ namespace YoctoVisualisation
 
         if ((args[i] == "-log")) OpenLogWindowAtStartUp = true;
 
+        if (args[i] == "-check4updates")
+           _forceCheckForUpdate = true;
+
       }
 
       string path = Path.GetDirectoryName(configfile);
@@ -223,4 +235,6 @@ namespace YoctoVisualisation
     }
 
   }
-}
+
+
+  }

@@ -1,10 +1,10 @@
 ﻿/*
  *   Yocto-Visualization, a free application to visualize Yoctopuce Sensors.
- * 
+ *
  *   Yocto 2D data renderer solid graph class
- *   
- * 
- *  
+ *
+ *
+ *
  *   - - - - - - - - - License information: - - - - - - - - -
  *
  *  Copyright (C) 2017 and beyond by Yoctopuce Sarl, Switzerland.
@@ -40,13 +40,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
+
 
 using System.Windows.Forms;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using System.Drawing.Imaging;
+
 using System.ComponentModel;
 using System.Globalization;
 
@@ -69,7 +67,7 @@ namespace YDataRendering
   public static class TimeConverter
   {
     private static DateTime sTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-    public enum TimeReference {[Description("Absolute")]ABSOLUTE, [Description("Relative to first data")] RELATIVE };
+    public enum TimeReference {[Description("Absolute")] ABSOLUTE, [Description("Relative to first data")] RELATIVE };
     public static Double ToUnixTime(DateTime datetime)
     {
       return (double)(datetime - sTime).TotalSeconds;
@@ -160,7 +158,7 @@ namespace YDataRendering
 
         if (dataDeltaTime <= 0.10) { ShowSecondsHundredth = true; }
         if (dataDeltaTime <= 1) { ShowSecondsTenth = true; }
-        if ((dataDeltaTime >= 60) || (viewportDeltaTime>=60)) { ShowMinutes = true; }
+        if ((dataDeltaTime >= 60) || (viewportDeltaTime >= 60)) { ShowMinutes = true; }
         if ((dataDeltaTime >= 3600) || (viewportDeltaTime >= 3600)) { ShowHours = true; }
         if ((dataDeltaTime >= 86400) || (viewportDeltaTime >= 86400)) { ShowDays = true; }
 
@@ -203,7 +201,7 @@ namespace YDataRendering
       return new MinMax { Min = M.Min - (delta * (factor - 1)) / 2, Max = M.Max + (delta * (factor - 1)) / 2 };
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static MinMax DefaultValue()
@@ -212,7 +210,7 @@ namespace YDataRendering
 
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static MinMax DefaultValue(double value)
@@ -221,7 +219,7 @@ namespace YDataRendering
 
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static MinMax DefaultValue(double value1, double value2)
@@ -232,7 +230,7 @@ namespace YDataRendering
 
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static bool isDefined(MinMax v)
@@ -242,7 +240,7 @@ namespace YDataRendering
     }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static MinMax Combine(MinMax M1, MinMax M2)
@@ -256,7 +254,7 @@ namespace YDataRendering
       return M2;
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public static MinMax Combine(MinMax M1, double value)
@@ -305,7 +303,7 @@ namespace YDataRendering
 
     public void grow() { Array.Resize(ref data, data.Length + SegmentGranularity); }
 
-    
+
 
 
   }
@@ -319,7 +317,7 @@ namespace YDataRendering
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
-    public static int MaxPointsPerSeries { get { return _MaxPointsPerSeries; } set { _MaxPointsPerSeries = value; }  } 
+    public static int MaxPointsPerSeries { get { return _MaxPointsPerSeries; } set { _MaxPointsPerSeries = value; } }
 
 
     public DataSerie(YGraph parent)
@@ -400,10 +398,15 @@ namespace YDataRendering
     public Color color { get { return _color; } set { _color = value; _pen = null; _brush = null; _navigatorpen = null; parent.redraw(); } }
 
     private double _thickness = 1.0;
-    public double thickness { get { return _thickness; }
-      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-            _thickness = value; _pen = null; parent.redraw();
-      } }
+    public double thickness
+    {
+      get { return _thickness; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+        _thickness = value; _pen = null; parent.redraw();
+      }
+    }
 
     private string _legend = "";
     public string legend { get { return _legend; } set { _legend = value; parent.redraw(); } }
@@ -448,26 +451,27 @@ namespace YDataRendering
       segments[0].data[segments[0].count] = p;
       segments[0].count++;
       totalPointCount++;
-      if  ((_MaxPointsPerSeries>0)  && (totalPointCount > _MaxPointsPerSeries)) dataCleanUp();
+      if ((_MaxPointsPerSeries > 0) && (totalPointCount > _MaxPointsPerSeries)) dataCleanUp();
 
       parent.adjustGlobalTimeRange(p.x);
       parent.redraw();
     }
 
     public void dataCleanUp()
-    {  if (segments.Count <= 0) return;
+    {
+      if (segments.Count <= 0) return;
       int newLimit = ((_MaxPointsPerSeries * 90) / 100);
-      while ( segments[segments.Count-1].count <= (totalPointCount - newLimit))
+      while (segments[segments.Count - 1].count <= (totalPointCount - newLimit))
       {
         totalPointCount -= segments[segments.Count - 1].count;
         segments.RemoveAt(segments.Count - 1);
       }
 
-     if  (totalPointCount> newLimit)
+      if (totalPointCount > newLimit)
       {
         int delta = totalPointCount - newLimit;
         int newsize = segments[segments.Count - 1].count - delta;
-        pointXY[] newdata =  new pointXY[newsize];
+        pointXY[] newdata = new pointXY[newsize];
         Array.Copy(segments[segments.Count - 1].data, delta, newdata, 0, segments[segments.Count - 1].count - delta);
         segments[segments.Count - 1].data = newdata;
         segments[segments.Count - 1].count -= delta;
@@ -479,16 +483,18 @@ namespace YDataRendering
       double tmax = segments[0].data[0].x;
       double ymin = segments[0].data[0].y;
       double ymax = segments[0].data[0].y;
-      
-      for (int i=0;i< segments.Count;i++)
-      { int count = segments[i].count;
-         if (tmin > segments[i].data[0].x) tmin = segments[i].data[0].x;
+
+      for (int i = 0; i < segments.Count; i++)
+      {
+        int count = segments[i].count;
+        if (tmin > segments[i].data[0].x) tmin = segments[i].data[0].x;
         if (tmax < segments[i].data[count - 1].x) tmax = segments[i].data[count - 1].x;
-         for (int j = 0; j < count; j++) 
-          { if (ymin > segments[i].data[j].y) ymin = segments[i].data[j].y;
-            if (ymax < segments[i].data[j].y) ymax = segments[i].data[j].y;
-          }
-       }
+        for (int j = 0; j < count; j++)
+        {
+          if (ymin > segments[i].data[j].y) ymin = segments[i].data[j].y;
+          if (ymax < segments[i].data[j].y) ymax = segments[i].data[j].y;
+        }
+      }
       _timeRange.Min = tmin;
       _timeRange.Max = tmax;
       _valueRange.Min = ymin;
@@ -516,7 +522,8 @@ namespace YDataRendering
       // can we merge with one already existing segment ?
       for (int i = 0; i < segments.Count; i++)
         if (segments[i].count > 1)
-        { double DeltaInsertAtBegining = segments[i].data[0].x - points[points.Length - 1].x;
+        {
+          double DeltaInsertAtBegining = segments[i].data[0].x - points[points.Length - 1].x;
           double DeltaInsertAtEnd = points[0].x - segments[i].data[segments[i].count - 1].x;
           if ((DeltaInsertAtBegining > 0) && (DeltaInsertAtBegining < 2 * FirstStep)) InsertAtBegining = i;
           if ((DeltaInsertAtEnd > 0) && (DeltaInsertAtEnd < 2 * LastStep)) InsertAtEnd = i;
@@ -529,7 +536,7 @@ namespace YDataRendering
         Array.Copy(segments[InsertAtBegining].data, 0, segments[InsertAtBegining].data, points.Length, segments[InsertAtBegining].count);
         Array.Copy(points, 0, segments[InsertAtBegining].data, 0, points.Length);
         segments[InsertAtBegining].count += points.Length;
-        totalPointCount+= points.Length;
+        totalPointCount += points.Length;
       }
 
       else if (InsertAtEnd >= 0) // insert at the end of segments[InsertAtEnd]
@@ -561,7 +568,8 @@ namespace YDataRendering
 
     private static int CompareSegments(DataSegment a, DataSegment b)
 
-    { if (a.data[0].x > b.data[0].x) return -1;
+    {
+      if (a.data[0].x > b.data[0].x) return -1;
 
       if (a.data[0].x < b.data[0].x) return 1;
       return 0;
@@ -570,10 +578,10 @@ namespace YDataRendering
 
     public List<pointXY> getData()
     {
-      List <pointXY> res  = new List<pointXY>();
+      List<pointXY> res = new List<pointXY>();
 
       segments.Sort(CompareSegments);
-      for (int i = segments.Count-1; i >= 0; i--)
+      for (int i = segments.Count - 1; i >= 0; i--)
         for (int j = 0; j < segments[i].count; j++)
           res.Add(segments[i].data[j]);
 
@@ -609,7 +617,8 @@ namespace YDataRendering
       pointXY match = segments[0].data[0];
       double delta = Math.Abs(segments[0].data[0].x - x);
       for (int i = 0; i < segments.Count; i++)
-      { double d1 = Math.Abs(segments[i].data[0].x - x);
+      {
+        double d1 = Math.Abs(segments[i].data[0].x - x);
         double d2 = Math.Abs(segments[i].data[segments[i].count - 1].x - x);
         if (d1 < delta) { match = segments[i].data[0]; delta = d1; }
         if (d2 < delta) { match = segments[i].data[segments[i].count - 1]; delta = d2; }
@@ -626,6 +635,7 @@ namespace YDataRendering
       segments.Clear();
       _timeRange = MinMaxHandler.DefaultValue();
       _valueRange = MinMaxHandler.DefaultValue();
+      parent.clearCachedObjects();
       totalPointCount = 0;
     }
 
@@ -679,20 +689,66 @@ namespace YDataRendering
     private bool _enabled = false;
     public bool enabled { get { return _enabled; } set { _enabled = value; _parentRenderer.redraw(); } }
 
+    private bool _showSerieName = false;
+    public bool showSerieName { get { return _showSerieName; } set { _showSerieName = value; _parentRenderer.redraw(); } }
+
+    private string _dataPrecisionString = "";
+    public enum DataPrecision
+    {
+      [Description("As is")] PRECISION_NOLIMIT,
+      [Description("1")] PRECISION_1,
+      [Description("0.1")] PRECISION_01,
+      [Description("0.01")] PRECISION_001,
+      [Description("0.001")] PRECISION_0001,
+      [Description("0.0001")] PRECISION_00001,
+      [Description("0.00001")] PRECISION_000001,
+      [Description("0.000001")] PRECISION_0000001,
+      [Description("0.0000001")] PRECISION_00000001,
+      [Description("0.00000001")] PRECISION_000000001
+    };
+
+    private DataPrecision _dataPrecision = DataPrecision.PRECISION_NOLIMIT;
+    public DataPrecision dataPrecision { get { return _dataPrecision; } set { _dataPrecision = value; compute_dataPrecisionString(); _parentRenderer.redraw(); } }
+
+
+    private void compute_dataPrecisionString()
+    {
+
+      if (_dataPrecision == DataPrecision.PRECISION_NOLIMIT) { _dataPrecisionString = ""; return; }
+      _dataPrecisionString = "0.";
+      for (int i = 1; i < (int)_dataPrecision; i++) _dataPrecisionString += "#";
+    }
+
+
+
+    public string dataPrecisionString { get { return _dataPrecisionString; } }
+
+
+
     private double _diameter = 5;
     public double diameter { get { return _diameter; } set { _diameter = value; _parentRenderer.redraw(); } }
 
     private double _handleLength = 25;
-    public double handleLength { get { return _handleLength; }
-      set { if (value <= 0) throw new ArgumentException("Diameter must be a positive value");
+    public double handleLength
+    {
+      get { return _handleLength; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Diameter must be a positive value");
         _handleLength = value; _parentRenderer.redraw();
-      } }
+      }
+    }
 
     private int _detectionDistance = 50;
-    public int detectionDistance { get { return _detectionDistance; }
-      set { if (value <= 0) throw new ArgumentException("Distance must be a positive value");
+    public int detectionDistance
+    {
+      get { return _detectionDistance; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Distance must be a positive value");
         _detectionDistance = value;
-      } }
+      }
+    }
 
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
@@ -702,24 +758,40 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; }
-      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-           _borderthickness = value; _pen = null; _parentRenderer.redraw();
-      } }
+    public double borderthickness
+    {
+      get { return _borderthickness; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+        _borderthickness = value; _pen = null; _parentRenderer.redraw();
+      }
+    }
 
     private double _padding = 10;
     public double padding { get { return _padding; } set { _padding = value; _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; }
-      set { if (value < 0) throw new ArgumentException("Margin must be a positive value");
-         _verticalMargin = value; _parentRenderer.redraw();
-      } }
+    public double verticalMargin
+    {
+      get { return _verticalMargin; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Margin must be a positive value");
+        _verticalMargin = value; _parentRenderer.redraw();
+      }
+    }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; }
-      set { if (value < 0) throw new ArgumentException("Margin must be a positive value");
-         _horizontalMargin = value; _parentRenderer.redraw(); } }
+    public double horizontalMargin
+    {
+      get { return _horizontalMargin; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Margin must be a positive value");
+        _horizontalMargin = value; _parentRenderer.redraw();
+      }
+    }
 
 
 
@@ -763,7 +835,7 @@ namespace YDataRendering
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
-    public enum Position {[Description("Left")]LEFT, [Description("Top-Left")]TOPLEFT, [Description("Top")]TOP, [Description("Top-Right")]TOPRIGHT, [Description("Right")]RIGHT, [Description("Bottom-Right")]BOTTOMRIGHT, [Description("Bottom")]BOTTOM, [Description("Bottom-Left")]BOTTOMLEFT };
+    public enum Position {[Description("Left")] LEFT, [Description("Top-Left")] TOPLEFT, [Description("Top")] TOP, [Description("Top-Right")] TOPRIGHT, [Description("Right")] RIGHT, [Description("Bottom-Right")] BOTTOMRIGHT, [Description("Bottom")] BOTTOM, [Description("Bottom-Left")] BOTTOMLEFT };
 
 
     public LegendPanel(YDataRenderer parent, Object directParent)
@@ -792,28 +864,48 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; }
-      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-           _borderthickness = value; _pen = null; _parentRenderer.redraw();
-      } }
+    public double borderthickness
+    {
+      get { return _borderthickness; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+        _borderthickness = value; _pen = null; _parentRenderer.redraw();
+      }
+    }
 
     private double _padding = 10;
-    public double padding { get { return _padding; }
-      set { if (value < 0) throw new ArgumentException("Padding must be a positive value");
-         _padding = value; _parentRenderer.redraw();
-      } }
+    public double padding
+    {
+      get { return _padding; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Padding must be a positive value");
+        _padding = value; _parentRenderer.redraw();
+      }
+    }
 
     private double _verticalMargin = 10;
-    public double verticalMargin { get { return _verticalMargin; }
-      set { if (value < 0) throw new ArgumentException("Margin must be a positive value");
-            _verticalMargin = value; _parentRenderer.redraw();
-      } }
+    public double verticalMargin
+    {
+      get { return _verticalMargin; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Margin must be a positive value");
+        _verticalMargin = value; _parentRenderer.redraw();
+      }
+    }
 
     private double _horizontalMargin = 10;
-    public double horizontalMargin { get { return _horizontalMargin; }
-      set { if (value <0) throw new ArgumentException("Margin must be a positive value");
-            _horizontalMargin = value; _parentRenderer.redraw();
-      } }
+    public double horizontalMargin
+    {
+      get { return _horizontalMargin; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Margin must be a positive value");
+        _horizontalMargin = value; _parentRenderer.redraw();
+      }
+    }
 
 
 
@@ -857,7 +949,7 @@ namespace YDataRendering
     private Object _directParent = null;
     public Object directParent { get { return _directParent; } }
 
-    public enum YAxisHandling {[Description("Automatic")]AUTO, [Description("Inherit from main view")] INHERIT };
+    public enum YAxisHandling {[Description("Automatic")] AUTO, [Description("Inherit from main view")] INHERIT };
 
     private ViewPortSettings _viewport = new ViewPortSettings
     {
@@ -871,6 +963,9 @@ namespace YDataRendering
 
     public MinMaxHandler.MinMax Xrange;
 
+    private bool _showXAxisZones = true;
+
+    public bool showXAxisZones { get { return _showXAxisZones; } set { _showXAxisZones = value; } }
 
     double _relativeheight = 10;
     public double relativeheight
@@ -958,10 +1053,15 @@ namespace YDataRendering
     public Color xAxisColor { get { return _xAxisColor; } set { _xAxisColor = value; _pen = null; _parentRenderer.redraw(); } }
 
     private double _xAxisThickness = 1.0;
-    public double xAxisThickness { get { return _xAxisThickness; }
-      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-            _xAxisThickness = value; _pen = null; _parentRenderer.redraw();
-      } }
+    public double xAxisThickness
+    {
+      get { return _xAxisThickness; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+        _xAxisThickness = value; _pen = null; _parentRenderer.redraw();
+      }
+    }
 
 
     private Pen _borderPen = null;
@@ -978,10 +1078,15 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderPen = null; _parentRenderer.redraw(); } }
 
     private Double _borderThickness = 1.0;
-    public Double borderThickness { get { return _borderThickness; }
-      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-            _borderThickness = value; _borderPen = null; _parentRenderer.redraw();
-          } }
+    public Double borderThickness
+    {
+      get { return _borderThickness; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+        _borderThickness = value; _borderPen = null; _parentRenderer.redraw();
+      }
+    }
 
 
     private LinearGradientBrush _bgBrush = null;
@@ -1084,6 +1189,18 @@ namespace YDataRendering
     private Object _directParent = null;
     public Object directParent { get { return _directParent; } }
 
+    protected List<Zone> _zones;
+    public List<Zone> zones { get { return _zones; } }
+
+
+    public Zone AddZone()
+    {
+
+      Zone z = new Zone(_parentRenderer, this);
+      _zones.Add(z);
+      return z;
+    }
+
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
@@ -1092,14 +1209,15 @@ namespace YDataRendering
 
     protected axisChangedCallBack _AxisChanged = null;
 
-    public  axisChangedCallBack AxisChanged { set {_AxisChanged=value;} get {return  _AxisChanged;} }
+    public axisChangedCallBack AxisChanged { set { _AxisChanged = value; } get { return _AxisChanged; } }
 
-    public GenericAxis(YGraph parent,Object directParent)
+    public GenericAxis(YGraph parent, Object directParent)
     {
+      _zones = new List<Zone>();
       _directParent = directParent;
       _parentRenderer = parent;
-      _legend = new Legend(parent,this);
-      _font = new YFontParams(parent,this);
+      _legend = new Legend(parent, this);
+      _font = new YFontParams(parent, this);
     }
 
 
@@ -1137,13 +1255,13 @@ namespace YDataRendering
     protected bool _AllowAutoShow = false;
     public bool AllowAutoShow { get { return _AllowAutoShow; } set { _AllowAutoShow = value; } }
 
-    public void AutoShow() { if (_AllowAutoShow) { visible = true; if (_AxisChanged != null) _AxisChanged(this); } } 
+    public void AutoShow() { if (_AllowAutoShow) { visible = true; if (_AxisChanged != null) _AxisChanged(this); } }
 
-    
-    public void  set_minMax(double value_min,double value_max)
+
+    public void set_minMax(double value_min, double value_max)
     {
-      if (!Double.IsNaN(value_min) && !Double.IsNaN(value_max) && (value_min>=value_max))
-        throw new ArgumentException("Min ("+ value_min.ToString()+ ") cannot be greater than max (" + value_max.ToString() + ")");
+      if (!Double.IsNaN(value_min) && !Double.IsNaN(value_max) && (value_min >= value_max))
+        throw new ArgumentException("Min (" + value_min.ToString() + ") cannot be greater than max (" + value_max.ToString() + ")");
 
       _min = value_min;
       _max = value_max;
@@ -1151,34 +1269,46 @@ namespace YDataRendering
     }
 
     protected Double _min = Double.NaN;
-    public Double min { get { return _min; }
+    public Double min
+    {
+      get { return _min; }
 
-      set {
-          if (!Double.IsNaN(value) && !Double.IsNaN(_max) && !YDataRenderer.minMaxCheckDisabled)
-             if (value >= _max)
-                throw new ArgumentException("Min cannot be greater than max (" + _max.ToString() + ")");
-           _min = value; _parentRenderer.redraw();
-          }
+      set
+      {
+        if (!Double.IsNaN(value) && !Double.IsNaN(_max) && !YDataRenderer.minMaxCheckDisabled)
+          if (value >= _max)
+            throw new ArgumentException("Min cannot be greater than max (" + _max.ToString() + ")");
+        _min = value; _parentRenderer.redraw();
+      }
     }
 
     protected Double _max = Double.NaN;
-    public Double max { get { return _max; }
-      set {
+    public Double max
+    {
+      get { return _max; }
+      set
+      {
         if (!Double.IsNaN(value) && !Double.IsNaN(_min) && !YDataRenderer.minMaxCheckDisabled)
           if (value <= _min) throw new ArgumentException("Max cannot be less than min (" + _min.ToString() + ")");
 
         _max = value;
         _parentRenderer.redraw();
-      } }
+      }
+    }
 
     protected Double _step = Double.NaN;
     public Double step { get { return _step; } set { _step = value; _parentRenderer.redraw(); } }
 
     protected Double _thickness = 1.0;
-    public Double thickness { get { return _thickness; }
-      set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-           _thickness = value; _pen = null; _parentRenderer.redraw();
-      } }
+    public Double thickness
+    {
+      get { return _thickness; }
+      set
+      {
+        if (value < 0) throw new ArgumentException("Thickness must be a positive value");
+        _thickness = value; _pen = null; _parentRenderer.redraw();
+      }
+    }
 
     protected Color _color = Color.Black;
     public Color color { get { return _color; } set { _color = value; _pen = null; _parentRenderer.redraw(); } }
@@ -1191,10 +1321,15 @@ namespace YDataRendering
     public Color gridColor { get { return _gridColor; } set { _gridColor = value; _gridPen = null; _parentRenderer.redraw(); } }
 
     protected Double _gridThickness = 1.0;
-    public Double gridThickness { get { return _gridThickness; }
-      set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-            _gridThickness = value; _gridPen = null; _parentRenderer.redraw();
-      } }
+    public Double gridThickness
+    {
+      get { return _gridThickness; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
+        _gridThickness = value; _gridPen = null; _parentRenderer.redraw();
+      }
+    }
 
 
     YFontParams _font = null;
@@ -1209,9 +1344,12 @@ namespace YDataRendering
   {
     public double dataMin;
     public double dataMax;
+    public double absMin;
+    public double absMax;
     public double step;
     public double start;
     public double stop;
+
     public int precision;
 
 
@@ -1242,38 +1380,43 @@ namespace YDataRendering
   {
 
 
-    private List<Zone> _zones;
-    public List<Zone> zones { get { return _zones; } }
 
-     NumberFormatInfo nfi ;
+
+    NumberFormatInfo nfi;
     int _index = 0;
 
 
-    public YAxis(YGraph parent, Object directParent,int index) : base(parent, directParent)
+    public YAxis(YGraph parent, Object directParent, int index) : base(parent, directParent)
     {
       _index = index; ;
-      _zones = new List<Zone>();
+
       nfi = new NumberFormatInfo();
       nfi.NumberDecimalSeparator = ".";
 
     }
 
     public int index { get { return _index; } }
-    
-
-    public enum HrzPosition {[Description("Left")]LEFT, [Description("Right")]RIGHT };
 
 
-   
+    public enum HrzPosition {[Description("Left")] LEFT, [Description("Right")] RIGHT };
 
-    public Zone AddZone()
+
+    public void lockMinMax()
     {
-
-      Zone z = new Zone(_parentRenderer,this);
-      _zones.Add(z);
-      return z;
+      _min = startStopStep.absMin;
+      _max = startStopStep.absMax;
+      _parentRenderer.redraw();
     }
 
+    public void unlockMinMax()
+    { _min = Double.NaN;
+      _max = Double.NaN;
+      _parentRenderer.redraw();
+    }
+
+
+    private bool _highlightZero = false;
+    public bool highlightZero { get { return _highlightZero; } set { _highlightZero = value; _parentRenderer.redraw(); }  }
 
 
     private HrzPosition _position = HrzPosition.LEFT;
@@ -1282,13 +1425,13 @@ namespace YDataRendering
     public int innerWidth = 0;
 
 
-    public double zoom =0;
+    public double zoom = 0;
     public double IRLy = 0;
 
 
     public StartStopStep startStopStep = new StartStopStep { start = 0, stop = 1, step = .1 };
 
-   
+
 
     public StartStopStep computeStartAndStep(MinMaxHandler.MinMax M)
     {
@@ -1302,6 +1445,8 @@ namespace YDataRendering
       if (Double.IsNaN(min)) min = M.Min;
       if (Double.IsNaN(max)) max = M.Max;
 
+      res.absMax = max;
+      res.absMin = min;
 
 
 
@@ -1331,32 +1476,33 @@ namespace YDataRendering
 
         Double C = Delta / Magnitude;
 
-       if (C <= 2) { res.step = (Magnitude / 5); res.precision--; }
-      
-       else if (C <= 5) {  res.step = (Magnitude / 2); res.precision--; }
-       else res.step = (Magnitude);
+        if (C <= 2) { res.step = (Magnitude / 5); res.precision--; }
+
+        else if (C <= 5) { res.step = (Magnitude / 2); res.precision--; }
+        else res.step = (Magnitude);
 
         if (Double.IsNaN(this.min))
         {
           double c = min / res.step;
           if (c - Math.Floor(c) != 0) c = (c > 0) ? Math.Floor(c) + 1 : Math.Floor(c) - 1;
           res.start = res.step * c;
-       
 
-     //     if ((M.Min < 0) && (M.Min - (int)M.Min != 0)) res.start -= res.step;
-         
+
+          //     if ((M.Min < 0) && (M.Min - (int)M.Min != 0)) res.start -= res.step;
+
         }
-      } else
+      }
+      else
       {
-        String v = res.step.ToString( nfi);
+        String v = res.step.ToString(nfi);
         int p = v.IndexOf('.');
-        if (p>=0)
+        if (p >= 0)
         {
-          res.precision = -(v.Length-p-1);
+          res.precision = -(v.Length - p - 1);
         }
         else res.precision = 0;
-      
-       
+
+
       }
 
       startStopStep = res;
@@ -1372,23 +1518,49 @@ namespace YDataRendering
 
   }
 
+
   public class XAxis : GenericAxis
   {
-    public enum VrtPosition {[Description("Top")]TOP, [Description("Bottom")]BOTTOM };
-    public enum OverflowHandling {[Description("Do nothing")]DONOTHING, [Description("Scroll contents")]SCROLL, [Description("Squeeze contents")]CONTRACT };
+    public const string FORMATAUTO = "auto";
+
+    public enum VrtPosition {[Description("Top")] TOP, [Description("Bottom")] BOTTOM };
+    public enum OverflowHandling {[Description("Do nothing")] DONOTHING, [Description("Scroll contents")] SCROLL, [Description("Squeeze contents")] CONTRACT };
 
 
     private VrtPosition _position = VrtPosition.BOTTOM;
     public VrtPosition position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
+
+
     private double _initialZoom = 300;
-    public double initialZoom { get { return _initialZoom; }
-      set { if (value <= 0) throw new ArgumentException("Zoom must be a positive value");
-          _initialZoom = value; max = min + initialZoom; _parentRenderer.redraw(); } }
+    public double initialZoom
+    {
+      get { return _initialZoom; }
+      set
+      {
+        if (value <= 0) throw new ArgumentException("Zoom must be a positive value");
+        _initialZoom = value; max = min + initialZoom; _parentRenderer.redraw();
+      }
+    }
+
+    private String _format = FORMATAUTO;
+    public string labelFormat
+    {
+      get { return _format; }
+
+      set
+      {
+        if (labelFormat != FORMATAUTO)
+          try { 1234.ToString(labelFormat); }
+          catch (Exception) { throw new ArgumentException("\"format\" is not a valid format."); }
 
 
+        _format = value;
+        _parentRenderer.redraw();
+      }
+    }
 
-    public XAxis(YGraph parent, Object directParent) : base(parent,directParent )
+    public XAxis(YGraph parent, Object directParent) : base(parent, directParent)
     {
       min = TimeConverter.ToUnixTime(DateTime.UtcNow);
       max = min + initialZoom;
@@ -1416,28 +1588,75 @@ namespace YDataRendering
   }
 
 
-
-  public class YGraph:YDataRenderer
+  public class DataPanel : GenericPanel
   {
-    
+
+    public enum HorizontalAlign
+    {[Description("Left")] LEFTOF, [Description("Center")] CENTERED, [Description("Right")] RIGHTOF };
+    public enum VerticalAlign
+    {[Description("Top")] ABOVE, [Description("Center")] CENTERED, [Description("Bottom")] BELOW };
+
+    public enum HorizontalPosition
+    {
+      [Description("Left border")] LEFTBORDER, [Description("Absolute X position")] ABSOLUTEX, [Description("Right border")] RIGHTBORDER
+    };
+
+    public enum VerticalPosition
+    {
+      [Description("Top border")] TOPBORDER, [Description("Absolute Y position")] ABSOLUTEY, [Description("Bottom border")] BOTTOMBORDER
+    };
+
+    public DataPanel(YDataRenderer parent, Object directParent) : base(parent, directParent)
+    { }
+
+    private HorizontalAlign _panelHrzAlign = HorizontalAlign.CENTERED;
+    public HorizontalAlign panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private VerticalAlign _panelVrtAlign = VerticalAlign.CENTERED;
+    public VerticalAlign panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private HorizontalPosition _horizontalPosition = HorizontalPosition.ABSOLUTEX;
+    public HorizontalPosition horizontalPosition { get { return _horizontalPosition; } set { _horizontalPosition = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private VerticalPosition _verticalPosition = VerticalPosition.ABSOLUTEY;
+    public VerticalPosition verticalPosition { get { return _verticalPosition; } set { _verticalPosition = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private Double _AbsoluteXposition = 0;
+    public Double AbsoluteXposition { get { return _AbsoluteXposition; } set { _AbsoluteXposition = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private Double _AbsoluteYposition = 0;
+    public Double AbsoluteYposition { get { return _AbsoluteYposition; } set { _AbsoluteYposition = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private int _YScaleIndex = 0;
+    public int yScaleIndex { get { return _YScaleIndex; } set { _YScaleIndex = value; if (_enabled) _parentRenderer.redraw(); } }
+
+
+
+  }
+
+
+
+  public class YGraph : YDataRenderer
+  {
+
     XAxis _xAxis;
     List<YAxis> _yAxes;
     List<DataSerie> _series;
-   
-    public static bool  VerticalDragZoomEnabled = false;
-   
+
+    public static bool VerticalDragZoomEnabled = false;
+
     int lastPointCount = -1;
     int lastTopMargin = -1;
     int lastBottomMargin = -1;
 
     Bitmap navigatorCache;
-    
+
 
     private LegendPanel _legendPanel;
-    public LegendPanel legendPanel { get { return _legendPanel; }}
+    public LegendPanel legendPanel { get { return _legendPanel; } }
 
     private DataTracker _dataTracker;
-    public DataTracker dataTracker { get { return _dataTracker; }}
+    public DataTracker dataTracker { get { return _dataTracker; } }
 
     private Pen borderPen = null;
 
@@ -1447,30 +1666,41 @@ namespace YDataRendering
     private Double _borderThickness = 1.0;
     public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; borderPen = null; redraw(); } }
 
-   
 
 
 
-    ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
 
- 
+ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
 
+
+    protected List<DataPanel> _dataPanels;
+    public List<DataPanel> dataPanels { get { return _dataPanels; } }
+
+    public DataPanel addDataPanel()
+    {
+      DataPanel p = new DataPanel(this, this);
+      _dataPanels.Add(p);
+      return p;
+
+    }
 
 
     public YGraph(PictureBox ChartContainer, logFct logFunction) : base(ChartContainer, logFunction)
     {
-      
-      _xAxis = new XAxis(this,this);
+
+      _xAxis = new XAxis(this, this);
       _yAxes = new List<YAxis>();
       _series = new List<DataSerie>();
-    
-      _navigator = new Navigator(this,this);
-      _legendPanel = new LegendPanel(this,this);
-      _dataTracker = new DataTracker(this,this);
+      _dataPanels = new List<DataPanel>();
+
+
+      _navigator = new Navigator(this, this);
+      _legendPanel = new LegendPanel(this, this);
+      _dataTracker = new DataTracker(this, this);
 
       this.UIContainer.MouseDown += MouseDown;
       this.UIContainer.MouseMove += MouseMove;
-     
+
       parentForm.MouseWheel += new System.Windows.Forms.MouseEventHandler(mouseWheelEvent);
       parentForm.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyDown);
 
@@ -1481,7 +1711,7 @@ namespace YDataRendering
       int originalFormWidth = parentForm.Width;
       int originalFormHeight = parentForm.Height;
 
-      
+
       AllowRedraw();
       Draw();
 
@@ -1495,14 +1725,17 @@ namespace YDataRendering
       if (Double.IsNaN(max)) return;
       double ofset = x - max;
       if (ofset > 0)
-      { switch (xAxis.overflowHandling)
-        { case XAxis.OverflowHandling.SCROLL:
+      {
+        switch (xAxis.overflowHandling)
+        {
+          case XAxis.OverflowHandling.SCROLL:
             if (max > xAxis.min + ((xAxis.max - xAxis.min) * 0.85) && (max <= xAxis.max))
-             {  DisableRedraw();
-                xAxis.set_minMax(xAxis.min + ofset, xAxis.max + ofset);
-                AllowRedraw();
-             }
-          break;
+            {
+              DisableRedraw();
+              xAxis.set_minMax(xAxis.min + ofset, xAxis.max + ofset);
+              AllowRedraw();
+            }
+            break;
           case XAxis.OverflowHandling.CONTRACT:
             if (max > xAxis.min + ((xAxis.max - xAxis.min) * 0.95) && (max <= xAxis.max))
             {
@@ -1532,20 +1765,21 @@ namespace YDataRendering
 
     public Navigator navigator { get { return _navigator; } }
 
-    public List<YAxis>  yAxes { get { return _yAxes; } }
+    public List<YAxis> yAxes { get { return _yAxes; } }
 
     public List<DataSerie> series { get { return _series; } }
 
     public YAxis addYAxis()
     {
-      YAxis s = new YAxis(this,this, _yAxes.Count);
+      YAxis s = new YAxis(this, this, _yAxes.Count);
       _yAxes.Add(s);
       redraw();
       return s;
 
     }
 
-   
+
+
 
     public DataSerie addSerie()
     {
@@ -1556,16 +1790,16 @@ namespace YDataRendering
 
     }
 
-  
 
-  
 
-    protected override void clearCachedObjects()
+
+
+    public override void clearCachedObjects()
     {
-      
+
       _bgBrush = null;
       navigatorCache = null;
-     
+
 
     }
 
@@ -1579,9 +1813,9 @@ namespace YDataRendering
       {
         mainViewPort.OriginalXAxisMin = xAxis.min;
         mainViewPort.OriginalXAxisMax = xAxis.max;
-        mainViewPort.OriginalIRLx = mainViewPort.IRLx;      
+        mainViewPort.OriginalIRLx = mainViewPort.IRLx;
         mainViewPort.OriginalLmargin = mainViewPort.Lmargin;
-        mainViewPort.OriginalZoomx = mainViewPort.zoomx;  
+        mainViewPort.OriginalZoomx = mainViewPort.zoomx;
         pointXY p = ViewPortPointToIRL(mainViewPort, new Point(e.X, e.Y));
         mainViewPort.CaptureStartY = e.Y;
         mainViewPort.IRLCaptureStartX = p.x;
@@ -1604,27 +1838,20 @@ namespace YDataRendering
         {
 
           _navigator.startCapture(p, _xAxis.min, _xAxis.max);
-        //  log("monitor start monitor capture  at " + _navigator.viewport.IRLCaptureStartX.ToString());
+          //  log("monitor start monitor capture  at " + _navigator.viewport.IRLCaptureStartX.ToString());
         }
         else
         {
           DisableRedraw();
           double min = p.x - (p3.x - p2.x) / 2;
           double max = min + (p3.x - p2.x);
-          _xAxis.set_minMax(min,max); 
-        
+          _xAxis.set_minMax(min, max);
+
           AllowRedraw();
-        //  log("Jump to " + mainViewPort.IRLx.ToString());
+          //  log("Jump to " + mainViewPort.IRLx.ToString());
           Draw();
         }
-
       }
-
-
-
-
-
-
     }
 
     private void MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -1643,13 +1870,13 @@ namespace YDataRendering
       if (mainViewPort.Capture)
       {
         double x1 = mainViewPort.OriginalIRLx + (double)(e.X - mainViewPort.OriginalLmargin) / mainViewPort.OriginalZoomx;
-      
+
         double deltaX = (x1 - mainViewPort.IRLCaptureStartX);
         double deltaY = (e.Y - mainViewPort.CaptureStartY);
         DisableRedraw();
-        double halfAxisDelta =( mainViewPort.OriginalXAxisMax - mainViewPort.OriginalXAxisMin) / 2;
+        double halfAxisDelta = (mainViewPort.OriginalXAxisMax - mainViewPort.OriginalXAxisMin) / 2;
         double Axismiddle = (mainViewPort.OriginalXAxisMax + mainViewPort.OriginalXAxisMin) / 2;
-        double deltaCoef = (YGraph.VerticalDragZoomEnabled && (Math.Abs(deltaY)  > 10)) ? Math.Pow(1.01, deltaY) : 1;
+        double deltaCoef = (YGraph.VerticalDragZoomEnabled && (Math.Abs(deltaY) > 10)) ? Math.Pow(1.01, deltaY) : 1;
 
 
         _xAxis.set_minMax(Axismiddle - halfAxisDelta * deltaCoef - deltaX,
@@ -1671,7 +1898,7 @@ namespace YDataRendering
 
       }
 
-     
+
 
 
 
@@ -1688,7 +1915,7 @@ namespace YDataRendering
       UIContainer.Invalidate();
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private Point IRLPointToViewPort(ViewPortSettings viewport, pointXY p)
@@ -1699,10 +1926,10 @@ namespace YDataRendering
 
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    private Point IRLPointToViewPort(ViewPortSettings viewport, pointXY p , double IRLy, double zoomy)
+    private Point IRLPointToViewPort(ViewPortSettings viewport, pointXY p, double IRLy, double zoomy)
     {
       int xx = viewport.Lmargin + (int)Math.Round((p.x - viewport.IRLx) * viewport.zoomx);
       int yy = viewport.Height - viewport.Bmargin - (int)Math.Round((p.y - IRLy) * zoomy);
@@ -1711,7 +1938,7 @@ namespace YDataRendering
     }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     private pointXY ViewPortPointToIRL(ViewPortSettings viewport, Point p)
@@ -1725,10 +1952,10 @@ namespace YDataRendering
       };
     }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    private pointXY ViewPortPointToIRL(ViewPortSettings viewport, Point p,Double IRLy, Double zoomy)
+    private pointXY ViewPortPointToIRL(ViewPortSettings viewport, Point p, Double IRLy, Double zoomy)
     {
       return new pointXY()
       {
@@ -1807,7 +2034,7 @@ namespace YDataRendering
         if (_series[i].legend != "") legends[i] = _series[i].legend; else legends[i] = "Series " + (i + 1).ToString();
 
 
-      if ((_legendPanel.position == LegendPanel.Position.TOP)  || (_legendPanel.position == LegendPanel.Position.BOTTOM))
+      if ((_legendPanel.position == LegendPanel.Position.TOP) || (_legendPanel.position == LegendPanel.Position.BOTTOM))
       {
         double availableWidth = viewPortWidth - 2 * _legendPanel.padding + _legendPanel.borderthickness;
         if (_legendPanel.overlap) availableWidth = availableWidth - mainViewPort.Lmargin - mainViewPort.Rmargin;
@@ -1857,7 +2084,8 @@ namespace YDataRendering
         if (totalWidth > availableWidth) totalWidth = availableWidth;
       }
       else
-      { double ty = 0;
+      {
+        double ty = 0;
         for (int i = 0; i < _series.Count; i++)
 
           if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
@@ -1874,29 +2102,29 @@ namespace YDataRendering
       }
 
 
-      double w = maxWidth  + 2 * _legendPanel.padding + _legendPanel.borderthickness;
+      double w = maxWidth + 2 * _legendPanel.padding + _legendPanel.borderthickness;
       double h = totalHeight + 2 * _legendPanel.padding + _legendPanel.borderthickness;
       double x = 0;
       double y = 0;
 
       switch (_legendPanel.position)
       {
-         case  LegendPanel.Position.LEFT:
-            x =  legendPanel.horizontalMargin;
-            if (!_legendPanel.overlap)
-             {
-               mainViewPort.Lmargin += (int)(w + 2 * legendPanel.horizontalMargin + legendPanel.borderthickness);
-               y = (viewPortHeight - h) / 2;
-            }
-           else
-             {
-               x += mainViewPort.Lmargin;
-               y = mainViewPort.Tmargin  + (viewPortHeight - mainViewPort.Tmargin - mainViewPort.Bmargin - h) / 2;
-             }
+        case LegendPanel.Position.LEFT:
+          x = legendPanel.horizontalMargin;
+          if (!_legendPanel.overlap)
+          {
+            mainViewPort.Lmargin += (int)(w + 2 * legendPanel.horizontalMargin + legendPanel.borderthickness);
+            y = (viewPortHeight - h) / 2;
+          }
+          else
+          {
+            x += mainViewPort.Lmargin;
+            y = mainViewPort.Tmargin + (viewPortHeight - mainViewPort.Tmargin - mainViewPort.Bmargin - h) / 2;
+          }
           break;
         case LegendPanel.Position.TOPLEFT:
-            x = legendPanel.horizontalMargin;
-            y = legendPanel.verticalMargin;
+          x = legendPanel.horizontalMargin;
+          y = legendPanel.verticalMargin;
           if (!_legendPanel.overlap) mainViewPort.Lmargin += (int)(w + 2 * legendPanel.horizontalMargin + legendPanel.borderthickness);
           else
           {
@@ -1909,7 +2137,7 @@ namespace YDataRendering
           {
             x = (viewPortWidth - w) / 2 - legendPanel.horizontalMargin - legendPanel.borderthickness;
             y = legendPanel.verticalMargin + legendPanel.borderthickness;
-            mainViewPort.Tmargin += (int)(totalHeight + legendPanel.verticalMargin  + 2 * legendPanel.verticalMargin + legendPanel.borderthickness);
+            mainViewPort.Tmargin += (int)(totalHeight + legendPanel.verticalMargin + 2 * legendPanel.verticalMargin + legendPanel.borderthickness);
           }
           else
           {
@@ -1918,9 +2146,9 @@ namespace YDataRendering
           }
           break;
 
-        case LegendPanel.Position.TOPRIGHT: 
-           x = viewPortWidth - legendPanel.horizontalMargin - w;
-           y = legendPanel.verticalMargin;
+        case LegendPanel.Position.TOPRIGHT:
+          x = viewPortWidth - legendPanel.horizontalMargin - w;
+          y = legendPanel.verticalMargin;
           if (!_legendPanel.overlap) mainViewPort.Rmargin += (int)(w + 2 * legendPanel.horizontalMargin + legendPanel.borderthickness);
           else
           {
@@ -1928,7 +2156,7 @@ namespace YDataRendering
             y += mainViewPort.Tmargin;
           }
 
-            break;
+          break;
         case LegendPanel.Position.RIGHT:
 
           x = viewPortWidth - legendPanel.horizontalMargin - w;
@@ -1951,7 +2179,7 @@ namespace YDataRendering
           if (!_legendPanel.overlap)
           {
             mainViewPort.Rmargin += (int)(w + 2 * legendPanel.horizontalMargin + legendPanel.borderthickness);
-            y = viewPortHeight-legendPanel.verticalMargin - h;
+            y = viewPortHeight - legendPanel.verticalMargin - h;
           }
 
           else
@@ -1964,13 +2192,13 @@ namespace YDataRendering
           if (!_legendPanel.overlap)
           {
             x = (viewPortWidth - w) / 2 - legendPanel.horizontalMargin - legendPanel.borderthickness;
-            y = viewPortHeight-   legendPanel.verticalMargin - 2 * legendPanel.padding  - legendPanel.borderthickness-totalHeight;
-            mainViewPort.Bmargin += (int)(totalHeight + 2* legendPanel.padding + 2 * legendPanel.verticalMargin + legendPanel.borderthickness);
+            y = viewPortHeight - legendPanel.verticalMargin - 2 * legendPanel.padding - legendPanel.borderthickness - totalHeight;
+            mainViewPort.Bmargin += (int)(totalHeight + 2 * legendPanel.padding + 2 * legendPanel.verticalMargin + legendPanel.borderthickness);
           }
           else
           {
             x = mainViewPort.Lmargin + (viewPortWidth - mainViewPort.Lmargin - mainViewPort.Rmargin - w) / 2 - legendPanel.horizontalMargin - legendPanel.borderthickness;
-            y = viewPortHeight -  mainViewPort.Bmargin -totalHeight - 2 * legendPanel.padding - 2 *legendPanel.verticalMargin - legendPanel.borderthickness;
+            y = viewPortHeight - mainViewPort.Bmargin - totalHeight - 2 * legendPanel.padding - 2 * legendPanel.verticalMargin - legendPanel.borderthickness;
           }
           break;
 
@@ -1983,40 +2211,41 @@ namespace YDataRendering
             mainViewPort.Lmargin += (int)(w + 2 * legendPanel.horizontalMargin + legendPanel.borderthickness);
             y = viewPortHeight - legendPanel.verticalMargin - h;
           }
-          else 
-             { x += mainViewPort.Lmargin;
-               y = viewPortHeight - mainViewPort.Bmargin - h - legendPanel.verticalMargin;
-             }
+          else
+          {
+            x += mainViewPort.Lmargin;
+            y = viewPortHeight - mainViewPort.Bmargin - h - legendPanel.verticalMargin;
+          }
           break;
-        }
-
-
-     
-          
-
-     
-          Rectangle r = new Rectangle((int)x, (int)y, (int)w,(int) h);
-          g.FillRectangle(_legendPanel.bgBrush, r);
-          g.DrawRectangle(_legendPanel.pen, r);
-         
-          for (int i = 0; i < _series.Count; i++)
-            if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
-             {
-              g.DrawString(legends[i], _legendPanel.font.fontObject, _legendPanel.font.brushObject,
-                 (int)(x+ofsetx[i]  + 20 + legendPanel.padding),
-                 (int)(y+ofsety[i] + legendPanel.padding));
-                 int px = (int) (x+ofsetx[i] + _legendPanel.borderthickness / 2 + legendPanel.padding +6);
-                 int py = (int)(y+ofsety[i] + legendPanel.padding + legendHeight[i] / 2 );
-              g.DrawLine(_series[i].pen, new Point(px, py), new Point(px + 12, py));
-              
-             }
-
       }
 
 
-     
 
- 
+
+
+
+      Rectangle r = new Rectangle((int)x, (int)y, (int)w, (int)h);
+      g.FillRectangle(_legendPanel.bgBrush, r);
+      g.DrawRectangle(_legendPanel.pen, r);
+
+      for (int i = 0; i < _series.Count; i++)
+        if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
+        {
+          g.DrawString(legends[i], _legendPanel.font.fontObject, _legendPanel.font.brushObject,
+             (int)(x + ofsetx[i] + 20 + legendPanel.padding),
+             (int)(y + ofsety[i] + legendPanel.padding));
+          int px = (int)(x + ofsetx[i] + _legendPanel.borderthickness / 2 + legendPanel.padding + 6);
+          int py = (int)(y + ofsety[i] + legendPanel.padding + legendHeight[i] / 2);
+          g.DrawLine(_series[i].pen, new Point(px, py), new Point(px + 12, py));
+
+        }
+
+    }
+
+
+
+
+
 
 
 
@@ -2080,27 +2309,29 @@ namespace YDataRendering
 
         ToDraw[n++] = IRLPointToViewPort(w, data[Last]);
         Array.Resize(ref ToDraw, n);
-        if (n>1)g.DrawLines(p, ToDraw);
+        if (n > 1) g.DrawLines(p, ToDraw);
         return n;
 
       }
       else
-      { // in SVG mode, DrawLines linejoins are rendered correctly, 
+      { // in SVG mode, DrawLines linejoins are rendered correctly,
         // in bitmap mode they aren't
         if (isSVG)
-        { Point[] ToDraw = new Point[Last - First + 1];
+        {
+          Point[] ToDraw = new Point[Last - First + 1];
           for (int i = First; i <= Last; i++) ToDraw[i - First] = IRLPointToViewPort(w, data[i]);
           g.DrawLines(p, ToDraw);
-        } else
-        for (int i = First; i < Last; i++)
-        {
-          g.DrawLine(p, IRLPointToViewPort(w, data[i]), IRLPointToViewPort(w, data[i + 1]));
         }
+        else
+          for (int i = First; i < Last; i++)
+          {
+            g.DrawLine(p, IRLPointToViewPort(w, data[i]), IRLPointToViewPort(w, data[i + 1]));
+          }
       }
       return Last - First;
 
     }
-    
+
 
     private void DrawYAxisZones(ViewPortSettings w, YGraphics g, YAxis scale)
     {
@@ -2114,7 +2345,7 @@ namespace YDataRendering
           double max = scale.zones[i].max;
           double min = scale.zones[i].min;
           if (double.IsNaN(max))
-             max = scale.startStopStep.dataMax;
+            max = scale.startStopStep.dataMax;
           if (double.IsNaN(min)) min = scale.startStopStep.dataMin;
 
 
@@ -2132,7 +2363,27 @@ namespace YDataRendering
 
     }
 
+    private void DrawXAxisZones(ViewPortSettings w, YGraphics g, XAxis scale)
+    {
+      if (!scale.visible) return;
+      double delta = scale.max - scale.min;
+      Double XZoom = (delta) / (w.Width - w.Lmargin - w.Rmargin);
 
+      for (int i = 0; i < scale.zones.Count; i++)
+        if (scale.zones[i].visible)
+        {
+          double max = scale.zones[i].max;
+          double min = scale.zones[i].min;
+          if (double.IsNaN(max)) max = scale.min;
+          if (double.IsNaN(min)) min = scale.max;
+          if (max < min) { double t = max; max = min; min = t; }
+          int x0 = w.Lmargin + (int)Math.Round((min - scale.min) / XZoom);
+          g.FillRectangle(scale.zones[i].zoneBrush,
+          x0, mainViewPort.Tmargin,
+          (int)((max - min) / XZoom),
+           mainViewPort.Height - mainViewPort.Tmargin - mainViewPort.Bmargin);
+        }
+    }
 
 
     private int DrawYAxis(ViewPortSettings w, YGraphics g, YAxis axis, int ofset, bool simulation)
@@ -2155,43 +2406,55 @@ namespace YDataRendering
       int x = leftSide ? w.Lmargin - ofset : (w.Width - w.Rmargin + ofset);
 
       if (!simulation) g.DrawLine(axis.pen, x, w.Tmargin, x, w.Height - w.Bmargin);
-    
+
       double FirstStep = axis.startStopStep.step * (Math.Truncate(axis.startStopStep.start / axis.startStopStep.step));
 
       if (FirstStep < 0) { FirstStep -= axis.startStopStep.step; }
 
       int stepCount = (int)((Delta - (FirstStep - axis.startStopStep.dataMin)) / axis.startStopStep.step) + 1;
 
-    
+
 
       if (!simulation) g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
       double UnitWidth = 0;
 
       string labelPrecision = "F0";
-      if (axis.startStopStep.precision<0) labelPrecision = "F"+ (-axis.startStopStep.precision).ToString() ;
+      if (axis.startStopStep.precision < 0) labelPrecision = "F" + (-axis.startStopStep.precision).ToString();
 
-      if (stepCount<w.Height) // protection again infinity of graduation
-      for (int i = 0; i < stepCount; i++)
-      {
-        int y = (int)Math.Round((FirstStep + i * axis.startStopStep.step - axis.startStopStep.dataMin) / YZoom);
-        if (y >= 0)
+      if (stepCount < w.Height) // protection again infinity of graduation
+        for (int i = 0; i < stepCount; i++)
         {
-
-          y = w.Height - w.Bmargin - y;
-          if (!simulation)
+          int y = (int)Math.Round((FirstStep + i * axis.startStopStep.step - axis.startStopStep.dataMin) / YZoom);
+          if (y >= 0)
           {
-            if ((axis.showGrid) && ((i>0) || (axis.startStopStep.dataMin!=0))) g.DrawLine(axis.gridPen, w.Lmargin, y, w.Width - w.Rmargin, y);
-            g.DrawLine(axis.pen, x + ((leftSide) ? -2 : 2), y, x + ((leftSide) ? 5 : -5), y);
+
+            y = w.Height - w.Bmargin - y;
+            double v = FirstStep + i * axis.startStopStep.step;
+            
+
+
+            if (!simulation)
+            {
+              if ((axis.showGrid) && ((i > 0) || (axis.startStopStep.dataMin != 0))) g.DrawLine(axis.gridPen, w.Lmargin, y, w.Width - w.Rmargin, y);
+
+              if ((Math.Abs(v) <1E-6) && axis.highlightZero)
+              {
+               
+                  g.DrawLine(axis.pen, w.Lmargin, y, w.Width - w.Rmargin, y);
+                
+
+              }
+               g.DrawLine(axis.pen, x + ((leftSide) ? -2 : 2), y, x + ((leftSide) ? 5 : -5), y);
+            }
+
+
+            String label = (v).ToString(labelPrecision);
+            SizeF ssize = g.MeasureString(label, axis.font.fontObject, 100000);
+            if (ssize.Width > UnitWidth) UnitWidth = ssize.Width;
+            if (!simulation) g.DrawString(label, axis.font.fontObject, axis.font.brushObject, new Point(x + ((leftSide) ? -(int)ssize.Width : 2), y - (int)(ssize.Height / 2)));
           }
 
-          
-          String label = (FirstStep + i * axis.startStopStep.step).ToString(labelPrecision);
-          SizeF ssize = g.MeasureString(label, axis.font.fontObject, 100000);
-          if (ssize.Width > UnitWidth) UnitWidth = ssize.Width;
-          if (!simulation) g.DrawString(label, axis.font.fontObject, axis.font.brushObject, new Point(x + ((leftSide) ? -(int)ssize.Width : 2), y - (int)(ssize.Height / 2)));
         }
-
-      }
 
       if (axis.legend.title != "")
       {
@@ -2217,7 +2480,7 @@ namespace YDataRendering
 
     }
 
-    private void DrawMonitorXAxis(ViewPortSettings w, YGraphics g, MinMaxHandler.MinMax xRange)
+    private void DrawMonitorXAxis(ViewPortSettings w, YGraphics g, MinMaxHandler.MinMax xRange, string format)
     {
 
 
@@ -2225,7 +2488,7 @@ namespace YDataRendering
       TimeResolution scale = TimeConverter.BestTimeformat(delta, delta, xAxis.timeReference);
       Double XZoom = (delta) / (w.Width - w.Lmargin - w.Rmargin);
 
-   
+
 
       int stepCount = (int)(delta / scale.step) + 2;
       double FirstStep = scale.step * (Math.Truncate(xRange.Min / scale.step));
@@ -2234,7 +2497,7 @@ namespace YDataRendering
       int y = w.Height - w.Bmargin;
 
       g.DrawLine(_navigator.pen, w.Lmargin, w.Height - w.Bmargin - 1, w.Width - w.Rmargin, w.Height - w.Bmargin - 1);
-
+      String label;
       double t = FirstStep;
       do
       {
@@ -2246,12 +2509,15 @@ namespace YDataRendering
         {
           int x = w.Lmargin + (int)Math.Round((t - xRange.Min) / XZoom);
           g.DrawLine(_navigator.pen, x, y, x, y - 4);
-          String label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scale.format);
+          if (format == XAxis.FORMATAUTO)
+            label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scale.format);
+          else label = t.ToString(format);
+
           SizeF ssize = g.MeasureString(label, _navigator.font.fontObject, 100000);
           g.DrawString(label, _navigator.font.fontObject, _navigator.font.brushObject, new Point((int)(x - ssize.Width / 2), (int)(y - ssize.Height - 2)));
         }
-        t +=  scale.step;
-     
+        t += scale.step;
+
       } while (t < xRange.Max);
 
 
@@ -2285,7 +2551,7 @@ namespace YDataRendering
       else
       {
         for (int i = 0; i < this._series.Count; i++)
-          if  (!_series[i].disabled)
+          if (!_series[i].disabled)
             timeRange = MinMaxHandler.Combine(timeRange, this._series[i].timeRange);
         if (double.IsNaN(timeRange.Min)) return 0;
         FirstStep = timeRange.Min + scale.step * (Math.Truncate((scale.min - timeRange.Min) / scale.step));
@@ -2303,9 +2569,10 @@ namespace YDataRendering
       scale.step = scaleFormat.step;
 
 
-   
-
       double t = FirstStep;
+
+
+
 
       do
       {
@@ -2326,13 +2593,19 @@ namespace YDataRendering
             }
 
             if (scale.timeReference == TimeConverter.TimeReference.ABSOLUTE)
-              label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scaleFormat.format);
+            {
+              if (scale.labelFormat == XAxis.FORMATAUTO)
+                label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scaleFormat.format);
+              else label = t.ToString(scale.labelFormat);
+
+            }
             else
             {
-              Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - timeRange.Min ));
+              Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - timeRange.Min));
 
-#if !NET35
-            label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
+
+#if (!NET35 && !NET40)
+              label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
 #else
              label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
 
@@ -2340,15 +2613,6 @@ namespace YDataRendering
 
             }
 
-            /*  not convinced
-             int p = label.IndexOf('\n');
-             if (p>0)
-             {
-               string date = label.Substring(p);
-               if (date == lastdate) label = label.Substring(0, p); else lastdate = date;
-
-             }
-             */
 
             SizeF ssize = g.MeasureString(label, scale.font.fontObject, 100000);
             if (ssize.Height > UnitHeight) UnitHeight = ssize.Height;
@@ -2356,10 +2620,10 @@ namespace YDataRendering
             if (!simulation) g.DrawString(label, scale.font.fontObject, scale.font.brushObject, new Point(x /*- (int)ssize.Width / 2*/, y + ((bottomSide) ? +2 : -(int)ssize.Height)), stringFormat);
           }
         }
-          t += scale.step;
-        } while (t <= scale.max) ;
+        t += scale.step;
+      } while (t <= scale.max);
 
-      
+
 
 
 
@@ -2385,57 +2649,58 @@ namespace YDataRendering
 
     }
 
-    private void DrawDataTracker(YGraphics g , int viewPortWidth, int viewPortHeight)
+    private void DrawDataTracker(YGraphics g, int viewPortWidth, int viewPortHeight)
     {
-      if (!_dataTracker.enabled) {  return; }
+      if (!_dataTracker.enabled) { return; }
 
       Nullable<Point> p = mousePosition();
-      if (p == null)  {  return;  }
+      if (p == null) { return; }
 
-      if (p.Value.X <= mainViewPort.Lmargin) {  return;}
-      if (p.Value.Y <= mainViewPort.Tmargin) { return;}
+      if (p.Value.X <= mainViewPort.Lmargin) { return; }
+      if (p.Value.Y <= mainViewPort.Tmargin) { return; }
 
-      if (p.Value.X >= UIContainer.Width-  mainViewPort.Rmargin) { return;}
-      if (p.Value.Y >= UIContainer.Height- mainViewPort.Bmargin) {  return;}
+      if (p.Value.X >= UIContainer.Width - mainViewPort.Rmargin) { return; }
+      if (p.Value.Y >= UIContainer.Height - mainViewPort.Bmargin) { return; }
 
       g.SetClip(new Rectangle(0, 0, viewPortWidth, viewPortHeight));
 
-      pointXY DataPoint = ViewPortPointToIRL(mainViewPort, p.Value);  //DataPoint Y value will be incorrect, but we don't need it. 
+      pointXY DataPoint = ViewPortPointToIRL(mainViewPort, p.Value);  //DataPoint Y value will be incorrect, but we don't need it.
 
 
       double delta = -1;
       int bestindex = -1;
-      Nullable<Point>[] bestmatch = new  Nullable<Point>[_series.Count];
+      Nullable<Point>[] bestmatch = new Nullable<Point>[_series.Count];
       Nullable<pointXY>[] IRLmatch = new Nullable<pointXY>[_series.Count];
 
 
       for (int i = 0; i < _series.Count; i++)
-        if ( (_series[i].visible) && (!_series[i].disabled))
+        if ((_series[i].visible) && (!_series[i].disabled))
         {
-        
-         IRLmatch[i]  = _series[i].findClosestValue(DataPoint.x, false);
-        if (IRLmatch[i] != null)
-        {
-          bestmatch[i] = IRLPointToViewPort(mainViewPort, IRLmatch[i].Value, yAxes[_series[i].yAxisIndex].IRLy, yAxes[_series[i].yAxisIndex].zoom);
-          if (bestindex < 0 || (delta > Math.Abs(bestmatch[i].Value.Y - p.Value.Y)))
-          { delta = Math.Abs(bestmatch[i].Value.Y - p.Value.Y);
 
-            if ((_dataTracker.detectionDistance == 0) ||
-                 ((delta <= _dataTracker.detectionDistance) &&
-                  (Math.Abs(bestmatch[i].Value.X - p.Value.X) < _dataTracker.detectionDistance)))
-                     bestindex = i;
-           }
+          IRLmatch[i] = _series[i].findClosestValue(DataPoint.x, false);
+          if (IRLmatch[i] != null)
+          {
+            bestmatch[i] = IRLPointToViewPort(mainViewPort, IRLmatch[i].Value, yAxes[_series[i].yAxisIndex].IRLy, yAxes[_series[i].yAxisIndex].zoom);
+            if (bestindex < 0 || (delta > Math.Abs(bestmatch[i].Value.Y - p.Value.Y)))
+            {
+              delta = Math.Abs(bestmatch[i].Value.Y - p.Value.Y);
+
+              if ((_dataTracker.detectionDistance == 0) ||
+                   ((delta <= _dataTracker.detectionDistance) &&
+                    (Math.Abs(bestmatch[i].Value.X - p.Value.X) < _dataTracker.detectionDistance)))
+                bestindex = i;
+            }
+          }
         }
-      }
 
-      if (bestindex>=0)
+      if (bestindex >= 0)
       {
 
         int xx = (int)(bestmatch[bestindex].Value.X - _dataTracker.diameter / 2);
         int yy = (int)(bestmatch[bestindex].Value.Y - _dataTracker.diameter / 2);
-        int dd = (int) _dataTracker.diameter;
+        int dd = (int)_dataTracker.diameter;
 
-        g.FillEllipse(_series[bestindex].brush, xx,yy,dd,dd);
+        g.FillEllipse(_series[bestindex].brush, xx, yy, dd, dd);
 
         g.DrawEllipse(_dataTracker.pen, xx, yy, dd, dd);
 
@@ -2446,33 +2711,40 @@ namespace YDataRendering
         int xx2 = (int)(bestmatch[bestindex].Value.X + dx * (_dataTracker.handleLength * 1.5));
         int yy2 = (int)(bestmatch[bestindex].Value.Y + dy * _dataTracker.handleLength);
 
-        g.DrawLine(_dataTracker.pen, (int)(bestmatch[bestindex].Value.X + dx * 0.707 *_dataTracker.diameter / 2), (int)(bestmatch[bestindex].Value.Y + dy * 0.707 * _dataTracker.diameter / 2),
-                                      (int)(bestmatch[bestindex].Value.X + dx * _dataTracker.handleLength ), (int)(bestmatch[bestindex].Value.Y + dy * _dataTracker.handleLength ));
+        g.DrawLine(_dataTracker.pen, (int)(bestmatch[bestindex].Value.X + dx * 0.707 * _dataTracker.diameter / 2), (int)(bestmatch[bestindex].Value.Y + dy * 0.707 * _dataTracker.diameter / 2),
+                                      (int)(bestmatch[bestindex].Value.X + dx * _dataTracker.handleLength), (int)(bestmatch[bestindex].Value.Y + dy * _dataTracker.handleLength));
 
-        g.DrawLine(_dataTracker.pen, (int)(bestmatch[bestindex].Value.X + dx * _dataTracker.handleLength ), (int)(bestmatch[bestindex].Value.Y + dy * _dataTracker.handleLength ),
-                                    xx2 , yy2);
+        g.DrawLine(_dataTracker.pen, (int)(bestmatch[bestindex].Value.X + dx * _dataTracker.handleLength), (int)(bestmatch[bestindex].Value.Y + dy * _dataTracker.handleLength),
+                                    xx2, yy2);
 
 
-        string strValue = IRLmatch[bestindex].Value.y.ToString()+ _series[bestindex].unit;
+        string strValue = "";
+        if (_dataTracker.showSerieName) strValue += _series[bestindex].legend + "\r\n";
+
+        if (_dataTracker.dataPrecision == DataTracker.DataPrecision.PRECISION_NOLIMIT)
+          strValue += IRLmatch[bestindex].Value.y.ToString() + _series[bestindex].unit;
+        else
+          strValue += IRLmatch[bestindex].Value.y.ToString(_dataTracker.dataPrecisionString) + _series[bestindex].unit;
+
         SizeF ssize = g.MeasureString(strValue, _dataTracker.font.fontObject, 10000);
 
-        int labelwidth  = (int )(ssize.Width + 2 * _dataTracker.padding + _dataTracker.borderthickness);
+        int labelwidth = (int)(ssize.Width + 2 * _dataTracker.padding + _dataTracker.borderthickness);
         int labelHeight = (int)(ssize.Height + 2 * _dataTracker.padding + _dataTracker.borderthickness);
 
         if (dx > 0)
         {
-          g.FillRectangle(_dataTracker.bgBrush, xx2,              yy2 - ( labelHeight >> 1), labelwidth, labelHeight);
+          g.FillRectangle(_dataTracker.bgBrush, xx2, yy2 - (labelHeight >> 1), labelwidth, labelHeight);
           g.DrawRectangle(_dataTracker.pen, xx2, yy2 - (labelHeight >> 1), labelwidth, labelHeight);
-          g.DrawString(strValue, _dataTracker.font.fontObject, _dataTracker.font.brushObject, (int)(xx2 + _dataTracker.padding),(int)( yy2 - (labelHeight >> 1) + _dataTracker.padding));
+          g.DrawString(strValue, _dataTracker.font.fontObject, _dataTracker.font.brushObject, (int)(xx2 + _dataTracker.padding), (int)(yy2 - (labelHeight >> 1) + _dataTracker.padding));
         }
         else
         {
           g.FillRectangle(_dataTracker.bgBrush, xx2 - labelwidth, yy2 - (labelHeight >> 1), labelwidth, labelHeight);
           g.DrawRectangle(_dataTracker.pen, xx2 - labelwidth, yy2 - (labelHeight >> 1), labelwidth, labelHeight);
-          g.DrawString(strValue, _dataTracker.font.fontObject, _dataTracker.font.brushObject, (int)(xx2 + _dataTracker.padding- labelwidth), (int)(yy2 - (labelHeight >> 1) + _dataTracker.padding));
+          g.DrawString(strValue, _dataTracker.font.fontObject, _dataTracker.font.brushObject, (int)(xx2 + _dataTracker.padding - labelwidth), (int)(yy2 - (labelHeight >> 1) + _dataTracker.padding));
         }
-       
-      } 
+
+      }
 
 
 
@@ -2480,27 +2752,143 @@ namespace YDataRendering
     }
 
 
+    /*
+     *  XAxis scale)
+    {
+        if (!scale.visible) return;
+        double delta = scale.max - scale.min;
+        Double XZoom = (delta) / (w.Width - w.Lmargin - w.Rmargin);
+
+        for (int i = 0; i < scale.zones.Count; i++)
+            if (scale.zones[i].visible)
+            {
+                double max = scale.zones[i].max;
+                double min = scale.zones[i].min;
+                if (double.IsNaN(max)) max = scale.min;
+                if (double.IsNaN(min)) min = scale.max;
+                if (max < min) { double t = max; max = min; min = t; }
+                int x0 =  w.Lmargin + (int)Math.Round((min - scale.min) / XZoom);
+     *
+     * */
+
+    public void DrawDataPanels(ViewPortSettings w, YGraphics g, XAxis scaleX, List<YAxis> scalesY, int viewPortWidth, int viewPortHeight)
+    {
+      if (_dataPanels.Count == 0) return;
+
+
+      g.SetClip(new Rectangle(w.Lmargin, w.Tmargin, w.Width - w.Rmargin - w.Lmargin, w.Height - w.Bmargin - w.Tmargin));
+      for (int i = 0; i < _dataPanels.Count; i++)
+        if (_dataPanels[i].enabled)
+        {
+          DataPanel p = _dataPanels[i];
+
+          if (p.yScaleIndex < scalesY.Count)
+          {
+
+            double AvailableWidth = w.Width - 2 * p.padding - p.borderthickness;
+            if (AvailableWidth < 100) AvailableWidth = 100;
+
+
+            SizeF ssize = g.MeasureString(p.text, p.font.fontObject, (int)AvailableWidth);
+            double panelWidth = ssize.Width + 2 * p.padding + p.borderthickness;
+            double panelHeight = ssize.Height + 2 * p.padding + p.borderthickness;
+            double x = 0;
+            switch (p.horizontalPosition)
+            {
+              case DataPanel.HorizontalPosition.LEFTBORDER: x = w.Lmargin; break;
+              case DataPanel.HorizontalPosition.RIGHTBORDER: x = w.Width - w.Rmargin; break;
+              case DataPanel.HorizontalPosition.ABSOLUTEX:
+                double delta = scaleX.max - scaleX.min;
+                Double XZoom = (delta) / (w.Width - w.Lmargin - w.Rmargin);
+                x = w.Lmargin + (int)Math.Round((p.AbsoluteXposition - scaleX.min) / XZoom);
+                break;
+            }
+
+
+            double y = 0;
+            switch (p.verticalPosition)
+            {
+              case DataPanel.VerticalPosition.TOPBORDER: y = w.Tmargin; break;
+              case DataPanel.VerticalPosition.BOTTOMBORDER: y = w.Height - w.Bmargin; break;
+              case DataPanel.VerticalPosition.ABSOLUTEY:
+                y = w.Height - w.Bmargin - (int)Math.Round((p.AbsoluteYposition - scalesY[p.yScaleIndex].IRLy) * scalesY[p.yScaleIndex].zoom);
+                break;
+            }
+
+
+            switch (p.panelHrzAlign)
+            {
+              case DataPanel.HorizontalAlign.LEFTOF: x -= panelWidth + p.horizontalMargin; break;
+              case DataPanel.HorizontalAlign.RIGHTOF: x += p.horizontalMargin; break;
+              default: x -= (panelWidth) / 2; break;
+            }
+
+            switch (p.panelVrtAlign)
+            {
+              case DataPanel.VerticalAlign.ABOVE: y -= panelHeight + p.verticalMargin; break;
+              case DataPanel.VerticalAlign.BELOW: y += p.verticalMargin; break;
+              default: y -= (panelHeight) / 2; break;
+            }
+
+
+
+
+            g.FillRectangle(p.bgBrush, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
+            if (p.borderthickness > 0) g.DrawRectangle(p.pen, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
+
+            StringFormat sf = new StringFormat();
+            switch (p.panelTextAlign)
+            {
+              case MessagePanel.TextAlign.LEFT:
+                sf.LineAlignment = StringAlignment.Near;
+                sf.Alignment = StringAlignment.Near;
+                break;
+              case MessagePanel.TextAlign.RIGHT:
+                sf.LineAlignment = StringAlignment.Far;
+                sf.Alignment = StringAlignment.Far;
+                break;
+              default:
+                sf.LineAlignment = StringAlignment.Center;
+                sf.Alignment = StringAlignment.Center;
+                break;
+            }
+            Rectangle r = new Rectangle((int)(x + p.padding + p.borderthickness / 2),
+
+              (int)(y + p.padding + p.borderthickness / 2),
+                    (int)ssize.Width + 1, (int)ssize.Height + 1);
+
+
+            g.DrawString(p.text, p.font.fontObject, p.font.brushObject, r, sf);
+
+          }
+          else throw new InvalidOperationException("Cannot renderer data panel #" + i.ToString() + ", no such Y axis");
+        }
+    }
+
+
+
+
     protected override int Render(YGraphics g, int UIw, int UIh)
     {
-    
 
 
 
-     
-   
-  
+
+
+
+
       mainViewPort.Width = UIw;
       mainViewPort.Height = UIh;
       mainViewPort.Lmargin = 0;
       mainViewPort.Rmargin = 0;
 
-    
+
       g.SmoothingMode = SmoothingMode.HighQuality;
       int yMarginOffset = 5;
 
       /* Step 1, found out margins */
       // top (bottom) margin: make sure the top(/bottom) number
-      // on Y scale can be draw completely 
+      // on Y scale can be draw completely
 
       for (int i = 0; i < _yAxes.Count; i++)
         if (_yAxes[i].visible)
@@ -2510,8 +2898,8 @@ namespace YDataRendering
           if (yMarginOffset < o) yMarginOffset = o;
         }
 
-    
-      mainViewPort.Tmargin = (_xAxis.position == XAxis.VrtPosition.TOP) ? 0: yMarginOffset;
+
+      mainViewPort.Tmargin = (_xAxis.position == XAxis.VrtPosition.TOP) ? 0 : yMarginOffset;
       mainViewPort.Bmargin = (_xAxis.position == XAxis.VrtPosition.BOTTOM) ? 0 : yMarginOffset;
 
 
@@ -2525,7 +2913,7 @@ namespace YDataRendering
       /* Step 1-A  compute margins dues to X axis  */
       int h = DrawXAxis(mainViewPort, g, _xAxis, true);
       if (_xAxis.position == XAxis.VrtPosition.TOP) mainViewPort.Tmargin += h; else mainViewPort.Bmargin += h;
-    
+
 
       mainViewPort.IRLx = _xAxis.min;
 
@@ -2549,12 +2937,12 @@ namespace YDataRendering
 
 
       /* Step 1-B  compute  margins dues to Y axes  */
-    
-      if (mainViewPort.Lmargin==0) mainViewPort.Lmargin = 5;
-      if (mainViewPort.Rmargin == 0)  mainViewPort.Rmargin = 5;
+
+      if (mainViewPort.Lmargin == 0) mainViewPort.Lmargin = 5;
+      if (mainViewPort.Rmargin == 0) mainViewPort.Rmargin = 5;
 
 
-     
+
 
 
       for (int i = 0; i < _yAxes.Count; i++)
@@ -2569,7 +2957,7 @@ namespace YDataRendering
       {
         int nh = (int)(_navigator.relativeheight * UIContainer.Size.Height / 100.0);
         int ofset = xAxis.position == XAxis.VrtPosition.BOTTOM ? h : 0;
-        _navigator.setPosition(UIw,UIh, mainViewPort.Lmargin, mainViewPort.Rmargin, mainViewPort.Height - nh - mainViewPort.Bmargin+ ofset, mainViewPort.Bmargin- ofset); 
+        _navigator.setPosition(UIw, UIh, mainViewPort.Lmargin, mainViewPort.Rmargin, mainViewPort.Height - nh - mainViewPort.Bmargin + ofset, mainViewPort.Bmargin - ofset);
         mainViewPort.Bmargin += nh;
 
       }
@@ -2591,7 +2979,7 @@ namespace YDataRendering
                                            new Point(0, mainViewPort.Tmargin), _bgColor1, _bgColor2);
 
 
-      g.FillRectangle(_bgBrush, 
+      g.FillRectangle(_bgBrush,
                       mainViewPort.Lmargin,
                       mainViewPort.Tmargin,
                       mainViewPort.Width - mainViewPort.Rmargin - mainViewPort.Lmargin,
@@ -2599,21 +2987,26 @@ namespace YDataRendering
                       );
 
 
-      if (_borderThickness >0)
-      {  if (borderPen == null) borderPen = new Pen(_borderColor, (float)_borderThickness);
+      if (_borderThickness > 0)
+      {
+        if (borderPen == null) borderPen = new Pen(_borderColor, (float)_borderThickness);
         g.DrawRectangle(borderPen, mainViewPort.Lmargin, mainViewPort.Tmargin, mainViewPort.Width - mainViewPort.Rmargin - mainViewPort.Lmargin, mainViewPort.Height - mainViewPort.Bmargin - mainViewPort.Tmargin);
 
       }
 
 
-   
 
 
-      /* Step 2B  Draw Y-axes zones */
+
+      /* Step 2B  Draw Y-axes and X axis zones */
       g.SetClip(new Rectangle(mainViewPort.Lmargin, mainViewPort.Tmargin, mainViewPort.Width - mainViewPort.Rmargin - mainViewPort.Lmargin, mainViewPort.Height - mainViewPort.Bmargin - mainViewPort.Tmargin));
       for (int i = 0; i < _yAxes.Count; i++)
         DrawYAxisZones(mainViewPort, g, _yAxes[i]);
+
+      DrawXAxisZones(mainViewPort, g, xAxis);
       g.ResetClip();
+
+
 
 
       /* step 3 draw X scale */
@@ -2629,6 +3022,8 @@ namespace YDataRendering
         if (_yAxes[i].position == YAxis.HrzPosition.RIGHT) rightOffset += ww;
 
       }
+
+
 
 
       // step 5 step define data zone
@@ -2651,26 +3046,27 @@ namespace YDataRendering
       int pointCount = 0;
       for (int k = 0; k < _series.Count; k++)
         if ((_series[k].visible) && !(_series[k].disabled))
-      {
-        int scaleIndex = _series[k].yAxisIndex;
-        mypenb = _series[k].pen;
-        mainViewPort.IRLy = _yAxes[scaleIndex].startStopStep.dataMin;
-        _yAxes[_series[k].yAxisIndex].IRLy = mainViewPort.IRLy;
-        double delta = _yAxes[scaleIndex].startStopStep.dataMax - _yAxes[scaleIndex].startStopStep.dataMin;
-        if (delta == 0) { delta = 1; mainViewPort.IRLy -= delta / 2; }
+        {
+          int scaleIndex = _series[k].yAxisIndex;
+          mypenb = _series[k].pen;
+          mainViewPort.IRLy = _yAxes[scaleIndex].startStopStep.dataMin;
+          _yAxes[_series[k].yAxisIndex].IRLy = mainViewPort.IRLy;
+          double delta = _yAxes[scaleIndex].startStopStep.dataMax - _yAxes[scaleIndex].startStopStep.dataMin;
+          if (delta == 0) { delta = 1; mainViewPort.IRLy -= delta / 2; }
 
-        mainViewPort.zoomy = (mainViewPort.Height - mainViewPort.Tmargin - mainViewPort.Bmargin) / (delta);
-        _yAxes[_series[k].yAxisIndex].zoom = mainViewPort.zoomy;
-        g.comment("** main view-port series " + k.ToString());
+          mainViewPort.zoomy = (mainViewPort.Height - mainViewPort.Tmargin - mainViewPort.Bmargin) / (delta);
+          _yAxes[_series[k].yAxisIndex].zoom = mainViewPort.zoomy;
+          g.comment("** main view-port series " + k.ToString());
 
           for (int i = 0; i < _series[k].segments.Count; i++)
-        {
-          lineCount += DoSegmentRendering(mainViewPort, g, mypenb, _series[k].segments[i].data, _series[k].segments[i].count);
-          pointCount += _series[k].segments[i].count;
+          {
+            lineCount += DoSegmentRendering(mainViewPort, g, mypenb, _series[k].segments[i].data, _series[k].segments[i].count);
+            pointCount += _series[k].segments[i].count;
+          }
         }
-      }
 
-      
+
+
 
 
 
@@ -2683,13 +3079,13 @@ namespace YDataRendering
         // step 7A, find out Time Range
         MinMaxHandler.MinMax range = MinMaxHandler.DefaultValue();
         for (int i = 0; i < _series.Count; i++)
-          if (!_series[i].disabled)range = MinMaxHandler.Combine(range, _series[i].timeRange);
+          if (!_series[i].disabled) range = MinMaxHandler.Combine(range, _series[i].timeRange);
 
-        _navigator.Xrange = MinMaxHandler.extend(range,1.05);
-       
+        _navigator.Xrange = MinMaxHandler.extend(range, 1.05);
+
 
         v.zoomx = (v.Width - v.Lmargin - v.Rmargin) / (_navigator.Xrange.Max - _navigator.Xrange.Min);
-        if ((lastPointCount != pointCount) || (navigatorCache == null) || (g is YGraphicsSVG) )
+        if ((lastPointCount != pointCount) || (navigatorCache == null) || (g is YGraphicsSVG))
         {
           g.comment("Redraw navigator");
           if (navigatorCache != null) navigatorCache.Dispose();
@@ -2704,42 +3100,66 @@ namespace YDataRendering
           ng.ResetClip();
           ng.FillRectangle(_navigator.bgBrush, v.Lmargin, v.Tmargin, v.Width - v.Rmargin - v.Lmargin, v.Height - v.Bmargin - v.Tmargin);
 
+          if ((xAxis.zones.Count > 0) && _navigator.showXAxisZones)
+          {
+            double delta = _navigator.Xrange.Max - _navigator.Xrange.Min;
+            Double XZoom = (delta) / (v.Width - v.Lmargin - v.Rmargin);
+            for (int i = 0; i < xAxis.zones.Count; i++)
+              if (xAxis.zones[i].visible)
+              {
+                double min = xAxis.zones[i].min;
+                double max = xAxis.zones[i].max;
+                if (Double.IsNaN(min)) min = _navigator.Xrange.Min;
+                if (Double.IsNaN(max)) max = _navigator.Xrange.Max;
+                ng.FillRectangle(xAxis.zones[i].zoneBrush,
+                             v.Lmargin + (int)((min - _navigator.Xrange.Min) / XZoom),
+                             v.Tmargin,
+                            (int)((max - min) / XZoom),
+                             v.Height - v.Bmargin - v.Tmargin);
+
+
+              }
+
+          }
+
+
+
           if ((MinMaxHandler.isDefined(_navigator.Xrange)) && ((_navigator.Xrange.Max - _navigator.Xrange.Min) > 0))  // if (Xrange<=0) then nothing to draw
           { // step 7B, draw series
             double Min;
             double Max;
             v.IRLx = _navigator.Xrange.Min;
-            double dontSticktoBorderZoom =  4.0 / (v.Height - v.Bmargin - v.Tmargin);
+            double dontSticktoBorderZoom = 4.0 / (v.Height - v.Bmargin - v.Tmargin);
 
             if (_navigator.yAxisHandling == Navigator.YAxisHandling.AUTO)
             { // Automatic yAxis handling
               for (int k = 0; k < _series.Count; k++)
                 if (!_series[k].disabled)
-              {
-                ng.comment("** navigator series "+k.ToString());
-                v.IRLy = _series[k].valueRange.Min;
-                int yAxisIndex = _series[k].yAxisIndex;
-                mypenb = _series[k].navigatorpen;
-                Min = _series[k].valueRange.Min;
-                Max = _series[k].valueRange.Max;
-                if (Max - Min <= 0)
+                {
+                  ng.comment("** navigator series " + k.ToString());
+                  v.IRLy = _series[k].valueRange.Min;
+                  int yAxisIndex = _series[k].yAxisIndex;
+                  mypenb = _series[k].navigatorpen;
+                  Min = _series[k].valueRange.Min;
+                  Max = _series[k].valueRange.Max;
+                  if (Max - Min <= 0)
                   {
                     v.IRLy = Min - 0.5; Max = Min + 0.5;
                   }
-                else
-                {
-                  double delta = Max - Min;
-                  Min -= delta * dontSticktoBorderZoom; // 0.025;
-                  Max += delta * dontSticktoBorderZoom; // 0.025;
+                  else
+                  {
+                    double delta = Max - Min;
+                    Min -= delta * dontSticktoBorderZoom; // 0.025;
+                    Max += delta * dontSticktoBorderZoom; // 0.025;
 
 
+                  }
+
+                  v.IRLy = Min;
+                  v.zoomy = (v.Height - v.Tmargin - v.Bmargin) / (Max - Min);
+                  for (int i = 0; i < _series[k].segments.Count; i++)
+                    lineCount += DoSegmentRendering(v, ng, mypenb, _series[k].segments[i].data, _series[k].segments[i].count);
                 }
-
-                v.IRLy = Min;
-                v.zoomy = (v.Height - v.Tmargin - v.Bmargin) / (Max - Min);
-                for (int i = 0; i < _series[k].segments.Count; i++)
-                  lineCount += DoSegmentRendering(v, ng, mypenb, _series[k].segments[i].data, _series[k].segments[i].count);
-              }
             }
             else
             {  //  yAxis handling inherited from main view-port settings
@@ -2749,15 +3169,15 @@ namespace YDataRendering
                 for (int j = 0; j < _series.Count; j++)
                   if ((_series[j].yAxisIndex == i) && (!_series[j].disabled))
                     Yrange = MinMaxHandler.Combine(Yrange, _series[j].valueRange);
-                Yrange= MinMaxHandler.extend(Yrange, 1+2*dontSticktoBorderZoom);
+                Yrange = MinMaxHandler.extend(Yrange, 1 + 2 * dontSticktoBorderZoom);
                 Min = _yAxes[i].min; if (Double.IsNaN(Min)) Min = Yrange.Min;
                 Max = _yAxes[i].max; if (Double.IsNaN(Max)) Max = Yrange.Max;
                 if (Double.IsNaN(Min)) { Min = 0.0; Max = 1.0; }
-                if (Max - Min <= 0) { Min = Min - 0.5; Max = Min+ 0.5; }
+                if (Max - Min <= 0) { Min = Min - 0.5; Max = Min + 0.5; }
                 v.IRLy = Min;
                 v.zoomy = (v.Height - v.Tmargin - v.Bmargin) / (Max - Min);
                 for (int j = 0; j < _series.Count; j++)
-                  if ((_series[j].yAxisIndex == i)  && (!_series[j].disabled) && (_series[j].visible))
+                  if ((_series[j].yAxisIndex == i) && (!_series[j].disabled) && (_series[j].visible))
                   {
                     ng.comment("** navigator series " + j.ToString());
                     mypenb = _series[j].navigatorpen;
@@ -2766,7 +3186,7 @@ namespace YDataRendering
                   }
               }
 
-              
+
 
 
 
@@ -2779,28 +3199,29 @@ namespace YDataRendering
             }
             // step 7C, draw Scale
 
-            DrawMonitorXAxis(v, ng, _navigator.Xrange);
+            DrawMonitorXAxis(v, ng, _navigator.Xrange, xAxis.labelFormat);
             _navigator.setIRLPosition(v.IRLx, v.IRLy, v.zoomx, v.zoomy);
-   
+
 
           }
-          ng.Dispose();
+          if (!(g is YGraphicsSVG))  ng.Dispose();
 
 
 
         }
         // set  7E, copy cache to display
-        Rectangle r = new Rectangle(v.Lmargin, v.Tmargin, v.Width - v.Rmargin - v.Lmargin+1, v.Height - v.Bmargin - v.Tmargin);
+        Rectangle r = new Rectangle(v.Lmargin, v.Tmargin, v.Width - v.Rmargin - v.Lmargin + 1, v.Height - v.Bmargin - v.Tmargin);
         g.SetClip(r);
 
-        if (!(g is YGraphicsSVG))  g.DrawImage(navigatorCache, r, r, GraphicsUnit.Pixel);
-       
-        
+        if (!(g is YGraphicsSVG)) g.DrawImage(navigatorCache, r, r, GraphicsUnit.Pixel);
+
+
         //navigatorCache.Save("C:\\tmp\\t.png", ImageFormat.Png);
         // set  7E, draw Cursor
 
         if (_navigator.borderThickness > 0)
-        { g.DrawLine(_navigator.borderPen, v.Lmargin, v.Tmargin, v.Lmargin, v.Height-v.Bmargin);
+        {
+          g.DrawLine(_navigator.borderPen, v.Lmargin, v.Tmargin, v.Lmargin, v.Height - v.Bmargin);
           g.DrawLine(_navigator.borderPen, v.Width - v.Rmargin, v.Tmargin, v.Width - v.Rmargin, v.Height - v.Bmargin);
         }
         pointXY IRLCursorStart = ViewPortPointToIRL(mainViewPort, new Point(mainViewPort.Lmargin, 0));
@@ -2810,7 +3231,7 @@ namespace YDataRendering
 
 
         g.FillRectangle(_navigator.cursorBrush, new Rectangle(CursorStart.X - 1, v.Tmargin, CursorEnd.X - CursorStart.X + 2, v.Height - v.Bmargin - v.Tmargin));
-        g.DrawLine(_navigator.cursorBorderPen, (int)(CursorStart.X - 1), (int)(v.Tmargin), (int)(CursorStart.X - 1),(int)(v.Height - v.Bmargin));
+        g.DrawLine(_navigator.cursorBorderPen, (int)(CursorStart.X - 1), (int)(v.Tmargin), (int)(CursorStart.X - 1), (int)(v.Height - v.Bmargin));
         g.DrawLine(_navigator.cursorBorderPen, (int)(CursorEnd.X + 1), (int)(v.Tmargin), (int)(CursorEnd.X + 1), (int)(v.Height - v.Bmargin));
 
 
@@ -2819,15 +3240,21 @@ namespace YDataRendering
 
       }
 
+
+
+
       if (_legendPanel.overlap) drawLegendPanel(g, UIw, UIh, ref mainViewPort);
+
+
+
+      DrawDataPanels(mainViewPort, g, xAxis, _yAxes, UIw, UIh);
 
       DrawDataTracker(g, UIw, UIh);
 
+      DrawMessagePanels(g, UIw, UIh);
 
-      drawMessagePanels(g, UIw, UIh);
 
-
-      return  0;
+      return 0;
 
     }
 
@@ -2844,13 +3271,13 @@ namespace YDataRendering
       if (e.KeyCode == Keys.Right)
       {
         double delta = 0.2 * (_xAxis.max - _xAxis.min);
-        _xAxis.set_minMax(  _xAxis.min + delta,
+        _xAxis.set_minMax(_xAxis.min + delta,
                             _xAxis.max + delta);
         redraw();
       }
       if (e.KeyCode == Keys.Up)
       {
-        mouseWheel(new Point( this.UIContainer.Width >> 1, this.UIContainer.Height >> 1), 10);
+        mouseWheel(new Point(this.UIContainer.Width >> 1, this.UIContainer.Height >> 1), 10);
       }
 
       if (e.KeyCode == Keys.Down)
@@ -2870,10 +3297,10 @@ namespace YDataRendering
       if ((NextZoomX > mainViewPort.zoomx) && (NextZoomX > 1000)) return;
       mainViewPort.IRLx += ((pos.X - mainViewPort.Lmargin) / mainViewPort.zoomx) - ((pos.X - mainViewPort.Lmargin) / NextZoomX);
       double range = _xAxis.max - _xAxis.min;
-      _xAxis.set_minMax ( mainViewPort.IRLx,
+      _xAxis.set_minMax(mainViewPort.IRLx,
                           mainViewPort.IRLx + range / ZoomFactor);
       mainViewPort.zoomx = NextZoomX;
-   //   log("ZoomX=" + mainViewPort.zoomx.ToString());
+      //   log("ZoomX=" + mainViewPort.zoomx.ToString());
       redraw();
     }
 
@@ -2901,7 +3328,7 @@ namespace YDataRendering
 
       Control c = FindControlAtPoint(parentForm, mouseLocation);
       if (c == UIContainer) this.mouseWheel(new Point(e.X - UIContainer.Left, e.Y - UIContainer.Top), e.Delta);
-       
+
 
 
     }

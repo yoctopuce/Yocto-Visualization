@@ -263,9 +263,11 @@ namespace YoctoVisualisation
       //FirstLiveValue = now();
       for (int i = 0; i < SeriesCount; i++)
       {
-        ChartSerie s = (ChartSerie)prop.GetType().GetProperty("Graph_series" + i.ToString()).GetValue(prop, null);
-        SourceChanged(i, s.DataSource_source);
+        _cartesianChart.series[i].clear();
+    
       }
+      double FirstLiveValue = now();
+      _cartesianChart.xAxis.set_minMax(FirstLiveValue, FirstLiveValue + _cartesianChart.xAxis.initialZoom); 
 
 
 
@@ -276,8 +278,8 @@ namespace YoctoVisualisation
 
     private void resetDataView(object sender, EventArgs e)
     {
-      //prop.Graph_showRecordedData = false;
-      //truncateView();
+      prop.Graph_showRecordedData = false;
+      truncateView();
 
 
     }

@@ -226,7 +226,7 @@ namespace YDataRendering
 
     }
 
-    protected override void clearCachedObjects()
+    public override void clearCachedObjects()
     {
       _bgBrush = null;
        _path = null;
@@ -543,7 +543,7 @@ namespace YDataRendering
         g.DrawString(lastDrawParameters.maxValue, _minMaxFont.fontObject, _minMaxFont.brushObject, lastDrawParameters.maxValueRectangle, lastDrawParameters.maxValueFormat);
 
       }
-      drawMessagePanels(g, w, h);
+      DrawMessagePanels(g, w, h);
     
      
      

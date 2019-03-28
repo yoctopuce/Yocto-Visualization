@@ -61,7 +61,10 @@ namespace YoctoVisualisation
     static PropertiesForm2 propWindow2 = null;
     static LogForm logWindow = new LogForm();
     static String DefaultWindowName = "New Window ";
-	static Timer HideTimer;
+  	static Timer HideTimer;
+
+ 
+
 
     public StartForm()
     {
@@ -75,26 +78,27 @@ namespace YoctoVisualisation
       MaximizeBox = false;
       LogManager.Log("Application start, Welcome to Yocto-Visualization.");
 
-     
+
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.LogNoTS("Optional command line parameters:");
       LogManager.LogNoTS("-config xmlFilePath      Create/Use alternate \"xmlFilePath\" configuration file.");
       LogManager.LogNoTS("                         You can use configuration files from V1, but they will ");
       LogManager.LogNoTS("                         be overwritten in V2 format.");
       LogManager.LogNoTS("-log                     Automatically open log window");
+      LogManager.LogNoTS("-check4updates           Re-enable automatic checks for updates");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.Log("Current configuration file is " + constants.configfile);
-      LogManager.Log("Yocto-Visualization version is "+constants.buildVersion);
+      LogManager.Log("Yocto-Visualization version is " + constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
-      LogManager.Log("Architecture is " + (IntPtr.Size*8).ToString()+" bits (platform "+ Environment.OSVersion.Platform.ToString()+")");
+      LogManager.Log("Architecture is " + (IntPtr.Size * 8).ToString() + " bits (platform " + Environment.OSVersion.Platform.ToString() + ")");
 
       if (constants.MonoRunning)
       {
         if (constants.OSX_Running)
         {
           LogManager.Log("Mono version is " + constants.MonoVersion + " (Mac OS X)");
-        } 
-        else 
+        }
+        else
         {
           LogManager.Log("Mono version is " + constants.MonoVersion);
         }
@@ -112,7 +116,7 @@ namespace YoctoVisualisation
       {
         string alternateCfgFile = Path.GetDirectoryName(cfgFile) + "\\..\\..\\YoctoVisualization\\1.0.0.0\\config.xml";
         if (File.Exists(alternateCfgFile))
-          if  (MessageBox.Show("No Yocto-Visualization V2 configuration available, but a configuration file from version 1 was found, do you want to import it?", "Yocto-Visualization V2",
+          if (MessageBox.Show("No Yocto-Visualization V2 configuration available, but a configuration file from version 1 was found, do you want to import it?", "Yocto-Visualization V2",
               MessageBoxButtons.YesNo, MessageBoxIcon.Question,
               MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
           {
@@ -123,11 +127,12 @@ namespace YoctoVisualisation
 
 
 
-        if (File.Exists(cfgFile))
-      { try
+      if (File.Exists(cfgFile))
+      {
+        try
         {
           XmlDocument doc = new XmlDocument();
-         
+
           doc.Load(cfgFile);
 
           double version = 1;
@@ -136,18 +141,18 @@ namespace YoctoVisualisation
           if (root.Attributes != null
              && root.Attributes["version"] != null)
             version = Double.Parse(root.Attributes["version"].Value);
-              
-          if (version==1)
+
+          if (version == 1)
           {
             string configdata = XMLConfigTranslator.TranslateFromV1(doc);
             doc = new XmlDocument();
             doc.LoadXml(configdata);
           }
 
-            // sensor configuration must be loaded first
-            foreach (XmlNode node in doc.DocumentElement.ChildNodes)
-             if (node.Name == "Sensors")
-               sensorsManager.setKnownSensors(node);
+          // sensor configuration must be loaded first
+          foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+            if (node.Name == "Sensors")
+              sensorsManager.setKnownSensors(node);
 
 
           foreach (XmlNode node in doc.DocumentElement.ChildNodes)
@@ -156,21 +161,22 @@ namespace YoctoVisualisation
             {
               case "GraphForm": NewGraphForm(node); MustHide = true; break;
               case "GaugeForm": NewSolidGaugeForm(node); MustHide = true; break;
-              case "angularGaugeForm":    NewAngularGaugeForm(node); MustHide = true; break;
+              case "angularGaugeForm": NewAngularGaugeForm(node); MustHide = true; break;
               case "digitalDisplayForm": NewDigitalDisplayForm(node); MustHide = true; break;
               case "Config": configWindow.Init(node); break;
-              case "PropertiesForm": RestoreWindowPosition(propWindow2,node); break;
-            
+              case "PropertiesForm": RestoreWindowPosition(propWindow2, node); break;
+
             }
 
           }
         }
         catch (Exception e) { LogManager.Log("Cannot load configuration file " + constants.configfile + ": " + e.Message); }
 
-        } else configWindow.DefaultInit();
-     
-      
-    
+      }
+      else configWindow.DefaultInit();
+
+
+
       sensorsManager.registerChangeCallback(sensorListHaschanged);
 
       configWindow.CheckInit();
@@ -178,11 +184,16 @@ namespace YoctoVisualisation
       YoctoTimer.Enabled = true;
       if (constants.OpenLogWindowAtStartUp) LogManager.Show();
 
-	  HideTimer = new Timer ();
-	
-		HideTimer.Tick+= HideTimer_Tick;
+      HideTimer = new Timer();
 
+      HideTimer.Tick += HideTimer_Tick;
+
+
+      /*<NOTINGITHUB>*/
+      new UpdateAppLibrary.YAppReleaseManager(new AppDescription()).StartBackgroundCheckForUpdates();
+      /*</NOTINGITHUB>*/
     }
+
 
     public void sensorListHaschanged()
     {

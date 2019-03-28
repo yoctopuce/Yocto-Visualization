@@ -100,30 +100,21 @@ namespace YDataRendering
     );
 
 
-  public class MessagePanel
+  public abstract class GenericPanel
   {
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
-    private YDataRenderer _parentRenderer = null;
+    protected YDataRenderer _parentRenderer = null;
 
-    public enum HorizontalAlign
-    {
-      [Description("Left")]
-      LEFT,
-      [Description("Center")]
-      CENTER,
-      [Description("Right")]
-      RIGHT
-    };
-    public enum VerticalAlign {[Description("Top")] TOP, [Description("Center")]CENTER, [Description("Bottom")] BOTTOM };
+   
+    
     public enum TextAlign {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Right")]RIGHT };
 
     private Object _directParent = null;
     public Object directParent { get { return _directParent; } }
 
-
-    public MessagePanel(YDataRenderer parent, Object directParent)
+    public GenericPanel(YDataRenderer parent, Object directParent)
     {
       this._directParent = directParent;
       this._parentRenderer = parent;
@@ -131,24 +122,13 @@ namespace YDataRendering
 
     }
 
-    private bool _enabled = false;
+    protected bool _enabled = false;
     public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; _parentRenderer.redraw(); } } }
 
-
-
-
-
-
-    private HorizontalAlign _panelHrzAlign = HorizontalAlign.CENTER;
-    public HorizontalAlign panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) _parentRenderer.redraw(); } }
-
-    private VerticalAlign _panelVrtAlign = VerticalAlign.CENTER;
-    public VerticalAlign panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) _parentRenderer.redraw(); } }
+    
 
     private TextAlign _panelTextAlign = TextAlign.LEFT;
     public TextAlign panelTextAlign { get { return _panelTextAlign; } set { _panelTextAlign = value; if (_enabled) _parentRenderer.redraw(); } }
-
-
 
     private string _text = "";
     public string text { get { return _text; } set { _text = value; if (_enabled) _parentRenderer.redraw(); } }
@@ -172,7 +152,6 @@ namespace YDataRendering
     public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
 
 
-
     private Brush _bgBrush = null;
     public Brush bgBrush
     {
@@ -183,7 +162,6 @@ namespace YDataRendering
         return _bgBrush;
       }
     }
-
 
     private Pen _pen = null;
     public Pen pen
@@ -198,48 +176,80 @@ namespace YDataRendering
     YFontParams _font = null;
     public YFontParams font { get { return _font; } }
 
-
-
   }
 
-
-
-
-  public class Zone
-  {
-    protected YDataRenderer _parentRenderer = null;
-    private Object _directParent = null;
-    public Object directParent { get { return _directParent; } }
-
-    private Object _userData = null;
-    public Object userData { get { return _userData; } set { _userData = value; } }
-
-    protected virtual void resetCache() { }
-
-
-    public Zone(YDataRenderer parentRenderer, Object directParent)
+    public class MessagePanel: GenericPanel
     {
-      this._directParent = directParent;
-      this._parentRenderer = parentRenderer;
+      
+        public enum HorizontalAlign
+        {
+            [Description("Left")]
+            LEFT,
+            [Description("Center")]
+            CENTER,
+            [Description("Right")]
+            RIGHT
+        };
+        public enum VerticalAlign {[Description("Top")] TOP, [Description("Center")] CENTER, [Description("Bottom")] BOTTOM };
+      
 
-    }
+        public MessagePanel(YDataRenderer parent, Object directParent): base(parent, directParent)
+        { }
+     
+        private HorizontalAlign _panelHrzAlign = HorizontalAlign.CENTER;
+        public HorizontalAlign panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
-    private Brush _zoneBrush = null;
-    public Brush zoneBrush
-    {
-      get
-      {
-        if (_zoneBrush == null) _zoneBrush = new SolidBrush(_color);
-        return _zoneBrush;
-      }
+        private VerticalAlign _panelVrtAlign = VerticalAlign.CENTER;
+        public VerticalAlign panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) _parentRenderer.redraw(); } }
+
+      
     }
 
 
-    private Color _color = Color.FromArgb(128, 255, 0, 0);
-    public Color color { get { return _color; } set { _color = value; _zoneBrush = null; if (visible) _parentRenderer.redraw(); } }
 
-    private bool _visible = false;
-    public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
+    public class Zone
+    {
+        protected YDataRenderer _parentRenderer = null;
+        private Object _directParent = null;
+        public Object directParent { get { return _directParent; } }
+
+        private Object _userData = null;
+        public Object userData { get { return _userData; } set { _userData = value; } }
+
+        protected virtual void resetCache() { }
+
+
+        public Zone(YDataRenderer parentRenderer, Object directParent)
+        {
+            this._directParent = directParent;
+            this._parentRenderer = parentRenderer;
+
+        }
+
+        private Brush _zoneBrush = null;
+        public Brush zoneBrush
+        {
+            get
+            {
+                if (_zoneBrush == null) _zoneBrush = new SolidBrush(_color);
+                return _zoneBrush;
+            }
+        }
+
+
+        private Color _color = Color.FromArgb(128, 255, 0, 0);
+        public Color color { get { return _color; } set { _color = value; _zoneBrush = null; if (visible) _parentRenderer.redraw(); } }
+
+        private bool _visible = false;
+        public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
+
+        public void set_minMax(double min, double max)
+        {
+            if (min > max) throw new ArgumentException("Min cannot be greater than max ");
+            _min = min; _max = max; resetCache(); if (visible) _parentRenderer.redraw();
+
+        }
+
 
     private double _min = 0;
     public double min { get { return _min; }
@@ -332,7 +342,7 @@ namespace YDataRendering
 
     public void containerResized(double newWidth, double newHeight)
     {
-      _value = resizeCoef(_resizeRule, _refWidth,_refHeight, newWidth, newHeight);  
+      _value = _refValue*resizeCoef(_resizeRule, _refWidth,_refHeight, newWidth, newHeight);  
       if (_reset != null) _reset(this);
     }
 
@@ -564,384 +574,398 @@ namespace YDataRendering
 
     protected List<MessagePanel> _messagePanels;
     public List<MessagePanel> messagePanels { get { return _messagePanels; } }
-#if !NET35
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-    public void AllowRedraw()
-    {
-      _redrawAllowed--;
-      if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
-      if (_redrawAllowed == 0) redraw();
 
-    }
+    /*
+     *  .NET 3.5 compatibility
+     *
+     *  To add NET3.5 compatibilty, just copy/paste the following lines
+     *  at the end of the .csproj file, right before the </Project>
+     *  closing tag.
+     *  
+     * <PropertyGroup>
+     *   <!-- Allows the project to be compiled with .NET 3.5 (Windows XP  compatibity) -->
+     *   <DefineConstants Condition="'$(TargetFrameworkVersion)'=='v3.5'">NET35</DefineConstants>
+     * </PropertyGroup> 
+     */
 
-#if !NET35
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-    public void AllowRedrawNoRefresh()
-    {
-      _redrawAllowed--;
-      if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
-
-
-    }
-
-
-
-#if !NET35
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-    public void DisableRedraw()
-    {
-      _redrawAllowed++;
-
-    }
-
-    List<Proportional> ProportionalToSizeValues = new List<Proportional>();
-
-    public void AddNewProportionalToSizeValue(Proportional v)
-    {
-      if (!ProportionalToSizeValues.Contains(v)) ProportionalToSizeValues.Add(v);
-
-    }
-
-    protected bool canRedraw()
-    {
-      return (_redrawAllowed == 0);
-
-    }
-
-    protected PictureBox UIContainer;
-    protected Form parentForm;
-    protected logFct _logFunction;
-    Timer redrawTimer = null;
-    private Stopwatch watch = Stopwatch.StartNew();
-    private int LastDrawTiming = 0;
-
-
-
-
-
-    protected Nullable<Point> mousePosition()
-    {
-      Point p = parentForm.PointToClient(System.Windows.Forms.Cursor.Position);
-      if ((p.X > UIContainer.Location.X) &&
-         (p.Y > UIContainer.Location.Y) &&
-         (p.X < UIContainer.Location.X + UIContainer.Width) &&
-         (p.Y < UIContainer.Location.Y + UIContainer.Height)) return new Point { X = p.X - UIContainer.Location.X, Y = p.Y - UIContainer.Location.Y };
-      return null;
-
-    }
-
-    private ProportionnalValueChangeCallback _proportionnalValueChangeCallback = null;
-    public ProportionnalValueChangeCallback proportionnalValueChangeCallback
-    {
-      set
-      {
-        _proportionnalValueChangeCallback = value;
-        //if (value != null)
-        //foreach (Proportional p in ProportionalToSizeValues)
-        //  p.forceChangeCallback();
-        //
-      }
-
-    }
-
-
-    public void ProportionnalValueChanged(Proportional source)
-    {
-      if (_proportionnalValueChangeCallback != null) _proportionnalValueChangeCallback(source);
-
-
-
-    }
-
-
-
-    public int Draw()
-    {
-
-      if (!canRedraw()) return 0;
-
-      int w = UIContainer.Size.Width;
-      int h = UIContainer.Size.Height;
-
-      if ((w <= 5) || (h <= 5)) return 0;
-
-      DisableRedraw();
-
-      Bitmap DrawArea = new Bitmap(w, h);
-      UIContainer.Image = DrawArea;
-      YGraphics g;
-
-      watch.Reset();
-      watch.Start();
-      g = new  YGraphics(DrawArea);
-
-      try {
-        Render(g, w, h);
-      } catch (Exception e) { log("Rendering error: " + e.Message); }
-
-      g.Dispose();
-      long timing = watch.ElapsedMilliseconds;
-    //  log(" refresh done in " + timing.ToString() + "ms");
-      AllowRedrawNoRefresh();
-      renderingPostProcessing();
-      return (int)timing;
-
-    }
-
-
-    protected virtual void renderingPostProcessing() { }
-
-    protected abstract int Render(YGraphics g, int w, int h);
-
-
-
-
-
-    protected abstract void clearCachedObjects();
-
-    Proportional.ResizeRule _resizeRule = Proportional.ResizeRule.FIXED;
-    public Proportional.ResizeRule resizeRule
-    {
-      get { return _resizeRule; }
-      set
-      {
-
-        if (value != _resizeRule)
+#if (!NET35 && !NET40)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #endif
+        public void AllowRedraw()
         {
+          _redrawAllowed--;
+          if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
+          if (_redrawAllowed == 0) redraw();
+
+        }
+
+#if (!NET35 && !NET40)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #endif
+        public void AllowRedrawNoRefresh()
+        {
+          _redrawAllowed--;
+          if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
+
+
+        }
+
+
+
+#if (!NET35 && !NET40)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #endif
+        public void DisableRedraw()
+        {
+          _redrawAllowed++;
+
+        }
+
+        List<Proportional> ProportionalToSizeValues = new List<Proportional>();
+
+        public void AddNewProportionalToSizeValue(Proportional v)
+        {
+          if (!ProportionalToSizeValues.Contains(v)) ProportionalToSizeValues.Add(v);
+
+        }
+
+        protected bool canRedraw()
+        {
+          return (_redrawAllowed == 0);
+
+        }
+
+        protected PictureBox UIContainer;
+        protected Form parentForm;
+        protected logFct _logFunction;
+        Timer redrawTimer = null;
+        private Stopwatch watch = Stopwatch.StartNew();
+        private int LastDrawTiming = 0;
+
+
+
+
+
+        protected Nullable<Point> mousePosition()
+        {
+          Point p = parentForm.PointToClient(System.Windows.Forms.Cursor.Position);
+          if ((p.X > UIContainer.Location.X) &&
+             (p.Y > UIContainer.Location.Y) &&
+             (p.X < UIContainer.Location.X + UIContainer.Width) &&
+             (p.Y < UIContainer.Location.Y + UIContainer.Height)) return new Point { X = p.X - UIContainer.Location.X, Y = p.Y - UIContainer.Location.Y };
+          return null;
+
+        }
+
+        private ProportionnalValueChangeCallback _proportionnalValueChangeCallback = null;
+        public ProportionnalValueChangeCallback proportionnalValueChangeCallback
+        {
+          set
+          {
+            _proportionnalValueChangeCallback = value;
+            //if (value != null)
+            //foreach (Proportional p in ProportionalToSizeValues)
+            //  p.forceChangeCallback();
+            //
+          }
+
+        }
+
+
+        public void ProportionnalValueChanged(Proportional source)
+        {
+          if (_proportionnalValueChangeCallback != null) _proportionnalValueChangeCallback(source);
+
+
+
+        }
+
+
+
+        public int Draw()
+        {
+
+          if (!canRedraw()) return 0;
+
+          int w = UIContainer.Size.Width;
+          int h = UIContainer.Size.Height;
+
+          if ((w <= 5) || (h <= 5)) return 0;
+
           DisableRedraw();
-          _resizeRule = value;
-          for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-            ProportionalToSizeValues[i].resizeRule = _resizeRule;
+
+          Bitmap DrawArea = new Bitmap(w, h);
+          UIContainer.Image = DrawArea;
+          YGraphics g;
+
+          watch.Reset();
+          watch.Start();
+          g = new  YGraphics(DrawArea);
+
+          try {
+            Render(g, w, h);
+          } catch (Exception e) { log("Rendering error: " + e.Message); }
+
+          g.Dispose();
+          long timing = watch.ElapsedMilliseconds;
+        //  log(" refresh done in " + timing.ToString() + "ms");
+          AllowRedrawNoRefresh();
+          renderingPostProcessing();
+          return (int)timing;
+
+        }
+
+
+        protected virtual void renderingPostProcessing() { }
+
+        protected abstract int Render(YGraphics g, int w, int h);
+
+
+
+
+
+        public abstract void clearCachedObjects();
+
+        Proportional.ResizeRule _resizeRule = Proportional.ResizeRule.FIXED;
+        public Proportional.ResizeRule resizeRule
+        {
+          get { return _resizeRule; }
+          set
+          {
+
+            if (value != _resizeRule)
+            {
+              DisableRedraw();
+              _resizeRule = value;
+              for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+                ProportionalToSizeValues[i].resizeRule = _resizeRule;
+              AllowRedraw();
+              redraw();
+
+            }
+
+          }
+        }
+
+
+        public void redraw()
+        {
+          if (parentForm.WindowState == FormWindowState.Minimized) return;
+          if (_redrawAllowed > 0) return;
+          if (UIContainer.Height < 2) return;
+          if (UIContainer.Width < 2) return;
+          if (redrawTimer.Enabled) return;
+
+          int elapsed = (int)watch.ElapsedMilliseconds;
+         // log("elapsed" + elapsed.ToString());
+
+          redrawTimer.Enabled = false;
+
+          int timelimit = 40; // no need to refresh  more then 25 times per seconds
+          if (timelimit < LastDrawTiming) timelimit = (15 * LastDrawTiming) / 10; // refresh starting to get very slow, don't try to go faster than the music
+          if (timelimit > 1000) timelimit = 1000; // if last redraw took more then 1 sec, you are in deep sh*t anayway.
+
+
+
+          if (elapsed < timelimit)
+          {
+            redrawTimer.Interval = timelimit - elapsed;
+            redrawTimer.Enabled = true;
+          //  log("postponed" + elapsed.ToString() + "<" + timelimit.ToString());
+            return;
+          }
+
+          //log("drawing");
+          LastDrawTiming = Draw();
+
+
+
+        }
+
+
+
+
+        private void TimerTick(object sender, EventArgs e)
+        {
+          redrawTimer.Enabled = false;
+          redraw();
+
+        }
+
+        public virtual int usableUiWidth() { return UIContainer.Width; }
+        public virtual int usableUiHeight() { return UIContainer.Height; }
+
+        protected void resetProportionalSizeObjectsCachePush(double newcoef)
+        {
+          clearCachedObjects();
+          if (_resizeRule != Proportional.ResizeRule.FIXED)
+            for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+              ProportionalToSizeValues[i].containerResizedPushNewCoef(newcoef);
+        }
+
+
+
+
+
+
+        protected void resetProportionalSizeObjectsCachePop()
+        {
+          clearCachedObjects();
+          if (_resizeRule != Proportional.ResizeRule.FIXED)
+            for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+              ProportionalToSizeValues[i].containerResizedPop();
+        }
+
+
+
+        protected void resetProportionalSizeObjectsCache(double w, double h)
+        {
+          clearCachedObjects();
+          if (_resizeRule != Proportional.ResizeRule.FIXED)
+            for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+              ProportionalToSizeValues[i].containerResized(w, h);
+        }
+
+        public void containerResized()
+        {
+          containerResize(null, null);
+        }
+
+        private void containerResize(object sender, EventArgs e)
+        {
+          if (((Form)sender).WindowState == FormWindowState.Minimized) return;
+
+          DisableRedraw();
+          // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
+
+          resetProportionalSizeObjectsCache(usableUiWidth(), usableUiHeight());
           AllowRedraw();
           redraw();
 
         }
 
-      }
-    }
+        private void _snapshotTimer_Tick(object sender, EventArgs e)
+        {
+
+          _snapshotTimer.Enabled = false;
+          _snapshotPanel.enabled = false;
+        }
+        /* can't get the clipboard transparency to work 
+        static void WriteIntToByteArray(Byte[] target, int ofset, int size, bool bidon, UInt32 data)
+        {
+          while(size>0)
+          {
+            target[ofset++] = (byte)( data & 0xff);
+            data >>= 8;
+            size--;
+
+          }
+
+        }
+
+        static Byte[] GetImageData(Bitmap scaledBitmap)
+        {
+          Rectangle rect = new Rectangle(0, 0, scaledBitmap.Width, scaledBitmap.Height);
+          var bitmapData = scaledBitmap.LockBits(rect, ImageLockMode.ReadWrite,  scaledBitmap.PixelFormat);
+          var length = bitmapData.Stride * bitmapData.Height;
+
+          Byte[] bytes = new byte[length];
+
+          // Copy bitmap to byte[]
+          Marshal.Copy(bitmapData.Scan0, bytes, 0, length);
+          scaledBitmap.UnlockBits(bitmapData);
+          return bytes;
+        }
+
+        /// <summary>
+        /// Converts the image to Device Independent Bitmap format of type BITFIELDS.
+        /// This is (wrongly) accepted by many applications as containing transparency,
+        /// so I'm abusing it for that.
+        /// </summary>
+        /// <param name="image">Image to convert to DIB</param>
+        /// <returns>The image converted to DIB, in bytes.</returns>
+        public static Byte[] ConvertToDib(Image image)
+        {
+          Byte[] bm32bData;
+          Int32 width = image.Width;
+          Int32 height = image.Height;
+          // Ensure image is 32bppARGB by painting it on a new 32bppARGB image.
+          using (Bitmap bm32b = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb))
+          {
+            using (Graphics gr = Graphics.FromImage(bm32b))
+              gr.DrawImage(image, new Rectangle(0, 0, bm32b.Width, bm32b.Height));
+            // Bitmap format has its lines reversed.
+            bm32b.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+            bm32bData = GetImageData(bm32b);
+            for (int i = 0; i < bm32bData.Length / 4; i++) bm32bData[i*4+3] = 127;
+          }
+          // BITMAPINFOHEADER struct for DIB.
+          Int32 hdrSize = 0x28;
+          Byte[] fullImage = new Byte[hdrSize + 12 + bm32bData.Length];
+          //Int32 biSize;
+         WriteIntToByteArray(fullImage, 0x00, 4, true, (UInt32)hdrSize);
+          //Int32 biWidth;
+          WriteIntToByteArray(fullImage, 0x04, 4, true, (UInt32)width);
+          //Int32 biHeight; 
+         WriteIntToByteArray(fullImage, 0x08, 4, true, (UInt32)height);
+          //Int16 biPlanes;
+          WriteIntToByteArray(fullImage, 0x0C, 2, true, 1);
+          //Int16 biBitCount;
+          WriteIntToByteArray(fullImage, 0x0E, 2, true, 32);
+          //BITMAPCOMPRESSION biCompression = BITMAPCOMPRESSION.BITFIELDS;
+          WriteIntToByteArray(fullImage, 0x10, 4, true, 3);
+          //Int32 biSizeImage;
+         WriteIntToByteArray(fullImage, 0x14, 4, true, (UInt32)bm32bData.Length);
+          // These are all 0. Since .net clears new arrays, don't bother writing them.
+          //Int32 biXPelsPerMeter = 0;
+          //Int32 biYPelsPerMeter = 0;
+          //Int32 biClrUsed = 0;
+          //Int32 biClrImportant = 0;
+
+          // The aforementioned "BITFIELDS": colour masks applied to the Int32 pixel value to get the R, G and B values.
+          WriteIntToByteArray(fullImage, hdrSize + 0, 4, true, 0x00FF0000);
+          WriteIntToByteArray(fullImage, hdrSize + 4, 4, true, 0x0000FF00);
+          WriteIntToByteArray(fullImage, hdrSize + 8, 4, true, 0x000000FF);
+          Array.Copy(bm32bData, 0, fullImage, hdrSize + 12, bm32bData.Length);
+          return fullImage;
+        }
+
+        /// <summary>
+        /// Copies the given image to the clipboard as PNG, DIB and standard Bitmap format.
+        /// </summary>
+        /// <param name="image">Image to put on the clipboard.</param>
+        /// <param name="imageNoTr">Optional specifically nontransparent version of the image to put on the clipboard.</param>
+        /// <param name="data">Clipboard data object to put the image into. Might already contain other stuff. Leave null to create a new one.</param>
+        public static void SetClipboardImage(Bitmap image, Bitmap imageNoTr, DataObject data)
+        {
 
 
-    public void redraw()
-    {
-      if (parentForm.WindowState == FormWindowState.Minimized) return;
-      if (_redrawAllowed > 0) return;
-      if (UIContainer.Height < 2) return;
-      if (UIContainer.Width < 2) return;
-      if (redrawTimer.Enabled) return;
+          Clipboard.Clear();
+          if (data == null)
+            data = new DataObject();
+          if (imageNoTr == null)
+            imageNoTr = image;
+          using (MemoryStream pngMemStream = new MemoryStream())
+          using (MemoryStream dibMemStream = new MemoryStream())
+          {
+            // // As standard bitmap, without transparency support
+            //  data.SetData(DataFormats.Bitmap, true, imageNoTr);
+            // As PNG. Gimp will prefer this over the other two.
 
-      int elapsed = (int)watch.ElapsedMilliseconds;
-     // log("elapsed" + elapsed.ToString());
+            image.Save(pngMemStream, ImageFormat.Png);
+            data.SetData("PNG", false, pngMemStream);
 
-      redrawTimer.Enabled = false;
+            // As DIB. This is (wrongly) accepted as ARGB by many applications.
+            Byte[] dibData = ConvertToDib(image);
+            dibMemStream.Write(dibData, 0, dibData.Length);
+            data.SetData(DataFormats.Dib, false, dibMemStream);
 
-      int timelimit = 40; // no need to refresh  more then 25 times per seconds
-      if (timelimit < LastDrawTiming) timelimit = (15 * LastDrawTiming) / 10; // refresh starting to get very slow, don't try to go faster than the music
-      if (timelimit > 1000) timelimit = 1000; // if last redraw took more then 1 sec, you are in deep sh*t anayway.
-
-
-     
-      if (elapsed < timelimit)
-      {
-        redrawTimer.Interval = timelimit - elapsed;
-        redrawTimer.Enabled = true;
-      //  log("postponed" + elapsed.ToString() + "<" + timelimit.ToString());
-        return;
-      }
-
-      //log("drawing");
-      LastDrawTiming = Draw();
-
-
-
-    }
-
-
-
-
-    private void TimerTick(object sender, EventArgs e)
-    {
-      redrawTimer.Enabled = false;
-      redraw();
-
-    }
-
-    public virtual int usableUiWidth() { return UIContainer.Width; }
-    public virtual int usableUiHeight() { return UIContainer.Height; }
-
-    protected void resetProportionalSizeObjectsCachePush(double newcoef)
-    {
-      clearCachedObjects();
-      if (_resizeRule != Proportional.ResizeRule.FIXED)
-        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-          ProportionalToSizeValues[i].containerResizedPushNewCoef(newcoef);
-    }
-
-
-  
-
-    
-
-    protected void resetProportionalSizeObjectsCachePop()
-    {
-      clearCachedObjects();
-      if (_resizeRule != Proportional.ResizeRule.FIXED)
-        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-          ProportionalToSizeValues[i].containerResizedPop();
-    }
-
-
-
-    protected void resetProportionalSizeObjectsCache(double w, double h)
-    {
-      clearCachedObjects();
-      if (_resizeRule != Proportional.ResizeRule.FIXED)
-        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-          ProportionalToSizeValues[i].containerResized(w, h);
-    }
-
-    public void containerResized()
-    {
-      containerResize(null, null);
-    }
-
-    private void containerResize(object sender, EventArgs e)
-    {
-      if (((Form)sender).WindowState == FormWindowState.Minimized) return;
-
-      DisableRedraw();
-      // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
-
-      resetProportionalSizeObjectsCache(usableUiWidth(), usableUiHeight());
-      AllowRedraw();
-      redraw();
-
-    }
-
-    private void _snapshotTimer_Tick(object sender, EventArgs e)
-    {
-
-      _snapshotTimer.Enabled = false;
-      _snapshotPanel.enabled = false;
-    }
-    /* can't get the clipboard transparency to work 
-    static void WriteIntToByteArray(Byte[] target, int ofset, int size, bool bidon, UInt32 data)
-    {
-      while(size>0)
-      {
-        target[ofset++] = (byte)( data & 0xff);
-        data >>= 8;
-        size--;
-
-      }
-
-    }
-
-    static Byte[] GetImageData(Bitmap scaledBitmap)
-    {
-      Rectangle rect = new Rectangle(0, 0, scaledBitmap.Width, scaledBitmap.Height);
-      var bitmapData = scaledBitmap.LockBits(rect, ImageLockMode.ReadWrite,  scaledBitmap.PixelFormat);
-      var length = bitmapData.Stride * bitmapData.Height;
-
-      Byte[] bytes = new byte[length];
-
-      // Copy bitmap to byte[]
-      Marshal.Copy(bitmapData.Scan0, bytes, 0, length);
-      scaledBitmap.UnlockBits(bitmapData);
-      return bytes;
-    }
-
-    /// <summary>
-    /// Converts the image to Device Independent Bitmap format of type BITFIELDS.
-    /// This is (wrongly) accepted by many applications as containing transparency,
-    /// so I'm abusing it for that.
-    /// </summary>
-    /// <param name="image">Image to convert to DIB</param>
-    /// <returns>The image converted to DIB, in bytes.</returns>
-    public static Byte[] ConvertToDib(Image image)
-    {
-      Byte[] bm32bData;
-      Int32 width = image.Width;
-      Int32 height = image.Height;
-      // Ensure image is 32bppARGB by painting it on a new 32bppARGB image.
-      using (Bitmap bm32b = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb))
-      {
-        using (Graphics gr = Graphics.FromImage(bm32b))
-          gr.DrawImage(image, new Rectangle(0, 0, bm32b.Width, bm32b.Height));
-        // Bitmap format has its lines reversed.
-        bm32b.RotateFlip(RotateFlipType.Rotate180FlipX);
-       
-        bm32bData = GetImageData(bm32b);
-        for (int i = 0; i < bm32bData.Length / 4; i++) bm32bData[i*4+3] = 127;
-      }
-      // BITMAPINFOHEADER struct for DIB.
-      Int32 hdrSize = 0x28;
-      Byte[] fullImage = new Byte[hdrSize + 12 + bm32bData.Length];
-      //Int32 biSize;
-     WriteIntToByteArray(fullImage, 0x00, 4, true, (UInt32)hdrSize);
-      //Int32 biWidth;
-      WriteIntToByteArray(fullImage, 0x04, 4, true, (UInt32)width);
-      //Int32 biHeight; 
-     WriteIntToByteArray(fullImage, 0x08, 4, true, (UInt32)height);
-      //Int16 biPlanes;
-      WriteIntToByteArray(fullImage, 0x0C, 2, true, 1);
-      //Int16 biBitCount;
-      WriteIntToByteArray(fullImage, 0x0E, 2, true, 32);
-      //BITMAPCOMPRESSION biCompression = BITMAPCOMPRESSION.BITFIELDS;
-      WriteIntToByteArray(fullImage, 0x10, 4, true, 3);
-      //Int32 biSizeImage;
-     WriteIntToByteArray(fullImage, 0x14, 4, true, (UInt32)bm32bData.Length);
-      // These are all 0. Since .net clears new arrays, don't bother writing them.
-      //Int32 biXPelsPerMeter = 0;
-      //Int32 biYPelsPerMeter = 0;
-      //Int32 biClrUsed = 0;
-      //Int32 biClrImportant = 0;
-
-      // The aforementioned "BITFIELDS": colour masks applied to the Int32 pixel value to get the R, G and B values.
-      WriteIntToByteArray(fullImage, hdrSize + 0, 4, true, 0x00FF0000);
-      WriteIntToByteArray(fullImage, hdrSize + 4, 4, true, 0x0000FF00);
-      WriteIntToByteArray(fullImage, hdrSize + 8, 4, true, 0x000000FF);
-      Array.Copy(bm32bData, 0, fullImage, hdrSize + 12, bm32bData.Length);
-      return fullImage;
-    }
-
-    /// <summary>
-    /// Copies the given image to the clipboard as PNG, DIB and standard Bitmap format.
-    /// </summary>
-    /// <param name="image">Image to put on the clipboard.</param>
-    /// <param name="imageNoTr">Optional specifically nontransparent version of the image to put on the clipboard.</param>
-    /// <param name="data">Clipboard data object to put the image into. Might already contain other stuff. Leave null to create a new one.</param>
-    public static void SetClipboardImage(Bitmap image, Bitmap imageNoTr, DataObject data)
-    {
-      
-
-      Clipboard.Clear();
-      if (data == null)
-        data = new DataObject();
-      if (imageNoTr == null)
-        imageNoTr = image;
-      using (MemoryStream pngMemStream = new MemoryStream())
-      using (MemoryStream dibMemStream = new MemoryStream())
-      {
-        // // As standard bitmap, without transparency support
-        //  data.SetData(DataFormats.Bitmap, true, imageNoTr);
-        // As PNG. Gimp will prefer this over the other two.
-      
-        image.Save(pngMemStream, ImageFormat.Png);
-        data.SetData("PNG", false, pngMemStream);
-
-        // As DIB. This is (wrongly) accepted as ARGB by many applications.
-        Byte[] dibData = ConvertToDib(image);
-        dibMemStream.Write(dibData, 0, dibData.Length);
-        data.SetData(DataFormats.Dib, false, dibMemStream);
-
-        // The 'copy=true' argument means the MemoryStreams can be safely disposed after the operation.
-        Clipboard.SetDataObject(data, true);
-      }
-    }
-    */
+            // The 'copy=true' argument means the MemoryStreams can be safely disposed after the operation.
+            Clipboard.SetDataObject(data, true);
+          }
+        }
+        */
 
     public void capture() { _Regis_HotKey(); }
 
@@ -996,7 +1020,7 @@ namespace YDataRendering
       switch (captureType)
       { case CaptureType.PNG :g = new YGraphics(Graphics.FromImage(DrawArea), w, h, captureDPI); break;
         case CaptureType.SVG : g = new YGraphicsSVG(Graphics.FromImage(DrawArea), w, h, captureDPI);break;
-         default: throw new InvalidOperationException("capture :unknow type");
+         default: throw new InvalidOperationException("capture :unknown type");
       }
 
      
@@ -1236,7 +1260,7 @@ namespace YDataRendering
 
     }
 
-    public void drawMessagePanels(YGraphics g, int viewPortWidth, int viewPortHeight)
+    public void DrawMessagePanels(YGraphics g, int viewPortWidth, int viewPortHeight)
     {
 
 
@@ -1468,124 +1492,125 @@ namespace YDataRendering
 
     public Graphics graphics { get { return _g; } }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawLine(Pen p, float x1, float y1, float x2, float y2) { _g.DrawLine(p, x1, y1, x2, y2); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawLine(Pen p, PointF p1, PointF p2) { _g.DrawLine(p, p1, p2); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void SetClip(Rectangle rect) { _g.SetClip(rect); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void ResetClip() { _g.ResetClip(); }
-
-#if !NET35
+    
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+    
     public SizeF MeasureString(string text, Font font, int width)
     { return _g.MeasureString(text, font, width); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void FillRectangle(Brush brush, Rectangle rect) { _g.FillRectangle(brush, rect); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void FillRectangle(Brush brush, float x, float y, float width, float height) { _g.FillRectangle(brush, x, y, width, height); }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawRectangle(Pen pen, Rectangle rect) { _g.DrawRectangle(pen, rect); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawRectangle(Pen pen, float x, float y, float width, float height) { _g.DrawRectangle(pen, x, y, width, height); }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawString(string s, Font font, Brush brush, float x, float y) { _g.DrawString(s, font, brush, x, y); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawString(string s, Font font, Brush brush, PointF point, StringFormat format) { _g.DrawString(s, font, brush, point, format); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawString(string s, Font font, Brush brush, PointF point) { _g.DrawString(s, font, brush, point); }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawString(string s, Font font, Brush brush, RectangleF layoutRectangle, StringFormat format) { _g.DrawString(s, font, brush, layoutRectangle, format); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void Transform(float dx, float dy, float angle) { _g.TranslateTransform(dx, dy); _g.RotateTransform(angle); }
 
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void ResetTransform() { _g.ResetTransform(); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void FillEllipse(Brush brush, int x, int y, int width, int height) { _g.FillEllipse(brush, x, y, width, height); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawEllipse(Pen pen, int x, int y, int width, int height) { _g.DrawEllipse(pen, x, y, width, height); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void FillPolygon(Brush brush, PointF[] points) { _g.FillPolygon(brush, points); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawPolygon(Pen pen, PointF[] points) { _g.DrawPolygon(pen, points); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawLines(Pen pen, PointF[] points) { _g.DrawLines(pen, points); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawLines(Pen pen, Point[] points) { _g.DrawLines(pen, points); }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual SizeF MeasureString(string text, Font font, int width, StringFormat stringFormat) { return _g.MeasureString(text, font, width, stringFormat); }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void Dispose() { _g.Dispose(); }
@@ -1597,14 +1622,14 @@ namespace YDataRendering
     public int width { get { return _width; } }
     public int height { get { return _height; } }
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void DrawImage(Image image, Rectangle destRect, Rectangle srcRect, GraphicsUnit srcUnit)
     { _g.DrawImage(image, destRect, srcRect, srcUnit); }
 
 
-#if !NET35
+#if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
     public virtual void comment(string s) { }
@@ -1746,8 +1771,11 @@ namespace YDataRendering
 
     public override void DrawString(string s, Font font, Brush brush, float x, float y)
     {
-
-      SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + (y + font.Size * 1.25).ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+     
+      string[] tokens = s.Split('\n');
+      for (int i = 0; i < tokens.Length; i++)
+      { s = tokens[i];
+        SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + (y + font.Size * 1.25).ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
                     + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
                     + "font-size=\"" + font.SizeInPoints + "pt\" "
                     + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
@@ -1756,6 +1784,8 @@ namespace YDataRendering
                     + "style=\"stroke-width:0\">\r\n"
                     + System.Security.SecurityElement.Escape(s)
                     + "\r\n</text>");
+        y += (float)(font.Size * 1.5);
+      }
 
 
 
@@ -1766,34 +1796,47 @@ namespace YDataRendering
     public override void DrawString(string s, Font font, Brush brush, PointF point, StringFormat format)
     {
 
-      SizeF sz = _g.MeasureString(s, font);
-      double x = point.X;
-      double y = point.Y + font.Size * 1.25;
-      switch (format.Alignment)
-      {
-        case StringAlignment.Near: break;
-        case StringAlignment.Center: x += -sz.Width / 2; break;
-        case StringAlignment.Far: x += -sz.Width; break;
+      SizeF totalsz = _g.MeasureString(s, font);
 
-      }
+      double y = point.Y + font.Size * 1.25;
+
       switch (format.LineAlignment)
       {
         case StringAlignment.Near: break;
-        case StringAlignment.Center: y += -sz.Height / 2; break;
-        case StringAlignment.Far: y += -sz.Height; break;
+        case StringAlignment.Center: y += -totalsz.Height / 2; break;
+        case StringAlignment.Far: y += -totalsz.Height; break;
 
       }
 
+      string[] tokens =  s.Split('\n');
 
-      SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
-                    + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
-                    + "font-size=\"" + font.SizeInPoints + "pt\" "
-                    + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
-                    + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
-                    + BrushToSVG(brush, false)
-                    + "style=\"stroke-width:0\">\r\n"
-                    + System.Security.SecurityElement.Escape(s)
-                    + "\r\n</text>");
+      for (int i = 0; i < tokens.Length; i++ )
+      { s = tokens[i];
+        SizeF sz = _g.MeasureString(s, font);
+        double x = point.X;
+        
+        switch (format.Alignment)
+        {
+          case StringAlignment.Near: break;
+          case StringAlignment.Center: x += -sz.Width / 2; break;
+          case StringAlignment.Far: x += -sz.Width; break;
+
+        }
+     
+
+
+        SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+                      + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
+                      + "font-size=\"" + font.SizeInPoints + "pt\" "
+                      + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
+                      + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
+                      + BrushToSVG(brush, false)
+                      + "style=\"stroke-width:0\">\r\n"
+                      + System.Security.SecurityElement.Escape(s)
+                      + "\r\n</text>");
+
+        y +=(float) (font.Size * 1.5); 
+      }
 
     }
 
@@ -1802,25 +1845,34 @@ namespace YDataRendering
     public override void DrawString(string s, Font font, Brush brush, RectangleF layoutRectangle, StringFormat format)
 
     {
-      SizeF sz = _g.MeasureString(s, font);
-      double x = layoutRectangle.X;
-      double y = layoutRectangle.Y + font.Size *1.25;
-      switch (format.Alignment)
-      {
-        case StringAlignment.Near: break;
-        case StringAlignment.Center: x += (layoutRectangle.Width - sz.Width) / 2; break;
-        case StringAlignment.Far: x += (layoutRectangle.Width - sz.Width); break;
+      SizeF totalsz = _g.MeasureString(s, font);
 
-      }
+      
+     
+      double y = layoutRectangle.Y + font.Size *1.25;
+
       switch (format.LineAlignment)
       {
         case StringAlignment.Near: break;
-        case StringAlignment.Center: y += (layoutRectangle.Height - sz.Height) / 2; break;
-        case StringAlignment.Far: y += (layoutRectangle.Height - sz.Height); break;
+        case StringAlignment.Center: y += (layoutRectangle.Height - totalsz.Height) / 2; break;
+        case StringAlignment.Far: y += (layoutRectangle.Height - totalsz.Height); break;
 
       }
 
+      string[] tokens = s.Split('\n');
 
+      for (int i = 0; i < tokens.Length; i++)
+      { s = tokens[i];
+        SizeF sz = _g.MeasureString(s, font);
+        double x = layoutRectangle.X;
+        switch (format.Alignment)
+        {
+          case StringAlignment.Near: break;
+          case StringAlignment.Center: x += (layoutRectangle.Width - sz.Width) / 2; break;
+          case StringAlignment.Far: x += (layoutRectangle.Width - sz.Width); break;
+
+        }
+    
       SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
                     + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
                     + "font-size=\"" + (font.SizeInPoints *1.1).ToString() + "pt\" "
@@ -1830,6 +1882,8 @@ namespace YDataRendering
                     + "style=\"stroke-width:0\">\r\n"
                     + System.Security.SecurityElement.Escape(s)
                     + "\r\n</text>");
+        y += (float)(font.Size * 1.5);
+      }
 
     }
 

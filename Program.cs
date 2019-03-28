@@ -1,9 +1,9 @@
 ﻿
 /*
  *   Yocto-Visualization, a free application to visualize Yoctopuce Sensors.
- * 
+ *
  *  Application entry point
- * 
+ *
  *  - - - - - - - - - License information: - - - - - - - - -
  *
  *  Copyright (C) 2017 and beyond by Yoctopuce Sarl, Switzerland.
@@ -34,7 +34,7 @@
  *  CONTRIBUTION, OR OTHER SIMILAR COSTS, WHETHER ASSERTED ON THE
  *  BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF
  *  WARRANTY, OR OTHERWISE.
- * 
+ *
  */
 
 using System;
@@ -62,7 +62,7 @@ namespace YoctoVisualisation
 
       if (constants.CheckMonoVersion(out errmsg))
       {
-        int res = yAPI.FILE_NOT_FOUND;
+        int res = YAPI.FILE_NOT_FOUND;
 
         res = YAPI.InitAPI(0, ref errmsg);
         YAPI.RegisterLogFunction(LogManager.APIlog);

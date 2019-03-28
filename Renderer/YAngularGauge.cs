@@ -369,7 +369,7 @@ namespace YDataRendering
 
     }
 
-    protected override void clearCachedObjects()
+    public override void clearCachedObjects()
     { 
       if (_zones!=null) for (int i = 0; i < _zones.Count; i++) _zones[i].resetPath();
       _path = null;
@@ -642,7 +642,7 @@ namespace YDataRendering
         }
 
       }
-      drawMessagePanels(g, w, h);
+      DrawMessagePanels(g, w, h);
       return 0;
 
     }

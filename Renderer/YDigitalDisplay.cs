@@ -127,7 +127,7 @@ namespace YDataRendering
 
     }
 
-    protected override void clearCachedObjects( )
+    public override void clearCachedObjects( )
     { font.ResetFont (null);
       _bgBrush = null;
 
@@ -217,7 +217,7 @@ namespace YDataRendering
            break;
 
       }
-      drawMessagePanels(g, w, h);
+      DrawMessagePanels(g, w, h);
 
       return 0;
     } 

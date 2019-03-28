@@ -1654,6 +1654,32 @@ public static class sensorPrecisionTypeDescription
      DescriptionAttribute("Should the data tracker be shown or not."  )]
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
+    private bool _showSerieName = false;
+    [DisplayName("Show Series legend"),
+     DescriptionAttribute("Should the data tracker show both the value and the value's series legend.")]
+     public bool showSerieName { get { return _showSerieName; } set { _showSerieName = value; } }
+
+
+    public enum DataPrecision
+    {
+      [Description("Sensor precision")]
+      PRECISION_NOLIMIT = DataTracker.DataPrecision.PRECISION_NOLIMIT,      
+      [Description("1")]
+      PRECISION_1 = DataTracker.DataPrecision.PRECISION_1,
+      [Description("0.1")]
+      PRECISION_01 = DataTracker.DataPrecision.PRECISION_01,
+      [Description("0.01")]
+      PRECISION_001 = DataTracker.DataPrecision.PRECISION_001,
+      [Description("0.001")]
+      PRECISION_0001 = DataTracker.DataPrecision.PRECISION_0001,
+
+    };
+
+   DataPrecision _dataPrecision = DataPrecision.PRECISION_NOLIMIT;
+    [DisplayName("Precision"),
+     DescriptionAttribute("A way to limit data precision to meaningful digits in the data tracker.")]
+     public  DataPrecision dataPrecision { get { return _dataPrecision; } set { _dataPrecision = value; } }
+
     private double _diameter = 5;
     [DisplayName("Point Diameter"),
     DescriptionAttribute("Data point diameter, in pixels")]

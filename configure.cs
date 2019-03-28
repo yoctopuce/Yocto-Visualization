@@ -252,6 +252,10 @@ namespace YoctoVisualisation
       res += "    <Width value= \"" + constants.captureWidth.ToString() + "\"/>\n";
       res += "    <Height value= \"" + constants.captureHeight.ToString() + "\"/>\n";    
       res += "  </Capture>\n";
+      res += "  <Updates>\n";
+      res += "    <checkForUpdate  value = \"" + constants.checkForUpdate.ToString() + "\"/>\n";
+      res += "    <ignoreBuild  value = \"" + constants.updateIgnoreBuild.ToString() + "\"/>\n";
+      res += "  </Updates>\n";
       res += "  <UI>\n";
       res += "    <VerticalDragZoom value= \"" + YGraph.VerticalDragZoomEnabled.ToString() + "\"/>\n";
       res += "    <DbleClickContextMenu value= \"" + constants.dbleClickBringsUpContextMenu.ToString() + "\"/>\n";   
@@ -301,7 +305,30 @@ namespace YoctoVisualisation
     }
 
 
-    public void InitMemoryUsageParams(XmlNode memNode)
+    public void InitCheckForUpdateParams(XmlNode memNode)
+    {
+      foreach (XmlNode node in memNode.ChildNodes)
+      {
+       
+       
+        switch (node.Name)
+        {
+          case "checkForUpdate":
+            bool bvalue;
+            if (bool.TryParse(node.Attributes["value"].InnerText, out bvalue))  constants.checkForUpdate =  bvalue;
+            break;
+
+          case "ignoreBuild":
+            int ivalue;
+            if (Int32.TryParse(node.Attributes["value"].InnerText, out ivalue)) constants.updateIgnoreBuild = ivalue;
+            break;
+
+        }
+      }
+    }
+
+
+            public void InitMemoryUsageParams(XmlNode memNode)
     {
       foreach (XmlNode node in memNode.ChildNodes)
       {
@@ -508,6 +535,9 @@ namespace YoctoVisualisation
             break;
           case "UI":
             InitUIParams(node);
+            break;
+          case "Updates":
+            InitCheckForUpdateParams(node);
             break;
           case "MemoryUsage":
             InitMemoryUsageParams(node);

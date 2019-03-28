@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 33916 2018-12-28 10:38:18Z seb $
+ * $Id: yocto_api.cs 34651 2019-03-15 17:21:54Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -43,7 +43,9 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+
 using YHANDLE = System.Int32;
 using YRETCODE = System.Int32;
 using s8 = System.SByte;
@@ -185,1006 +187,2073 @@ internal static class SafeNativeMethods
     }
 
 
-    // 32 bits dll entry points
-    [DllImport("yapi", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiInitAPI32(int mode, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiFreeAPI32();
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterLogFunction32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceArrivalCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceRemovalCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceChangeCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceConfigChangeCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterFunctionUpdateCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterTimedReportCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiLockDeviceCallBack32(StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiUnlockDeviceCallBack32(StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiLockFunctionCallBack32(StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiUnlockFunctionCallBack32(StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiRegisterHub32(StringBuilder rootUrl, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiPreregisterHub32(StringBuilder rootUrl, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiUnregisterHub32(StringBuilder rootUrl);
-
-    [DllImport("yapi", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiUpdateDeviceList32(uint force, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHandleEvents32(StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static u64 _yapiGetTickCount32();
-
-    [DllImport("yapi", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiCheckLogicalName32(StringBuilder name);
-
-    [DllImport("yapi", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static u16 _yapiGetAPIVersion32(ref IntPtr version, ref IntPtr date);
-
-    [DllImport("yapi", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YDEV_DESCR _yapiGetDevice32(StringBuilder device_str, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetAllDevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetAllDevices32(IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetDeviceInfo32(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YFUN_DESCR _yapiGetFunction32(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetFunctionsByClass32(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetFunctionsByDevice32(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetFunctionInfoEx32(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestSyncStart32(ref YIOHDL iohdl, StringBuilder device, IntPtr request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestSyncStartEx32(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestSyncDone32(ref YIOHDL iohdl, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestAsync32(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestAsyncEx32(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequest32(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetDevicePath32(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiSleep32(int duration_ms, StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterHubDiscoveryCallback32(IntPtr fct);
-
-    [DllImport("yapi", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiTriggerHubDiscovery32(StringBuilder errmsg);
-
-    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceLogCallback32(IntPtr fct);
-
-    // 64 bits dll entry points
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiInitAPI64(int mode, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiFreeAPI64();
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterLogFunction64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceArrivalCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceRemovalCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceChangeCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceConfigChangeCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterFunctionUpdateCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterTimedReportCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiLockDeviceCallBack64(StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiUnlockDeviceCallBack64(StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiLockFunctionCallBack64(StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiUnlockFunctionCallBack64(StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiRegisterHub64(StringBuilder rootUrl, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiPreregisterHub64(StringBuilder rootUrl, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiUnregisterHub64(StringBuilder rootUrl);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiUpdateDeviceList64(uint force, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHandleEvents64(StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static u64 _yapiGetTickCount64();
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiCheckLogicalName64(StringBuilder name);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static u16 _yapiGetAPIVersion64(ref IntPtr version, ref IntPtr date);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YDEV_DESCR _yapiGetDevice64(StringBuilder device_str, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetAllDevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetAllDevices64(IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetDeviceInfo64(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YFUN_DESCR _yapiGetFunction64(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetFunctionsByClass64(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetFunctionsByDevice64(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetFunctionInfoEx64(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestSyncStart64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestSyncStartEx64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestSyncDone64(ref YIOHDL iohdl, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestAsync64(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequestAsyncEx64(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiHTTPRequest64(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetDevicePath64(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiSleep64(int duration_ms, StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterHubDiscoveryCallback64(IntPtr fct);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiTriggerHubDiscovery64(StringBuilder errmsg);
-
-    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private extern static void _yapiRegisterDeviceLogCallback64(IntPtr fct);
-
-    internal static int _yapiInitAPI(int mode, StringBuilder errmsg)
+    private enum YAPIDLL_VERSION
     {
-        if (IntPtr.Size == 4) {
-            return _yapiInitAPI32(mode, errmsg);
-        } else {
-            try {
-                return _yapiInitAPI64(mode, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiInitAPI32(mode, errmsg);
-            }
-        }
+        WIN32,
+        WIN64,
+        MACOS32,
+        MACOS64,
+        LIN32,
+        LIN64,
+        LINARMHF
     }
 
-    internal static void _yapiFreeAPI()
+    private static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.WIN32;
+
+    private static bool IsMacOS()
     {
-        if (IntPtr.Size == 4) {
-            _yapiFreeAPI32();
-        } else {
-            try {
-                _yapiFreeAPI64();
-            } catch (System.DllNotFoundException) {
-                _yapiFreeAPI32();
-            }
-        }
+        return (Environment.OSVersion.Platform == PlatformID.Unix && Directory.Exists("/Applications") && Directory.Exists("/System") && Directory.Exists("/Users") && Directory.Exists("/Volumes"));
     }
 
-    internal static void _yapiRegisterLogFunction(IntPtr fct)
+    internal static u16 tryGetAPIVersion(ref IntPtr version, ref IntPtr dat_)
     {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterLogFunction32(fct);
+        Boolean is64 = IntPtr.Size == 8;
+
+        
+
+        PlatformID platform = Environment.OSVersion.Platform;
+        if (platform == PlatformID.MacOSX) {
+            if (is64) {
+                _dllVersion = YAPIDLL_VERSION.MACOS64;
+            } else {
+                _dllVersion = YAPIDLL_VERSION.MACOS32;
+            }
+        } else if (platform == PlatformID.Unix) {
+            if (IsMacOS()) {
+                if (is64) {
+                    _dllVersion = YAPIDLL_VERSION.MACOS64;
+                } else {
+                    _dllVersion = YAPIDLL_VERSION.MACOS32;
+                }
+            } else {
+                if (is64) {
+                    _dllVersion = YAPIDLL_VERSION.LIN64;
+                } else {
+                    _dllVersion = YAPIDLL_VERSION.LIN32;
+                }
+            }
         } else {
-            try {
-                _yapiRegisterLogFunction64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterLogFunction32(fct);
+            if (is64) {
+                _dllVersion = YAPIDLL_VERSION.WIN64;
+            } else {
+                _dllVersion = YAPIDLL_VERSION.WIN32;
             }
         }
-    }
-
-    internal static void _yapiRegisterDeviceArrivalCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterDeviceArrivalCallback32(fct);
-        } else {
+        Console.WriteLine("Detected platform is "+_dllVersion.ToString());
+        bool can_retry = true;
+        do {
             try {
-                _yapiRegisterDeviceArrivalCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterDeviceArrivalCallback32(fct);
+                return _yapiGetAPIVersion(ref version, ref dat_);
+            } catch (System.DllNotFoundException ex) {
+                Console.WriteLine(ex.ToString());
+                switch (_dllVersion) {
+                    default:
+                    case YAPIDLL_VERSION.WIN32:
+                        throw ex;
+                    case YAPIDLL_VERSION.WIN64:
+                    case YAPIDLL_VERSION.MACOS32:
+                    case YAPIDLL_VERSION.LINARMHF:
+                        _dllVersion = YAPIDLL_VERSION.WIN32;
+                        break;
+                    case YAPIDLL_VERSION.MACOS64:
+                        _dllVersion = YAPIDLL_VERSION.MACOS32;
+                        break;
+                    case YAPIDLL_VERSION.LIN32:
+                        _dllVersion = YAPIDLL_VERSION.LINARMHF;
+                        break;
+                    case YAPIDLL_VERSION.LIN64:
+                        _dllVersion = YAPIDLL_VERSION.LIN32;
+                        break;
+                }
+                Console.WriteLine("retry with platform " + _dllVersion.ToString());
             }
-        }
+
+        } while (can_retry);
+        return 0;
     }
 
-    internal static void _yapiRegisterDeviceRemovalCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterDeviceRemovalCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterDeviceRemovalCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterDeviceRemovalCallback32(fct);
-            }
-        }
-    }
-
-    internal static void _yapiRegisterDeviceChangeCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterDeviceChangeCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterDeviceChangeCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterDeviceChangeCallback32(fct);
-            }
-        }
-    }
-
-    internal static void _yapiRegisterDeviceConfigChangeCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterDeviceConfigChangeCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterDeviceConfigChangeCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterDeviceConfigChangeCallback32(fct);
-            }
-        }
-    }
-
-    internal static void _yapiRegisterFunctionUpdateCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterFunctionUpdateCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterFunctionUpdateCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterFunctionUpdateCallback32(fct);
-            }
-        }
-    }
-
-    internal static void _yapiRegisterTimedReportCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterTimedReportCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterTimedReportCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterTimedReportCallback32(fct);
-            }
-        }
-    }
-
-    internal static int _yapiLockDeviceCallBack(StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiLockDeviceCallBack32(errmsg);
-        } else {
-            try {
-                return _yapiLockDeviceCallBack64(errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiLockDeviceCallBack32(errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiUnlockDeviceCallBack(StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiUnlockDeviceCallBack32(errmsg);
-        } else {
-            try {
-                return _yapiUnlockDeviceCallBack64(errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiUnlockDeviceCallBack32(errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiLockFunctionCallBack(StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiLockFunctionCallBack32(errmsg);
-        } else {
-            try {
-                return _yapiLockFunctionCallBack64(errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiLockFunctionCallBack32(errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiUnlockFunctionCallBack(StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiUnlockFunctionCallBack32(errmsg);
-        } else {
-            try {
-                return _yapiUnlockFunctionCallBack64(errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiUnlockFunctionCallBack32(errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiRegisterHub(StringBuilder rootUrl, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiRegisterHub32(rootUrl, errmsg);
-        } else {
-            try {
-                return _yapiRegisterHub64(rootUrl, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiRegisterHub32(rootUrl, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiPreregisterHub(StringBuilder rootUrl, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiPreregisterHub32(rootUrl, errmsg);
-        } else {
-            try {
-                return _yapiPreregisterHub64(rootUrl, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiPreregisterHub32(rootUrl, errmsg);
-            }
-        }
-    }
-
-    internal static void _yapiUnregisterHub(StringBuilder rootUrl)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiUnregisterHub32(rootUrl);
-        } else {
-            try {
-                _yapiUnregisterHub64(rootUrl);
-            } catch (System.DllNotFoundException) {
-                _yapiUnregisterHub32(rootUrl);
-            }
-        }
-    }
-
-    internal static int _yapiUpdateDeviceList(uint force, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiUpdateDeviceList32(force, errmsg);
-        } else {
-            try {
-                return _yapiUpdateDeviceList64(force, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiUpdateDeviceList32(force, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiHandleEvents(StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHandleEvents32(errmsg);
-        } else {
-            try {
-                return _yapiHandleEvents64(errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHandleEvents32(errmsg);
-            }
-        }
-    }
-
-    internal static u64 _yapiGetTickCount()
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetTickCount32();
-        } else {
-            try {
-                return _yapiGetTickCount64();
-            } catch (System.DllNotFoundException) {
-                return _yapiGetTickCount32();
-            }
-        }
-    }
-
-    internal static int _yapiCheckLogicalName(StringBuilder name)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiCheckLogicalName32(name);
-        } else {
-            try {
-                return _yapiCheckLogicalName64(name);
-            } catch (System.DllNotFoundException) {
-                return _yapiCheckLogicalName32(name);
-            }
-        }
-    }
-
-    internal static u16 _yapiGetAPIVersion(ref IntPtr version, ref IntPtr date)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetAPIVersion32(ref version, ref date);
-        } else {
-            try {
-                return _yapiGetAPIVersion64(ref version, ref date);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetAPIVersion32(ref version, ref date);
-            }
-        }
-    }
-
-    internal static YDEV_DESCR _yapiGetDevice(StringBuilder device_str, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetDevice32(device_str, errmsg);
-        } else {
-            try {
-                return _yapiGetDevice64(device_str, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetDevice32(device_str, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiGetAllDevices(IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetAllDevices32(buffer, maxsize, ref neededsize, errmsg);
-        } else {
-            try {
-                return _yapiGetAllDevices64(buffer, maxsize, ref neededsize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetAllDevices32(buffer, maxsize, ref neededsize, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiGetDeviceInfo(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetDeviceInfo32(d, ref infos, errmsg);
-        } else {
-            try {
-                return _yapiGetDeviceInfo64(d, ref infos, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetDeviceInfo32(d, ref infos, errmsg);
-            }
-        }
-    }
-
-    internal static YFUN_DESCR _yapiGetFunction(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetFunction32(class_str, function_str, errmsg);
-        } else {
-            try {
-                return _yapiGetFunction64(class_str, function_str, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetFunction32(class_str, function_str, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiGetFunctionsByClass(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetFunctionsByClass32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-        } else {
-            try {
-                return _yapiGetFunctionsByClass64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetFunctionsByClass32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiGetFunctionsByDevice(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetFunctionsByDevice32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-        } else {
-            try {
-                return _yapiGetFunctionsByDevice64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetFunctionsByDevice32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-            }
-        }
-    }
-
-
-    internal static int _yapiGetFunctionInfoEx(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetFunctionInfoEx32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-        } else {
-            try {
-                return _yapiGetFunctionInfoEx64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetFunctionInfoEx32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-            }
-        }
-    }
-
-
-    internal static int _yapiHTTPRequestSyncStart(ref YIOHDL iohdl, StringBuilder device, IntPtr request, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHTTPRequestSyncStart32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-        } else {
-            try {
-                return _yapiHTTPRequestSyncStart64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHTTPRequestSyncStart32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiHTTPRequestSyncStartEx(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHTTPRequestSyncStartEx32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-        } else {
-            try {
-                return _yapiHTTPRequestSyncStartEx64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHTTPRequestSyncStartEx32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiHTTPRequestSyncDone(ref YIOHDL iohdl, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHTTPRequestSyncDone32(ref iohdl, errmsg);
-        } else {
-            try {
-                return _yapiHTTPRequestSyncDone64(ref iohdl, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHTTPRequestSyncDone32(ref iohdl, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiHTTPRequestAsync(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHTTPRequestAsync32(device, request, callback, context, errmsg);
-        } else {
-            try {
-                return _yapiHTTPRequestAsync64(device, request, callback, context, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHTTPRequestAsync32(device, request, callback, context, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiHTTPRequestAsyncEx(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHTTPRequestAsyncEx32(device, request, requestlen, callback, context, errmsg);
-        } else {
-            try {
-                return _yapiHTTPRequestAsyncEx64(device, request, requestlen, callback, context, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHTTPRequestAsyncEx32(device, request, requestlen, callback, context, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiHTTPRequest(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiHTTPRequest32(device, url, buffer, buffsize, ref fullsize, errmsg);
-        } else {
-            try {
-                return _yapiHTTPRequest64(device, url, buffer, buffsize, ref fullsize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiHTTPRequest32(device, url, buffer, buffsize, ref fullsize, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiGetDevicePath(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiGetDevicePath32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-        } else {
-            try {
-                return _yapiGetDevicePath64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiGetDevicePath32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-            }
-        }
-    }
-
-    internal static int _yapiSleep(int duration_ms, StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiSleep32(duration_ms, errmsg);
-        } else {
-            try {
-                return _yapiSleep64(duration_ms, errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiSleep32(duration_ms, errmsg);
-            }
-        }
-    }
-
-    internal static void _yapiRegisterHubDiscoveryCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterHubDiscoveryCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterHubDiscoveryCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterHubDiscoveryCallback32(fct);
-            }
-        }
-    }
-
-    internal static int _yapiTriggerHubDiscovery(StringBuilder errmsg)
-    {
-        if (IntPtr.Size == 4) {
-            return _yapiTriggerHubDiscovery32(errmsg);
-        } else {
-            try {
-                return _yapiTriggerHubDiscovery64(errmsg);
-            } catch (System.DllNotFoundException) {
-                return _yapiTriggerHubDiscovery32(errmsg);
-            }
-        }
-    }
-
-    internal static void _yapiRegisterDeviceLogCallback(IntPtr fct)
-    {
-        if (IntPtr.Size == 4) {
-            _yapiRegisterDeviceLogCallback32(fct);
-        } else {
-            try {
-                _yapiRegisterDeviceLogCallback64(fct);
-            } catch (System.DllNotFoundException) {
-                _yapiRegisterDeviceLogCallback32(fct);
-            }
-        }
-    }
 
     //--- (generated code: YFunction dlldef)
+    [DllImport("yapi", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPIWIN32(int mode, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPIWIN64(int mode, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPIMACOS32(int mode, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPIMACOS64(int mode, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPILIN64(int mode, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPILIN32(int mode, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPILINARMHF(int mode, StringBuilder errmsg);
+    internal static int _yapiInitAPI(int mode, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiInitAPIWIN32(mode, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiInitAPIWIN64(mode, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiInitAPIMACOS32(mode, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiInitAPIMACOS64(mode, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiInitAPILIN64(mode, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiInitAPILIN32(mode, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiInitAPILINARMHF(mode, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPIWIN32();
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPIWIN64();
+    [DllImport("libyapi32", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPIMACOS32();
+    [DllImport("libyapi64", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPIMACOS64();
+    [DllImport("libyapi-amd64", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPILIN64();
+    [DllImport("libyapi-i386", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPILIN32();
+    [DllImport("libyapi-armhf", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPILINARMHF();
+    internal static void _yapiFreeAPI()
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiFreeAPIWIN32();
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiFreeAPIWIN64();
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiFreeAPIMACOS32();
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiFreeAPIMACOS64();
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiFreeAPILIN64();
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiFreeAPILIN32();
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiFreeAPILINARMHF();
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileWIN32(StringBuilder tracefile);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileWIN64(StringBuilder tracefile);
+    [DllImport("libyapi32", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileMACOS32(StringBuilder tracefile);
+    [DllImport("libyapi64", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileMACOS64(StringBuilder tracefile);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileLIN64(StringBuilder tracefile);
+    [DllImport("libyapi-i386", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileLIN32(StringBuilder tracefile);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileLINARMHF(StringBuilder tracefile);
+    internal static void _yapiSetTraceFile(StringBuilder tracefile)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiSetTraceFileWIN32(tracefile);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiSetTraceFileWIN64(tracefile);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiSetTraceFileMACOS32(tracefile);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiSetTraceFileMACOS64(tracefile);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiSetTraceFileLIN64(tracefile);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiSetTraceFileLIN32(tracefile);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiSetTraceFileLINARMHF(tracefile);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterLogFunction(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterLogFunctionWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterLogFunctionWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterLogFunctionMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterLogFunctionMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterLogFunctionLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterLogFunctionLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterLogFunctionLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterDeviceArrivalCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterDeviceArrivalCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterDeviceArrivalCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterDeviceArrivalCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterDeviceArrivalCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterDeviceArrivalCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterDeviceArrivalCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterDeviceArrivalCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterDeviceRemovalCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterDeviceRemovalCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterDeviceRemovalCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterDeviceRemovalCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterDeviceRemovalCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterDeviceRemovalCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterDeviceRemovalCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterDeviceRemovalCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterDeviceChangeCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterDeviceChangeCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterDeviceChangeCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterDeviceChangeCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterDeviceChangeCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterDeviceChangeCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterDeviceChangeCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterDeviceChangeCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterDeviceConfigChangeCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterDeviceConfigChangeCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterDeviceConfigChangeCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterDeviceConfigChangeCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterDeviceConfigChangeCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterDeviceConfigChangeCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterDeviceConfigChangeCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterDeviceConfigChangeCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterFunctionUpdateCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterFunctionUpdateCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterFunctionUpdateCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterFunctionUpdateCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterFunctionUpdateCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterFunctionUpdateCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterFunctionUpdateCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterFunctionUpdateCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterTimedReportCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterTimedReportCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterTimedReportCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterTimedReportCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterTimedReportCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterTimedReportCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterTimedReportCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterTimedReportCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackWIN32(StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackWIN64(StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackMACOS32(StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackMACOS64(StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackLIN64(StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackLIN32(StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackLINARMHF(StringBuilder errmsg);
+    internal static int _yapiLockDeviceCallBack(StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiLockDeviceCallBackWIN32(errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiLockDeviceCallBackWIN64(errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiLockDeviceCallBackMACOS32(errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiLockDeviceCallBackMACOS64(errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiLockDeviceCallBackLIN64(errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiLockDeviceCallBackLIN32(errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiLockDeviceCallBackLINARMHF(errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackWIN32(StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackWIN64(StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackMACOS32(StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackMACOS64(StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackLIN64(StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackLIN32(StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackLINARMHF(StringBuilder errmsg);
+    internal static int _yapiUnlockDeviceCallBack(StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiUnlockDeviceCallBackWIN32(errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiUnlockDeviceCallBackWIN64(errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiUnlockDeviceCallBackMACOS32(errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiUnlockDeviceCallBackMACOS64(errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiUnlockDeviceCallBackLIN64(errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiUnlockDeviceCallBackLIN32(errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiUnlockDeviceCallBackLINARMHF(errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackWIN32(StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackWIN64(StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackMACOS32(StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackMACOS64(StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackLIN64(StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackLIN32(StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackLINARMHF(StringBuilder errmsg);
+    internal static int _yapiLockFunctionCallBack(StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiLockFunctionCallBackWIN32(errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiLockFunctionCallBackWIN64(errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiLockFunctionCallBackMACOS32(errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiLockFunctionCallBackMACOS64(errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiLockFunctionCallBackLIN64(errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiLockFunctionCallBackLIN32(errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiLockFunctionCallBackLINARMHF(errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackWIN32(StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackWIN64(StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackMACOS32(StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackMACOS64(StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackLIN64(StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackLIN32(StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackLINARMHF(StringBuilder errmsg);
+    internal static int _yapiUnlockFunctionCallBack(StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiUnlockFunctionCallBackWIN32(errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiUnlockFunctionCallBackWIN64(errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiUnlockFunctionCallBackMACOS32(errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiUnlockFunctionCallBackMACOS64(errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiUnlockFunctionCallBackLIN64(errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiUnlockFunctionCallBackLIN32(errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiUnlockFunctionCallBackLINARMHF(errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubWIN32(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubWIN64(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubMACOS32(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubMACOS64(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubLIN64(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubLIN32(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubLINARMHF(StringBuilder rootUrl, StringBuilder errmsg);
+    internal static int _yapiRegisterHub(StringBuilder rootUrl, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiRegisterHubWIN32(rootUrl, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiRegisterHubWIN64(rootUrl, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiRegisterHubMACOS32(rootUrl, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiRegisterHubMACOS64(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiRegisterHubLIN64(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiRegisterHubLIN32(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiRegisterHubLINARMHF(rootUrl, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubWIN32(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubWIN64(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubMACOS32(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubMACOS64(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubLIN64(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubLIN32(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubLINARMHF(StringBuilder rootUrl, StringBuilder errmsg);
+    internal static int _yapiPreregisterHub(StringBuilder rootUrl, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiPreregisterHubWIN32(rootUrl, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiPreregisterHubWIN64(rootUrl, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiPreregisterHubMACOS32(rootUrl, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiPreregisterHubMACOS64(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiPreregisterHubLIN64(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiPreregisterHubLIN32(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiPreregisterHubLINARMHF(rootUrl, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubWIN32(StringBuilder rootUrl);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubWIN64(StringBuilder rootUrl);
+    [DllImport("libyapi32", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubMACOS32(StringBuilder rootUrl);
+    [DllImport("libyapi64", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubMACOS64(StringBuilder rootUrl);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubLIN64(StringBuilder rootUrl);
+    [DllImport("libyapi-i386", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubLIN32(StringBuilder rootUrl);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubLINARMHF(StringBuilder rootUrl);
+    internal static void _yapiUnregisterHub(StringBuilder rootUrl)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiUnregisterHubWIN32(rootUrl);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiUnregisterHubWIN64(rootUrl);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiUnregisterHubMACOS32(rootUrl);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiUnregisterHubMACOS64(rootUrl);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiUnregisterHubLIN64(rootUrl);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiUnregisterHubLIN32(rootUrl);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiUnregisterHubLINARMHF(rootUrl);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListWIN32(u32 force, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListWIN64(u32 force, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListMACOS32(u32 force, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListMACOS64(u32 force, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListLIN64(u32 force, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListLIN32(u32 force, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListLINARMHF(u32 force, StringBuilder errmsg);
+    internal static int _yapiUpdateDeviceList(u32 force, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiUpdateDeviceListWIN32(force, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiUpdateDeviceListWIN64(force, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiUpdateDeviceListMACOS32(force, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiUpdateDeviceListMACOS64(force, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiUpdateDeviceListLIN64(force, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiUpdateDeviceListLIN32(force, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiUpdateDeviceListLINARMHF(force, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsWIN32(StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsWIN64(StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsMACOS32(StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsMACOS64(StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsLIN64(StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsLIN32(StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsLINARMHF(StringBuilder errmsg);
+    internal static int _yapiHandleEvents(StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHandleEventsWIN32(errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHandleEventsWIN64(errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHandleEventsMACOS32(errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHandleEventsMACOS64(errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHandleEventsLIN64(errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHandleEventsLIN32(errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHandleEventsLINARMHF(errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountWIN32();
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountWIN64();
+    [DllImport("libyapi32", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountMACOS32();
+    [DllImport("libyapi64", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountMACOS64();
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountLIN64();
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountLIN32();
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountLINARMHF();
+    internal static u64 _yapiGetTickCount()
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetTickCountWIN32();
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetTickCountWIN64();
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetTickCountMACOS32();
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetTickCountMACOS64();
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetTickCountLIN64();
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetTickCountLIN32();
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetTickCountLINARMHF();
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameWIN32(StringBuilder name);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameWIN64(StringBuilder name);
+    [DllImport("libyapi32", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameMACOS32(StringBuilder name);
+    [DllImport("libyapi64", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameMACOS64(StringBuilder name);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameLIN64(StringBuilder name);
+    [DllImport("libyapi-i386", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameLIN32(StringBuilder name);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameLINARMHF(StringBuilder name);
+    internal static int _yapiCheckLogicalName(StringBuilder name)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiCheckLogicalNameWIN32(name);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiCheckLogicalNameWIN64(name);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiCheckLogicalNameMACOS32(name);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiCheckLogicalNameMACOS64(name);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiCheckLogicalNameLIN64(name);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiCheckLogicalNameLIN32(name);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiCheckLogicalNameLINARMHF(name);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionWIN32(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionWIN64(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("libyapi32", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionMACOS32(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("libyapi64", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionMACOS64(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionLIN64(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionLIN32(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionLINARMHF(ref IntPtr version, ref IntPtr dat_);
+    internal static u16 _yapiGetAPIVersion(ref IntPtr version, ref IntPtr dat_)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetAPIVersionWIN32(ref version, ref dat_);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetAPIVersionWIN64(ref version, ref dat_);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetAPIVersionMACOS32(ref version, ref dat_);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetAPIVersionMACOS64(ref version, ref dat_);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetAPIVersionLIN64(ref version, ref dat_);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetAPIVersionLIN32(ref version, ref dat_);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetAPIVersionLINARMHF(ref version, ref dat_);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceWIN32(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceWIN64(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceMACOS32(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceMACOS64(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceLIN64(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceLIN32(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceLINARMHF(StringBuilder device_str, StringBuilder errmsg);
+    internal static YDEV_DESCR _yapiGetDevice(StringBuilder device_str, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetDeviceWIN32(device_str, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetDeviceWIN64(device_str, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetDeviceMACOS32(device_str, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetDeviceMACOS64(device_str, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetDeviceLIN64(device_str, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetDeviceLIN32(device_str, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetDeviceLINARMHF(device_str, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoWIN32(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoWIN64(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoMACOS32(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoMACOS64(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoLIN64(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoLIN32(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoLINARMHF(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    internal static int _yapiGetDeviceInfo(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetDeviceInfoWIN32(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetDeviceInfoWIN64(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetDeviceInfoMACOS32(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetDeviceInfoMACOS64(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetDeviceInfoLIN64(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetDeviceInfoLIN32(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetDeviceInfoLINARMHF(d, ref infos, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionWIN32(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionWIN64(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionMACOS32(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionMACOS64(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionLIN64(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionLIN32(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionLINARMHF(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    internal static YFUN_DESCR _yapiGetFunction(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetFunctionWIN32(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetFunctionWIN64(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetFunctionMACOS32(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetFunctionMACOS64(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetFunctionLIN64(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetFunctionLIN32(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetFunctionLINARMHF(class_str, function_str, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassWIN32(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassWIN64(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassMACOS32(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassMACOS64(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassLIN64(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassLIN32(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassLINARMHF(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    internal static int _yapiGetFunctionsByClass(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetFunctionsByClassWIN32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetFunctionsByClassWIN64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetFunctionsByClassMACOS32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetFunctionsByClassMACOS64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetFunctionsByClassLIN64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetFunctionsByClassLIN32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetFunctionsByClassLINARMHF(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceWIN32(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceWIN64(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceMACOS32(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceMACOS64(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceLIN64(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceLIN32(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceLINARMHF(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    internal static int _yapiGetFunctionsByDevice(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetFunctionsByDeviceWIN32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetFunctionsByDeviceWIN64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetFunctionsByDeviceMACOS32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetFunctionsByDeviceMACOS64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetFunctionsByDeviceLIN64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetFunctionsByDeviceLIN32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetFunctionsByDeviceLINARMHF(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExWIN32(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExWIN64(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExMACOS32(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExMACOS64(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExLIN64(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExLIN32(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExLINARMHF(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    internal static int _yapiGetFunctionInfoEx(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetFunctionInfoExWIN32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetFunctionInfoExWIN64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetFunctionInfoExMACOS32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetFunctionInfoExMACOS64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetFunctionInfoExLIN64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetFunctionInfoExLIN32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetFunctionInfoExLINARMHF(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartWIN32(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartWIN64(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartMACOS32(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartMACOS64(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartLIN64(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartLIN32(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartLINARMHF(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    internal static int _yapiHTTPRequestSyncStart(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestSyncStartWIN32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestSyncStartWIN64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestSyncStartMACOS32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestSyncStartMACOS64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestSyncStartLIN64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestSyncStartLIN32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestSyncStartLINARMHF(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExWIN32(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExWIN64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExMACOS32(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExMACOS64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExLIN64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExLIN32(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExLINARMHF(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    internal static int _yapiHTTPRequestSyncStartEx(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestSyncStartExWIN32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestSyncStartExWIN64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestSyncStartExMACOS32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestSyncStartExMACOS64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestSyncStartExLIN64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestSyncStartExLIN32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestSyncStartExLINARMHF(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneWIN32(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneWIN64(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneMACOS32(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneMACOS64(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneLIN64(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneLIN32(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneLINARMHF(ref YIOHDL iohdl, StringBuilder errmsg);
+    internal static int _yapiHTTPRequestSyncDone(ref YIOHDL iohdl, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestSyncDoneWIN32(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestSyncDoneWIN64(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestSyncDoneMACOS32(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestSyncDoneMACOS64(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestSyncDoneLIN64(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestSyncDoneLIN32(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestSyncDoneLINARMHF(ref iohdl, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncWIN32(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncWIN64(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncMACOS32(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncMACOS64(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncLIN64(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncLIN32(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncLINARMHF(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    internal static int _yapiHTTPRequestAsync(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestAsyncWIN32(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestAsyncWIN64(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestAsyncMACOS32(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestAsyncMACOS64(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestAsyncLIN64(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestAsyncLIN32(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestAsyncLINARMHF(device, request, callback, context, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExWIN32(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExWIN64(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExMACOS32(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExMACOS64(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExLIN64(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExLIN32(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExLINARMHF(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    internal static int _yapiHTTPRequestAsyncEx(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestAsyncExWIN32(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestAsyncExWIN64(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestAsyncExMACOS32(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestAsyncExMACOS64(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestAsyncExLIN64(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestAsyncExLIN32(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestAsyncExLINARMHF(device, request, requestlen, callback, context, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestWIN32(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestWIN64(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestMACOS32(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestMACOS64(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestLIN64(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestLIN32(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestLINARMHF(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    internal static int _yapiHTTPRequest(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestWIN32(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestWIN64(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestMACOS32(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestMACOS64(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestLIN64(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestLIN32(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestLINARMHF(device, url, buffer, buffsize, ref fullsize, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathWIN32(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathWIN64(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathMACOS32(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathMACOS64(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathLIN64(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathLIN32(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathLINARMHF(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    internal static int _yapiGetDevicePath(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetDevicePathWIN32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetDevicePathWIN64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetDevicePathMACOS32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetDevicePathMACOS64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetDevicePathLIN64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetDevicePathLIN32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetDevicePathLINARMHF(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepWIN32(int duration_ms, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepWIN64(int duration_ms, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepMACOS32(int duration_ms, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepMACOS64(int duration_ms, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepLIN64(int duration_ms, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepLIN32(int duration_ms, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepLINARMHF(int duration_ms, StringBuilder errmsg);
+    internal static int _yapiSleep(int duration_ms, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiSleepWIN32(duration_ms, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiSleepWIN64(duration_ms, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiSleepMACOS32(duration_ms, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiSleepMACOS64(duration_ms, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiSleepLIN64(duration_ms, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiSleepLIN32(duration_ms, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiSleepLINARMHF(duration_ms, errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterHubDiscoveryCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterHubDiscoveryCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterHubDiscoveryCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterHubDiscoveryCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterHubDiscoveryCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterHubDiscoveryCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterHubDiscoveryCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterHubDiscoveryCallbackLINARMHF(fct);
+                  return;
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryWIN32(StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryWIN64(StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryMACOS32(StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryMACOS64(StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryLIN64(StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryLIN32(StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryLINARMHF(StringBuilder errmsg);
+    internal static int _yapiTriggerHubDiscovery(StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiTriggerHubDiscoveryWIN32(errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiTriggerHubDiscoveryWIN64(errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiTriggerHubDiscoveryMACOS32(errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiTriggerHubDiscoveryMACOS64(errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiTriggerHubDiscoveryLIN64(errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiTriggerHubDiscoveryLIN32(errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiTriggerHubDiscoveryLINARMHF(errmsg);
+        }
+    }
+    [DllImport("yapi", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackWIN32(IntPtr fct);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackWIN64(IntPtr fct);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackMACOS32(IntPtr fct);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackMACOS64(IntPtr fct);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackLIN64(IntPtr fct);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackLIN32(IntPtr fct);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackLINARMHF(IntPtr fct);
+    internal static void _yapiRegisterDeviceLogCallback(IntPtr fct)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterDeviceLogCallbackWIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterDeviceLogCallbackWIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterDeviceLogCallbackMACOS32(fct);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterDeviceLogCallbackMACOS64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterDeviceLogCallbackLIN64(fct);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterDeviceLogCallbackLIN32(fct);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterDeviceLogCallbackLINARMHF(fct);
+                  return;
+        }
+    }
     [DllImport("yapi", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetAllJsonKeys32(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetAllJsonKeysWIN32(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetAllJsonKeys64(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetAllJsonKeysWIN64(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetAllJsonKeysMACOS32(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetAllJsonKeysMACOS64(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetAllJsonKeysLIN64(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetAllJsonKeysLIN32(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetAllJsonKeysLINARMHF(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetAllJsonKeys(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiGetAllJsonKeys32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-        } else {
-             try {
-                 return _yapiGetAllJsonKeys64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiGetAllJsonKeys32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetAllJsonKeysWIN32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetAllJsonKeysWIN64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetAllJsonKeysMACOS32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetAllJsonKeysMACOS64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetAllJsonKeysLIN64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetAllJsonKeysLIN32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetAllJsonKeysLINARMHF(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiCheckFirmware32(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiCheckFirmwareWIN32(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiCheckFirmware64(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiCheckFirmwareWIN64(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiCheckFirmwareMACOS32(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiCheckFirmwareMACOS64(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiCheckFirmwareLIN64(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiCheckFirmwareLIN32(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiCheckFirmwareLINARMHF(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
     internal static YRETCODE _yapiCheckFirmware(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiCheckFirmware32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-        } else {
-             try {
-                 return _yapiCheckFirmware64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiCheckFirmware32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiCheckFirmwareWIN32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiCheckFirmwareWIN64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiCheckFirmwareMACOS32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiCheckFirmwareMACOS64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiCheckFirmwareLIN64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiCheckFirmwareLIN32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiCheckFirmwareLINARMHF(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetBootloaders32(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetBootloadersWIN32(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetBootloaders64(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetBootloadersWIN64(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetBootloadersMACOS32(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetBootloadersMACOS64(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetBootloadersLIN64(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetBootloadersLIN32(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetBootloadersLINARMHF(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetBootloaders(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiGetBootloaders32(buffer, buffersize, ref totalSize, errmsg);
-        } else {
-             try {
-                 return _yapiGetBootloaders64(buffer, buffersize, ref totalSize, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiGetBootloaders32(buffer, buffersize, ref totalSize, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetBootloadersWIN32(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetBootloadersWIN64(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetBootloadersMACOS32(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetBootloadersMACOS64(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetBootloadersLIN64(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetBootloadersLIN32(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetBootloadersLINARMHF(buffer, buffersize, ref totalSize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiUpdateFirmwareEx32(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    private extern static YRETCODE _yapiUpdateFirmwareExWIN32(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiUpdateFirmwareEx64(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    private extern static YRETCODE _yapiUpdateFirmwareExWIN64(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiUpdateFirmwareExMACOS32(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiUpdateFirmwareExMACOS64(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiUpdateFirmwareExLIN64(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiUpdateFirmwareExLIN32(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiUpdateFirmwareExLINARMHF(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
     internal static YRETCODE _yapiUpdateFirmwareEx(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiUpdateFirmwareEx32(serial, firmwarePath, settings, force, startUpdate, errmsg);
-        } else {
-             try {
-                 return _yapiUpdateFirmwareEx64(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiUpdateFirmwareEx32(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiUpdateFirmwareExWIN32(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiUpdateFirmwareExWIN64(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiUpdateFirmwareExMACOS32(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiUpdateFirmwareExMACOS64(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiUpdateFirmwareExLIN64(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiUpdateFirmwareExLIN32(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiUpdateFirmwareExLINARMHF(serial, firmwarePath, settings, force, startUpdate, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBand32(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandWIN32(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBand64(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandWIN64(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandMACOS32(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandMACOS64(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLIN64(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLIN32(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLINARMHF(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
     internal static YRETCODE _yapiHTTPRequestSyncStartOutOfBand(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiHTTPRequestSyncStartOutOfBand32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-        } else {
-             try {
-                 return _yapiHTTPRequestSyncStartOutOfBand64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiHTTPRequestSyncStartOutOfBand32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestSyncStartOutOfBandWIN32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestSyncStartOutOfBandWIN64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestSyncStartOutOfBandMACOS32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestSyncStartOutOfBandMACOS64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestSyncStartOutOfBandLIN64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestSyncStartOutOfBandLIN32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestSyncStartOutOfBandLINARMHF(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBand32(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandWIN32(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBand64(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandWIN64(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandMACOS32(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandMACOS64(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLIN64(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLIN32(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLINARMHF(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static YRETCODE _yapiHTTPRequestAsyncOutOfBand(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiHTTPRequestAsyncOutOfBand32(channel, device, request, requestsize, callback, context, errmsg);
-        } else {
-             try {
-                 return _yapiHTTPRequestAsyncOutOfBand64(channel, device, request, requestsize, callback, context, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiHTTPRequestAsyncOutOfBand32(channel, device, request, requestsize, callback, context, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiHTTPRequestAsyncOutOfBandWIN32(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiHTTPRequestAsyncOutOfBandWIN64(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiHTTPRequestAsyncOutOfBandMACOS32(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiHTTPRequestAsyncOutOfBandMACOS64(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiHTTPRequestAsyncOutOfBandLIN64(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiHTTPRequestAsyncOutOfBandLIN32(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiHTTPRequestAsyncOutOfBandLINARMHF(channel, device, request, requestsize, callback, context, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiTestHub32(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    private extern static YRETCODE _yapiTestHubWIN32(StringBuilder url, int mstimeout, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiTestHub64(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    private extern static YRETCODE _yapiTestHubWIN64(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiTestHubMACOS32(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiTestHubMACOS64(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiTestHubLIN64(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiTestHubLIN32(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiTestHubLINARMHF(StringBuilder url, int mstimeout, StringBuilder errmsg);
     internal static YRETCODE _yapiTestHub(StringBuilder url, int mstimeout, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiTestHub32(url, mstimeout, errmsg);
-        } else {
-             try {
-                 return _yapiTestHub64(url, mstimeout, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiTestHub32(url, mstimeout, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiTestHubWIN32(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiTestHubWIN64(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiTestHubMACOS32(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiTestHubMACOS64(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiTestHubLIN64(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiTestHubLIN32(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiTestHubLINARMHF(url, mstimeout, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiJsonGetPath32(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    private extern static int _yapiJsonGetPathWIN32(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiJsonGetPath64(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    private extern static int _yapiJsonGetPathWIN64(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonGetPathMACOS32(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonGetPathMACOS64(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonGetPathLIN64(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonGetPathLIN32(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonGetPathLINARMHF(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
     internal static int _yapiJsonGetPath(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiJsonGetPath32(path, json_data, json_len, ref result, errmsg);
-        } else {
-             try {
-                 return _yapiJsonGetPath64(path, json_data, json_len, ref result, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiJsonGetPath32(path, json_data, json_len, ref result, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiJsonGetPathWIN32(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiJsonGetPathWIN64(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiJsonGetPathMACOS32(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiJsonGetPathMACOS64(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiJsonGetPathLIN64(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiJsonGetPathLIN32(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiJsonGetPathLINARMHF(path, json_data, json_len, ref result, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiJsonDecodeString32(StringBuilder json_data, StringBuilder output);
+    private extern static int _yapiJsonDecodeStringWIN32(StringBuilder json_data, StringBuilder output);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiJsonDecodeString64(StringBuilder json_data, StringBuilder output);
+    private extern static int _yapiJsonDecodeStringWIN64(StringBuilder json_data, StringBuilder output);
+    [DllImport("libyapi32", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonDecodeStringMACOS32(StringBuilder json_data, StringBuilder output);
+    [DllImport("libyapi64", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonDecodeStringMACOS64(StringBuilder json_data, StringBuilder output);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonDecodeStringLIN64(StringBuilder json_data, StringBuilder output);
+    [DllImport("libyapi-i386", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonDecodeStringLIN32(StringBuilder json_data, StringBuilder output);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonDecodeStringLINARMHF(StringBuilder json_data, StringBuilder output);
     internal static int _yapiJsonDecodeString(StringBuilder json_data, StringBuilder output)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiJsonDecodeString32(json_data, output);
-        } else {
-             try {
-                 return _yapiJsonDecodeString64(json_data, output);
-             } catch (System.DllNotFoundException) {
-                 return _yapiJsonDecodeString32(json_data, output);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiJsonDecodeStringWIN32(json_data, output);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiJsonDecodeStringWIN64(json_data, output);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiJsonDecodeStringMACOS32(json_data, output);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiJsonDecodeStringMACOS64(json_data, output);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiJsonDecodeStringLIN64(json_data, output);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiJsonDecodeStringLIN32(json_data, output);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiJsonDecodeStringLINARMHF(json_data, output);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetSubdevices32(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetSubdevicesWIN32(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetSubdevices64(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetSubdevicesWIN64(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetSubdevicesMACOS32(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetSubdevicesMACOS64(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetSubdevicesLIN64(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetSubdevicesLIN32(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetSubdevicesLINARMHF(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetSubdevices(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiGetSubdevices32(serial, buffer, buffersize, ref totalSize, errmsg);
-        } else {
-             try {
-                 return _yapiGetSubdevices64(serial, buffer, buffersize, ref totalSize, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiGetSubdevices32(serial, buffer, buffersize, ref totalSize, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetSubdevicesWIN32(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetSubdevicesWIN64(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetSubdevicesMACOS32(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetSubdevicesMACOS64(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetSubdevicesLIN64(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetSubdevicesLIN32(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetSubdevicesLINARMHF(serial, buffer, buffersize, ref totalSize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiFreeMem32(IntPtr buffer);
+    private extern static void _yapiFreeMemWIN32(IntPtr buffer);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiFreeMem64(IntPtr buffer);
+    private extern static void _yapiFreeMemWIN64(IntPtr buffer);
+    [DllImport("libyapi32", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeMemMACOS32(IntPtr buffer);
+    [DllImport("libyapi64", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeMemMACOS64(IntPtr buffer);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeMemLIN64(IntPtr buffer);
+    [DllImport("libyapi-i386", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeMemLIN32(IntPtr buffer);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeMemLINARMHF(IntPtr buffer);
     internal static void _yapiFreeMem(IntPtr buffer)
     {
-        if (IntPtr.Size == 4) {
-             _yapiFreeMem32(buffer);
-        } else {
-             try {
-                 _yapiFreeMem64(buffer);
-             } catch (System.DllNotFoundException) {
-                 _yapiFreeMem32(buffer);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiFreeMemWIN32(buffer);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiFreeMemWIN64(buffer);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiFreeMemMACOS32(buffer);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiFreeMemMACOS64(buffer);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiFreeMemLIN64(buffer);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiFreeMemLIN32(buffer);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiFreeMemLINARMHF(buffer);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetDevicePathEx32(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetDevicePathExWIN32(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static YRETCODE _yapiGetDevicePathEx64(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    private extern static YRETCODE _yapiGetDevicePathExWIN64(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetDevicePathExMACOS32(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetDevicePathExMACOS64(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetDevicePathExLIN64(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetDevicePathExLIN32(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetDevicePathExLINARMHF(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetDevicePathEx(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
     {
-        if (IntPtr.Size == 4) {
-             return _yapiGetDevicePathEx32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-        } else {
-             try {
-                 return _yapiGetDevicePathEx64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             } catch (System.DllNotFoundException) {
-                 return _yapiGetDevicePathEx32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetDevicePathExWIN32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetDevicePathExWIN64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetDevicePathExMACOS32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetDevicePathExMACOS64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetDevicePathExLIN64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetDevicePathExLIN32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetDevicePathExLINARMHF(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiSetNetDevListValidity32(int sValidity);
+    private extern static void _yapiSetNetDevListValidityWIN32(int sValidity);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiSetNetDevListValidity64(int sValidity);
+    private extern static void _yapiSetNetDevListValidityWIN64(int sValidity);
+    [DllImport("libyapi32", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidityMACOS32(int sValidity);
+    [DllImport("libyapi64", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidityMACOS64(int sValidity);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidityLIN64(int sValidity);
+    [DllImport("libyapi-i386", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidityLIN32(int sValidity);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidityLINARMHF(int sValidity);
     internal static void _yapiSetNetDevListValidity(int sValidity)
     {
-        if (IntPtr.Size == 4) {
-             _yapiSetNetDevListValidity32(sValidity);
-        } else {
-             try {
-                 _yapiSetNetDevListValidity64(sValidity);
-             } catch (System.DllNotFoundException) {
-                 _yapiSetNetDevListValidity32(sValidity);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiSetNetDevListValidityWIN32(sValidity);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiSetNetDevListValidityWIN64(sValidity);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiSetNetDevListValidityMACOS32(sValidity);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiSetNetDevListValidityMACOS64(sValidity);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiSetNetDevListValidityLIN64(sValidity);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiSetNetDevListValidityLIN32(sValidity);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiSetNetDevListValidityLINARMHF(sValidity);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetNetDevListValidity32();
+    private extern static int _yapiGetNetDevListValidityWIN32();
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static int _yapiGetNetDevListValidity64();
+    private extern static int _yapiGetNetDevListValidityWIN64();
+    [DllImport("libyapi32", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidityMACOS32();
+    [DllImport("libyapi64", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidityMACOS64();
+    [DllImport("libyapi-amd64", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidityLIN64();
+    [DllImport("libyapi-i386", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidityLIN32();
+    [DllImport("libyapi-armhf", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidityLINARMHF();
     internal static int _yapiGetNetDevListValidity()
     {
-        if (IntPtr.Size == 4) {
-             return _yapiGetNetDevListValidity32();
-        } else {
-             try {
-                 return _yapiGetNetDevListValidity64();
-             } catch (System.DllNotFoundException) {
-                 return _yapiGetNetDevListValidity32();
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiGetNetDevListValidityWIN32();
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiGetNetDevListValidityWIN64();
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiGetNetDevListValidityMACOS32();
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiGetNetDevListValidityMACOS64();
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiGetNetDevListValidityLIN64();
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiGetNetDevListValidityLIN32();
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiGetNetDevListValidityLINARMHF();
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiRegisterBeaconCallback32(IntPtr beaconCallback);
+    private extern static void _yapiRegisterBeaconCallbackWIN32(IntPtr beaconCallback);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiRegisterBeaconCallback64(IntPtr beaconCallback);
+    private extern static void _yapiRegisterBeaconCallbackWIN64(IntPtr beaconCallback);
+    [DllImport("libyapi32", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterBeaconCallbackMACOS32(IntPtr beaconCallback);
+    [DllImport("libyapi64", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterBeaconCallbackMACOS64(IntPtr beaconCallback);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterBeaconCallbackLIN64(IntPtr beaconCallback);
+    [DllImport("libyapi-i386", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterBeaconCallbackLIN32(IntPtr beaconCallback);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterBeaconCallbackLINARMHF(IntPtr beaconCallback);
     internal static void _yapiRegisterBeaconCallback(IntPtr beaconCallback)
     {
-        if (IntPtr.Size == 4) {
-             _yapiRegisterBeaconCallback32(beaconCallback);
-        } else {
-             try {
-                 _yapiRegisterBeaconCallback64(beaconCallback);
-             } catch (System.DllNotFoundException) {
-                 _yapiRegisterBeaconCallback32(beaconCallback);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiRegisterBeaconCallbackWIN32(beaconCallback);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiRegisterBeaconCallbackWIN64(beaconCallback);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiRegisterBeaconCallbackMACOS32(beaconCallback);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiRegisterBeaconCallbackMACOS64(beaconCallback);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiRegisterBeaconCallbackLIN64(beaconCallback);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiRegisterBeaconCallbackLIN32(beaconCallback);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiRegisterBeaconCallbackLINARMHF(beaconCallback);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiStartStopDeviceLogCallback32(StringBuilder serial, int start);
+    private extern static void _yapiStartStopDeviceLogCallbackWIN32(StringBuilder serial, int start);
     [DllImport("amd64\\yapi.dll", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-    private extern static void _yapiStartStopDeviceLogCallback64(StringBuilder serial, int start);
+    private extern static void _yapiStartStopDeviceLogCallbackWIN64(StringBuilder serial, int start);
+    [DllImport("libyapi32", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallbackMACOS32(StringBuilder serial, int start);
+    [DllImport("libyapi64", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallbackMACOS64(StringBuilder serial, int start);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallbackLIN64(StringBuilder serial, int start);
+    [DllImport("libyapi-i386", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallbackLIN32(StringBuilder serial, int start);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallbackLINARMHF(StringBuilder serial, int start);
     internal static void _yapiStartStopDeviceLogCallback(StringBuilder serial, int start)
     {
-        if (IntPtr.Size == 4) {
-             _yapiStartStopDeviceLogCallback32(serial, start);
-        } else {
-             try {
-                 _yapiStartStopDeviceLogCallback64(serial, start);
-             } catch (System.DllNotFoundException) {
-                 _yapiStartStopDeviceLogCallback32(serial, start);
-             }
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  _yapiStartStopDeviceLogCallbackWIN32(serial, start);
+                  return;
+             case YAPIDLL_VERSION.WIN64:
+                  _yapiStartStopDeviceLogCallbackWIN64(serial, start);
+                  return;
+             case YAPIDLL_VERSION.MACOS32:
+                  _yapiStartStopDeviceLogCallbackMACOS32(serial, start);
+                  return;
+             case YAPIDLL_VERSION.MACOS64:
+                  _yapiStartStopDeviceLogCallbackMACOS64(serial, start);
+                  return;
+             case YAPIDLL_VERSION.LIN64:
+                  _yapiStartStopDeviceLogCallbackLIN64(serial, start);
+                  return;
+             case YAPIDLL_VERSION.LIN32:
+                  _yapiStartStopDeviceLogCallbackLIN32(serial, start);
+                  return;
+             case YAPIDLL_VERSION.LINARMHF:
+                  _yapiStartStopDeviceLogCallbackLINARMHF(serial, start);
+                  return;
         }
     }
 //--- (end of generated code: YFunction dlldef)
@@ -1235,7 +2304,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "34302";
+    public const string YOCTO_API_BUILD_NO = "34807";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -1480,6 +2549,7 @@ public class YAPI
             char sti = data[start];
             while (start < stop && (sti == '\n' || sti == '\r' || sti == ' ')) {
                 start++;
+                sti = data[start];
             }
 
             return start;
@@ -1524,7 +2594,7 @@ public class YAPI
         {
             int cur_pos = SkipGarbage(_data, _data_start, _data_boundary);
 
-            if (_data[cur_pos] != '[') {
+            if (cur_pos >= _data_boundary || _data[cur_pos] != '[') {
                 throw new System.Exception(FormatError("Opening braces was expected", cur_pos));
             }
 
@@ -1689,7 +2759,7 @@ public class YAPI
             string value = "";
             int cur_pos = SkipGarbage(_data, _data_start, _data_boundary);
 
-            if (_data[cur_pos] != '"') {
+            if (cur_pos >= _data_boundary || _data[cur_pos] != '"') {
                 throw new System.Exception(FormatError("double quote was expected", cur_pos));
             }
 
@@ -1897,7 +2967,7 @@ public class YAPI
             int name_start = _data_start;
             int cur_pos = SkipGarbage(_data, _data_start, _data_boundary);
 
-            if (_data.Length <= cur_pos || _data[cur_pos] != '{') {
+            if (_data.Length <= cur_pos || cur_pos >= _data_boundary || _data[cur_pos] != '{') {
                 throw new System.Exception(FormatError("Opening braces was expected", cur_pos));
             }
 
@@ -2616,7 +3686,7 @@ public class YAPI
         public void invoke()
         {
             if (_sensor != null) {
-                YMeasure mesure = _sensor._decodeTimedReport(_timestamp,_duration, _report);
+                YMeasure mesure = _sensor._decodeTimedReport(_timestamp, _duration, _report);
                 _sensor._invokeTimedReportCallback(mesure);
             } else if (_fun != null) {
                 // new value
@@ -3992,7 +5062,7 @@ public class YAPI
         IntPtr pversion = default(IntPtr);
         IntPtr pdate = default(IntPtr);
         u16 res = default(u16);
-        res = SafeNativeMethods._yapiGetAPIVersion(ref pversion, ref pdate);
+        res = SafeNativeMethods.tryGetAPIVersion(ref pversion, ref pdate);
         version = Marshal.PtrToStringAnsi(pversion);
         date = Marshal.PtrToStringAnsi(pdate);
         return res;
@@ -4061,6 +5131,7 @@ public class YAPI
         errmsg = buffer.ToString();
         return functionReturnValue;
     }
+
     //--- (generated code: YAPIContext yapiwrapper)
     /**
      * <summary>
@@ -4147,11 +5218,6 @@ public class YAPI
 //--- (end of generated code: YAPIContext yapiwrapper)
 }
 
-// Backward-compatibility with previous versions of the library
-public class yAPI : YAPI
-{ }
-
-
 
 //--- (generated code: YAPIContext return codes)
     //--- (end of generated code: YAPIContext return codes)
@@ -4167,7 +5233,8 @@ public class YAPIContext
     protected ulong _defaultCacheValidity = 5;
     //--- (end of generated code: YAPIContext definitions)
 
-    public YAPIContext()    {
+    public YAPIContext()
+    {
         //--- (generated code: YAPIContext attributes initialization)
         //--- (end of generated code: YAPIContext attributes initialization)
     }
@@ -4271,7 +5338,6 @@ public class YAPIContext
 
     //--- (end of generated code: YAPIContext functions)
 }
-
 
 
 //--- (generated code: YFirmwareUpdate class start)
@@ -5487,6 +6553,7 @@ public class YDataSet
                 _streams.Add(stream);
             }
         }
+
         this._progress = 0;
         return this.get_progress();
     }
@@ -6621,9 +7688,10 @@ public class YFunction
             return (YDataStream) _dataStreams[key];
         List<int> words = YAPI._decodeWords(def);
         if (words.Count < 14) {
-            _throw(YAPI.VERSION_MISMATCH,"device firmware too old");
+            _throw(YAPI.VERSION_MISMATCH, "device firmware too old");
             return null;
         }
+
         YDataStream newDataStream = new YDataStream(this, dataset, words);
         _dataStreams.Add(key, newDataStream);
         return newDataStream;
@@ -7377,7 +8445,8 @@ public class YFunction
 
     protected List<string> _json_get_array(byte[] data)
     {
-        YAPI.YJSONArray array = new YAPI.YJSONArray(YAPI.DefaultEncoding.GetString(data));
+        string debug = YAPI.DefaultEncoding.GetString(data);
+        YAPI.YJSONArray array = new YAPI.YJSONArray(debug);
         array.parse();
         List<string> list = new List<string>();
         int len = array.Length;
@@ -7780,7 +8849,7 @@ public class YModule : YFunction
         if (add) {
             module.isOnline();
             if (!_moduleCallbackList.ContainsKey(module)) {
-                _moduleCallbackList[module] =1;
+                _moduleCallbackList[module] = 1;
             } else {
                 _moduleCallbackList[module] += 1;
             }
@@ -7790,7 +8859,6 @@ public class YModule : YFunction
             }
         }
     }
-
 
 
     //--- (generated code: YModule implementation)
@@ -12265,7 +13333,6 @@ public class YDataLogger : YFunction
 
         return YAPI.SUCCESS;
     }
-
 
 
     //--- (generated code: YDataLogger functions)
