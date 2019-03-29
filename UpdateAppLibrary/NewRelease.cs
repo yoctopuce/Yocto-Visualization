@@ -229,11 +229,11 @@ namespace UpdateAppLibrary
 
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.Label label2;
-    private System.Windows.Forms.Label label3;
+    //private System.Windows.Forms.Label label3;
     private Timer closeTimer;
     private EventHandler _onclick;
     private int n = 0;
-    private int fullwidth = 300;  //pixels
+    //private int fullwidth = 300;  //pixels
     private int displayDelay = 10;  // secondes
     private int speedfactor = 4;
 
