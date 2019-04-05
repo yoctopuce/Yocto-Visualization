@@ -189,9 +189,6 @@ namespace YoctoVisualisation
       HideTimer.Tick += HideTimer_Tick;
 
 
-      /*<NOTINGITHUB>*/
-      new UpdateAppLibrary.YAppReleaseManager(new AppDescription()).StartBackgroundCheckForUpdates();
-      /*</NOTINGITHUB>*/
     }
 
 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 34826 2019-03-28 11:52:43Z seb $
+ * $Id: yocto_api.cs 34989 2019-04-05 13:41:16Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -73,6 +73,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 
+#pragma warning disable 1591
 [Serializable]
 public class YAPI_Exception : Exception
 {
@@ -237,7 +238,7 @@ internal static class SafeNativeMethods
                 _dllVersion = YAPIDLL_VERSION.WIN32;
             }
         }
-        ///Console.WriteLine("Detected platform is "+_dllVersion.ToString());
+        //Console.WriteLine("Detected platform is "+_dllVersion.ToString());
         bool can_retry = true;
         do {
             try {
@@ -2302,7 +2303,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "34868";
+    public const string YOCTO_API_BUILD_NO = "34990";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -13381,3 +13382,5 @@ public class YDataLogger : YFunction
 
     //--- (end of generated code: YDataLogger functions)
 }
+
+#pragma warning restore 1591

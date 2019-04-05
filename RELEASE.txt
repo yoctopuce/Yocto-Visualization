@@ -1,3 +1,0 @@
-Yocto-Visualization v2.0.34868
-
-- Beta Test

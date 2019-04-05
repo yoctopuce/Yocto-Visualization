@@ -161,19 +161,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XMLConfigTranslator.cs" />
     <Compile Include="YColor.cs" />
-    <!--<NOTINGITHUB>-->
-    <Compile Include="UpdateAppLibrary\appDescription.cs" />
-    <Compile Include="UpdateAppLibrary\NewRelease.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UpdateAppLibrary\NewRelease.Designer.cs">
-      <DependentUpon>NewRelease.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UpdateAppLibrary\YAppRelease.cs" />
-    <EmbeddedResource Include="UpdateAppLibrary\NewRelease.resx">
-      <DependentUpon>NewRelease.cs</DependentUpon>
-    </EmbeddedResource>
-    <!--</NOTINGITHUB>-->
     <EmbeddedResource Include="angularGaugeForm.resx">
       <DependentUpon>angularGaugeForm.cs</DependentUpon>
       <SubType>Designer</SubType>

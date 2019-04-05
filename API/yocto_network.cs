@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_network.cs 34604 2019-03-11 14:49:45Z seb $
+ *  $Id: yocto_network.cs 34989 2019-04-05 13:41:16Z seb $
  *
  *  Implements yFindNetwork(), the high-level API for Network functions
  *
@@ -47,6 +47,7 @@ using System.Text;
 using YDEV_DESCR = System.Int32;
 using YFUN_DESCR = System.Int32;
 
+ #pragma warning disable 1591
     //--- (YNetwork return codes)
     //--- (end of YNetwork return codes)
 //--- (YNetwork dlldef)
@@ -1944,3 +1945,4 @@ public class YNetwork : YFunction
 
     //--- (end of YNetwork functions)
 }
+#pragma warning restore 1591
