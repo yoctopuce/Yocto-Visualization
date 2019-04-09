@@ -63,17 +63,17 @@ cp YoctoVisualization.desktop yoctovisualization/usr/share/applications
 chmod 644 yoctovisualization/usr/share/applications/YoctoVisualization.desktop
 cp ../artwork/icon.svg yoctovisualization/usr/share/icons/hicolor/scalable/apps/YoctoVisualization.svg
 chmod 644 yoctovisualization/usr/share/icons/hicolor/scalable/apps/YoctoVisualization.svg
-cp YoctoVisualization_16.png yoctovisualization/usr/share/icons/hicolor/16x16/apps/YoctoVisualization.png
+cp icon_16.png yoctovisualization/usr/share/icons/hicolor/16x16/apps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/icons/hicolor/16x16/apps/YoctoVisualization.png
-cp YoctoVisualization_32.png yoctovisualization/usr/share/icons/hicolor/32x32/apps/YoctoVisualization.png
+cp icon_32.png yoctovisualization/usr/share/icons/hicolor/32x32/apps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/icons/hicolor/32x32/apps/YoctoVisualization.png
-cp YoctoVisualization_48.png yoctovisualization/usr/share/icons/hicolor/48x48/apps/YoctoVisualization.png
+cp icon_48.png yoctovisualization/usr/share/icons/hicolor/48x48/apps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/icons/hicolor/48x48/apps/YoctoVisualization.png
-cp YoctoVisualization_128.png yoctovisualization/usr/share/icons/hicolor//128x128/apps/YoctoVisualization.png
+cp icon_128.png yoctovisualization/usr/share/icons/hicolor//128x128/apps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/icons/hicolor//128x128/apps/YoctoVisualization.png
-cp YoctoVisualization_256.png yoctovisualization/usr/share/icons/hicolor/256x256/apps/YoctoVisualization.png
+cp icon_256.png yoctovisualization/usr/share/icons/hicolor/256x256/apps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/icons/hicolor/256x256/apps/YoctoVisualization.png
-cp YoctoVisualization_48.png yoctovisualization/usr/share/pixmaps/YoctoVisualization.png
+cp icon_48.png yoctovisualization/usr/share/pixmaps/YoctoVisualization.png
 chmod 644 yoctovisualization/usr/share/pixmaps/YoctoVisualization.png
 
 

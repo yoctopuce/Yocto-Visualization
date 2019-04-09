@@ -690,8 +690,15 @@ namespace YoctoVisualisation
         tinfo.SetValue(FinalTarget, b,null);
       }
       else
-
-
+    if ((stype == "YoctoVisualisation.DataTrackerDescription+DataPrecision") && (ttype == "YDataRendering.DataTracker+DataPrecision"))
+      {  // Mono doesn't like enums implicit conversions
+        YoctoVisualisation.DataTrackerDescription.DataPrecision svalue = (YoctoVisualisation.DataTrackerDescription.DataPrecision)TerminalSource;
+        int temp = (int)svalue;
+        YDataRendering.DataTracker.DataPrecision tvalue = (YDataRendering.DataTracker.DataPrecision)(temp);
+        tinfo.SetValue(FinalTarget, tvalue, null);
+        //int a = 1;
+      }
+     else
       { 
         
           tinfo.SetValue(FinalTarget, TerminalSource, null);
