@@ -433,7 +433,7 @@ namespace YoctoVisualisation
       CaptureFolderbutton.Enabled = targetFolder.Enabled;
       Color activeColor = SystemColors.ControlText;
       Color inactiveColor = SystemColors.GrayText;
-
+      sizePolicy.BackColor = Color.White;
       switch (sizePolicy.SelectedIndex)
       {
         case (int)YDataRendering.YDataRenderer.CaptureFormats.Fixed:

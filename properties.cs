@@ -231,9 +231,12 @@ public static class sensorPrecisionTypeDescription
       }
     }
 
+    public bool isSensorReadOnly { get { return _DataSource_source.isReadOnly; } }
+
     [DisplayName("Sensor freq"),
      CategoryAttribute("Data source"),
      NotSavedInXMLAttribute(true),
+     IsReadonlyCallAttribute("isSensorReadOnly"),
      ParamExtraDescription(typeof(sensorFreqTypeDescription)),
      DescriptionAttribute("Sensor data acquisition frequency."+ GenericHints.DevConfAffected)]
 
@@ -517,9 +520,13 @@ public static class sensorPrecisionTypeDescription
       }
     }
 
+    public bool isSensorReadOnly { get { return _DataSource_source.isReadOnly; } }
+
+
     [DisplayName("Sensor freq"),
     CategoryAttribute("Data source"),
     NotSavedInXMLAttribute(true),
+    IsReadonlyCallAttribute("isSensorReadOnly"),
     DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected),
     ParamExtraDescription(typeof(sensorFreqTypeDescription))]
 
@@ -1114,7 +1121,9 @@ public static class sensorPrecisionTypeDescription
       }
     }
 
-    
+    public bool isSensorReadOnly { get { return _DataSource_source.isReadOnly; } }
+
+   
     public string sensorDescription
     {
       get
@@ -1126,6 +1135,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Sensor freq"),
      CategoryAttribute("Data source"),
      NotSavedInXMLAttribute(true),
+     IsReadonlyCallAttribute("isSensorReadOnly"),
      DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected),
      ParamExtraDescription(typeof(sensorFreqTypeDescription))] 
     public string DataSource_freq
@@ -1383,12 +1393,12 @@ public static class sensorPrecisionTypeDescription
     }
   }
 
-  
 
-  
 
- 
- 
+
+
+
+
 
   /*********************************
    * SERIES
@@ -1403,7 +1413,7 @@ public static class sensorPrecisionTypeDescription
     public ChartSerie(YColor defaultColor)
     {
       _color = defaultColor;
-     
+
     }
 
     public string summary
@@ -1445,16 +1455,21 @@ public static class sensorPrecisionTypeDescription
       {
         _DataSource_source = value;
         if (ownerForm != null) PropagateDataSourceChange(_DataSource_source);
-          
+
 
       }
     }
 
+    public bool  isSensorReadOnly
+      { get{ return _DataSource_source.isReadOnly; } 
+      }
+
 
     [DisplayName("Sensor frequency"),
      NotSavedInXMLAttribute(true),
+     IsReadonlyCallAttribute("isSensorReadOnly"),
      DescriptionAttribute("Sensor data acquisition frequency." + GenericHints.DevConfAffected),
-      ParamExtraDescription(typeof(sensorFreqTypeDescription))]
+     ParamExtraDescription(typeof(sensorFreqTypeDescription))]
 
     public string DataSource_freq
     {
@@ -1484,6 +1499,7 @@ public static class sensorPrecisionTypeDescription
 
     [DisplayName("Sensor recording"),
      NotSavedInXMLAttribute(true),
+     IsReadonlyCallAttribute("isSensorReadOnly"),
      DescriptionAttribute("Enable/ disable sensor data recording in the device on-board datalogger."+  GenericHints.DevConfAffected  )]
 
     public bool DataSource_recording

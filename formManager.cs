@@ -124,6 +124,7 @@ namespace YoctoVisualisation
 
       menu.Items.Add(new ToolStripSeparator());
       menu.Items.Add(new ToolStripMenuItem("Global configuration ", Resources.menu_configure, ConfigureUSBNet));
+      menu.Items.Add(new ToolStripMenuItem("Save now", Resources.save, savenow));
       menu.Items.Add(new ToolStripMenuItem("Show logs", Resources.menu_logs, showlogs));
 
       menu.Items.Add(new ToolStripMenuItem("Close the whole application", Resources.exit, ExitTheApplication));
@@ -140,6 +141,10 @@ namespace YoctoVisualisation
 
     private void ConfigureUSBNet(object sender, EventArgs e)
     { mainForm.ConfigureUSBNet(); }
+
+    private void savenow(object sender, EventArgs e)
+    { LogManager.Log("Saving..."); mainForm.SaveConfig(); }
+
 
     private void ShowRawData(object sender, EventArgs e)
     { mainForm.ShowRawData(); }

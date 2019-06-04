@@ -13,6 +13,29 @@ using YColors;
 namespace YoctoVisualisation
 {
 
+  public class FlatCombo : ComboBox  // thanks Reza Aghaei @ stackoverflow
+  {
+    private const int WM_PAINT = 0xF;
+    private int buttonWidth = SystemInformation.HorizontalScrollBarArrowWidth;
+    protected override void WndProc(ref Message m)
+    {
+      base.WndProc(ref m);
+      if (m.Msg == WM_PAINT)
+      {
+        using (var g = Graphics.FromHwnd(Handle))
+        {
+          using (var p = new Pen(Color.White))
+          {
+            g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
+            g.DrawLine(p, Width - buttonWidth, 0, Width - buttonWidth, Height);
+          }
+        }
+      }
+    }
+  }
+
+
+
   public class expandButton : Button
   {
 
@@ -81,13 +104,14 @@ namespace YoctoVisualisation
     public bool changeCausesParentRefresh;
     public bool preExpanded;
     public bool expandable = false;
+    public string isReadonlyCall = "";
     // public GetSummaryCallBack summaryCallback = null;
     public PropertyInfo summary =null;
     public object structRoot = null;
 
 
 
-    public UIElementBaseParams(Panel p_parentPanel, Label p_descriptionLabel, UIElement p_parentNode, UIElement p_RootNode, string p_internalname, string p_label, string p_description)
+    public UIElementBaseParams(Panel p_parentPanel, Label p_descriptionLabel, UIElement p_parentNode, UIElement p_RootNode, string p_internalname, string p_label, string p_description, string p_isReadonlyCall)
     {
       parentPanel = p_parentPanel;
       descriptionLabel = p_descriptionLabel;
@@ -98,6 +122,7 @@ namespace YoctoVisualisation
       description = p_description;
       changeCausesParentRefresh = false;
       preExpanded = false;
+      isReadonlyCall = p_isReadonlyCall;
 
     }
 
@@ -138,7 +163,9 @@ namespace YoctoVisualisation
     protected bool _changeCausesParentRefresh = false;
     protected int _availableWidth = 0;
     protected PropertyInfo _summaryProperty = null;
-   
+    protected string _isReadOnlyCall = "";
+
+
     protected bool expandButtonInitDone = false;
     protected bool mainLabelInitDone = false;
     protected List<UIElement> subElements = new List<UIElement>();
@@ -238,8 +265,10 @@ namespace YoctoVisualisation
       _expandable = p.expandable;
       _preExpanded = p.preExpanded;
       _structRoot = p.structRoot;
+      _isReadOnlyCall = p.isReadonlyCall;
 
      
+
       _summaryProperty = p.summary;
 
       if (baseheight == 0)
@@ -470,6 +499,7 @@ namespace YoctoVisualisation
       public bool PreExpandedCategory = false;
       public bool PreExpanded = false;
       public string summaryPropertyName = "";
+      public string isReadOnlyCall = "";
 
       public CustomAttributesExtractor(PropertyInfo ps)
       {
@@ -486,6 +516,8 @@ namespace YoctoVisualisation
           else if (o is PreExpandedCategoryAttribute) PreExpandedCategory = ((PreExpandedCategoryAttribute)o).preExpandedCategory;
           else if (o is PreExpandedAttribute) PreExpanded = ((PreExpandedAttribute)o).preExpanded;
           else if (o is ParamCategorySummaryAttribute) summaryPropertyName = ((ParamCategorySummaryAttribute)o).callback;
+          else if (o is IsReadonlyCallAttribute)
+            isReadOnlyCall = ((IsReadonlyCallAttribute)o).IsReadonlyCall;
 
 
         }
@@ -551,7 +583,7 @@ namespace YoctoVisualisation
               if (subsections.ContainsKey(attr.category)) section = subsections[attr.category];
               else
               {
-                UIElementBaseParams sectionparam = new UIElementBaseParams(_parentPanel, _descriptionLabel, this, _rootNode, ARTIFICIALSECTIONNAME, attr.category, attr.category + " section, expand for more...");
+                UIElementBaseParams sectionparam = new UIElementBaseParams(_parentPanel, _descriptionLabel, this, _rootNode, ARTIFICIALSECTIONNAME, attr.category, attr.category + " section, expand for more...","");
                 sectionparam.preExpanded = attr.PreExpandedCategory;
                 sectionparam.expandable = true;
                 sectionparam.structRoot = dataStucture;
@@ -567,7 +599,7 @@ namespace YoctoVisualisation
               }
             }
 
-            UIElementBaseParams elParam = new UIElementBaseParams(_parentPanel, _descriptionLabel, section, _rootNode, ps.Name, attr.displayName, attr.displayDescription);
+            UIElementBaseParams elParam = new UIElementBaseParams(_parentPanel, _descriptionLabel, section, _rootNode, ps.Name, attr.displayName, attr.displayDescription, attr.isReadOnlyCall);
             elParam.preExpanded = attr.PreExpanded;
             elParam.changeCausesParentRefresh = attr.changeCausesParentRefresh;
 
@@ -863,6 +895,7 @@ namespace YoctoVisualisation
     protected object _dataContainer;
     protected PropertyInfo _prop;
     protected Control input = null;
+
     public UIElementGeneric(UIElementBaseParams p, object dataContainer, PropertyInfo prop)
         : base(p)
     {
@@ -907,6 +940,21 @@ namespace YoctoVisualisation
 
       base.show();
       if (input != null) input.Visible = true;
+
+     
+
+    }
+
+    public void checkForReadOnly()
+    {
+      if (input == null) return;
+
+     if (_isReadOnlyCall != "")
+      {
+        bool readOnly = (bool)_dataContainer.GetType().GetProperty(_isReadOnlyCall).GetValue(_dataContainer, null);
+        input.Enabled = !readOnly;
+      }
+
     }
 
     public override void hide()
@@ -981,6 +1029,7 @@ namespace YoctoVisualisation
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
+        checkForReadOnly();
 
       }
 
@@ -991,6 +1040,7 @@ namespace YoctoVisualisation
       string s = (string)_prop.GetValue(_dataContainer, null);
 
       if (input != null) if (s != input.Text) input.Text = s;
+      checkForReadOnly();
     }
 
     private void Text_TextChanged(object sender, EventArgs e)
@@ -1050,6 +1100,7 @@ namespace YoctoVisualisation
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
+        checkForReadOnly();
       }
     }
 
@@ -1064,7 +1115,7 @@ namespace YoctoVisualisation
         ok = (inputValue == propValue);
       }
       if (!ok) input.Text = propValue.ToString();
-
+      checkForReadOnly();
     }
 
     private void Text_TextChanged(object sender, EventArgs e)
@@ -1123,6 +1174,7 @@ namespace YoctoVisualisation
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
+        checkForReadOnly();
       }
     }
 
@@ -1135,7 +1187,8 @@ namespace YoctoVisualisation
       {
         ok = (inputValue == propValue);
       }      
-      if  (!ok) input.Text = propValue.ToString(); 
+      if  (!ok) input.Text = propValue.ToString();
+      checkForReadOnly();
     }
 
     protected virtual void Text_TextChanged(object sender, EventArgs e)
@@ -1190,6 +1243,7 @@ namespace YoctoVisualisation
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
+        checkForReadOnly();
       }
     }
 
@@ -1213,8 +1267,8 @@ namespace YoctoVisualisation
       }
       if (!ok) input.Text = propValue.ToString();
 
-   
-    
+      checkForReadOnly();
+
     }
 
     protected virtual void Text_TextChanged(object sender, EventArgs e)
@@ -1279,6 +1333,7 @@ namespace YoctoVisualisation
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
+        checkForReadOnly();
       }
     }
 
@@ -1292,6 +1347,7 @@ namespace YoctoVisualisation
           ((CheckBox)input).Checked = b;
           ((CheckBox)input).Text = b ? "Yes" : "No";
         }
+      checkForReadOnly();
     }
 
     private void UIElementBool_CheckedChanged(object sender, EventArgs e)
@@ -1351,7 +1407,7 @@ namespace YoctoVisualisation
       if (input == null)
       {
 
-        input = new ComboBox();
+        input = new FlatCombo();
         ((ComboBox)input).DropDownStyle = ComboBoxStyle.DropDownList;
         ((ComboBox)input).FlatStyle = FlatStyle.Flat;
         ((ComboBox)input).ItemHeight = baseheight;
@@ -1380,11 +1436,13 @@ namespace YoctoVisualisation
           }
         }
         value = (int)_prop.GetValue(_dataContainer, null);
+       
+
         ((ComboBox)input).SelectedValueChanged += UIElementEnum_SelectedValueChanged;
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
-
+        checkForReadOnly();
       }
     }
 
@@ -1394,10 +1452,14 @@ namespace YoctoVisualisation
     {
       if (input != null)
       {
+      
+
         elmnt el = ((elmnt)(((ComboBox)input)).SelectedItem);
         if (_value != el.value())
           value = (int)_prop.GetValue(_dataContainer, null);
+        
       }
+      checkForReadOnly();
     }
 
     private void UIElementEnum_SelectedValueChanged(object sender, EventArgs e)
@@ -1462,7 +1524,7 @@ namespace YoctoVisualisation
       base.AllocateControls();
       if (input == null)
       {
-        input = new ComboBox();
+        input = new FlatCombo();
         ((ComboBox)input).DropDownStyle = ComboBoxStyle.DropDownList;
         ((ComboBox)input).FlatStyle = FlatStyle.Flat;
         input.BackColor = Color.White;
@@ -1479,13 +1541,14 @@ namespace YoctoVisualisation
         _parentPanel.Controls.Add(input);
         input.LostFocus += control_LostFocus;
         input.GotFocus += control_GotFocus;
+        checkForReadOnly();
       }
     }
 
     public override int rowHeight { get { return input.Height; } }
 
     public override void control_GotFocus(object sender, EventArgs e)
-    {
+    { 
       base.control_GotFocus(sender, e);
       refresh();
     }
@@ -1494,6 +1557,9 @@ namespace YoctoVisualisation
     public override void refresh()
     {
       if (input == null) return;
+
+
+
 
         ((ComboBox)input).SelectedValueChanged -= UIElementList_SelectedValueChanged;
       if (_refreshCallback != null) 
@@ -1504,8 +1570,10 @@ namespace YoctoVisualisation
         foreach (object o in _list)
               ((ComboBox)input).Items.Add(o);
        
+
       }
 
+     
 
      value = _prop.GetValue(_dataContainer, null);
       if (value is Int32)
@@ -1517,7 +1585,7 @@ namespace YoctoVisualisation
                 ((ComboBox)input).SelectedIndex = i;
      
       ((ComboBox)input).SelectedValueChanged += UIElementList_SelectedValueChanged;
-
+      checkForReadOnly();
     }
 
     private void UIElementList_SelectedValueChanged(object sender, EventArgs e)

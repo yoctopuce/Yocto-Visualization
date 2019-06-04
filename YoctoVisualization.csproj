@@ -248,6 +248,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="artwork\info.png" />
+    <None Include="artwork\save.png" />
+    <None Include="Resources\save.png" />
     <Content Include="yapi.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -24,12 +24,12 @@ namespace YoctoVisualization
     {
       Text = "New hub connection";
       ok = false;
-      protocolChooser.SelectedIndex = 0;
-      addressChooser.Text = "";
-      portChooser.Text = "";
-      pathChooser.Text = "";
-      usernameChooser.Text = "";
-      passwordChooser.Text = "";
+      protocolChooser.SelectedIndex = 0; protocolChooser.BackColor = Color.White;
+      addressChooser.Text = ""; addressChooser.BackColor = Color.White;
+      portChooser.Text = ""; portChooser.BackColor = Color.White;
+      pathChooser.Text = ""; pathChooser.BackColor = Color.White;
+      usernameChooser.Text = ""; usernameChooser.BackColor = Color.White;
+      passwordChooser.Text = ""; passwordChooser.BackColor = Color.White;
 
       new InputFieldManager(addressChooser, InputFieldManager.dataType.DATA_STRING, false, Double.NaN, Double.NaN, null);
       new InputFieldManager(portChooser, InputFieldManager.dataType.DATA_STRICT_POSITIVE_INT, true, Double.NaN, Double.NaN, null);
@@ -53,12 +53,12 @@ namespace YoctoVisualization
     public bool editHub(ref Hub h)
     {
       Text = "Edit hub connection";
-      protocolChooser.SelectedIndex = h.protocol == "ws" ?0:1;
-      addressChooser.Text =h.addr;
-      portChooser.Text = h.port;
-      pathChooser.Text = h.path;
-      usernameChooser.Text = h.user;
-      passwordChooser.Text = h.clearPassword;
+      protocolChooser.SelectedIndex = h.protocol == "ws" ?0:1; protocolChooser.BackColor = Color.White;
+      addressChooser.Text =h.addr; addressChooser.BackColor = Color.White;
+      portChooser.Text = h.port; portChooser.BackColor = Color.White;
+      pathChooser.Text = h.path; pathChooser.BackColor = Color.White;
+      usernameChooser.Text = h.user; usernameChooser.BackColor = Color.White;
+      passwordChooser.Text = h.clearPassword; passwordChooser.BackColor = Color.White;
       ShowDialog();
       if (ok)
       {

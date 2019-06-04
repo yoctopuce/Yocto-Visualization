@@ -171,6 +171,18 @@ namespace YoctoVisualisation
     }
   }
 
+
+  [AttributeUsage(AttributeTargets.All)]
+  public class IsReadonlyCallAttribute : System.Attribute
+  {
+    public string IsReadonlyCall;
+
+    public IsReadonlyCallAttribute(string value)
+    {
+      this.IsReadonlyCall = value;
+    }
+  }
+
   public static class colorConverter
    {  public static Color colorFromHex(string hex)
       {

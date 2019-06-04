@@ -75,11 +75,22 @@ namespace YoctoVisualisation
         Hide();
       }
     }
+
+    private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+
+    }
+
+    private void copyAllToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      Clipboard.Clear();          
+      Clipboard.SetText(textBox1.Text); 
+    }
   }
 
 
 
-public class LogHandler
+  public class LogHandler
   {
     List<String> buffer;
     TextBox _logWindow;

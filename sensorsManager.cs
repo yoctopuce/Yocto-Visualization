@@ -255,8 +255,9 @@ namespace YoctoVisualisation
     private readonly Mutex dataMutex = new Mutex();
     bool cfgChgNotificationsSupported = false;
     bool mustReloadConfig = false;
+   // private bool _isReadOnly = false;
 
-
+    public bool isReadOnly { get { return sensor.isReadOnly(); } }
 
 
     ulong lastGetConfig = 0;
@@ -334,6 +335,12 @@ namespace YoctoVisualisation
         hwdName = s.get_hardwareId();
         friendlyname = s.get_friendlyName();
         configureSensor();
+
+      
+       
+         if (this.isReadOnly) LogManager.Log(hwdName + " is read only");
+        
+
         online = true;
       //  loadDatalogger();  // will be done automatically at device arrival
 
@@ -534,8 +541,15 @@ namespace YoctoVisualisation
           frequency = frequencyToSet;
           sensor.set_reportFrequency(frequency);
           string lfreq = sensor.get_logFrequency();
-          if (lfreq != "OFF") sensor.set_logFrequency(frequency);
-          sensor.get_module().saveToFlash();
+          try
+          {
+            if (lfreq != "OFF") sensor.set_logFrequency(frequency);
+            sensor.get_module().saveToFlash();
+          } catch (Exception e)
+           {
+            LogManager.Log("failed to change "+hwdName + " log frequency (" + e.Message+")");
+
+          }
         }
         else online = false;
       }
@@ -564,11 +578,19 @@ namespace YoctoVisualisation
         if (sensor.isOnline())
         {
           recording = recordingStatus;
-          sensor.set_logFrequency(recording ? frequency : "OFF");
-          YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");
-          dl.set_recording(recording ? YDataLogger.RECORDING_ON: YDataLogger.RECORDING_OFF);
-          dl.set_autoStart(recording ?  YDataLogger.AUTOSTART_ON : YDataLogger.RECORDING_OFF);
-          sensor.get_module().saveToFlash();
+          try
+          {
+            sensor.set_logFrequency(recording ? frequency : "OFF");
+            YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");    
+            dl.set_recording(recording ? YDataLogger.RECORDING_ON : YDataLogger.RECORDING_OFF);
+            dl.set_autoStart(recording ? YDataLogger.AUTOSTART_ON : YDataLogger.RECORDING_OFF);
+            sensor.get_module().saveToFlash();
+          }
+          catch (Exception e)
+          {
+            LogManager.Log("failed to change " + hwdName + " recording (" + e.Message + ")");
+
+          }
         }
         else online = false;
       }
@@ -813,6 +835,13 @@ namespace YoctoVisualisation
         return;
       }
 
+      if (this.isReadOnly)
+      {
+        LogManager.Log(hwdName + " is read only, cannot load the datalogger contents  (yes that's a bug)");
+        return;
+      }
+
+
       if ((!preloadDone) && (!predloadProcess.IsBusy) && dataLoggerFeature)
       {
         LogManager.Log(hwdName + " : start datalogger preloading");
@@ -833,6 +862,7 @@ namespace YoctoVisualisation
       configureSensor();
       online = true;
       loadDatalogger();
+      if (isReadOnly) LogManager.Log(hwdName + " is read only");
 
 
     }
@@ -859,37 +889,45 @@ namespace YoctoVisualisation
         if (m.functionType(i) == "DataLogger")
           dataLoggerFeature = true;
 
-
-
-      if (dataLoggerFeature)
+      try
       {
-        YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");
-        bool dataloggerOn = dl.get_recording() != YDataLogger.RECORDING_OFF;
-
-        if ((!dataloggerOn) && (lfreq != "OFF")) { lfreq = "OFF"; mustSave = true; }
-
-        if (lfreq != "OFF") { rfreq = lfreq; sensor.set_reportFrequency(rfreq); mustSave = true; }
-        else if (rfreq == "OFF") { rfreq = "1/s"; sensor.set_reportFrequency(rfreq); mustSave = true; }
-        if (mustSave) sensor.set_logFrequency(lfreq);
-
-        if (lfreq != "OFF")
+        if (dataLoggerFeature)
         {
-          dl.set_recording(YDataLogger.RECORDING_ON);
-          dl.set_autoStart(YDataLogger.AUTOSTART_ON);
-          mustSave = true;
+          YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");
+          bool dataloggerOn = dl.get_recording() != YDataLogger.RECORDING_OFF;
+
+          if ((!dataloggerOn) && (lfreq != "OFF")) { lfreq = "OFF"; mustSave = true; }
+
+          if (lfreq != "OFF") { rfreq = lfreq; sensor.set_reportFrequency(rfreq); mustSave = true; }
+          else if (rfreq == "OFF") { rfreq = "1/s"; sensor.set_reportFrequency(rfreq); mustSave = true; }
+          if (mustSave) sensor.set_logFrequency(lfreq);
+
+          if (lfreq != "OFF")
+          {
+            dl.set_recording(YDataLogger.RECORDING_ON);
+            dl.set_autoStart(YDataLogger.AUTOSTART_ON);
+            mustSave = true;
+          }
+
+        }
+        else
+        {
+          lfreq = "OFF";
+          rfreq = sensor.get_reportFrequency();
+          if (rfreq == "OFF") { rfreq = "1/s"; sensor.set_reportFrequency(rfreq); mustSave = true; }
+
         }
 
+
+        if (mustSave) sensor.get_module().saveToFlash();
+
       }
-      else
+      catch (Exception e)
       {
-        lfreq = "OFF";
-        rfreq = sensor.get_reportFrequency();
-        if (rfreq == "OFF") { rfreq = "1/s"; sensor.set_reportFrequency(rfreq); mustSave = true; }
+        LogManager.Log("failed to configure " + hwdName + "  (" + e.Message + ")");
 
       }
 
-
-      if (mustSave) sensor.get_module().saveToFlash();
       sensor.registerTimedReportCallback(TimedCallback);
       recording = (lfreq != "OFF");
       frequency = rfreq;
@@ -913,6 +951,7 @@ namespace YoctoVisualisation
 
     public void TimedCallback(YFunction source, YMeasure M)
     {
+      
 
       if (M != null)
       {
@@ -975,7 +1014,10 @@ namespace YoctoVisualisation
         }
         catch { online = false; }
       }
-      if (online) return friendlyname;
+      if (online)
+      { if (this.isReadOnly) return friendlyname + " (READ ONLY)";
+        return friendlyname;
+      }
       return friendlyname + " (OFFLINE)";
 
     }
@@ -1101,6 +1143,7 @@ namespace YoctoVisualisation
               YSensor s = YSensor.FindSensor(serial + "." + fid);
               string hwd = s.get_hardwareId();
 
+              //if (s.isReadOnly()) LogManager.Log(hwd + " is read only!");
 
               sensorList.Add(new CustomYSensor(s, hwd, FindSensorLastLocalConfig(hwd)));
              
@@ -1113,11 +1156,19 @@ namespace YoctoVisualisation
         // (depends on firmware version)
 
         m.registerConfigChangeCallback(deviceConfigChanged);
-        m.triggerConfigChangeCallback();
+        try
+        {
+          m.triggerConfigChangeCallback();
+        } catch   (Exception )
+        {
+          
+        }
 
         if (_changeCallback != null) _changeCallback();
       }
-      catch (Exception e) { LogManager.Log("Device Arrival Error: " + e.Message); }
+      catch (Exception e) {
+         LogManager.Log("Device Arrival Error: " + e.Message);
+      }
     }
 
 

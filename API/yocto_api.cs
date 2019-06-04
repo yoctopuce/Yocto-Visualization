@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 34989 2019-04-05 13:41:16Z seb $
+ * $Id: yocto_api.cs 35620 2019-06-04 08:29:58Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -2255,6 +2255,40 @@ internal static class SafeNativeMethods
                   return;
         }
     }
+    [DllImport("yapi", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableWIN32(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("amd64\\yapi.dll", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableWIN64(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("libyapi32", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableMACOS32(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("libyapi64", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableMACOS64(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("libyapi-amd64", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableLIN64(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("libyapi-i386", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableLIN32(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("libyapi-armhf", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableLINARMHF(StringBuilder serial, StringBuilder errmsg);
+    internal static int _yapiIsModuleWritable(StringBuilder serial, StringBuilder errmsg)
+    {
+        switch (_dllVersion) {
+             default:
+             case YAPIDLL_VERSION.WIN32:
+                  return _yapiIsModuleWritableWIN32(serial, errmsg);
+             case YAPIDLL_VERSION.WIN64:
+                  return _yapiIsModuleWritableWIN64(serial, errmsg);
+             case YAPIDLL_VERSION.MACOS32:
+                  return _yapiIsModuleWritableMACOS32(serial, errmsg);
+             case YAPIDLL_VERSION.MACOS64:
+                  return _yapiIsModuleWritableMACOS64(serial, errmsg);
+             case YAPIDLL_VERSION.LIN64:
+                  return _yapiIsModuleWritableLIN64(serial, errmsg);
+             case YAPIDLL_VERSION.LIN32:
+                  return _yapiIsModuleWritableLIN32(serial, errmsg);
+             case YAPIDLL_VERSION.LINARMHF:
+                  return _yapiIsModuleWritableLINARMHF(serial, errmsg);
+        }
+    }
 //--- (end of generated code: YFunction dlldef)
 }
 
@@ -2303,7 +2337,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "35091";
+    public const string YOCTO_API_BUILD_NO = "35622";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -8010,6 +8044,37 @@ public class YFunction
 
     /**
      * <summary>
+     *   Test if the function is readOnly.
+     * <para>
+     *   Return <c>true</c> if the function is write protected
+     *   or that the function is not available.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   <c>true</c> if the function is readOnly or not online.
+     * </returns>
+     */
+    public virtual bool isReadOnly()
+    {
+        string serial;
+        StringBuilder errmsg = new StringBuilder(YAPI.YOCTO_ERRMSG_LEN);
+        int res;
+        try {
+            serial = this.get_serialNumber();
+        } catch {
+            return true;
+        }
+        res = SafeNativeMethods._yapiIsModuleWritable(new StringBuilder(serial), errmsg);
+        if (res > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * <summary>
      *   Returns the serial number of the module, as set by the factory.
      * <para>
      * </para>
@@ -9415,11 +9480,18 @@ public class YModule : YFunction
     public static YModule FindModule(string func)
     {
         YModule obj;
+        string cleanHwId;
+        int modpos;
         lock (YAPI.globalLock) {
-            obj = (YModule) YFunction._FindFromCache("Module", func);
+            cleanHwId = func;
+            modpos = (func).IndexOf(".module");
+            if (modpos != ((func).Length - 7)) {
+                cleanHwId = func + ".module";
+            }
+            obj = (YModule) YFunction._FindFromCache("Module", cleanHwId);
             if (obj == null) {
-                obj = new YModule(func);
-                YFunction._AddToCache("Module", func, obj);
+                obj = new YModule(cleanHwId);
+                YFunction._AddToCache("Module", cleanHwId, obj);
             }
         }
         return obj;
@@ -9827,15 +9899,17 @@ public class YModule : YFunction
             if (YAPI._atoi(this.get_firmwareRelease()) > 9000) {
                 url = "api/"+ templist[ii]+"/sensorType";
                 t_type = YAPI.DefaultEncoding.GetString(this._download(url));
-                if (t_type == "RES_NTC") {
+                if (t_type == "RES_NTC" || t_type == "RES_LINEAR") {
                     id = ( templist[ii]).Substring( 11, ( templist[ii]).Length - 11);
-                    temp_data_bin = this._download("extra.json?page="+id);
-                    if ((temp_data_bin).Length == 0) {
-                        return temp_data_bin;
+                    if (id == "") {
+                        id = "1";
                     }
-                    item = ""+ sep+"{\"fid\":\""+  templist[ii]+"\", \"json\":"+YAPI.DefaultEncoding.GetString(temp_data_bin)+"}\n";
-                    ext_settings = ext_settings + item;
-                    sep = ",";
+                    temp_data_bin = this._download("extra.json?page="+id);
+                    if ((temp_data_bin).Length > 0) {
+                        item = ""+ sep+"{\"fid\":\""+  templist[ii]+"\", \"json\":"+YAPI.DefaultEncoding.GetString(temp_data_bin)+"}\n";
+                        ext_settings = ext_settings + item;
+                        sep = ",";
+                    }
                 }
             }
         }
@@ -9880,7 +9954,7 @@ public class YModule : YFunction
         while (ofs + 1 < size) {
             curr = values[ofs];
             currTemp = values[ofs + 1];
-            url = "api/"+  funcId+"/.json?command=m"+ curr+":"+currTemp;
+            url = "api/"+ funcId+".json?command=m"+ curr+":"+currTemp;
             this._download(url);
             ofs = ofs + 2;
         }

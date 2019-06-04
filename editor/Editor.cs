@@ -115,7 +115,7 @@ namespace YoctoVisualisation
 
       if (!EditedDataSourceList.ContainsKey(structData))
       {
-        UIElementBaseParams rootparam = new UIElementBaseParams(panel1, label1, null, null, "root", "Root", "root node");
+        UIElementBaseParams rootparam = new UIElementBaseParams(panel1, label1, null, null, "root", "Root", "root node","");
         it = new UIElement(rootparam);
         currentEditedDataSource = new EditedDataSource(structData, it);
         EditedDataSourceList[structData] = currentEditedDataSource;
