@@ -257,7 +257,7 @@ namespace YoctoVisualisation
     bool mustReloadConfig = false;
    // private bool _isReadOnly = false;
 
-    public bool isReadOnly { get { return sensor.isReadOnly(); } }
+    public bool isReadOnly { get { if (sensor != null) return sensor.isReadOnly(); else return true; } }
 
 
     ulong lastGetConfig = 0;

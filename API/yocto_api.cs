@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 35620 2019-06-04 08:29:58Z seb $
+ * $Id: yocto_api.cs 35677 2019-06-05 09:34:47Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -2337,7 +2337,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "35652";
+    public const string YOCTO_API_BUILD_NO = "35802";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -7633,27 +7633,36 @@ public class YFunction
         return new byte[0];
     }
 
+    private byte[] _strip_http_header(byte[] buffer)
+    {
+        int found, body;
+        for (found = 0; found < buffer.Length - 4; found++)
+        {
+            if (buffer[found] == 13 && buffer[found + 1] == 10 && buffer[found + 2] == 13 && buffer[found + 3] == 10)
+                break;
+        }
+
+        if (found >= buffer.Length - 4)
+        {
+            _throw(YAPI.IO_ERROR, "http request failed");
+            return null;
+        }
+
+        body = found + 4;
+        byte[] res = new byte[buffer.Length - body];
+        Buffer.BlockCopy(buffer, body, res, 0, buffer.Length - body);
+        return res;
+
+    }
+
     // Method used to send http request to the device (not the function)
     public byte[] _download(string path)
     {
         string request;
         byte[] buffer, res;
-        int found, body;
         request = "GET /" + path + " HTTP/1.1\r\n\r\n";
         buffer = _request(request);
-        for (found = 0; found < buffer.Length - 4; found++) {
-            if (buffer[found] == 13 && buffer[found + 1] == 10 && buffer[found + 2] == 13 && buffer[found + 3] == 10)
-                break;
-        }
-
-        if (found >= buffer.Length - 4) {
-            _throw(YAPI.IO_ERROR, "http request failed");
-            return new byte[0];
-        }
-
-        body = found + 4;
-        res = new byte[buffer.Length - body];
-        Buffer.BlockCopy(buffer, body, res, 0, buffer.Length - body);
+        res = _strip_http_header(buffer);
         return res;
     }
 
@@ -7670,7 +7679,7 @@ public class YFunction
     }
 
     // Method used to upload a file to the device
-    public int _upload(string path, byte[] content)
+    public byte[] _uploadEx(string path, byte[] content)
     {
         string bodystr, boundary;
         byte[] body, bb, header, footer, fullrequest, buffer;
@@ -7703,13 +7712,17 @@ public class YFunction
         Buffer.BlockCopy(header, 0, fullrequest, 0, header.Length);
         Buffer.BlockCopy(body, 0, fullrequest, header.Length, body.Length);
         Buffer.BlockCopy(footer, 0, fullrequest, header.Length + body.Length, footer.Length);
-
         buffer = _request(fullrequest);
-        if (buffer.Length == 0) {
-            _throw(YAPI.IO_ERROR, "http request failed");
+        return _strip_http_header(buffer);
+    }
+
+    public int _upload(string path, byte[] content)
+    {
+        byte[] buffer;
+        buffer = _uploadEx(path,content);
+        if (buffer == null) {
             return YAPI.IO_ERROR;
         }
-
         return YAPI.SUCCESS;
     }
 

@@ -344,6 +344,7 @@ namespace YDataRendering
     }
 
     private Pen _pen = null;
+    private Pen _legendPen = null;
 
 
     public Pen pen
@@ -359,6 +360,22 @@ namespace YDataRendering
         return _pen;
       }
     }
+
+    public Pen legendPen
+    {
+      get
+      {
+        if (_legendPen == null)
+        {
+          _legendPen = new Pen(_color, (float)(_thickness* parent.legendPanel.traceWidthFactor));
+          
+
+        }
+        return _legendPen;
+      }
+    }
+
+    public void resetlegendPen() { _legendPen = null; } 
 
     private Brush _brush = null;
 
@@ -395,7 +412,7 @@ namespace YDataRendering
 
 
     private Color _color = Color.Black;
-    public Color color { get { return _color; } set { _color = value; _pen = null; _brush = null; _navigatorpen = null; parent.redraw(); } }
+    public Color color { get { return _color; } set { _color = value; _pen = null; _legendPen = null; _brush = null; _navigatorpen = null; parent.redraw(); } }
 
     private double _thickness = 1.0;
     public double thickness
@@ -404,7 +421,7 @@ namespace YDataRendering
       set
       {
         if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-        _thickness = value; _pen = null; parent.redraw();
+        _thickness = value; _pen = null; _legendPen = null;  parent.redraw();
       }
     }
 
@@ -837,6 +854,21 @@ namespace YDataRendering
 
     public enum Position {[Description("Left")] LEFT, [Description("Top-Left")] TOPLEFT, [Description("Top")] TOP, [Description("Top-Right")] TOPRIGHT, [Description("Right")] RIGHT, [Description("Bottom-Right")] BOTTOMRIGHT, [Description("Bottom")] BOTTOM, [Description("Bottom-Left")] BOTTOMLEFT };
 
+    protected double _traceWidth = 1.0;
+    public double traceWidthFactor
+    {
+      get { return _traceWidth; }
+      set
+      {
+        if (value > 0)
+        {
+          _traceWidth = value;
+          _parentRenderer.resetlegendPens();
+          _parentRenderer.redraw();
+        }
+        else throw new ArgumentException("This has to be a strictly positive value");
+      }
+    }
 
     public LegendPanel(YDataRenderer parent, Object directParent)
     {
@@ -2013,6 +2045,12 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
     }
 
 
+    public override void resetlegendPens()
+    {
+      for (int i = 0; i < _series.Count; i++)
+        _series[i].resetlegendPen();
+    }
+
 
     public void drawLegendPanel(YGraphics g, int viewPortWidth, int viewPortHeight, ref ViewPortSettings mainViewPort)
     {
@@ -2227,19 +2265,18 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
       Rectangle r = new Rectangle((int)x, (int)y, (int)w, (int)h);
       g.FillRectangle(_legendPanel.bgBrush, r);
       g.DrawRectangle(_legendPanel.pen, r);
-
+      
       for (int i = 0; i < _series.Count; i++)
         if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
-        {
+        { 
           g.DrawString(legends[i], _legendPanel.font.fontObject, _legendPanel.font.brushObject,
              (int)(x + ofsetx[i] + 20 + legendPanel.padding),
              (int)(y + ofsety[i] + legendPanel.padding));
           int px = (int)(x + ofsetx[i] + _legendPanel.borderthickness / 2 + legendPanel.padding + 6);
           int py = (int)(y + ofsety[i] + legendPanel.padding + legendHeight[i] / 2);
-          g.DrawLine(_series[i].pen, new Point(px, py), new Point(px + 12, py));
+          g.DrawLine(_series[i].legendPen , new Point(px, py), new Point(px + 12, py));
 
         }
-
     }
 
 

@@ -1649,7 +1649,10 @@ public static class sensorPrecisionTypeDescription
     DescriptionAttribute("Distance between the panel border and its surroundings")]
     public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; } }
 
- 
+    private double _traceWidthFactor = 1;
+    [DisplayName("Color Indicators Factor"),
+    DescriptionAttribute("Factor used to enlarge series color indicators shown in the legend panel")]
+    public double traceWidthFactor { get { return _traceWidthFactor; } set { _traceWidthFactor = value; } }
 
   }
 

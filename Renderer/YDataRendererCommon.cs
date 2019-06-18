@@ -563,8 +563,8 @@ namespace YDataRendering
 
     static private bool _disableMinMaxCheck = false;
     static public bool minMaxCheckDisabled { get { return _disableMinMaxCheck; } set { _disableMinMaxCheck = value; }  }
-    
 
+    public virtual void resetlegendPens() { }
 
     private getCaptureParamaters _getCaptureParameters = null;
     public getCaptureParamaters getCaptureParameters { get { return _getCaptureParameters; } set { _getCaptureParameters = value; } }
