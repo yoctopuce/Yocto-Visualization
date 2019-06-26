@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 35677 2019-06-05 09:34:47Z seb $
+ * $Id: yocto_api.cs 35931 2019-06-26 07:03:28Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -196,7 +196,8 @@ internal static class SafeNativeMethods
         MACOS64,
         LIN32,
         LIN64,
-        LINARMHF
+        LINARMHF,
+        LINAARCH64
     }
 
     private static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.WIN32;
@@ -252,6 +253,7 @@ internal static class SafeNativeMethods
                     case YAPIDLL_VERSION.WIN64:
                     case YAPIDLL_VERSION.MACOS32:
                     case YAPIDLL_VERSION.LINARMHF:
+                    case YAPIDLL_VERSION.LINAARCH64:
                         _dllVersion = YAPIDLL_VERSION.WIN32;
                         break;
                     case YAPIDLL_VERSION.MACOS64:
@@ -261,7 +263,7 @@ internal static class SafeNativeMethods
                         _dllVersion = YAPIDLL_VERSION.LINARMHF;
                         break;
                     case YAPIDLL_VERSION.LIN64:
-                        _dllVersion = YAPIDLL_VERSION.LIN32;
+                        _dllVersion = YAPIDLL_VERSION.LINAARCH64;
                         break;
                 }
                 //Console.WriteLine("retry with platform " + _dllVersion.ToString());
@@ -287,6 +289,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiInitAPILIN32(int mode, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiInitAPILINARMHF(int mode, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiInitAPILINAARCH64(int mode, StringBuilder errmsg);
     internal static int _yapiInitAPI(int mode, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -305,6 +309,8 @@ internal static class SafeNativeMethods
                   return _yapiInitAPILIN32(mode, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiInitAPILINARMHF(mode, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiInitAPILINAARCH64(mode, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -321,6 +327,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiFreeAPILIN32();
     [DllImport("libyapi-armhf", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiFreeAPILINARMHF();
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiFreeAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeAPILINAARCH64();
     internal static void _yapiFreeAPI()
     {
         switch (_dllVersion) {
@@ -346,6 +354,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiFreeAPILINARMHF();
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiFreeAPILINAARCH64();
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -362,6 +373,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiSetTraceFileLIN32(StringBuilder tracefile);
     [DllImport("libyapi-armhf", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiSetTraceFileLINARMHF(StringBuilder tracefile);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiSetTraceFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetTraceFileLINAARCH64(StringBuilder tracefile);
     internal static void _yapiSetTraceFile(StringBuilder tracefile)
     {
         switch (_dllVersion) {
@@ -387,6 +400,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiSetTraceFileLINARMHF(tracefile);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiSetTraceFileLINAARCH64(tracefile);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -403,6 +419,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterLogFunctionLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterLogFunctionLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterLogFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterLogFunctionLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterLogFunction(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -428,6 +446,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterLogFunctionLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterLogFunctionLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -444,6 +465,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceArrivalCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterDeviceArrivalCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterDeviceArrivalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceArrivalCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceArrivalCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -469,6 +492,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceArrivalCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterDeviceArrivalCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -485,6 +511,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceRemovalCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterDeviceRemovalCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterDeviceRemovalCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceRemovalCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceRemovalCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -510,6 +538,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceRemovalCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterDeviceRemovalCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -526,6 +557,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceChangeCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterDeviceChangeCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterDeviceChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceChangeCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceChangeCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -551,6 +584,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceChangeCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterDeviceChangeCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -567,6 +603,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceConfigChangeCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterDeviceConfigChangeCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterDeviceConfigChangeCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceConfigChangeCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceConfigChangeCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -592,6 +630,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceConfigChangeCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterDeviceConfigChangeCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -608,6 +649,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterFunctionUpdateCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterFunctionUpdateCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterFunctionUpdateCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterFunctionUpdateCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterFunctionUpdateCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -633,6 +676,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterFunctionUpdateCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterFunctionUpdateCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -649,6 +695,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterTimedReportCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterTimedReportCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterTimedReportCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterTimedReportCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterTimedReportCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -674,6 +722,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterTimedReportCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterTimedReportCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -690,6 +741,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiLockDeviceCallBackLIN32(StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiLockDeviceCallBackLINARMHF(StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiLockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockDeviceCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiLockDeviceCallBack(StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -708,6 +761,8 @@ internal static class SafeNativeMethods
                   return _yapiLockDeviceCallBackLIN32(errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiLockDeviceCallBackLINARMHF(errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiLockDeviceCallBackLINAARCH64(errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -724,6 +779,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiUnlockDeviceCallBackLIN32(StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiUnlockDeviceCallBackLINARMHF(StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiUnlockDeviceCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockDeviceCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiUnlockDeviceCallBack(StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -742,6 +799,8 @@ internal static class SafeNativeMethods
                   return _yapiUnlockDeviceCallBackLIN32(errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUnlockDeviceCallBackLINARMHF(errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiUnlockDeviceCallBackLINAARCH64(errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -758,6 +817,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiLockFunctionCallBackLIN32(StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiLockFunctionCallBackLINARMHF(StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiLockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiLockFunctionCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiLockFunctionCallBack(StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -776,6 +837,8 @@ internal static class SafeNativeMethods
                   return _yapiLockFunctionCallBackLIN32(errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiLockFunctionCallBackLINARMHF(errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiLockFunctionCallBackLINAARCH64(errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -792,6 +855,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiUnlockFunctionCallBackLIN32(StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiUnlockFunctionCallBackLINARMHF(StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiUnlockFunctionCallBack", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUnlockFunctionCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiUnlockFunctionCallBack(StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -810,6 +875,8 @@ internal static class SafeNativeMethods
                   return _yapiUnlockFunctionCallBackLIN32(errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUnlockFunctionCallBackLINARMHF(errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiUnlockFunctionCallBackLINAARCH64(errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -826,6 +893,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiRegisterHubLIN32(StringBuilder rootUrl, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiRegisterHubLINARMHF(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiRegisterHubLINAARCH64(StringBuilder rootUrl, StringBuilder errmsg);
     internal static int _yapiRegisterHub(StringBuilder rootUrl, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -844,6 +913,8 @@ internal static class SafeNativeMethods
                   return _yapiRegisterHubLIN32(rootUrl, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiRegisterHubLINARMHF(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiRegisterHubLINAARCH64(rootUrl, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -860,6 +931,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiPreregisterHubLIN32(StringBuilder rootUrl, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiPreregisterHubLINARMHF(StringBuilder rootUrl, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiPreregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiPreregisterHubLINAARCH64(StringBuilder rootUrl, StringBuilder errmsg);
     internal static int _yapiPreregisterHub(StringBuilder rootUrl, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -878,6 +951,8 @@ internal static class SafeNativeMethods
                   return _yapiPreregisterHubLIN32(rootUrl, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiPreregisterHubLINARMHF(rootUrl, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiPreregisterHubLINAARCH64(rootUrl, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -894,6 +969,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiUnregisterHubLIN32(StringBuilder rootUrl);
     [DllImport("libyapi-armhf", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiUnregisterHubLINARMHF(StringBuilder rootUrl);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiUnregisterHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiUnregisterHubLINAARCH64(StringBuilder rootUrl);
     internal static void _yapiUnregisterHub(StringBuilder rootUrl)
     {
         switch (_dllVersion) {
@@ -919,6 +996,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiUnregisterHubLINARMHF(rootUrl);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiUnregisterHubLINAARCH64(rootUrl);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -935,6 +1015,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiUpdateDeviceListLIN32(u32 force, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiUpdateDeviceListLINARMHF(u32 force, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiUpdateDeviceList", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiUpdateDeviceListLINAARCH64(u32 force, StringBuilder errmsg);
     internal static int _yapiUpdateDeviceList(u32 force, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -953,6 +1035,8 @@ internal static class SafeNativeMethods
                   return _yapiUpdateDeviceListLIN32(force, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUpdateDeviceListLINARMHF(force, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiUpdateDeviceListLINAARCH64(force, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -969,6 +1053,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHandleEventsLIN32(StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHandleEventsLINARMHF(StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHandleEvents", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHandleEventsLINAARCH64(StringBuilder errmsg);
     internal static int _yapiHandleEvents(StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -987,6 +1073,8 @@ internal static class SafeNativeMethods
                   return _yapiHandleEventsLIN32(errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHandleEventsLINARMHF(errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHandleEventsLINAARCH64(errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1003,6 +1091,8 @@ internal static class SafeNativeMethods
     private extern static u64 _yapiGetTickCountLIN32();
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static u64 _yapiGetTickCountLINARMHF();
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetTickCount", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u64 _yapiGetTickCountLINAARCH64();
     internal static u64 _yapiGetTickCount()
     {
         switch (_dllVersion) {
@@ -1021,6 +1111,8 @@ internal static class SafeNativeMethods
                   return _yapiGetTickCountLIN32();
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetTickCountLINARMHF();
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetTickCountLINAARCH64();
         }
     }
     [DllImport("yapi", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1037,6 +1129,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiCheckLogicalNameLIN32(StringBuilder name);
     [DllImport("libyapi-armhf", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiCheckLogicalNameLINARMHF(StringBuilder name);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiCheckLogicalName", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiCheckLogicalNameLINAARCH64(StringBuilder name);
     internal static int _yapiCheckLogicalName(StringBuilder name)
     {
         switch (_dllVersion) {
@@ -1055,6 +1149,8 @@ internal static class SafeNativeMethods
                   return _yapiCheckLogicalNameLIN32(name);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiCheckLogicalNameLINARMHF(name);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiCheckLogicalNameLINAARCH64(name);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1071,6 +1167,8 @@ internal static class SafeNativeMethods
     private extern static u16 _yapiGetAPIVersionLIN32(ref IntPtr version, ref IntPtr dat_);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static u16 _yapiGetAPIVersionLINARMHF(ref IntPtr version, ref IntPtr dat_);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetAPIVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static u16 _yapiGetAPIVersionLINAARCH64(ref IntPtr version, ref IntPtr dat_);
     internal static u16 _yapiGetAPIVersion(ref IntPtr version, ref IntPtr dat_)
     {
         switch (_dllVersion) {
@@ -1089,6 +1187,8 @@ internal static class SafeNativeMethods
                   return _yapiGetAPIVersionLIN32(ref version, ref dat_);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetAPIVersionLINARMHF(ref version, ref dat_);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetAPIVersionLINAARCH64(ref version, ref dat_);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1105,6 +1205,8 @@ internal static class SafeNativeMethods
     private extern static YDEV_DESCR _yapiGetDeviceLIN32(StringBuilder device_str, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YDEV_DESCR _yapiGetDeviceLINARMHF(StringBuilder device_str, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YDEV_DESCR _yapiGetDeviceLINAARCH64(StringBuilder device_str, StringBuilder errmsg);
     internal static YDEV_DESCR _yapiGetDevice(StringBuilder device_str, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1123,6 +1225,8 @@ internal static class SafeNativeMethods
                   return _yapiGetDeviceLIN32(device_str, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDeviceLINARMHF(device_str, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetDeviceLINAARCH64(device_str, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1139,6 +1243,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetDeviceInfoLIN32(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiGetDeviceInfoLINARMHF(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetDeviceInfo", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDeviceInfoLINAARCH64(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
     internal static int _yapiGetDeviceInfo(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1157,6 +1263,8 @@ internal static class SafeNativeMethods
                   return _yapiGetDeviceInfoLIN32(d, ref infos, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDeviceInfoLINARMHF(d, ref infos, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetDeviceInfoLINAARCH64(d, ref infos, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1173,6 +1281,8 @@ internal static class SafeNativeMethods
     private extern static YFUN_DESCR _yapiGetFunctionLIN32(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YFUN_DESCR _yapiGetFunctionLINARMHF(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetFunction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YFUN_DESCR _yapiGetFunctionLINAARCH64(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
     internal static YFUN_DESCR _yapiGetFunction(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1191,6 +1301,8 @@ internal static class SafeNativeMethods
                   return _yapiGetFunctionLIN32(class_str, function_str, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionLINARMHF(class_str, function_str, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetFunctionLINAARCH64(class_str, function_str, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1207,6 +1319,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetFunctionsByClassLIN32(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiGetFunctionsByClassLINARMHF(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetFunctionsByClass", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByClassLINAARCH64(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
     internal static int _yapiGetFunctionsByClass(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1225,6 +1339,8 @@ internal static class SafeNativeMethods
                   return _yapiGetFunctionsByClassLIN32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionsByClassLINARMHF(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetFunctionsByClassLINAARCH64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1241,6 +1357,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetFunctionsByDeviceLIN32(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiGetFunctionsByDeviceLINARMHF(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetFunctionsByDevice", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionsByDeviceLINAARCH64(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
     internal static int _yapiGetFunctionsByDevice(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1259,6 +1377,8 @@ internal static class SafeNativeMethods
                   return _yapiGetFunctionsByDeviceLIN32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionsByDeviceLINARMHF(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetFunctionsByDeviceLINAARCH64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1275,6 +1395,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetFunctionInfoExLIN32(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiGetFunctionInfoExLINARMHF(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetFunctionInfoEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetFunctionInfoExLINAARCH64(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
     internal static int _yapiGetFunctionInfoEx(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1293,6 +1415,8 @@ internal static class SafeNativeMethods
                   return _yapiGetFunctionInfoExLIN32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionInfoExLINARMHF(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetFunctionInfoExLINAARCH64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1309,6 +1433,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestSyncStartLIN32(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHTTPRequestSyncStartLINARMHF(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestSyncStart", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartLINAARCH64(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
     internal static int _yapiHTTPRequestSyncStart(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1327,6 +1453,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestSyncStartLIN32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncStartLINARMHF(ref iohdl, device, request, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestSyncStartLINAARCH64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1343,6 +1471,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestSyncStartExLIN32(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHTTPRequestSyncStartExLINARMHF(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestSyncStartEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncStartExLINAARCH64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
     internal static int _yapiHTTPRequestSyncStartEx(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1361,6 +1491,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestSyncStartExLIN32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncStartExLINARMHF(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestSyncStartExLINAARCH64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1377,6 +1509,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestSyncDoneLIN32(ref YIOHDL iohdl, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHTTPRequestSyncDoneLINARMHF(ref YIOHDL iohdl, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestSyncDone", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestSyncDoneLINAARCH64(ref YIOHDL iohdl, StringBuilder errmsg);
     internal static int _yapiHTTPRequestSyncDone(ref YIOHDL iohdl, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1395,6 +1529,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestSyncDoneLIN32(ref iohdl, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncDoneLINARMHF(ref iohdl, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestSyncDoneLINAARCH64(ref iohdl, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1411,6 +1547,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestAsyncLIN32(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHTTPRequestAsyncLINARMHF(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestAsync", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncLINAARCH64(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static int _yapiHTTPRequestAsync(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1429,6 +1567,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestAsyncLIN32(device, request, callback, context, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestAsyncLINARMHF(device, request, callback, context, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestAsyncLINAARCH64(device, request, callback, context, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1445,6 +1585,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestAsyncExLIN32(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHTTPRequestAsyncExLINARMHF(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestAsyncEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestAsyncExLINAARCH64(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static int _yapiHTTPRequestAsyncEx(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1463,6 +1605,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestAsyncExLIN32(device, request, requestlen, callback, context, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestAsyncExLINARMHF(device, request, requestlen, callback, context, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestAsyncExLINAARCH64(device, request, requestlen, callback, context, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1479,6 +1623,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestLIN32(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiHTTPRequestLINARMHF(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequest", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiHTTPRequestLINAARCH64(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
     internal static int _yapiHTTPRequest(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1497,6 +1643,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestLIN32(device, url, buffer, buffsize, ref fullsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestLINARMHF(device, url, buffer, buffsize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestLINAARCH64(device, url, buffer, buffsize, ref fullsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1513,6 +1661,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetDevicePathLIN32(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiGetDevicePathLINARMHF(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetDevicePath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetDevicePathLINAARCH64(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     internal static int _yapiGetDevicePath(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1531,6 +1681,8 @@ internal static class SafeNativeMethods
                   return _yapiGetDevicePathLIN32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDevicePathLINARMHF(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetDevicePathLINAARCH64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1547,6 +1699,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiSleepLIN32(int duration_ms, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiSleepLINARMHF(int duration_ms, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiSleep", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiSleepLINAARCH64(int duration_ms, StringBuilder errmsg);
     internal static int _yapiSleep(int duration_ms, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1565,6 +1719,8 @@ internal static class SafeNativeMethods
                   return _yapiSleepLIN32(duration_ms, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiSleepLINARMHF(duration_ms, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiSleepLINAARCH64(duration_ms, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1581,6 +1737,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterHubDiscoveryCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterHubDiscoveryCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterHubDiscoveryCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterHubDiscoveryCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterHubDiscoveryCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -1606,6 +1764,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterHubDiscoveryCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterHubDiscoveryCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1622,6 +1783,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiTriggerHubDiscoveryLIN32(StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiTriggerHubDiscoveryLINARMHF(StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiTriggerHubDiscovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiTriggerHubDiscoveryLINAARCH64(StringBuilder errmsg);
     internal static int _yapiTriggerHubDiscovery(StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1640,6 +1803,8 @@ internal static class SafeNativeMethods
                   return _yapiTriggerHubDiscoveryLIN32(errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiTriggerHubDiscoveryLINARMHF(errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiTriggerHubDiscoveryLINAARCH64(errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1656,6 +1821,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceLogCallbackLIN32(IntPtr fct);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterDeviceLogCallbackLINARMHF(IntPtr fct);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterDeviceLogCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceLogCallback(IntPtr fct)
     {
         switch (_dllVersion) {
@@ -1681,6 +1848,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceLogCallbackLINARMHF(fct);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterDeviceLogCallbackLINAARCH64(fct);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1697,6 +1867,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetAllJsonKeysLIN32(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiGetAllJsonKeysLINARMHF(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetAllJsonKeys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetAllJsonKeysLINAARCH64(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetAllJsonKeys(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1715,6 +1887,8 @@ internal static class SafeNativeMethods
                   return _yapiGetAllJsonKeysLIN32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetAllJsonKeysLINARMHF(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetAllJsonKeysLINAARCH64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1731,6 +1905,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiCheckFirmwareLIN32(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiCheckFirmwareLINARMHF(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiCheckFirmware", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiCheckFirmwareLINAARCH64(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
     internal static YRETCODE _yapiCheckFirmware(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1749,6 +1925,8 @@ internal static class SafeNativeMethods
                   return _yapiCheckFirmwareLIN32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiCheckFirmwareLINARMHF(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiCheckFirmwareLINAARCH64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1765,6 +1943,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetBootloadersLIN32(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiGetBootloadersLINARMHF(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetBootloaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetBootloadersLINAARCH64(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetBootloaders(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1783,6 +1963,8 @@ internal static class SafeNativeMethods
                   return _yapiGetBootloadersLIN32(buffer, buffersize, ref totalSize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetBootloadersLINARMHF(buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetBootloadersLINAARCH64(buffer, buffersize, ref totalSize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1799,6 +1981,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiUpdateFirmwareExLIN32(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiUpdateFirmwareExLINARMHF(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiUpdateFirmwareEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiUpdateFirmwareExLINAARCH64(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
     internal static YRETCODE _yapiUpdateFirmwareEx(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1817,6 +2001,8 @@ internal static class SafeNativeMethods
                   return _yapiUpdateFirmwareExLIN32(serial, firmwarePath, settings, force, startUpdate, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUpdateFirmwareExLINARMHF(serial, firmwarePath, settings, force, startUpdate, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiUpdateFirmwareExLINAARCH64(serial, firmwarePath, settings, force, startUpdate, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1833,6 +2019,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLIN32(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLINARMHF(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestSyncStartOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLINAARCH64(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
     internal static YRETCODE _yapiHTTPRequestSyncStartOutOfBand(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1851,6 +2039,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestSyncStartOutOfBandLIN32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncStartOutOfBandLINARMHF(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestSyncStartOutOfBandLINAARCH64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1867,6 +2057,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLIN32(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLINARMHF(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiHTTPRequestAsyncOutOfBand", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLINAARCH64(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static YRETCODE _yapiHTTPRequestAsyncOutOfBand(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1885,6 +2077,8 @@ internal static class SafeNativeMethods
                   return _yapiHTTPRequestAsyncOutOfBandLIN32(channel, device, request, requestsize, callback, context, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestAsyncOutOfBandLINARMHF(channel, device, request, requestsize, callback, context, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiHTTPRequestAsyncOutOfBandLINAARCH64(channel, device, request, requestsize, callback, context, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1901,6 +2095,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiTestHubLIN32(StringBuilder url, int mstimeout, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiTestHubLINARMHF(StringBuilder url, int mstimeout, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiTestHub", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiTestHubLINAARCH64(StringBuilder url, int mstimeout, StringBuilder errmsg);
     internal static YRETCODE _yapiTestHub(StringBuilder url, int mstimeout, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1919,6 +2115,8 @@ internal static class SafeNativeMethods
                   return _yapiTestHubLIN32(url, mstimeout, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiTestHubLINARMHF(url, mstimeout, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiTestHubLINAARCH64(url, mstimeout, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1935,6 +2133,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiJsonGetPathLIN32(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiJsonGetPathLINARMHF(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiJsonGetPath", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonGetPathLINAARCH64(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
     internal static int _yapiJsonGetPath(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -1953,6 +2153,8 @@ internal static class SafeNativeMethods
                   return _yapiJsonGetPathLIN32(path, json_data, json_len, ref result, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiJsonGetPathLINARMHF(path, json_data, json_len, ref result, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiJsonGetPathLINAARCH64(path, json_data, json_len, ref result, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -1969,6 +2171,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiJsonDecodeStringLIN32(StringBuilder json_data, StringBuilder output);
     [DllImport("libyapi-armhf", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiJsonDecodeStringLINARMHF(StringBuilder json_data, StringBuilder output);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiJsonDecodeString", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiJsonDecodeStringLINAARCH64(StringBuilder json_data, StringBuilder output);
     internal static int _yapiJsonDecodeString(StringBuilder json_data, StringBuilder output)
     {
         switch (_dllVersion) {
@@ -1987,6 +2191,8 @@ internal static class SafeNativeMethods
                   return _yapiJsonDecodeStringLIN32(json_data, output);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiJsonDecodeStringLINARMHF(json_data, output);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiJsonDecodeStringLINAARCH64(json_data, output);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2003,6 +2209,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetSubdevicesLIN32(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiGetSubdevicesLINARMHF(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetSubdevices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetSubdevicesLINAARCH64(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetSubdevices(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -2021,6 +2229,8 @@ internal static class SafeNativeMethods
                   return _yapiGetSubdevicesLIN32(serial, buffer, buffersize, ref totalSize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetSubdevicesLINARMHF(serial, buffer, buffersize, ref totalSize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetSubdevicesLINAARCH64(serial, buffer, buffersize, ref totalSize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2037,6 +2247,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiFreeMemLIN32(IntPtr buffer);
     [DllImport("libyapi-armhf", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiFreeMemLINARMHF(IntPtr buffer);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiFreeMem", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiFreeMemLINAARCH64(IntPtr buffer);
     internal static void _yapiFreeMem(IntPtr buffer)
     {
         switch (_dllVersion) {
@@ -2062,6 +2274,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiFreeMemLINARMHF(buffer);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiFreeMemLINAARCH64(buffer);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2078,6 +2293,8 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetDevicePathExLIN32(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static YRETCODE _yapiGetDevicePathExLINARMHF(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetDevicePathEx", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static YRETCODE _yapiGetDevicePathExLINAARCH64(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetDevicePathEx(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -2096,6 +2313,8 @@ internal static class SafeNativeMethods
                   return _yapiGetDevicePathExLIN32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDevicePathExLINARMHF(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetDevicePathExLINAARCH64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
         }
     }
     [DllImport("yapi", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2112,6 +2331,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiSetNetDevListValidityLIN32(int sValidity);
     [DllImport("libyapi-armhf", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiSetNetDevListValidityLINARMHF(int sValidity);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiSetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiSetNetDevListValidityLINAARCH64(int sValidity);
     internal static void _yapiSetNetDevListValidity(int sValidity)
     {
         switch (_dllVersion) {
@@ -2137,6 +2358,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiSetNetDevListValidityLINARMHF(sValidity);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiSetNetDevListValidityLINAARCH64(sValidity);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2153,6 +2377,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetNetDevListValidityLIN32();
     [DllImport("libyapi-armhf", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiGetNetDevListValidityLINARMHF();
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiGetNetDevListValidity", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiGetNetDevListValidityLINAARCH64();
     internal static int _yapiGetNetDevListValidity()
     {
         switch (_dllVersion) {
@@ -2171,6 +2397,8 @@ internal static class SafeNativeMethods
                   return _yapiGetNetDevListValidityLIN32();
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetNetDevListValidityLINARMHF();
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiGetNetDevListValidityLINAARCH64();
         }
     }
     [DllImport("yapi", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2187,6 +2415,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterBeaconCallbackLIN32(IntPtr beaconCallback);
     [DllImport("libyapi-armhf", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiRegisterBeaconCallbackLINARMHF(IntPtr beaconCallback);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiRegisterBeaconCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiRegisterBeaconCallbackLINAARCH64(IntPtr beaconCallback);
     internal static void _yapiRegisterBeaconCallback(IntPtr beaconCallback)
     {
         switch (_dllVersion) {
@@ -2212,6 +2442,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterBeaconCallbackLINARMHF(beaconCallback);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiRegisterBeaconCallbackLINAARCH64(beaconCallback);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2228,6 +2461,8 @@ internal static class SafeNativeMethods
     private extern static void _yapiStartStopDeviceLogCallbackLIN32(StringBuilder serial, int start);
     [DllImport("libyapi-armhf", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static void _yapiStartStopDeviceLogCallbackLINARMHF(StringBuilder serial, int start);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiStartStopDeviceLogCallback", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static void _yapiStartStopDeviceLogCallbackLINAARCH64(StringBuilder serial, int start);
     internal static void _yapiStartStopDeviceLogCallback(StringBuilder serial, int start)
     {
         switch (_dllVersion) {
@@ -2253,6 +2488,9 @@ internal static class SafeNativeMethods
              case YAPIDLL_VERSION.LINARMHF:
                   _yapiStartStopDeviceLogCallbackLINARMHF(serial, start);
                   return;
+             case YAPIDLL_VERSION.LINAARCH64:
+                  _yapiStartStopDeviceLogCallbackLINAARCH64(serial, start);
+                  return;
         }
     }
     [DllImport("yapi", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -2269,6 +2507,8 @@ internal static class SafeNativeMethods
     private extern static int _yapiIsModuleWritableLIN32(StringBuilder serial, StringBuilder errmsg);
     [DllImport("libyapi-armhf", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiIsModuleWritableLINARMHF(StringBuilder serial, StringBuilder errmsg);
+    [DllImport("libyapi-aarch64", EntryPoint = "yapiIsModuleWritable", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    private extern static int _yapiIsModuleWritableLINAARCH64(StringBuilder serial, StringBuilder errmsg);
     internal static int _yapiIsModuleWritable(StringBuilder serial, StringBuilder errmsg)
     {
         switch (_dllVersion) {
@@ -2287,6 +2527,8 @@ internal static class SafeNativeMethods
                   return _yapiIsModuleWritableLIN32(serial, errmsg);
              case YAPIDLL_VERSION.LINARMHF:
                   return _yapiIsModuleWritableLINARMHF(serial, errmsg);
+             case YAPIDLL_VERSION.LINAARCH64:
+                  return _yapiIsModuleWritableLINAARCH64(serial, errmsg);
         }
     }
 //--- (end of generated code: YFunction dlldef)
@@ -2337,7 +2579,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "35917";
+    public const string YOCTO_API_BUILD_NO = "35931";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
