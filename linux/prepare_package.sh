@@ -89,6 +89,8 @@ cp ../libyapi-armhf.so yoctovisualization/usr/lib/Yocto-Visualization/libyapi-ar
 chmod 0644 yoctovisualization/usr/lib/Yocto-Visualization/libyapi-armhf.so
 cp ../libyapi-i386.so yoctovisualization/usr/lib/Yocto-Visualization
 chmod 0644 yoctovisualization/usr/lib/Yocto-Visualization/libyapi-i386.so
+cp ../libyapi-aarch64.so yoctovisualization/usr/lib/Yocto-Visualization
+chmod 0644 yoctovisualization/usr/lib/Yocto-Visualization/libyapi-aarch64.so
 
 #copy binary
 cp  ../bin/Release/YoctoVisualization.exe yoctovisualization/usr/lib/Yocto-Visualization

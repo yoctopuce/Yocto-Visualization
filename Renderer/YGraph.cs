@@ -355,7 +355,7 @@ namespace YDataRendering
         {
           _pen = new Pen(_color, (float)_thickness);
           _pen.EndCap = LineCap.Round;
-
+          _pen.LineJoin = LineJoin.Round;
         }
         return _pen;
       }
@@ -2339,6 +2339,7 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
             if (New.Y < min) min = New.Y;
             i++;
           } while ((i < Last) && (Current.X == New.X));
+
           ToDraw[n++] = new Point(Current.X, min);
           ToDraw[n++] = new Point(Current.X, max);
           Current = New;
