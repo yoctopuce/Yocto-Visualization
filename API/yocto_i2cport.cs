@@ -1,8 +1,8 @@
 /*********************************************************************
  *
- *  $Id: yocto_spiport.cs 36047 2019-06-28 17:42:49Z mvuilleu $
+ *  $Id: yocto_i2cport.cs 36207 2019-07-10 20:46:18Z mvuilleu $
  *
- *  Implements yFindSpiPort(), the high-level API for SpiPort functions
+ *  Implements yFindI2cPort(), the high-level API for I2cPort functions
  *
  *  - - - - - - - - - License information: - - - - - - - - -
  *
@@ -48,32 +48,32 @@ using YDEV_DESCR = System.Int32;
 using YFUN_DESCR = System.Int32;
 
  #pragma warning disable 1591
-    //--- (YSpiPort return codes)
-    //--- (end of YSpiPort return codes)
-//--- (YSpiPort dlldef)
-//--- (end of YSpiPort dlldef)
-//--- (YSpiPort yapiwrapper)
-//--- (end of YSpiPort yapiwrapper)
-//--- (YSpiPort class start)
+    //--- (YI2cPort return codes)
+    //--- (end of YI2cPort return codes)
+//--- (YI2cPort dlldef)
+//--- (end of YI2cPort dlldef)
+//--- (YI2cPort yapiwrapper)
+//--- (end of YI2cPort yapiwrapper)
+//--- (YI2cPort class start)
 /**
  * <summary>
- *   The SpiPort function interface allows you to fully drive a Yoctopuce
- *   SPI port, to send and receive data, and to configure communication
- *   parameters (baud rate, bit count, parity, flow control and protocol).
+ *   The I2cPort function interface allows you to fully drive a Yoctopuce
+ *   I2C port, to send and receive data, and to configure communication
+ *   parameters (baud rate, etc).
  * <para>
- *   Note that Yoctopuce SPI ports are not exposed as virtual COM ports.
+ *   Note that Yoctopuce I2C ports are not exposed as virtual COM ports.
  *   They are meant to be used in the same way as all Yoctopuce devices.
  * </para>
  * <para>
  * </para>
  * </summary>
  */
-public class YSpiPort : YFunction
+public class YI2cPort : YFunction
 {
-//--- (end of YSpiPort class start)
-    //--- (YSpiPort definitions)
-    public new delegate void ValueCallback(YSpiPort func, string value);
-    public new delegate void TimedReportCallback(YSpiPort func, YMeasure measure);
+//--- (end of YI2cPort class start)
+    //--- (YI2cPort definitions)
+    public new delegate void ValueCallback(YI2cPort func, string value);
+    public new delegate void TimedReportCallback(YI2cPort func, YMeasure measure);
 
     public const int RXCOUNT_INVALID = YAPI.INVALID_UINT;
     public const int TXCOUNT_INVALID = YAPI.INVALID_UINT;
@@ -94,13 +94,7 @@ public class YSpiPort : YFunction
     public const int VOLTAGELEVEL_TTL1V8 = 7;
     public const int VOLTAGELEVEL_INVALID = -1;
     public const string PROTOCOL_INVALID = YAPI.INVALID_STRING;
-    public const string SPIMODE_INVALID = YAPI.INVALID_STRING;
-    public const int SSPOLARITY_ACTIVE_LOW = 0;
-    public const int SSPOLARITY_ACTIVE_HIGH = 1;
-    public const int SSPOLARITY_INVALID = -1;
-    public const int SHIFTSAMPLING_OFF = 0;
-    public const int SHIFTSAMPLING_ON = 1;
-    public const int SHIFTSAMPLING_INVALID = -1;
+    public const string I2CMODE_INVALID = YAPI.INVALID_STRING;
     protected int _rxCount = RXCOUNT_INVALID;
     protected int _txCount = TXCOUNT_INVALID;
     protected int _errCount = ERRCOUNT_INVALID;
@@ -112,24 +106,22 @@ public class YSpiPort : YFunction
     protected string _command = COMMAND_INVALID;
     protected int _voltageLevel = VOLTAGELEVEL_INVALID;
     protected string _protocol = PROTOCOL_INVALID;
-    protected string _spiMode = SPIMODE_INVALID;
-    protected int _ssPolarity = SSPOLARITY_INVALID;
-    protected int _shiftSampling = SHIFTSAMPLING_INVALID;
-    protected ValueCallback _valueCallbackSpiPort = null;
+    protected string _i2cMode = I2CMODE_INVALID;
+    protected ValueCallback _valueCallbackI2cPort = null;
     protected int _rxptr = 0;
     protected byte[] _rxbuff;
     protected int _rxbuffptr = 0;
-    //--- (end of YSpiPort definitions)
+    //--- (end of YI2cPort definitions)
 
-    public YSpiPort(string func)
+    public YI2cPort(string func)
         : base(func)
     {
-        _className = "SpiPort";
-        //--- (YSpiPort attributes initialization)
-        //--- (end of YSpiPort attributes initialization)
+        _className = "I2cPort";
+        //--- (YI2cPort attributes initialization)
+        //--- (end of YI2cPort attributes initialization)
     }
 
-    //--- (YSpiPort implementation)
+    //--- (YI2cPort implementation)
 
     protected override void _parseAttr(YAPI.YJSONObject json_val)
     {
@@ -177,17 +169,9 @@ public class YSpiPort : YFunction
         {
             _protocol = json_val.getString("protocol");
         }
-        if (json_val.has("spiMode"))
+        if (json_val.has("i2cMode"))
         {
-            _spiMode = json_val.getString("spiMode");
-        }
-        if (json_val.has("ssPolarity"))
-        {
-            _ssPolarity = json_val.getInt("ssPolarity") > 0 ? 1 : 0;
-        }
-        if (json_val.has("shiftSampling"))
-        {
-            _shiftSampling = json_val.getInt("shiftSampling") > 0 ? 1 : 0;
+            _i2cMode = json_val.getString("i2cMode");
         }
         base._parseAttr(json_val);
     }
@@ -204,7 +188,7 @@ public class YSpiPort : YFunction
      *   an integer corresponding to the total number of bytes received since last reset
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.RXCOUNT_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.RXCOUNT_INVALID</c>.
      * </para>
      */
     public int get_rxCount()
@@ -233,7 +217,7 @@ public class YSpiPort : YFunction
      *   an integer corresponding to the total number of bytes transmitted since last reset
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.TXCOUNT_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.TXCOUNT_INVALID</c>.
      * </para>
      */
     public int get_txCount()
@@ -262,7 +246,7 @@ public class YSpiPort : YFunction
      *   an integer corresponding to the total number of communication errors detected since last reset
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.ERRCOUNT_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.ERRCOUNT_INVALID</c>.
      * </para>
      */
     public int get_errCount()
@@ -291,7 +275,7 @@ public class YSpiPort : YFunction
      *   an integer corresponding to the total number of messages received since last reset
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.RXMSGCOUNT_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.RXMSGCOUNT_INVALID</c>.
      * </para>
      */
     public int get_rxMsgCount()
@@ -320,7 +304,7 @@ public class YSpiPort : YFunction
      *   an integer corresponding to the total number of messages send since last reset
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.TXMSGCOUNT_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.TXMSGCOUNT_INVALID</c>.
      * </para>
      */
     public int get_txMsgCount()
@@ -349,7 +333,7 @@ public class YSpiPort : YFunction
      *   a string corresponding to the latest message fully received (for Line and Frame protocols)
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.LASTMSG_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.LASTMSG_INVALID</c>.
      * </para>
      */
     public string get_lastMsg()
@@ -378,7 +362,7 @@ public class YSpiPort : YFunction
      *   a string corresponding to the name of the job file currently in use
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.CURRENTJOB_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.CURRENTJOB_INVALID</c>.
      * </para>
      */
     public string get_currentJob()
@@ -438,7 +422,7 @@ public class YSpiPort : YFunction
      *   a string corresponding to the job file to use when the device is powered on
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.STARTUPJOB_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.STARTUPJOB_INVALID</c>.
      * </para>
      */
     public string get_startupJob()
@@ -518,14 +502,14 @@ public class YSpiPort : YFunction
      * </para>
      * </summary>
      * <returns>
-     *   a value among <c>YSpiPort.VOLTAGELEVEL_OFF</c>, <c>YSpiPort.VOLTAGELEVEL_TTL3V</c>,
-     *   <c>YSpiPort.VOLTAGELEVEL_TTL3VR</c>, <c>YSpiPort.VOLTAGELEVEL_TTL5V</c>,
-     *   <c>YSpiPort.VOLTAGELEVEL_TTL5VR</c>, <c>YSpiPort.VOLTAGELEVEL_RS232</c>,
-     *   <c>YSpiPort.VOLTAGELEVEL_RS485</c> and <c>YSpiPort.VOLTAGELEVEL_TTL1V8</c> corresponding to the
+     *   a value among <c>YI2cPort.VOLTAGELEVEL_OFF</c>, <c>YI2cPort.VOLTAGELEVEL_TTL3V</c>,
+     *   <c>YI2cPort.VOLTAGELEVEL_TTL3VR</c>, <c>YI2cPort.VOLTAGELEVEL_TTL5V</c>,
+     *   <c>YI2cPort.VOLTAGELEVEL_TTL5VR</c>, <c>YI2cPort.VOLTAGELEVEL_RS232</c>,
+     *   <c>YI2cPort.VOLTAGELEVEL_RS485</c> and <c>YI2cPort.VOLTAGELEVEL_TTL1V8</c> corresponding to the
      *   voltage level used on the serial line
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.VOLTAGELEVEL_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.VOLTAGELEVEL_INVALID</c>.
      * </para>
      */
     public int get_voltageLevel()
@@ -556,10 +540,10 @@ public class YSpiPort : YFunction
      * </para>
      * </summary>
      * <param name="newval">
-     *   a value among <c>YSpiPort.VOLTAGELEVEL_OFF</c>, <c>YSpiPort.VOLTAGELEVEL_TTL3V</c>,
-     *   <c>YSpiPort.VOLTAGELEVEL_TTL3VR</c>, <c>YSpiPort.VOLTAGELEVEL_TTL5V</c>,
-     *   <c>YSpiPort.VOLTAGELEVEL_TTL5VR</c>, <c>YSpiPort.VOLTAGELEVEL_RS232</c>,
-     *   <c>YSpiPort.VOLTAGELEVEL_RS485</c> and <c>YSpiPort.VOLTAGELEVEL_TTL1V8</c> corresponding to the
+     *   a value among <c>YI2cPort.VOLTAGELEVEL_OFF</c>, <c>YI2cPort.VOLTAGELEVEL_TTL3V</c>,
+     *   <c>YI2cPort.VOLTAGELEVEL_TTL3VR</c>, <c>YI2cPort.VOLTAGELEVEL_TTL5V</c>,
+     *   <c>YI2cPort.VOLTAGELEVEL_TTL5VR</c>, <c>YI2cPort.VOLTAGELEVEL_RS232</c>,
+     *   <c>YI2cPort.VOLTAGELEVEL_RS485</c> and <c>YI2cPort.VOLTAGELEVEL_TTL1V8</c> corresponding to the
      *   voltage type used on the serial line
      * </param>
      * <para>
@@ -584,10 +568,9 @@ public class YSpiPort : YFunction
      * <summary>
      *   Returns the type of protocol used over the serial line, as a string.
      * <para>
-     *   Possible values are "Line" for ASCII messages separated by CR and/or LF,
-     *   "Frame:[timeout]ms" for binary messages separated by a delay time,
-     *   "Char" for a continuous ASCII stream or
-     *   "Byte" for a continuous binary stream.
+     *   Possible values are
+     *   "Line" for messages separated by LF or
+     *   "Char" for continuous stream of codes.
      * </para>
      * <para>
      * </para>
@@ -596,7 +579,7 @@ public class YSpiPort : YFunction
      *   a string corresponding to the type of protocol used over the serial line, as a string
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.PROTOCOL_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.PROTOCOL_INVALID</c>.
      * </para>
      */
     public string get_protocol()
@@ -617,12 +600,11 @@ public class YSpiPort : YFunction
      * <summary>
      *   Changes the type of protocol used over the serial line.
      * <para>
-     *   Possible values are "Line" for ASCII messages separated by CR and/or LF,
-     *   "Frame:[timeout]ms" for binary messages separated by a delay time,
-     *   "Char" for a continuous ASCII stream or
-     *   "Byte" for a continuous binary stream.
+     *   Possible values are
+     *   "Line" for messages separated by LF or
+     *   "Char" for continuous stream of codes.
      *   The suffix "/[wait]ms" can be added to reduce the transmit rate so that there
-     *   is always at lest the specified number of milliseconds between each bytes sent.
+     *   is always at lest the specified number of milliseconds between each message sent.
      * </para>
      * <para>
      * </para>
@@ -651,32 +633,32 @@ public class YSpiPort : YFunction
     /**
      * <summary>
      *   Returns the SPI port communication parameters, as a string such as
-     *   "125000,0,msb".
+     *   "400kbps,2000ms".
      * <para>
-     *   The string includes the baud rate, the SPI mode (between
-     *   0 and 3) and the bit order.
+     *   The string includes the baud rate and  th  e recovery delay
+     *   after communications errors.
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
      *   a string corresponding to the SPI port communication parameters, as a string such as
-     *   "125000,0,msb"
+     *   "400kbps,2000ms"
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.SPIMODE_INVALID</c>.
+     *   On failure, throws an exception or returns <c>YI2cPort.I2CMODE_INVALID</c>.
      * </para>
      */
-    public string get_spiMode()
+    public string get_i2cMode()
     {
         string res;
         lock (_thisLock) {
             if (this._cacheExpiration <= YAPI.GetTickCount()) {
                 if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
-                    return SPIMODE_INVALID;
+                    return I2CMODE_INVALID;
                 }
             }
-            res = this._spiMode;
+            res = this._i2cMode;
         }
         return res;
     }
@@ -684,17 +666,17 @@ public class YSpiPort : YFunction
     /**
      * <summary>
      *   Changes the SPI port communication parameters, with a string such as
-     *   "125000,0,msb".
+     *   "400kbps,2000ms".
      * <para>
-     *   The string includes the baud rate, the SPI mode (between
-     *   0 and 3) and the bit order.
+     *   The string includes the baud rate and the recovery delay
+     *   after communications errors.
      * </para>
      * <para>
      * </para>
      * </summary>
      * <param name="newval">
      *   a string corresponding to the SPI port communication parameters, with a string such as
-     *   "125000,0,msb"
+     *   "400kbps,2000ms"
      * </param>
      * <para>
      * </para>
@@ -705,141 +687,18 @@ public class YSpiPort : YFunction
      *   On failure, throws an exception or returns a negative error code.
      * </para>
      */
-    public int set_spiMode(string newval)
+    public int set_i2cMode(string newval)
     {
         string rest_val;
         lock (_thisLock) {
             rest_val = newval;
-            return _setAttr("spiMode", rest_val);
+            return _setAttr("i2cMode", rest_val);
         }
     }
 
     /**
      * <summary>
-     *   Returns the SS line polarity.
-     * <para>
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <returns>
-     *   either <c>YSpiPort.SSPOLARITY_ACTIVE_LOW</c> or <c>YSpiPort.SSPOLARITY_ACTIVE_HIGH</c>, according
-     *   to the SS line polarity
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.SSPOLARITY_INVALID</c>.
-     * </para>
-     */
-    public int get_ssPolarity()
-    {
-        int res;
-        lock (_thisLock) {
-            if (this._cacheExpiration <= YAPI.GetTickCount()) {
-                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
-                    return SSPOLARITY_INVALID;
-                }
-            }
-            res = this._ssPolarity;
-        }
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Changes the SS line polarity.
-     * <para>
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="newval">
-     *   either <c>YSpiPort.SSPOLARITY_ACTIVE_LOW</c> or <c>YSpiPort.SSPOLARITY_ACTIVE_HIGH</c>, according
-     *   to the SS line polarity
-     * </param>
-     * <para>
-     * </para>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public int set_ssPolarity(int newval)
-    {
-        string rest_val;
-        lock (_thisLock) {
-            rest_val = (newval > 0 ? "1" : "0");
-            return _setAttr("ssPolarity", rest_val);
-        }
-    }
-
-    /**
-     * <summary>
-     *   Returns true when the SDI line phase is shifted with regards to the SDO line.
-     * <para>
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <returns>
-     *   either <c>YSpiPort.SHIFTSAMPLING_OFF</c> or <c>YSpiPort.SHIFTSAMPLING_ON</c>, according to true
-     *   when the SDI line phase is shifted with regards to the SDO line
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns <c>YSpiPort.SHIFTSAMPLING_INVALID</c>.
-     * </para>
-     */
-    public int get_shiftSampling()
-    {
-        int res;
-        lock (_thisLock) {
-            if (this._cacheExpiration <= YAPI.GetTickCount()) {
-                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
-                    return SHIFTSAMPLING_INVALID;
-                }
-            }
-            res = this._shiftSampling;
-        }
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Changes the SDI line sampling shift.
-     * <para>
-     *   When disabled, SDI line is
-     *   sampled in the middle of data output time. When enabled, SDI line is
-     *   samples at the end of data output time.
-     * </para>
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="newval">
-     *   either <c>YSpiPort.SHIFTSAMPLING_OFF</c> or <c>YSpiPort.SHIFTSAMPLING_ON</c>, according to the SDI
-     *   line sampling shift
-     * </param>
-     * <para>
-     * </para>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public int set_shiftSampling(int newval)
-    {
-        string rest_val;
-        lock (_thisLock) {
-            rest_val = (newval > 0 ? "1" : "0");
-            return _setAttr("shiftSampling", rest_val);
-        }
-    }
-
-    /**
-     * <summary>
-     *   Retrieves a SPI port for a given identifier.
+     *   Retrieves an I2C port for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -863,11 +722,11 @@ public class YSpiPort : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the SPI port is online at the time
+     *   This function does not require that the I2C port is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YSpiPort.isOnline()</c> to test if the SPI port is
+     *   Use the method <c>YI2cPort.isOnline()</c> to test if the I2C port is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a SPI port by logical name, no error is notified: the first instance
+     *   an I2C port by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -880,20 +739,20 @@ public class YSpiPort : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the SPI port
+     *   a string that uniquely characterizes the I2C port
      * </param>
      * <returns>
-     *   a <c>YSpiPort</c> object allowing you to drive the SPI port.
+     *   a <c>YI2cPort</c> object allowing you to drive the I2C port.
      * </returns>
      */
-    public static YSpiPort FindSpiPort(string func)
+    public static YI2cPort FindI2cPort(string func)
     {
-        YSpiPort obj;
+        YI2cPort obj;
         lock (YAPI.globalLock) {
-            obj = (YSpiPort) YFunction._FindFromCache("SpiPort", func);
+            obj = (YI2cPort) YFunction._FindFromCache("I2cPort", func);
             if (obj == null) {
-                obj = new YSpiPort(func);
-                YFunction._AddToCache("SpiPort", func, obj);
+                obj = new YI2cPort(func);
+                YFunction._AddToCache("I2cPort", func, obj);
             }
         }
         return obj;
@@ -925,7 +784,7 @@ public class YSpiPort : YFunction
         } else {
             YFunction._UpdateValueCallbackList(this, false);
         }
-        this._valueCallbackSpiPort = callback;
+        this._valueCallbackI2cPort = callback;
         // Immediately invoke value callback with current value
         if (callback != null && this.isOnline()) {
             val = this._advertisedValue;
@@ -938,8 +797,8 @@ public class YSpiPort : YFunction
 
     public override int _invokeValueCallback(string value)
     {
-        if (this._valueCallbackSpiPort != null) {
-            this._valueCallbackSpiPort(this, value);
+        if (this._valueCallbackI2cPort != null) {
+            this._valueCallbackI2cPort(this, value);
         } else {
             base._invokeValueCallback(value);
         }
@@ -1178,7 +1037,7 @@ public class YSpiPort : YFunction
      *   a string containing a JSON definition of the job
      * </param>
      * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1205,7 +1064,7 @@ public class YSpiPort : YFunction
      *   name of the job file (on the device filesystem)
      * </param>
      * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1225,7 +1084,7 @@ public class YSpiPort : YFunction
      * </para>
      * </summary>
      * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1242,15 +1101,325 @@ public class YSpiPort : YFunction
 
     /**
      * <summary>
-     *   Sends a single byte to the serial port.
+     *   Sends a one-way message (provided as a a binary buffer) to a device on the I2C bus.
      * <para>
+     *   This function checks and reports communication errors on the I2C bus.
+     * </para>
+     * </summary>
+     * <param name="slaveAddr">
+     *   the 7-bit address of the slave device (without the direction bit)
+     * </param>
+     * <param name="buff">
+     *   the binary buffer to be sent
+     * </param>
+     * <returns>
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int i2cSendBin(int slaveAddr, byte[] buff)
+    {
+        int nBytes;
+        int idx;
+        int val;
+        string msg;
+        string reply;
+        msg = "@"+String.Format("{0:x02}",slaveAddr)+":";
+        nBytes = (buff).Length;
+        idx = 0;
+        while (idx < nBytes) {
+            val = buff[idx];
+            msg = ""+ msg+""+String.Format("{0:x02}",val);
+            idx = idx + 1;
+        }
+
+        reply = this.queryLine(msg,1000);
+        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "no response from device"); return YAPI.IO_ERROR; }
+        idx = (reply).IndexOf("[N]!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No ACK received"); return YAPI.IO_ERROR; }
+        idx = (reply).IndexOf("!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "Protocol error"); return YAPI.IO_ERROR; }
+        return YAPI.SUCCESS;
+    }
+
+    /**
+     * <summary>
+     *   Sends a one-way message (provided as a list of integer) to a device on the I2C bus.
+     * <para>
+     *   This function checks and reports communication errors on the I2C bus.
+     * </para>
+     * </summary>
+     * <param name="slaveAddr">
+     *   the 7-bit address of the slave device (without the direction bit)
+     * </param>
+     * <param name="values">
+     *   a list of data bytes to be sent
+     * </param>
+     * <returns>
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int i2cSendArray(int slaveAddr, List<int> values)
+    {
+        int nBytes;
+        int idx;
+        int val;
+        string msg;
+        string reply;
+        msg = "@"+String.Format("{0:x02}",slaveAddr)+":";
+        nBytes = values.Count;
+        idx = 0;
+        while (idx < nBytes) {
+            val = values[idx];
+            msg = ""+ msg+""+String.Format("{0:x02}",val);
+            idx = idx + 1;
+        }
+
+        reply = this.queryLine(msg,1000);
+        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "no response from device"); return YAPI.IO_ERROR; }
+        idx = (reply).IndexOf("[N]!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No ACK received"); return YAPI.IO_ERROR; }
+        idx = (reply).IndexOf("!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "Protocol error"); return YAPI.IO_ERROR; }
+        return YAPI.SUCCESS;
+    }
+
+    /**
+     * <summary>
+     *   Sends a one-way message (provided as a a binary buffer) to a device on the I2C bus,
+     *   then read back the specified number of bytes from device.
+     * <para>
+     *   This function checks and reports communication errors on the I2C bus.
+     * </para>
+     * </summary>
+     * <param name="slaveAddr">
+     *   the 7-bit address of the slave device (without the direction bit)
+     * </param>
+     * <param name="buff">
+     *   the binary buffer to be sent
+     * </param>
+     * <param name="rcvCount">
+     *   the number of bytes to receive once the data bytes are sent
+     * </param>
+     * <returns>
+     *   a list of bytes with the data received from slave device.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns an empty binary buffer.
+     * </para>
+     */
+    public virtual byte[] i2cSendAndReceiveBin(int slaveAddr, byte[] buff, int rcvCount)
+    {
+        int nBytes;
+        int idx;
+        int val;
+        string msg;
+        string reply;
+        byte[] rcvbytes;
+        msg = "@"+String.Format("{0:x02}",slaveAddr)+":";
+        nBytes = (buff).Length;
+        idx = 0;
+        while (idx < nBytes) {
+            val = buff[idx];
+            msg = ""+ msg+""+String.Format("{0:x02}",val);
+            idx = idx + 1;
+        }
+        idx = 0;
+        while (idx < rcvCount) {
+            msg = ""+msg+"xx";
+            idx = idx + 1;
+        }
+
+        reply = this.queryLine(msg,1000);
+        rcvbytes = new byte[0];
+        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "no response from device"); return rcvbytes; }
+        idx = (reply).IndexOf("[N]!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No ACK received"); return rcvbytes; }
+        idx = (reply).IndexOf("!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "Protocol error"); return rcvbytes; }
+        reply = (reply).Substring( (reply).Length-2*rcvCount, 2*rcvCount);
+        rcvbytes = YAPI._hexStrToBin(reply);
+        return rcvbytes;
+    }
+
+    /**
+     * <summary>
+     *   Sends a one-way message (provided as a list of integer) to a device on the I2C bus,
+     *   then read back the specified number of bytes from device.
+     * <para>
+     *   This function checks and reports communication errors on the I2C bus.
+     * </para>
+     * </summary>
+     * <param name="slaveAddr">
+     *   the 7-bit address of the slave device (without the direction bit)
+     * </param>
+     * <param name="values">
+     *   a list of data bytes to be sent
+     * </param>
+     * <param name="rcvCount">
+     *   the number of bytes to receive once the data bytes are sent
+     * </param>
+     * <returns>
+     *   a list of bytes with the data received from slave device.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns an empty array.
+     * </para>
+     */
+    public virtual List<int> i2cSendAndReceiveArray(int slaveAddr, List<int> values, int rcvCount)
+    {
+        int nBytes;
+        int idx;
+        int val;
+        string msg;
+        string reply;
+        byte[] rcvbytes;
+        List<int> res = new List<int>();
+        msg = "@"+String.Format("{0:x02}",slaveAddr)+":";
+        nBytes = values.Count;
+        idx = 0;
+        while (idx < nBytes) {
+            val = values[idx];
+            msg = ""+ msg+""+String.Format("{0:x02}",val);
+            idx = idx + 1;
+        }
+        idx = 0;
+        while (idx < rcvCount) {
+            msg = ""+msg+"xx";
+            idx = idx + 1;
+        }
+
+        reply = this.queryLine(msg,1000);
+        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "no response from device"); return res; }
+        idx = (reply).IndexOf("[N]!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No ACK received"); return res; }
+        idx = (reply).IndexOf("!");
+        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "Protocol error"); return res; }
+        reply = (reply).Substring( (reply).Length-2*rcvCount, 2*rcvCount);
+        rcvbytes = YAPI._hexStrToBin(reply);
+        res.Clear();
+        idx = 0;
+        while (idx < rcvCount) {
+            val = rcvbytes[idx];
+            res.Add(val);
+            idx = idx + 1;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Sends a text-encoded I2C code stream to the I2C bus, as is.
+     * <para>
+     *   An I2C code stream is a string made of hexadecimal data bytes,
+     *   but that may also include the I2C state transitions code:
+     *   "{S}" to emit a start condition,
+     *   "{R}" for a repeated start condition,
+     *   "{P}" for a stop condition,
+     *   "xx" for receiving a data byte,
+     *   "{A}" to ack a data byte received and
+     *   "{N}" to nack a data byte received.
+     *   If a newline ("\n") is included in the stream, the message
+     *   will be terminated and a newline will also be added to the
+     *   receive stream.
+     * </para>
+     * </summary>
+     * <param name="codes">
+     *   the code stream to send
+     * </param>
+     * <returns>
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int writeStr(string codes)
+    {
+        int bufflen;
+        byte[] buff;
+        int idx;
+        int ch;
+        buff = YAPI.DefaultEncoding.GetBytes(codes);
+        bufflen = (buff).Length;
+        if (bufflen < 100) {
+            // if string is pure text, we can send it as a simple command (faster)
+            ch = 0x20;
+            idx = 0;
+            while ((idx < bufflen) && (ch != 0)) {
+                ch = buff[idx];
+                if ((ch >= 0x20) && (ch < 0x7f)) {
+                    idx = idx + 1;
+                } else {
+                    ch = 0;
+                }
+            }
+            if (idx >= bufflen) {
+                return this.sendCommand("+"+codes);
+            }
+        }
+        // send string using file upload
+        return this._upload("txdata", buff);
+    }
+
+    /**
+     * <summary>
+     *   Sends a text-encoded I2C code stream to the I2C bus, and terminate
+     *   the message en relâchant le bus.
+     * <para>
+     *   An I2C code stream is a string made of hexadecimal data bytes,
+     *   but that may also include the I2C state transitions code:
+     *   "{S}" to emit a start condition,
+     *   "{R}" for a repeated start condition,
+     *   "{P}" for a stop condition,
+     *   "xx" for receiving a data byte,
+     *   "{A}" to ack a data byte received and
+     *   "{N}" to nack a data byte received.
+     *   At the end of the stream, a stop condition is added if missing
+     *   and a newline is added to the receive buffer as well.
+     * </para>
+     * </summary>
+     * <param name="codes">
+     *   the code stream to send
+     * </param>
+     * <returns>
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int writeLine(string codes)
+    {
+        int bufflen;
+        byte[] buff;
+        bufflen = (codes).Length;
+        if (bufflen < 100) {
+            return this.sendCommand("!"+codes);
+        }
+        // send string using file upload
+        buff = YAPI.DefaultEncoding.GetBytes(""+codes+"\n");
+        return this._upload("txdata", buff);
+    }
+
+    /**
+     * <summary>
+     *   Sends a single byte to the I2C bus.
+     * <para>
+     *   Depending on the I2C bus state, the byte
+     *   will be interpreted as an address byte or a data byte.
      * </para>
      * </summary>
      * <param name="code">
      *   the byte to send
      * </param>
      * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1258,121 +1427,22 @@ public class YSpiPort : YFunction
      */
     public virtual int writeByte(int code)
     {
-        return this.sendCommand("$"+String.Format("{0:X02}",code));
+        return this.sendCommand("+"+String.Format("{0:X02}",code));
     }
 
     /**
      * <summary>
-     *   Sends an ASCII string to the serial port, as is.
+     *   Sends a byte sequence (provided as a hexadecimal string) to the I2C bus.
      * <para>
-     * </para>
-     * </summary>
-     * <param name="text">
-     *   the text string to send
-     * </param>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual int writeStr(string text)
-    {
-        byte[] buff;
-        int bufflen;
-        int idx;
-        int ch;
-        buff = YAPI.DefaultEncoding.GetBytes(text);
-        bufflen = (buff).Length;
-        if (bufflen < 100) {
-            // if string is pure text, we can send it as a simple command (faster)
-            ch = 0x20;
-            idx = 0;
-            while ((idx < bufflen) && (ch != 0)) {
-                ch = buff[idx];
-                if ((ch >= 0x20) && (ch < 0x7f)) {
-                    idx = idx + 1;
-                } else {
-                    ch = 0;
-                }
-            }
-            if (idx >= bufflen) {
-                return this.sendCommand("+"+text);
-            }
-        }
-        // send string using file upload
-        return this._upload("txdata", buff);
-    }
-
-    /**
-     * <summary>
-     *   Sends a binary buffer to the serial port, as is.
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="buff">
-     *   the binary buffer to send
-     * </param>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual int writeBin(byte[] buff)
-    {
-        return this._upload("txdata", buff);
-    }
-
-    /**
-     * <summary>
-     *   Sends a byte sequence (provided as a list of bytes) to the serial port.
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="byteList">
-     *   a list of byte codes
-     * </param>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual int writeArray(List<int> byteList)
-    {
-        byte[] buff;
-        int bufflen;
-        int idx;
-        int hexb;
-        int res;
-        bufflen = byteList.Count;
-        buff = new byte[bufflen];
-        idx = 0;
-        while (idx < bufflen) {
-            hexb = byteList[idx];
-            buff[idx] = (byte)(hexb & 0xff);
-            idx = idx + 1;
-        }
-
-        res = this._upload("txdata", buff);
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Sends a byte sequence (provided as a hexadecimal string) to the serial port.
-     * <para>
+     *   Depending on the I2C bus state, the first byte will be interpreted as an
+     *   address byte or a data byte.
      * </para>
      * </summary>
      * <param name="hexString">
      *   a string of hexadecimal byte codes
      * </param>
      * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1380,410 +1450,133 @@ public class YSpiPort : YFunction
      */
     public virtual int writeHex(string hexString)
     {
-        byte[] buff;
         int bufflen;
-        int idx;
-        int hexb;
-        int res;
+        byte[] buff;
         bufflen = (hexString).Length;
         if (bufflen < 100) {
-            return this.sendCommand("$"+hexString);
+            return this.sendCommand("+"+hexString);
         }
-        bufflen = ((bufflen) >> (1));
-        buff = new byte[bufflen];
-        idx = 0;
-        while (idx < bufflen) {
-            hexb = Convert.ToInt32((hexString).Substring( 2 * idx, 2), 16);
-            buff[idx] = (byte)(hexb & 0xff);
-            idx = idx + 1;
-        }
+        buff = YAPI.DefaultEncoding.GetBytes(hexString);
 
-        res = this._upload("txdata", buff);
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Sends an ASCII string to the serial port, followed by a line break (CR LF).
-     * <para>
-     * </para>
-     * </summary>
-     * <param name="text">
-     *   the text string to send
-     * </param>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual int writeLine(string text)
-    {
-        byte[] buff;
-        int bufflen;
-        int idx;
-        int ch;
-        buff = YAPI.DefaultEncoding.GetBytes(""+text+"\r\n");
-        bufflen = (buff).Length-2;
-        if (bufflen < 100) {
-            // if string is pure text, we can send it as a simple command (faster)
-            ch = 0x20;
-            idx = 0;
-            while ((idx < bufflen) && (ch != 0)) {
-                ch = buff[idx];
-                if ((ch >= 0x20) && (ch < 0x7f)) {
-                    idx = idx + 1;
-                } else {
-                    ch = 0;
-                }
-            }
-            if (idx >= bufflen) {
-                return this.sendCommand("!"+text);
-            }
-        }
-        // send string using file upload
         return this._upload("txdata", buff);
     }
 
     /**
      * <summary>
-     *   Reads one byte from the receive buffer, starting at current stream position.
+     *   Sends a binary buffer to the I2C bus, as is.
      * <para>
-     *   If data at current stream position is not available anymore in the receive buffer,
-     *   or if there is no data available yet, the function returns YAPI.NO_MORE_DATA.
+     *   Depending on the I2C bus state, the first byte will be interpreted
+     *   as an address byte or a data byte.
      * </para>
      * </summary>
-     * <returns>
-     *   the next byte
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual int readByte()
-    {
-        int currpos;
-        int reqlen;
-        byte[] buff;
-        int bufflen;
-        int mult;
-        int endpos;
-        int res;
-        // first check if we have the requested character in the look-ahead buffer
-        bufflen = (this._rxbuff).Length;
-        if ((this._rxptr >= this._rxbuffptr) && (this._rxptr < this._rxbuffptr+bufflen)) {
-            res = this._rxbuff[this._rxptr-this._rxbuffptr];
-            this._rxptr = this._rxptr + 1;
-            return res;
-        }
-        // try to preload more than one byte to speed-up byte-per-byte access
-        currpos = this._rxptr;
-        reqlen = 1024;
-        buff = this.readBin(reqlen);
-        bufflen = (buff).Length;
-        if (this._rxptr == currpos+bufflen) {
-            res = buff[0];
-            this._rxptr = currpos+1;
-            this._rxbuffptr = currpos;
-            this._rxbuff = buff;
-            return res;
-        }
-        // mixed bidirectional data, retry with a smaller block
-        this._rxptr = currpos;
-        reqlen = 16;
-        buff = this.readBin(reqlen);
-        bufflen = (buff).Length;
-        if (this._rxptr == currpos+bufflen) {
-            res = buff[0];
-            this._rxptr = currpos+1;
-            this._rxbuffptr = currpos;
-            this._rxbuff = buff;
-            return res;
-        }
-        // still mixed, need to process character by character
-        this._rxptr = currpos;
-
-        buff = this._download("rxdata.bin?pos="+Convert.ToString(this._rxptr)+"&len=1");
-        bufflen = (buff).Length - 1;
-        endpos = 0;
-        mult = 1;
-        while ((bufflen > 0) && (buff[bufflen] != 64)) {
-            endpos = endpos + mult * (buff[bufflen] - 48);
-            mult = mult * 10;
-            bufflen = bufflen - 1;
-        }
-        this._rxptr = endpos;
-        if (bufflen == 0) {
-            return YAPI.NO_MORE_DATA;
-        }
-        res = buff[0];
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Reads data from the receive buffer as a string, starting at current stream position.
-     * <para>
-     *   If data at current stream position is not available anymore in the receive buffer, the
-     *   function performs a short read.
-     * </para>
-     * </summary>
-     * <param name="nChars">
-     *   the maximum number of characters to read
+     * <param name="buff">
+     *   the binary buffer to send
      * </param>
      * <returns>
-     *   a string with receive buffer contents
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
      * </para>
      */
-    public virtual string readStr(int nChars)
+    public virtual int writeBin(byte[] buff)
     {
-        byte[] buff;
-        int bufflen;
-        int mult;
-        int endpos;
-        string res;
-        if (nChars > 65535) {
-            nChars = 65535;
-        }
-
-        buff = this._download("rxdata.bin?pos="+Convert.ToString( this._rxptr)+"&len="+Convert.ToString(nChars));
-        bufflen = (buff).Length - 1;
-        endpos = 0;
-        mult = 1;
-        while ((bufflen > 0) && (buff[bufflen] != 64)) {
-            endpos = endpos + mult * (buff[bufflen] - 48);
-            mult = mult * 10;
-            bufflen = bufflen - 1;
-        }
-        this._rxptr = endpos;
-        res = (YAPI.DefaultEncoding.GetString(buff)).Substring( 0, bufflen);
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Reads data from the receive buffer as a binary buffer, starting at current stream position.
-     * <para>
-     *   If data at current stream position is not available anymore in the receive buffer, the
-     *   function performs a short read.
-     * </para>
-     * </summary>
-     * <param name="nChars">
-     *   the maximum number of bytes to read
-     * </param>
-     * <returns>
-     *   a binary object with receive buffer contents
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual byte[] readBin(int nChars)
-    {
-        byte[] buff;
-        int bufflen;
-        int mult;
-        int endpos;
+        int nBytes;
         int idx;
-        byte[] res;
-        if (nChars > 65535) {
-            nChars = 65535;
-        }
-
-        buff = this._download("rxdata.bin?pos="+Convert.ToString( this._rxptr)+"&len="+Convert.ToString(nChars));
-        bufflen = (buff).Length - 1;
-        endpos = 0;
-        mult = 1;
-        while ((bufflen > 0) && (buff[bufflen] != 64)) {
-            endpos = endpos + mult * (buff[bufflen] - 48);
-            mult = mult * 10;
-            bufflen = bufflen - 1;
-        }
-        this._rxptr = endpos;
-        res = new byte[bufflen];
+        int val;
+        string msg;
+        msg = "";
+        nBytes = (buff).Length;
         idx = 0;
-        while (idx < bufflen) {
-            res[idx] = (byte)(buff[idx] & 0xff);
+        while (idx < nBytes) {
+            val = buff[idx];
+            msg = ""+ msg+""+String.Format("{0:x02}",val);
             idx = idx + 1;
         }
-        return res;
+
+        return this.writeHex(msg);
     }
 
     /**
      * <summary>
-     *   Reads data from the receive buffer as a list of bytes, starting at current stream position.
+     *   Sends a byte sequence (provided as a list of bytes) to the I2C bus.
      * <para>
-     *   If data at current stream position is not available anymore in the receive buffer, the
-     *   function performs a short read.
+     *   Depending on the I2C bus state, the first byte will be interpreted as an
+     *   address byte or a data byte.
      * </para>
      * </summary>
-     * <param name="nChars">
-     *   the maximum number of bytes to read
+     * <param name="byteList">
+     *   a list of byte codes
      * </param>
      * <returns>
-     *   a sequence of bytes with receive buffer contents
+     *   <c>YAPI_SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
-     *   On failure, throws an exception or returns an empty array.
+     *   On failure, throws an exception or returns a negative error code.
      * </para>
      */
-    public virtual List<int> readArray(int nChars)
+    public virtual int writeArray(List<int> byteList)
     {
-        byte[] buff;
-        int bufflen;
-        int mult;
-        int endpos;
+        int nBytes;
         int idx;
-        int b;
-        List<int> res = new List<int>();
-        if (nChars > 65535) {
-            nChars = 65535;
-        }
-
-        buff = this._download("rxdata.bin?pos="+Convert.ToString( this._rxptr)+"&len="+Convert.ToString(nChars));
-        bufflen = (buff).Length - 1;
-        endpos = 0;
-        mult = 1;
-        while ((bufflen > 0) && (buff[bufflen] != 64)) {
-            endpos = endpos + mult * (buff[bufflen] - 48);
-            mult = mult * 10;
-            bufflen = bufflen - 1;
-        }
-        this._rxptr = endpos;
-        res.Clear();
+        int val;
+        string msg;
+        msg = "";
+        nBytes = byteList.Count;
         idx = 0;
-        while (idx < bufflen) {
-            b = buff[idx];
-            res.Add(b);
+        while (idx < nBytes) {
+            val = byteList[idx];
+            msg = ""+ msg+""+String.Format("{0:x02}",val);
             idx = idx + 1;
         }
-        return res;
+
+        return this.writeHex(msg);
     }
 
     /**
      * <summary>
-     *   Reads data from the receive buffer as a hexadecimal string, starting at current stream position.
+     *   Continues the enumeration of I2C ports started using <c>yFirstI2cPort()</c>.
      * <para>
-     *   If data at current stream position is not available anymore in the receive buffer, the
-     *   function performs a short read.
-     * </para>
-     * </summary>
-     * <param name="nBytes">
-     *   the maximum number of bytes to read
-     * </param>
-     * <returns>
-     *   a string with receive buffer contents, encoded in hexadecimal
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual string readHex(int nBytes)
-    {
-        byte[] buff;
-        int bufflen;
-        int mult;
-        int endpos;
-        int ofs;
-        string res;
-        if (nBytes > 65535) {
-            nBytes = 65535;
-        }
-
-        buff = this._download("rxdata.bin?pos="+Convert.ToString( this._rxptr)+"&len="+Convert.ToString(nBytes));
-        bufflen = (buff).Length - 1;
-        endpos = 0;
-        mult = 1;
-        while ((bufflen > 0) && (buff[bufflen] != 64)) {
-            endpos = endpos + mult * (buff[bufflen] - 48);
-            mult = mult * 10;
-            bufflen = bufflen - 1;
-        }
-        this._rxptr = endpos;
-        res = "";
-        ofs = 0;
-        while (ofs + 3 < bufflen) {
-            res = ""+ res+""+String.Format("{0:X02}", buff[ofs])+""+String.Format("{0:X02}", buff[ofs + 1])+""+String.Format("{0:X02}", buff[ofs + 2])+""+String.Format("{0:X02}",buff[ofs + 3]);
-            ofs = ofs + 4;
-        }
-        while (ofs < bufflen) {
-            res = ""+ res+""+String.Format("{0:X02}",buff[ofs]);
-            ofs = ofs + 1;
-        }
-        return res;
-    }
-
-    /**
-     * <summary>
-     *   Manually sets the state of the SS line.
-     * <para>
-     *   This function has no effect when
-     *   the SS line is handled automatically.
-     * </para>
-     * </summary>
-     * <param name="val">
-     *   1 to turn SS active, 0 to release SS.
-     * </param>
-     * <returns>
-     *   <c>YAPI.SUCCESS</c> if the call succeeds.
-     * </returns>
-     * <para>
-     *   On failure, throws an exception or returns a negative error code.
-     * </para>
-     */
-    public virtual int set_SS(int val)
-    {
-        return this.sendCommand("S"+Convert.ToString(val));
-    }
-
-    /**
-     * <summary>
-     *   Continues the enumeration of SPI ports started using <c>yFirstSpiPort()</c>.
-     * <para>
-     *   Caution: You can't make any assumption about the returned SPI ports order.
-     *   If you want to find a specific a SPI port, use <c>SpiPort.findSpiPort()</c>
+     *   Caution: You can't make any assumption about the returned I2C ports order.
+     *   If you want to find a specific an I2C port, use <c>I2cPort.findI2cPort()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
-     *   a pointer to a <c>YSpiPort</c> object, corresponding to
-     *   a SPI port currently online, or a <c>null</c> pointer
-     *   if there are no more SPI ports to enumerate.
+     *   a pointer to a <c>YI2cPort</c> object, corresponding to
+     *   an I2C port currently online, or a <c>null</c> pointer
+     *   if there are no more I2C ports to enumerate.
      * </returns>
      */
-    public YSpiPort nextSpiPort()
+    public YI2cPort nextI2cPort()
     {
         string hwid = "";
         if (YAPI.YISERR(_nextFunction(ref hwid)))
             return null;
         if (hwid == "")
             return null;
-        return FindSpiPort(hwid);
+        return FindI2cPort(hwid);
     }
 
-    //--- (end of YSpiPort implementation)
+    //--- (end of YI2cPort implementation)
 
-    //--- (YSpiPort functions)
+    //--- (YI2cPort functions)
 
     /**
      * <summary>
-     *   Starts the enumeration of SPI ports currently accessible.
+     *   Starts the enumeration of I2C ports currently accessible.
      * <para>
-     *   Use the method <c>YSpiPort.nextSpiPort()</c> to iterate on
-     *   next SPI ports.
+     *   Use the method <c>YI2cPort.nextI2cPort()</c> to iterate on
+     *   next I2C ports.
      * </para>
      * </summary>
      * <returns>
-     *   a pointer to a <c>YSpiPort</c> object, corresponding to
-     *   the first SPI port currently online, or a <c>null</c> pointer
+     *   a pointer to a <c>YI2cPort</c> object, corresponding to
+     *   the first I2C port currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */
-    public static YSpiPort FirstSpiPort()
+    public static YI2cPort FirstI2cPort()
     {
         YFUN_DESCR[] v_fundescr = new YFUN_DESCR[1];
         YDEV_DESCR dev = default(YDEV_DESCR);
@@ -1796,7 +1589,7 @@ public class YSpiPort : YFunction
         string errmsg = "";
         int size = Marshal.SizeOf(v_fundescr[0]);
         IntPtr p = Marshal.AllocHGlobal(Marshal.SizeOf(v_fundescr[0]));
-        err = YAPI.apiGetFunctionsByClass("SpiPort", 0, p, size, ref neededsize, ref errmsg);
+        err = YAPI.apiGetFunctionsByClass("I2cPort", 0, p, size, ref neededsize, ref errmsg);
         Marshal.Copy(p, v_fundescr, 0, 1);
         Marshal.FreeHGlobal(p);
         if ((YAPI.YISERR(err) | (neededsize == 0)))
@@ -1808,11 +1601,11 @@ public class YSpiPort : YFunction
         errmsg = "";
         if ((YAPI.YISERR(YAPI.yapiGetFunctionInfo(v_fundescr[0], ref dev, ref serial, ref funcId, ref funcName, ref funcVal, ref errmsg))))
             return null;
-        return FindSpiPort(serial + "." + funcId);
+        return FindI2cPort(serial + "." + funcId);
     }
 
 
 
-    //--- (end of YSpiPort functions)
+    //--- (end of YI2cPort functions)
 }
 #pragma warning restore 1591

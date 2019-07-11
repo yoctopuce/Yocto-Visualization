@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 35931 2019-06-26 07:03:28Z seb $
+ * $Id: yocto_api.cs 36141 2019-07-08 17:51:33Z mvuilleu $
  *
  * High-level programming interface, common to all modules
  *
@@ -2579,7 +2579,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "35983";
+    public const string YOCTO_API_BUILD_NO = "36230";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -7472,6 +7472,179 @@ public class YDataSet
     //--- (end of generated code: YDataSet implementation)
 }
 
+
+//--- (generated code: YConsolidatedDataSet class start)
+/**
+ * <summary>
+ *   YConsolidatedDataSet objects make it possible to retrieve a set of
+ *   recorded measures from multiple sensors, for a specified time interval.
+ * <para>
+ *   They can be used to load data points progressively, and to receive
+ *   data records by timestamp, one by one..
+ * </para>
+ * <para>
+ * </para>
+ * </summary>
+ */
+public class YConsolidatedDataSet
+{
+//--- (end of generated code: YConsolidatedDataSet class start)
+    //--- (generated code: YConsolidatedDataSet definitions)
+
+    protected double _start = 0;
+    protected double _end = 0;
+    protected int _nsensors = 0;
+    protected List<YSensor> _sensors = new List<YSensor>();
+    protected List<YDataSet> _datasets = new List<YDataSet>();
+    protected List<int> _progresss = new List<int>();
+    protected List<int> _nextidx = new List<int>();
+    protected List<double> _nexttim = new List<double>();
+    //--- (end of generated code: YConsolidatedDataSet definitions)
+
+    // YConsolidatedDataSet constructor
+    public YConsolidatedDataSet(double startTime, double endTime, List<YSensor> sensorList)
+    {
+        //--- (generated code: YConsolidatedDataSet attributes initialization)
+        //--- (end of generated code: YConsolidatedDataSet attributes initialization)
+        this._init(startTime, endTime, sensorList);
+    }
+
+    //--- (generated code: YConsolidatedDataSet implementation)
+
+
+    public virtual int _init(double startt, double endt, List<YSensor> sensorList)
+    {
+        this._start = startt;
+        this._end = endt;
+        this._sensors = sensorList;
+        this._nsensors = -1;
+        return YAPI.SUCCESS;
+    }
+
+    /**
+     * <summary>
+     *   Extracts the next data record from the dataLogger of all sensors linked to this
+     *   object.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="datarec">
+     *   array of floating point numbers, that will be filled by the
+     *   function with the timestamp of the measure in first position,
+     *   followed by the measured value in next positions.
+     * </param>
+     * <returns>
+     *   an integer in the range 0 to 100 (percentage of completion),
+     *   or a negative error code in case of failure.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int nextRecord(List<double> datarec)
+    {
+        int s;
+        int idx;
+        YSensor sensor;
+        YDataSet newdataset;
+        int globprogress;
+        int currprogress;
+        double currnexttim;
+        double newvalue;
+        List<YMeasure> measures = new List<YMeasure>();
+        double nexttime;
+        //
+        // Ensure the dataset have been retrieved
+        //
+        if (this._nsensors == -1) {
+            this._nsensors = this._sensors.Count;
+            this._datasets.Clear();
+            this._progresss.Clear();
+            this._nextidx.Clear();
+            this._nexttim.Clear();
+            s = 0;
+            while (s < this._nsensors) {
+                sensor = this._sensors[s];
+                newdataset = sensor.get_recordedData(this._start, this._end);
+                this._datasets.Add(newdataset);
+                this._progresss.Add(0);
+                this._nextidx.Add(0);
+                this._nexttim.Add(0.0);
+                s = s + 1;
+            }
+        }
+        datarec.Clear();
+        //
+        // Find next timestamp to process
+        //
+        nexttime = 0;
+        s = 0;
+        while (s < this._nsensors) {
+            currnexttim = this._nexttim[s];
+            if (currnexttim == 0) {
+                idx = this._nextidx[s];
+                measures = this._datasets[s].get_measures();
+                currprogress = this._progresss[s];
+                while ((idx >= measures.Count) && (currprogress < 100)) {
+                    currprogress = this._datasets[s].loadMore();
+                    if (currprogress < 0) {
+                        currprogress = 100;
+                    }
+                    this._progresss[s] = currprogress;
+                    measures = this._datasets[s].get_measures();
+                }
+                if (idx < measures.Count) {
+                    currnexttim = measures[idx].get_endTimeUTC();
+                    this._nexttim[s] = currnexttim;
+                }
+            }
+            if (currnexttim > 0) {
+                if ((nexttime == 0) || (nexttime > currnexttim)) {
+                    nexttime = currnexttim;
+                }
+            }
+            s = s + 1;
+        }
+        if (nexttime == 0) {
+            return 100;
+        }
+        //
+        // Extract data for this timestamp
+        //
+        datarec.Clear();
+        datarec.Add(nexttime);
+        globprogress = 0;
+        s = 0;
+        while (s < this._nsensors) {
+            if (this._nexttim[s] == nexttime) {
+                idx = this._nextidx[s];
+                measures = this._datasets[s].get_measures();
+                newvalue = measures[idx].get_averageValue();
+                datarec.Add(newvalue);
+                this._nexttim[s] = 0.0;
+                this._nextidx[s] = idx+1;
+            } else {
+                datarec.Add(Double.NaN);
+            }
+            currprogress = this._progresss[s];
+            globprogress = globprogress + currprogress;
+            s = s + 1;
+        }
+        if (globprogress > 0) {
+            globprogress = ((globprogress) / (this._nsensors));
+            if (globprogress > 99) {
+                globprogress = 99;
+            }
+        }
+        return globprogress;
+    }
+
+    //--- (end of generated code: YConsolidatedDataSet implementation)
+}
+
+
 //
 // TYFunction Class (virtual class, used internally)
 //
@@ -11376,8 +11549,8 @@ public class YModule : YFunction
 
             char first = funcId[0];
             int i;
-            for (i = 1; i < funcId.Length; i++) {
-                if (!Char.IsLetter(funcId[i])) {
+            for (i = funcId.Length; i > 0; i--) {
+                if (Char.IsLetter(funcId[i-1])) {
                     break;
                 }
             }
@@ -11870,7 +12043,8 @@ public class YSensor : YFunction
 
     /**
      * <summary>
-     *   Returns the uncalibrated, unrounded raw value returned by the sensor, in the specified unit, as a floating point number.
+     *   Returns the uncalibrated, unrounded raw value returned by the
+     *   sensor, in the specified unit, as a floating point number.
      * <para>
      * </para>
      * <para>

@@ -382,10 +382,13 @@ namespace YoctoVisualisation
       int n1 = start;
       int n2 = 0;
       List<pointXY[]> l = new List<pointXY[]>();
-
-      while (n1 < dataCount - 1)
+      double deltaT =0;
+      while (n1 < start+dataCount - 1)
       {
-        double deltaT = data[n1 + 1].DateTime - data[n1].DateTime;
+        try
+        {  deltaT = data[n1 + 1].DateTime - data[n1].DateTime; }
+        catch (Exception )
+        { }
         n2 = n1 + 1;
         while ((n2 < dataCount - 1) && (data[n2].DateTime - data[n2 - 1].DateTime < 2 * deltaT)) n2++;
         int count = n2 - n1;
@@ -530,6 +533,9 @@ namespace YoctoVisualisation
 
     }
 
+
+  
+
     public void SensorNewDataBlock(CustomYSensor source, int sourceFromIndex, int sourcetoIndex, int targetIndex, bool fromDataLogger)
     {
 
@@ -549,7 +555,7 @@ namespace YoctoVisualisation
           int count = sourcetoIndex - sourceFromIndex + 1;
           pointXY[] datablock = new pointXY[count];
 
-
+          if (count>1)
           switch (s.DataSource_datatype)
           {
             case 1:

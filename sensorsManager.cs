@@ -241,6 +241,17 @@ namespace YoctoVisualisation
 
   public class CustomYSensor
   {
+
+    private class DataLoggerBoundary
+    { private double _start=0;
+      private double _stop = 0;
+
+      public DataLoggerBoundary(double start, double stop) { _start = start; _stop = stop; }
+      public double start { get { return _start; } }
+      public double stop { get { return _stop; } }
+
+    }
+
     YSensor sensor;
     protected string hwdName;
     protected string friendlyname;
@@ -267,6 +278,8 @@ namespace YoctoVisualisation
     double firstLiveDataTimeStamp = 0;
     double firstDataloggerTimeStamp = 0;
     double lastDataTimeStamp = 0;
+    string lastDataSource = "";
+    int consecutiveBadTimeStamp = 0;
 
     int globalDataLoadProgress = 0;
     public List<TimedSensorValue> minData = new List<TimedSensorValue>();
@@ -409,7 +422,11 @@ namespace YoctoVisualisation
 
     protected void preload_DoWork(object sender, DoWorkEventArgs e)
     {
-      recordedData = sensor.get_recordedData(0, 0);
+      DataLoggerBoundary arg = (DataLoggerBoundary)(e.Argument);
+
+      LogManager.Log(hwdName + ": preloading data from " + arg.start.ToString() + " to "+ arg.stop.ToString() +"(delta= "+(arg.stop- arg.start).ToString("F3")+")"); 
+
+      recordedData = sensor.get_recordedData(arg.start, arg.stop );
       
       try
       {
@@ -430,7 +447,8 @@ namespace YoctoVisualisation
       for (int i = startIndex; i < measures.Count; i++)
       {
         double t = measures[i].get_endTimeUTC();
-        if ((t < firstLiveDataTimeStamp) || (firstLiveDataTimeStamp == 0))
+      
+        if ((t>= arg.start) && (t < arg.stop)) // returned dataset might be slightly larger than what we asked for
         {
           previewMinData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_minValue() });
           previewCurData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_averageValue() });
@@ -439,80 +457,124 @@ namespace YoctoVisualisation
       }
 
 
+      if (previewCurData.Count > 1)
+      {
+        LogManager.Log(hwdName + ": preloaded data from " + previewCurData[0].DateTime.ToString() + " to " + previewCurData[previewCurData.Count - 1].DateTime.ToString());
 
-      if (_MaxLoggerRecords > 0)
-      { // find out where to start reading datalogger to make sure we don't read more the _MaxLoggerRecords records
+        if ((_MaxLoggerRecords > 0) && (arg.start == 0))
+        { // find out where to start reading datalogger to make sure we don't read more the _MaxLoggerRecords records
+          // tested only when loading initial data (arg.start==0)
 
-        List<YDataStream> list = recordedData.get_privateDataStreams();
-        int index = list.Count - 1;
-        int totalRecords = 0;
-        while ((index > 0) && (totalRecords< _MaxLoggerRecords))
-         { totalRecords += list[index].get_rowCount();
-           dataLoggerStartReadTime = list[index].get_startTimeUTC();
-           index--;
-         }
+          List<YDataStream> list = recordedData.get_privateDataStreams();
+          int index = list.Count - 1;
+          int totalRecords = 0;
+          while ((index > 0) && (totalRecords < _MaxLoggerRecords))
+          {
+            totalRecords += list[index].get_rowCount();
+            dataLoggerStartReadTime = list[index].get_startTimeUTC();
+            index--;
+          }
 
-        int n = 0;
-        while ((n < previewMinData.Count) && (previewMinData[n].DateTime < dataLoggerStartReadTime)) n++;
-        if (n>1)
-        {
-          previewMinData.RemoveRange(0, n-1);
-          previewCurData.RemoveRange(0, n-1);
-          previewMaxData.RemoveRange(0, n-1);
+          int n = 0;
+          while ((n < previewMinData.Count) && (previewMinData[n].DateTime < dataLoggerStartReadTime)) n++;
+          if (n > 1)
+          {
+            previewMinData.RemoveRange(0, n - 1);
+            previewCurData.RemoveRange(0, n - 1);
+            previewMaxData.RemoveRange(0, n - 1);
+          }
+
         }
-        
       }
+      // pass the start stop parameter to  the preload_Completed
+    e.Result = e.Argument;
+
+
+
     }
 
+    protected void findMergeBoundaries(List<TimedSensorValue>  previewMinData, out int MergeSourceStart, out int MergeSourceStop)
+    {
+       MergeSourceStart = 0;
+       MergeSourceStop = 0;
+      if (minData.Count > 0)
+      {
+        while ((MergeSourceStart < minData.Count) && (previewMinData[0].DateTime > minData[MergeSourceStart].DateTime)) MergeSourceStart++;
+        MergeSourceStop = MergeSourceStart;
+        while ((MergeSourceStop < minData.Count) && (previewMinData[previewMinData.Count - 1].DateTime >= minData[MergeSourceStop].DateTime)) MergeSourceStop++;
+      }
+
+
+    }
     protected void preload_Completed(object sender, RunWorkerCompletedEventArgs e)
     {
 
 
-      LogManager.Log(hwdName + " : datalogger preloading completed ("+ previewMinData.Count + " rows )");
-
-      int RangeTo = -1;
+      LogManager.Log(hwdName + " : datalogger preloading completed (" + previewMinData.Count + " rows )");
+      /*
+      string s = "";
+      for (int j = 0; j < curData.Count; j++)
+        s += curData[j].DateTime.ToString() + " ; " + curData[j].Value.ToString() + "\r\n";
+      System.IO.File.WriteAllText("C:\\tmp\\data-before.csv", s);
+*/
       if (previewMinData == null) return;
+    
 
-
-      if (previewMinData.Count <= 0) return;
-
-
-      if (firstLiveDataTimeStamp > 0)
+      if (previewMinData.Count > 1) // make sure there is enough data not enough data for rendering
       {
-        while ((RangeTo < previewMinData.Count - 1) && (previewMinData[RangeTo + 1].DateTime < firstLiveDataTimeStamp)) RangeTo++;
-      }
-      else RangeTo = previewMinData.Count - 1;
-
-      if (RangeTo < 0) return;
-
-      firstDataloggerTimeStamp = previewMinData[0].DateTime;
+        int MergeSourceStart = 0;
+        int MergeSourceStop = 0;
+        // find out where datalogger data fit in the already there data
+        findMergeBoundaries(previewMinData, out MergeSourceStart, out MergeSourceStop);
 
 
-      previewMinData = previewMinData.GetRange(0, RangeTo);
-      previewCurData = previewCurData.GetRange(0, RangeTo);
-      previewMaxData = previewMaxData.GetRange(0, RangeTo);
+
+      
+    
+
+/*
+       s = "";
+      for (int j = 0; j < curData.Count; j++)
+        s += previewCurData[j].DateTime.ToString() + " ; " + previewCurData[j].Value.ToString() + "\r\n";
+      System.IO.File.WriteAllText("C:\\tmp\\datalogger.csv", s);
+      */
+      // insert loaded data in current data
       dataMutex.WaitOne();
-      minData = previewMinData.Union(minData).ToList();
-      curData = previewCurData.Union(curData).ToList();
-      maxData = previewMinData.Union(maxData).ToList();
+      minData.RemoveRange(MergeSourceStart, MergeSourceStop - MergeSourceStart);
+      minData.InsertRange(MergeSourceStart, previewMinData);
+      curData.RemoveRange(MergeSourceStart, MergeSourceStop - MergeSourceStart);
+      curData.InsertRange(MergeSourceStart, previewCurData);
+      maxData.RemoveRange(MergeSourceStart, MergeSourceStop - MergeSourceStart);
+      maxData.InsertRange(MergeSourceStart, previewMaxData);
+
       dataMutex.ReleaseMutex();
 
-      preloadDone = true;
+        /*
+            s = "MergeStart = "+ MergeStart.ToString()+ "; MergeStop= " + MergeStop.ToString() + "\r\n"; ;
+            for (int j=0;j< curData.Count;j++)
+             s += curData[j].DateTime.ToString() + " ; " + curData[j].Value.ToString() + "\r\n";
+            System.IO.File.WriteAllText("C:\\tmp\\data-after.csv", s);
+            */
 
+        foreach (Form f in FormsToNotify)
+          if (f is GraphForm)
+            ((GraphForm)f).SensorNewDataBlock(this, MergeSourceStart, MergeSourceStart + previewMinData.Count-1, 0, true);
+      }
 
       int count = curData.Count;
       if (count > 0)
         if (curData[count - 1].DateTime > lastDataTimeStamp)
+        {
           lastDataTimeStamp = curData[count - 1].DateTime;
+          lastDataSource = "last preload timestamp";
+        }
 
-      foreach (Form f in FormsToNotify)
-        if (f is GraphForm)
-          ((GraphForm)f).SensorNewDataBlock(this, 0, RangeTo - 1, 0, true);
-
-      if (recordedDataLoadProgress < 100)
+   
+     // if (recordedDataLoadProgress < 100)
       {
-        LogManager.Log(hwdName + " : start datalogger loading");
-        loadProcess.RunWorkerAsync(null);
+          LogManager.Log(hwdName + " : start datalogger loading");
+          
+          loadProcess.RunWorkerAsync(e.Result); // e.result contains the start stop parameters
 
       }
 
@@ -603,7 +665,8 @@ namespace YoctoVisualisation
 
     protected void load_DoWork(object sender, DoWorkEventArgs e)
     {
-     
+      DataLoggerBoundary arg = (DataLoggerBoundary)(e.Argument);
+      LogManager.Log(hwdName + " loading main data from datalogger");
       if (dataLoggerStartReadTime>0)
        {
          recordedData = sensor.get_recordedData(dataLoggerStartReadTime, 0);
@@ -624,14 +687,14 @@ namespace YoctoVisualisation
         try
         {
           recordedDataLoadProgress = recordedData.loadMore();
-          //LogManager.Log(hwdName + "loading " + recordedDataLoadProgress.ToString() + "%");
+          //LogManager.Log(hwdName + " loading " + recordedDataLoadProgress.ToString() + "%");
 
 
         }
         catch (Exception) { loadFailed = true; return; }
 
 
-                if (globalDataLoadProgress != (int)(recordedDataLoadProgress))
+      if (globalDataLoadProgress != (int)(recordedDataLoadProgress))
         {
           
           globalDataLoadProgress = (int)(recordedDataLoadProgress);
@@ -647,7 +710,8 @@ namespace YoctoVisualisation
 
       {
         double t = measures[i].get_endTimeUTC();
-        if ((previewMinData.Count == 0) || (t > previewMinData[previewMinData.Count - 1].DateTime))
+        if ((t>=arg.start) && (t<arg.stop))   // trust no one!
+        if ( (previewMinData.Count == 0) || (t > previewMinData[previewMinData.Count - 1].DateTime)  )        
         {
           previewMinData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_minValue() });
           previewCurData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_averageValue() });
@@ -663,25 +727,31 @@ namespace YoctoVisualisation
           throw new Exception("Time-stamp inconsistency");
       }
 
-     
+
+      LogManager.Log(hwdName + " loaded " + previewCurData.Count.ToString() +  "/"+ measures.Count.ToString()+ " records over "+ (previewCurData[previewCurData.Count-1].DateTime- previewCurData[0].DateTime).ToString("F3") +" sec");
 
 
-
-      if (previewMinData.Count > 0)
+      if (previewMinData.Count > 2)
       {
         globalDataLoadProgress = 100;
-        int index = 0;
+        
         dataMutex.WaitOne();
         double lastPreviewTimeStamp = previewMinData[previewMinData.Count - 1].DateTime;
-        while ((index < minData.Count) && (minData[index].DateTime < lastPreviewTimeStamp)) index++;
+        //while ((index < minData.Count) && (minData[index].DateTime < lastPreviewTimeStamp)) index++;
         //LogManager.Log(hwdName + " time range is ["+constants.UnixTimeStampToDateTime(previewMinData[0].DateTime)+".."+ constants.UnixTimeStampToDateTime(lastPreviewTimeStamp)+"]");
 
-        minData.RemoveRange(0, index);
-        curData.RemoveRange(0, index);
-        maxData.RemoveRange(0, index);
-        minData.InsertRange(0, previewMinData);
-        curData.InsertRange(0, previewCurData);
-        maxData.InsertRange(0, previewMaxData);
+        int MergeSourceStart;
+        int MergeSourceStop;
+        // find out where datalogger data fit in the already there data
+        findMergeBoundaries(previewMinData, out MergeSourceStart, out MergeSourceStop);
+
+        int recordcount = MergeSourceStop - MergeSourceStart;
+        minData.RemoveRange(MergeSourceStart, recordcount);
+        curData.RemoveRange(MergeSourceStart, recordcount);
+        maxData.RemoveRange(MergeSourceStart, recordcount);
+        minData.InsertRange(MergeSourceStart, previewMinData);
+        curData.InsertRange(MergeSourceStart, previewCurData);
+        maxData.InsertRange(MergeSourceStart, previewMaxData);
         dataMutex.ReleaseMutex();
       }
       firstDataloggerTimeStamp = curData[0].DateTime;
@@ -691,7 +761,14 @@ namespace YoctoVisualisation
       int count = curData.Count;
       if (count > 0)
         if (curData[count - 1].DateTime > lastDataTimeStamp)
+        {
           lastDataTimeStamp = curData[count - 1].DateTime;
+          lastDataSource = "end of datalogger";
+        }
+
+      e.Result = e.Argument; // pass the start stop argument to load_Completed;
+
+
     }
 
 
@@ -711,7 +788,15 @@ namespace YoctoVisualisation
         previewMinData.Clear();
         previewCurData.Clear();
         previewMaxData.Clear();
+        preloadDone = false;
+        loadDone = false;
         return;
+      }
+
+      if (previewCurData.Count<=2)
+      {
+        preloadDone = false;
+        loadDone = false;
       }
 
       LogManager.Log(hwdName + " : datalogger loading completed  (" + previewMinData.Count + " rows )");
@@ -734,6 +819,9 @@ namespace YoctoVisualisation
       previewMinData.Clear();
       previewCurData.Clear();
       previewMaxData.Clear();
+      preloadDone = false;
+      loadDone = false;
+
 
     }
 
@@ -775,6 +863,7 @@ namespace YoctoVisualisation
       firstLiveDataTimeStamp = 0;
       firstDataloggerTimeStamp = 0;
       lastDataTimeStamp = 0;
+      lastDataSource = "stop";
 
       if (!loadProcess.CancellationPending) loadProcess.CancelAsync();
       load_ProgressChanged(null, null);
@@ -827,8 +916,15 @@ namespace YoctoVisualisation
 
     }
 
-    public void  loadDatalogger()
+    public void  loadDatalogger(double start, double stop)
+ 
     {
+
+      if (!dataLoggerFeature) return;
+      if (predloadProcess.IsBusy) return;
+      if (loadProcess.IsBusy) return;
+
+
       if (constants.maxPointsPerDataloggerSerie < 0)
       {
         LogManager.Log(hwdName + " : datalogger access is disabled");
@@ -841,13 +937,15 @@ namespace YoctoVisualisation
         return;
       }
 
+      
 
-      if ((!preloadDone) && (!predloadProcess.IsBusy) && dataLoggerFeature)
+      if ((!preloadDone) &&   dataLoggerFeature)
       {
         LogManager.Log(hwdName + " : start datalogger preloading");
-        predloadProcess.RunWorkerAsync(null);
+        predloadProcess.RunWorkerAsync(new DataLoggerBoundary(start,stop));
+      
       }
-      else if ( (preloadDone) && (!loadDone) && (!loadProcess.IsBusy)  && dataLoggerFeature)
+      else if ( (preloadDone) && (!loadDone)   && dataLoggerFeature)
       {
         LogManager.Log(hwdName + " : start datalogger loading");
         loadProcess.RunWorkerAsync(null);
@@ -861,7 +959,25 @@ namespace YoctoVisualisation
     {
       configureSensor();
       online = true;
-      loadDatalogger();
+
+    
+      if (curData.Count>0)
+      {
+        double end = sensor.get_dataLogger().get_timeUTC();
+        double start   = curData[curData.Count - 1].DateTime;
+        double duration = end - start;
+
+
+        if (duration > 1)
+        {
+          LogManager.Log(hwdName + " is back online trying to load "+duration.ToString("F3")+" sec of data from datalogger ");
+          loadDatalogger(start, end);
+          
+        }
+
+        } else
+        loadDatalogger(0, sensor.get_dataLogger().get_timeUTC());
+
       if (isReadOnly) LogManager.Log(hwdName + " is read only");
 
 
@@ -958,14 +1074,32 @@ namespace YoctoVisualisation
         online = true;
         double t = M.get_endTimeUTC();
         if (firstLiveDataTimeStamp == 0) firstLiveDataTimeStamp = t;
-        if (t > lastDataTimeStamp) lastDataTimeStamp = t;
-        dataMutex.WaitOne();
-        curData.Add(new TimedSensorValue { DateTime = t, Value = M.get_averageValue() });
-        minData.Add(new TimedSensorValue { DateTime = t, Value = M.get_minValue() });
-        maxData.Add(new TimedSensorValue { DateTime = t, Value = M.get_maxValue() });
-        if (_MaxDataRecords > 0) dataCleanUp();
-        dataMutex.ReleaseMutex();
+        //LogManager.Log(hwdName + ": timed callback " +  t.ToString("F3") + String.Format(" {0:0.000}", t));
 
+        if (t > lastDataTimeStamp)
+        {
+          lastDataTimeStamp = t;
+          lastDataSource = "last timedReport";
+          consecutiveBadTimeStamp = 0;
+        }
+        else
+        {
+          consecutiveBadTimeStamp++;
+          if (consecutiveBadTimeStamp<10)
+            LogManager.Log(hwdName + ": ignoring bad timestamp ("+(lastDataTimeStamp-t).ToString("F3")+ " sec before "+lastDataSource+")");
+
+        }
+
+        if ((consecutiveBadTimeStamp == 0) || (consecutiveBadTimeStamp >= 10))
+        {
+          dataMutex.WaitOne();
+          curData.Add(new TimedSensorValue { DateTime = t, Value = M.get_averageValue() });
+          minData.Add(new TimedSensorValue { DateTime = t, Value = M.get_minValue() });
+          maxData.Add(new TimedSensorValue { DateTime = t, Value = M.get_maxValue() });
+         // LogManager.Log(hwdName + " :: Callback : " + t.ToString());
+          if (_MaxDataRecords > 0) dataCleanUp();
+          dataMutex.ReleaseMutex();
+        }
         for (int i = 0; i < Alarms.Count; i++)
           Alarms[i].check(M);
 
@@ -1231,14 +1365,18 @@ namespace YoctoVisualisation
     {
       string errmsg = "";
 
-      if (counter == 0)
+      try
       {
-        YAPI.UpdateDeviceList(ref errmsg);
+        if (counter == 0)
+        {
+          YAPI.UpdateDeviceList(ref errmsg);
 
+        }
+        else YAPI.HandleEvents(ref errmsg);
+        counter = (counter + 1) % 20;
       }
-      else YAPI.HandleEvents(ref errmsg);
-      counter = (counter + 1) % 20;
-    }
+      catch (Exception ex) { LogManager.Log("SensorsManager.run() exception : " + ex.Message); }
+      } 
 
   }
 }

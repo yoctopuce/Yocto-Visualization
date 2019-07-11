@@ -72,6 +72,8 @@ namespace YoctoVisualisation
           YAPI.SetDeviceListValidity(3600);
           Application.EnableVisualStyles();
           Application.SetCompatibleTextRenderingDefault(false);
+         // Application.Run(new StartForm());
+          
           try  { Application.Run(new StartForm());}
           catch (OutOfMemoryException)
           {
