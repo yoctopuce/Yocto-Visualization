@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_accelerometer.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_accelerometer.cs 37619 2019-10-11 11:52:42Z mvuilleu $
  *
  *  Implements yFindAccelerometer(), the high-level API for Accelerometer functions
  *
@@ -166,6 +166,8 @@ public class YAccelerometer : YSensor
      * <para>
      *   When the
      *   frequency is lower, the device performs averaging.
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_buzzer.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_buzzer.cs 36554 2019-07-29 12:21:31Z mvuilleu $
  *
  *  Implements yFindBuzzer(), the high-level API for Buzzer functions
  *
@@ -219,6 +219,8 @@ public class YBuzzer : YFunction
      * <summary>
      *   Changes the volume of the signal sent to the buzzer/speaker.
      * <para>
+     *   Remember to call the
+     *   <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

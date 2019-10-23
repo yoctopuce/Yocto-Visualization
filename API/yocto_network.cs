@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_network.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_network.cs 37619 2019-10-11 11:52:42Z mvuilleu $
  *
  *  Implements yFindNetwork(), the high-level API for Network functions
  *
@@ -795,14 +795,14 @@ public class YNetwork : YFunction
 
     /**
      * <summary>
-     *   Returns the HTML page to serve for the URL "/"" of the hub.
+     *   Returns the TCP port used to serve the hub web UI.
      * <para>
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   an integer corresponding to the HTML page to serve for the URL "/"" of the hub
+     *   an integer corresponding to the TCP port used to serve the hub web UI
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YNetwork.HTTPPORT_INVALID</c>.
@@ -824,17 +824,19 @@ public class YNetwork : YFunction
 
     /**
      * <summary>
-     *   Changes the default HTML page returned by the hub.
+     *   Changes the the TCP port used to serve the hub web UI.
      * <para>
-     *   If not value are set the hub return
-     *   "index.html" which is the web interface of the hub. It is possible to change this page
-     *   for file that has been uploaded on the hub.
+     *   The default value is port 80,
+     *   which is the default for all Web servers. Regardless of the value set here,
+     *   the hub will always reply on port 4444, which is used by default by Yoctopuce
+     *   API library. When you change this parameter, remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
      * </summary>
      * <param name="newval">
-     *   an integer corresponding to the default HTML page returned by the hub
+     *   an integer corresponding to the the TCP port used to serve the hub web UI
      * </param>
      * <para>
      * </para>
@@ -889,7 +891,9 @@ public class YNetwork : YFunction
      * <para>
      *   If not value are set the hub return
      *   "index.html" which is the web interface of the hub. It is possible to change this page
-     *   for file that has been uploaded on the hub.
+     *   for file that has been uploaded on the hub. The maximum filename size is 15 characters.
+     *   When you change this parameter, remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -952,6 +956,8 @@ public class YNetwork : YFunction
      *   Changes the activation state of the multicast announce protocols to allow easy
      *   discovery of the module in the network neighborhood (uPnP/Bonjour protocol).
      * <para>
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1019,7 +1025,8 @@ public class YNetwork : YFunction
      * <para>
      *   A zero value disables automated reboot
      *   in case of Internet connectivity loss. The smallest valid non-zero timeout is
-     *   90 seconds.
+     *   90 seconds. Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1141,6 +1148,8 @@ public class YNetwork : YFunction
      * <summary>
      *   Changes the HTTP method used to notify callbacks for significant state changes.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1207,6 +1216,8 @@ public class YNetwork : YFunction
      * <summary>
      *   Changes the encoding standard to use for representing notification values.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1374,6 +1385,7 @@ public class YNetwork : YFunction
      * <summary>
      *   Changes the initial waiting time before first callback notifications, in seconds.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1432,6 +1444,8 @@ public class YNetwork : YFunction
      * <summary>
      *   Changes the HTTP callback schedule strategy, as a text string.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1490,6 +1504,7 @@ public class YNetwork : YFunction
      * <summary>
      *   Changes the minimum waiting time between two HTTP callbacks, in seconds.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -1548,6 +1563,7 @@ public class YNetwork : YFunction
      * <summary>
      *   Changes the waiting time between two HTTP callbacks when there is nothing new.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_wakeupschedule.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_wakeupschedule.cs 37000 2019-09-03 06:40:17Z mvuilleu $
  *
  *  Implements yFindWakeUpSchedule(), the high-level API for WakeUpSchedule functions
  *
@@ -167,6 +167,8 @@ public class YWakeUpSchedule : YFunction
      * <summary>
      *   Changes the minutes in the 00-29 interval when a wake up must take place.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -225,6 +227,8 @@ public class YWakeUpSchedule : YFunction
      * <summary>
      *   Changes the minutes in the 30-59 interval when a wake up must take place.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -283,6 +287,8 @@ public class YWakeUpSchedule : YFunction
      * <summary>
      *   Changes the hours when a wake up must take place.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -341,6 +347,8 @@ public class YWakeUpSchedule : YFunction
      * <summary>
      *   Changes the days of the week when a wake up must take place.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -399,6 +407,8 @@ public class YWakeUpSchedule : YFunction
      * <summary>
      *   Changes the days of the month when a wake up must take place.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -457,6 +467,8 @@ public class YWakeUpSchedule : YFunction
      * <summary>
      *   Changes the months when a wake up must take place.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>

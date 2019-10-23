@@ -90,7 +90,7 @@ namespace YoctoVisualisation
       YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
-    
+      _display.resetRefrenceSize();
       _display.AllowPrintScreenCapture = true;
       _display.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _display.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
@@ -184,8 +184,22 @@ namespace YoctoVisualisation
     }
     public string getConfigData()
     {
+
+      double newCoef = 0;
+      if (WindowState == FormWindowState.Maximized)
+      { // if the window is maximized, saved size will be regular size, and maximize
+        //  flag will be stored separately , so we need to save font
+        //  size relative to  regular size (i.e. RestoreBounds.Size);
+
+        int deltaX = Size.Width - _display.usableUiWidth();
+        int deltaY = Size.Height - _display.usableUiHeight();
+        newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, _display.refWidth, _display.refHeight, RestoreBounds.Size.Width-deltaX, RestoreBounds.Size.Height-deltaX);  
+        _display.resetProportionalSizeObjectsCachePush(newCoef);  // reset all size related cached objects    
+      }
+      string dt = manager.getConfigData();
+      if (newCoef != 0) _display.resetProportionalSizeObjectsCachePop();
       return "<digitalDisplayForm>\n"
-            + manager.getConfigData()
+            + dt
             + "</digitalDisplayForm>\n";
     }
 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_wakeupmonitor.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_wakeupmonitor.cs 37000 2019-09-03 06:40:17Z mvuilleu $
  *
  *  Implements yFindWakeUpMonitor(), the high-level API for WakeUpMonitor functions
  *
@@ -168,6 +168,8 @@ public class YWakeUpMonitor : YFunction
      * <summary>
      *   Changes the maximal wake up time (seconds) before automatically going to sleep.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_pwmoutput.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_pwmoutput.cs 37619 2019-10-11 11:52:42Z mvuilleu $
  *
  *  Implements yFindPwmOutput(), the high-level API for PwmOutput functions
  *
@@ -206,7 +206,8 @@ public class YPwmOutput : YFunction
      *   The duty cycle is kept unchanged thanks to an
      *   automatic pulse width change, in other words, the change will not be applied
      *   before the end of the current period. This can significantly affect reaction
-     *   time at low frequencies.
+     *   time at low frequencies. If you call the matching module <c>saveToFlash()</c>
+     *   method, the frequency will be kept after a device power cycle.
      *   To stop the PWM signal, do not set the frequency to zero, use the set_enabled()
      *   method instead.
      * </para>
@@ -270,7 +271,8 @@ public class YPwmOutput : YFunction
      *   Caution: in order to avoid  random truncation of
      *   the current pulse, the change will not be applied
      *   before the end of the current period. This can significantly affect reaction
-     *   time at low frequencies.
+     *   time at low frequencies. If you call the matching module <c>saveToFlash()</c>
+     *   method, the frequency will be kept after a device power cycle.
      * </para>
      * <para>
      * </para>

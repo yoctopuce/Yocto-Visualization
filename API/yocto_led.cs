@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_led.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_led.cs 36554 2019-07-29 12:21:31Z mvuilleu $
  *
  *  Implements yFindLed(), the high-level API for Led functions
  *
@@ -208,6 +208,8 @@ public class YLed : YFunction
      * <summary>
      *   Changes the current LED intensity (in per cent).
      * <para>
+     *   Remember to call the
+     *   <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

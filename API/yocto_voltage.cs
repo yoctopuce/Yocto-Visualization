@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_voltage.cs 35360 2019-05-09 09:02:29Z mvuilleu $
+ *  $Id: yocto_voltage.cs 37619 2019-10-11 11:52:42Z mvuilleu $
  *
  *  Implements yFindVoltage(), the high-level API for Voltage functions
  *
@@ -133,18 +133,21 @@ public class YVoltage : YSensor
 
     /**
      * <summary>
-     *   Changes the activation state of this input.
+     *   Changes the activation state of this voltage input.
      * <para>
-     *   When an input is disabled,
-     *   its value is no more updated. On some devices, disabling an input can
-     *   improve the refresh rate of the other active inputs.
+     *   When AC measurements are disabled,
+     *   the device will always assume a DC signal, and vice-versa. When both AC and DC measurements
+     *   are active, the device switches between AC and DC mode based on the relative amplitude
+     *   of variations compared to the average value.
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
      * </summary>
      * <param name="newval">
      *   either <c>YVoltage.ENABLED_FALSE</c> or <c>YVoltage.ENABLED_TRUE</c>, according to the activation
-     *   state of this input
+     *   state of this voltage input
      * </param>
      * <para>
      * </para>

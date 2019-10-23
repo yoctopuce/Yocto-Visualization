@@ -116,8 +116,8 @@ namespace YoctoVisualisation
       YDataRenderer.minMaxCheckDisabled = false;
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
- 
-    
+
+      _angularGauge.resetRefrenceSize();
       _angularGauge.AllowPrintScreenCapture = true;
       _angularGauge.proportionnalValueChangeCallback = manager.proportionalValuechanged ;
       _angularGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
@@ -224,8 +224,21 @@ namespace YoctoVisualisation
 
     public string getConfigData()
     {
+      double newCoef = 0;
+      if (WindowState == FormWindowState.Maximized)
+      { // if the window is maximized, saved size will be regular size, and maximize
+        //  flag will be stored separately , so we need to save font
+        //  size relative to  regular size (i.e. RestoreBounds.Size);
+
+        int deltaX = Size.Width - _angularGauge.usableUiWidth();
+        int deltaY = Size.Height - _angularGauge.usableUiHeight();
+        newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, _angularGauge.refWidth, _angularGauge.refHeight, RestoreBounds.Size.Width - deltaX, RestoreBounds.Size.Height - deltaX);
+        _angularGauge.resetProportionalSizeObjectsCachePush(newCoef);  // reset all size related cached objects    
+      }
+      string dt = manager.getConfigData();
+      if (newCoef != 0) _angularGauge.resetProportionalSizeObjectsCachePop();
       return "<angularGaugeForm>\n"
-            + manager.getConfigData()
+            + dt
             + "</angularGaugeForm>\n";
     }
 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_tilt.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_tilt.cs 37619 2019-10-11 11:52:42Z mvuilleu $
  *
  *  Implements yFindTilt(), the high-level API for Tilt functions
  *
@@ -149,6 +149,8 @@ public class YTilt : YSensor
      * <para>
      *   When the
      *   frequency is lower, the device performs averaging.
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_cellular.cs 34989 2019-04-05 13:41:16Z seb $
+ * $Id: yocto_cellular.cs 37619 2019-10-11 11:52:42Z mvuilleu $
  *
  * Implements yFindCellular(), the high-level API for Cellular functions
  *
@@ -570,6 +570,8 @@ public class YCellular : YFunction
      *   If the name is an empty
      *   string, the choice will be made automatically based on the SIM card. Otherwise,
      *   the selected operator is the only one that will be used.
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -697,6 +699,8 @@ public class YCellular : YFunction
      * </para>
      * <para>
      *   When data services are disabled, SMS are the only mean of communication.
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -759,6 +763,8 @@ public class YCellular : YFunction
      *   Returns the Access Point Name (APN) to be used, if needed.
      * <para>
      *   When left blank, the APN suggested by the cell operator will be used.
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -858,6 +864,8 @@ public class YCellular : YFunction
      * <summary>
      *   Changes the automated connectivity check interval, in seconds.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

@@ -120,6 +120,7 @@ namespace YoctoVisualisation
 
 
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration,capture);
+      _solidGauge.resetRefrenceSize();
       _solidGauge.AllowPrintScreenCapture = true;
       _solidGauge.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _solidGauge.resizeRule = Proportional.ResizeRule.RELATIVETOBOTH;
@@ -209,8 +210,21 @@ namespace YoctoVisualisation
 
     public string getConfigData()
     {
+      double newCoef = 0;
+      if (WindowState == FormWindowState.Maximized)
+      { // if the window is maximized, saved size will be regular size, and maximize
+        //  flag will be stored separately , so we need to save font
+        //  size relative to  regular size (i.e. RestoreBounds.Size);
+
+        int deltaX = Size.Width - _solidGauge.usableUiWidth();
+        int deltaY = Size.Height - _solidGauge.usableUiHeight();
+        newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, _solidGauge.refWidth, _solidGauge.refHeight, RestoreBounds.Size.Width - deltaX, RestoreBounds.Size.Height - deltaX);
+        _solidGauge.resetProportionalSizeObjectsCachePush(newCoef);  // reset all size related cached objects    
+      }
+      string dt = manager.getConfigData();
+      if (newCoef != 0) _solidGauge.resetProportionalSizeObjectsCachePop();
       return "<GaugeForm>\n"
-            + manager.getConfigData()
+            + dt
             + "</GaugeForm>\n";
     }
 

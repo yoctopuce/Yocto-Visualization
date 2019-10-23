@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_gps.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_gps.cs 37165 2019-09-13 16:57:27Z mvuilleu $
  *
  *  Implements yFindGps(), the high-level API for Gps functions
  *
@@ -84,6 +84,14 @@ public class YGps : YFunction
     public const int COORDSYSTEM_GPS_DM = 1;
     public const int COORDSYSTEM_GPS_D = 2;
     public const int COORDSYSTEM_INVALID = -1;
+    public const int CONSTELLATION_GPS = 0;
+    public const int CONSTELLATION_GLONASS = 1;
+    public const int CONSTELLATION_GALLILEO = 2;
+    public const int CONSTELLATION_GNSS = 3;
+    public const int CONSTELLATION_GPS_GLONASS = 4;
+    public const int CONSTELLATION_GPS_GALLILEO = 5;
+    public const int CONSTELLATION_GLONASS_GALLELIO = 6;
+    public const int CONSTELLATION_INVALID = -1;
     public const string LATITUDE_INVALID = YAPI.INVALID_STRING;
     public const string LONGITUDE_INVALID = YAPI.INVALID_STRING;
     public const double DILUTION_INVALID = YAPI.INVALID_DOUBLE;
@@ -97,6 +105,7 @@ public class YGps : YFunction
     protected int _isFixed = ISFIXED_INVALID;
     protected long _satCount = SATCOUNT_INVALID;
     protected int _coordSystem = COORDSYSTEM_INVALID;
+    protected int _constellation = CONSTELLATION_INVALID;
     protected string _latitude = LATITUDE_INVALID;
     protected string _longitude = LONGITUDE_INVALID;
     protected double _dilution = DILUTION_INVALID;
@@ -133,6 +142,10 @@ public class YGps : YFunction
         if (json_val.has("coordSystem"))
         {
             _coordSystem = json_val.getInt("coordSystem");
+        }
+        if (json_val.has("constellation"))
+        {
+            _constellation = json_val.getInt("constellation");
         }
         if (json_val.has("latitude"))
         {
@@ -270,6 +283,8 @@ public class YGps : YFunction
      * <summary>
      *   Changes the representation system used for positioning data.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>
@@ -293,6 +308,76 @@ public class YGps : YFunction
         lock (_thisLock) {
             rest_val = (newval).ToString();
             return _setAttr("coordSystem", rest_val);
+        }
+    }
+
+    /**
+     * <summary>
+     *   Returns the the satellites constellation used to compute
+     *   positioning data.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a value among <c>YGps.CONSTELLATION_GPS</c>, <c>YGps.CONSTELLATION_GLONASS</c>,
+     *   <c>YGps.CONSTELLATION_GALLILEO</c>, <c>YGps.CONSTELLATION_GNSS</c>,
+     *   <c>YGps.CONSTELLATION_GPS_GLONASS</c>, <c>YGps.CONSTELLATION_GPS_GALLILEO</c> and
+     *   <c>YGps.CONSTELLATION_GLONASS_GALLELIO</c> corresponding to the the satellites constellation used to compute
+     *   positioning data
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YGps.CONSTELLATION_INVALID</c>.
+     * </para>
+     */
+    public int get_constellation()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return CONSTELLATION_INVALID;
+                }
+            }
+            res = this._constellation;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Changes the satellites constellation used to compute
+     *   positioning data.
+     * <para>
+     *   Possible  constellations are GPS, Glonass, Galileo ,
+     *   GNSS ( = GPS + Glonass + Galileo) and the 3 possible pairs. This seeting has effect on Yocto-GPS rev A.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="newval">
+     *   a value among <c>YGps.CONSTELLATION_GPS</c>, <c>YGps.CONSTELLATION_GLONASS</c>,
+     *   <c>YGps.CONSTELLATION_GALLILEO</c>, <c>YGps.CONSTELLATION_GNSS</c>,
+     *   <c>YGps.CONSTELLATION_GPS_GLONASS</c>, <c>YGps.CONSTELLATION_GPS_GALLILEO</c> and
+     *   <c>YGps.CONSTELLATION_GLONASS_GALLELIO</c> corresponding to the satellites constellation used to compute
+     *   positioning data
+     * </param>
+     * <para>
+     * </para>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public int set_constellation(int newval)
+    {
+        string rest_val;
+        lock (_thisLock) {
+            rest_val = (newval).ToString();
+            return _setAttr("constellation", rest_val);
         }
     }
 
@@ -571,6 +656,8 @@ public class YGps : YFunction
      * <para>
      *   The timezone is automatically rounded to the nearest multiple of 15 minutes.
      *   If current UTC time is known, the current time is automatically be updated according to the selected time zone.
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
      * </para>
      * <para>
      * </para>

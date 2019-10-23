@@ -312,7 +312,7 @@ namespace YDataRendering
     public void containerResizedPushNewCoef(double coef)
     {
       valueStack.Add(_value);
-      _value = _value* coef;
+      _value = _refValue * coef;
       if (_reset != null) _reset(this);
     }
    
@@ -325,15 +325,13 @@ namespace YDataRendering
     }
 
     public static  double resizeCoef(ResizeRule rule, double refWidth, double refHeight,  double newWidth, double newHeight)
-    {
+    { 
+      
       switch (rule)
       {
-       
         case ResizeRule.RELATIVETOWIDTH:  return   newWidth / refWidth;      
         case ResizeRule.RELATIVETOHEIGHT: return   newHeight / refHeight;
-        case ResizeRule.RELATIVETOBOTH:   return Math.Min(newHeight / refHeight, newWidth / refWidth);
-        
-
+        case ResizeRule.RELATIVETOBOTH:   return Math.Min(newHeight / refHeight, newWidth / refWidth); // original
       }
       return 1.0;
     }
@@ -341,8 +339,7 @@ namespace YDataRendering
 
 
     public void containerResized(double newWidth, double newHeight)
-    {
-      _value = _refValue*resizeCoef(_resizeRule, _refWidth,_refHeight, newWidth, newHeight);  
+    { _value = _refValue* resizeCoef(_resizeRule, _refWidth, _refHeight, newWidth, newHeight);
       if (_reset != null) _reset(this);
     }
 
@@ -529,10 +526,11 @@ namespace YDataRendering
   {
     private RegisterHotKeyClass _RegisKey = new RegisterHotKeyClass();
     protected int _redrawAllowed = 1;
-    
+    private int _refWidth = 1;
+    private int _refHeight = 1;
 
     public delegate void RendererDblClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
-    public delegate void RendererRightClickCallBack(YDataRenderer source, MouseEventArgs eventArg);    
+    public delegate void RendererRightClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
 
     public enum CaptureFormats
     {
@@ -552,9 +550,9 @@ namespace YDataRendering
       PNG,
       [Description("Vector (SVG)")]
       SVG,
-     
+
     };
-   
+
 
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
@@ -562,7 +560,7 @@ namespace YDataRendering
     public enum CaptureTargets { ToClipBoard, ToFile };
 
     static private bool _disableMinMaxCheck = false;
-    static public bool minMaxCheckDisabled { get { return _disableMinMaxCheck; } set { _disableMinMaxCheck = value; }  }
+    static public bool minMaxCheckDisabled { get { return _disableMinMaxCheck; } set { _disableMinMaxCheck = value; } }
 
     public virtual void resetlegendPens() { }
 
@@ -589,390 +587,397 @@ namespace YDataRendering
      */
 
 #if (!NET35 && !NET40)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    #endif
-        public void AllowRedraw()
-        {
-          _redrawAllowed--;
-          if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
-          if (_redrawAllowed == 0) redraw();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public void AllowRedraw()
+    {
+      _redrawAllowed--;
+      if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
+      if (_redrawAllowed == 0) redraw();
 
-        }
-
-#if (!NET35 && !NET40)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    #endif
-        public void AllowRedrawNoRefresh()
-        {
-          _redrawAllowed--;
-          if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
-
-
-        }
-
-
+    }
 
 #if (!NET35 && !NET40)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    #endif
-        public void DisableRedraw()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public void AllowRedrawNoRefresh()
+    {
+      _redrawAllowed--;
+      if (_redrawAllowed < 0) throw new InvalidOperationException("Too many AllowRedraw calls");
+
+
+    }
+
+
+
+#if (!NET35 && !NET40)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public void DisableRedraw()
+    {
+      _redrawAllowed++;
+
+    }
+
+    List<Proportional> ProportionalToSizeValues = new List<Proportional>();
+
+    public void AddNewProportionalToSizeValue(Proportional v)
+    {
+      if (!ProportionalToSizeValues.Contains(v)) ProportionalToSizeValues.Add(v);
+
+    }
+
+    protected bool canRedraw()
+    {
+      return (_redrawAllowed == 0);
+
+    }
+
+    protected PictureBox UIContainer;
+    protected Form parentForm;
+    protected logFct _logFunction;
+    Timer redrawTimer = null;
+    private Stopwatch watch = Stopwatch.StartNew();
+    private int LastDrawTiming = 0;
+
+
+
+
+
+    protected Nullable<Point> mousePosition()
+    {
+      Point p = parentForm.PointToClient(System.Windows.Forms.Cursor.Position);
+      if ((p.X > UIContainer.Location.X) &&
+         (p.Y > UIContainer.Location.Y) &&
+         (p.X < UIContainer.Location.X + UIContainer.Width) &&
+         (p.Y < UIContainer.Location.Y + UIContainer.Height)) return new Point { X = p.X - UIContainer.Location.X, Y = p.Y - UIContainer.Location.Y };
+      return null;
+
+    }
+
+    private ProportionnalValueChangeCallback _proportionnalValueChangeCallback = null;
+    public ProportionnalValueChangeCallback proportionnalValueChangeCallback
+    {
+      set
+      {
+        _proportionnalValueChangeCallback = value;
+        //if (value != null)
+        //foreach (Proportional p in ProportionalToSizeValues)
+        //  p.forceChangeCallback();
+        //
+      }
+
+    }
+
+
+    public void ProportionnalValueChanged(Proportional source)
+    {
+      if (_proportionnalValueChangeCallback != null) _proportionnalValueChangeCallback(source);
+
+
+
+    }
+
+
+
+    public int Draw()
+    {
+
+      if (!canRedraw()) return 0;
+
+      int w = UIContainer.Size.Width;
+      int h = UIContainer.Size.Height;
+
+      if ((w <= 5) || (h <= 5)) return 0;
+
+      DisableRedraw();
+
+      Bitmap DrawArea = new Bitmap(w, h);
+      UIContainer.Image = DrawArea;
+      YGraphics g;
+
+      watch.Reset();
+      watch.Start();
+      g = new YGraphics(DrawArea);
+
+      try {
+        Render(g, w, h);
+      } catch (Exception e) { log("Rendering error: " + e.Message); }
+
+      g.Dispose();
+      long timing = watch.ElapsedMilliseconds;
+      //  log(" refresh done in " + timing.ToString() + "ms");
+      AllowRedrawNoRefresh();
+      renderingPostProcessing();
+      return (int)timing;
+
+    }
+
+
+    protected virtual void renderingPostProcessing() { }
+
+    protected abstract int Render(YGraphics g, int w, int h);
+
+
+
+
+
+    public abstract void clearCachedObjects();
+
+    Proportional.ResizeRule _resizeRule = Proportional.ResizeRule.FIXED;
+    public Proportional.ResizeRule resizeRule
+    {
+      get { return _resizeRule; }
+      set
+      {
+
+        if (value != _resizeRule)
         {
-          _redrawAllowed++;
-
-        }
-
-        List<Proportional> ProportionalToSizeValues = new List<Proportional>();
-
-        public void AddNewProportionalToSizeValue(Proportional v)
-        {
-          if (!ProportionalToSizeValues.Contains(v)) ProportionalToSizeValues.Add(v);
-
-        }
-
-        protected bool canRedraw()
-        {
-          return (_redrawAllowed == 0);
-
-        }
-
-        protected PictureBox UIContainer;
-        protected Form parentForm;
-        protected logFct _logFunction;
-        Timer redrawTimer = null;
-        private Stopwatch watch = Stopwatch.StartNew();
-        private int LastDrawTiming = 0;
-
-
-
-
-
-        protected Nullable<Point> mousePosition()
-        {
-          Point p = parentForm.PointToClient(System.Windows.Forms.Cursor.Position);
-          if ((p.X > UIContainer.Location.X) &&
-             (p.Y > UIContainer.Location.Y) &&
-             (p.X < UIContainer.Location.X + UIContainer.Width) &&
-             (p.Y < UIContainer.Location.Y + UIContainer.Height)) return new Point { X = p.X - UIContainer.Location.X, Y = p.Y - UIContainer.Location.Y };
-          return null;
-
-        }
-
-        private ProportionnalValueChangeCallback _proportionnalValueChangeCallback = null;
-        public ProportionnalValueChangeCallback proportionnalValueChangeCallback
-        {
-          set
-          {
-            _proportionnalValueChangeCallback = value;
-            //if (value != null)
-            //foreach (Proportional p in ProportionalToSizeValues)
-            //  p.forceChangeCallback();
-            //
-          }
-
-        }
-
-
-        public void ProportionnalValueChanged(Proportional source)
-        {
-          if (_proportionnalValueChangeCallback != null) _proportionnalValueChangeCallback(source);
-
-
-
-        }
-
-
-
-        public int Draw()
-        {
-
-          if (!canRedraw()) return 0;
-
-          int w = UIContainer.Size.Width;
-          int h = UIContainer.Size.Height;
-
-          if ((w <= 5) || (h <= 5)) return 0;
-
           DisableRedraw();
-
-          Bitmap DrawArea = new Bitmap(w, h);
-          UIContainer.Image = DrawArea;
-          YGraphics g;
-
-          watch.Reset();
-          watch.Start();
-          g = new  YGraphics(DrawArea);
-
-          try {
-            Render(g, w, h);
-          } catch (Exception e) { log("Rendering error: " + e.Message); }
-
-          g.Dispose();
-          long timing = watch.ElapsedMilliseconds;
-        //  log(" refresh done in " + timing.ToString() + "ms");
-          AllowRedrawNoRefresh();
-          renderingPostProcessing();
-          return (int)timing;
-
-        }
-
-
-        protected virtual void renderingPostProcessing() { }
-
-        protected abstract int Render(YGraphics g, int w, int h);
-
-
-
-
-
-        public abstract void clearCachedObjects();
-
-        Proportional.ResizeRule _resizeRule = Proportional.ResizeRule.FIXED;
-        public Proportional.ResizeRule resizeRule
-        {
-          get { return _resizeRule; }
-          set
-          {
-
-            if (value != _resizeRule)
-            {
-              DisableRedraw();
-              _resizeRule = value;
-              for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-                ProportionalToSizeValues[i].resizeRule = _resizeRule;
-              AllowRedraw();
-              redraw();
-
-            }
-
-          }
-        }
-
-
-        public void redraw()
-        {
-          if (parentForm.WindowState == FormWindowState.Minimized) return;
-          if (_redrawAllowed > 0) return;
-          if (UIContainer.Height < 2) return;
-          if (UIContainer.Width < 2) return;
-          if (redrawTimer.Enabled) return;
-
-          int elapsed = (int)watch.ElapsedMilliseconds;
-         // log("elapsed" + elapsed.ToString());
-
-          redrawTimer.Enabled = false;
-
-          int timelimit = 40; // no need to refresh  more then 25 times per seconds
-          if (timelimit < LastDrawTiming) timelimit = (15 * LastDrawTiming) / 10; // refresh starting to get very slow, don't try to go faster than the music
-          if (timelimit > 1000) timelimit = 1000; // if last redraw took more then 1 sec, you are in deep sh*t anayway.
-
-
-
-          if (elapsed < timelimit)
-          {
-            redrawTimer.Interval = timelimit - elapsed;
-            redrawTimer.Enabled = true;
-          //  log("postponed" + elapsed.ToString() + "<" + timelimit.ToString());
-            return;
-          }
-
-          //log("drawing");
-          LastDrawTiming = Draw();
-
-
-
-        }
-
-
-
-
-        private void TimerTick(object sender, EventArgs e)
-        {
-          redrawTimer.Enabled = false;
-          redraw();
-
-        }
-
-        public virtual int usableUiWidth() { return UIContainer.Width; }
-        public virtual int usableUiHeight() { return UIContainer.Height; }
-
-        protected void resetProportionalSizeObjectsCachePush(double newcoef)
-        {
-          clearCachedObjects();
-          if (_resizeRule != Proportional.ResizeRule.FIXED)
-            for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-              ProportionalToSizeValues[i].containerResizedPushNewCoef(newcoef);
-        }
-
-
-
-
-
-
-        protected void resetProportionalSizeObjectsCachePop()
-        {
-          clearCachedObjects();
-          if (_resizeRule != Proportional.ResizeRule.FIXED)
-            for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-              ProportionalToSizeValues[i].containerResizedPop();
-        }
-
-
-
-        protected void resetProportionalSizeObjectsCache(double w, double h)
-        {
-          clearCachedObjects();
-          if (_resizeRule != Proportional.ResizeRule.FIXED)
-            for (int i = 0; i < ProportionalToSizeValues.Count; i++)
-              ProportionalToSizeValues[i].containerResized(w, h);
-        }
-
-        public void containerResized()
-        {
-          containerResize(null, null);
-        }
-
-        private void containerResize(object sender, EventArgs e)
-        {
-          if (((Form)sender).WindowState == FormWindowState.Minimized) return;
-
-          DisableRedraw();
-          // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
-
-          resetProportionalSizeObjectsCache(usableUiWidth(), usableUiHeight());
+          _resizeRule = value;
+          for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+            ProportionalToSizeValues[i].resizeRule = _resizeRule;
           AllowRedraw();
           redraw();
 
         }
 
-        private void _snapshotTimer_Tick(object sender, EventArgs e)
-        {
-
-          _snapshotTimer.Enabled = false;
-          _snapshotPanel.enabled = false;
-        }
-        /* can't get the clipboard transparency to work 
-        static void WriteIntToByteArray(Byte[] target, int ofset, int size, bool bidon, UInt32 data)
-        {
-          while(size>0)
-          {
-            target[ofset++] = (byte)( data & 0xff);
-            data >>= 8;
-            size--;
-
-          }
-
-        }
-
-        static Byte[] GetImageData(Bitmap scaledBitmap)
-        {
-          Rectangle rect = new Rectangle(0, 0, scaledBitmap.Width, scaledBitmap.Height);
-          var bitmapData = scaledBitmap.LockBits(rect, ImageLockMode.ReadWrite,  scaledBitmap.PixelFormat);
-          var length = bitmapData.Stride * bitmapData.Height;
-
-          Byte[] bytes = new byte[length];
-
-          // Copy bitmap to byte[]
-          Marshal.Copy(bitmapData.Scan0, bytes, 0, length);
-          scaledBitmap.UnlockBits(bitmapData);
-          return bytes;
-        }
-
-        /// <summary>
-        /// Converts the image to Device Independent Bitmap format of type BITFIELDS.
-        /// This is (wrongly) accepted by many applications as containing transparency,
-        /// so I'm abusing it for that.
-        /// </summary>
-        /// <param name="image">Image to convert to DIB</param>
-        /// <returns>The image converted to DIB, in bytes.</returns>
-        public static Byte[] ConvertToDib(Image image)
-        {
-          Byte[] bm32bData;
-          Int32 width = image.Width;
-          Int32 height = image.Height;
-          // Ensure image is 32bppARGB by painting it on a new 32bppARGB image.
-          using (Bitmap bm32b = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb))
-          {
-            using (Graphics gr = Graphics.FromImage(bm32b))
-              gr.DrawImage(image, new Rectangle(0, 0, bm32b.Width, bm32b.Height));
-            // Bitmap format has its lines reversed.
-            bm32b.RotateFlip(RotateFlipType.Rotate180FlipX);
-
-            bm32bData = GetImageData(bm32b);
-            for (int i = 0; i < bm32bData.Length / 4; i++) bm32bData[i*4+3] = 127;
-          }
-          // BITMAPINFOHEADER struct for DIB.
-          Int32 hdrSize = 0x28;
-          Byte[] fullImage = new Byte[hdrSize + 12 + bm32bData.Length];
-          //Int32 biSize;
-         WriteIntToByteArray(fullImage, 0x00, 4, true, (UInt32)hdrSize);
-          //Int32 biWidth;
-          WriteIntToByteArray(fullImage, 0x04, 4, true, (UInt32)width);
-          //Int32 biHeight; 
-         WriteIntToByteArray(fullImage, 0x08, 4, true, (UInt32)height);
-          //Int16 biPlanes;
-          WriteIntToByteArray(fullImage, 0x0C, 2, true, 1);
-          //Int16 biBitCount;
-          WriteIntToByteArray(fullImage, 0x0E, 2, true, 32);
-          //BITMAPCOMPRESSION biCompression = BITMAPCOMPRESSION.BITFIELDS;
-          WriteIntToByteArray(fullImage, 0x10, 4, true, 3);
-          //Int32 biSizeImage;
-         WriteIntToByteArray(fullImage, 0x14, 4, true, (UInt32)bm32bData.Length);
-          // These are all 0. Since .net clears new arrays, don't bother writing them.
-          //Int32 biXPelsPerMeter = 0;
-          //Int32 biYPelsPerMeter = 0;
-          //Int32 biClrUsed = 0;
-          //Int32 biClrImportant = 0;
-
-          // The aforementioned "BITFIELDS": colour masks applied to the Int32 pixel value to get the R, G and B values.
-          WriteIntToByteArray(fullImage, hdrSize + 0, 4, true, 0x00FF0000);
-          WriteIntToByteArray(fullImage, hdrSize + 4, 4, true, 0x0000FF00);
-          WriteIntToByteArray(fullImage, hdrSize + 8, 4, true, 0x000000FF);
-          Array.Copy(bm32bData, 0, fullImage, hdrSize + 12, bm32bData.Length);
-          return fullImage;
-        }
-
-        /// <summary>
-        /// Copies the given image to the clipboard as PNG, DIB and standard Bitmap format.
-        /// </summary>
-        /// <param name="image">Image to put on the clipboard.</param>
-        /// <param name="imageNoTr">Optional specifically nontransparent version of the image to put on the clipboard.</param>
-        /// <param name="data">Clipboard data object to put the image into. Might already contain other stuff. Leave null to create a new one.</param>
-        public static void SetClipboardImage(Bitmap image, Bitmap imageNoTr, DataObject data)
-        {
+      }
+    }
 
 
-          Clipboard.Clear();
-          if (data == null)
-            data = new DataObject();
-          if (imageNoTr == null)
-            imageNoTr = image;
-          using (MemoryStream pngMemStream = new MemoryStream())
-          using (MemoryStream dibMemStream = new MemoryStream())
-          {
-            // // As standard bitmap, without transparency support
-            //  data.SetData(DataFormats.Bitmap, true, imageNoTr);
-            // As PNG. Gimp will prefer this over the other two.
+    public void redraw()
+    {
+      if (parentForm.WindowState == FormWindowState.Minimized) return;
+      if (_redrawAllowed > 0) return;
+      if (UIContainer.Height < 2) return;
+      if (UIContainer.Width < 2) return;
+      if (redrawTimer.Enabled) return;
 
-            image.Save(pngMemStream, ImageFormat.Png);
-            data.SetData("PNG", false, pngMemStream);
+      int elapsed = (int)watch.ElapsedMilliseconds;
+      // log("elapsed" + elapsed.ToString());
 
-            // As DIB. This is (wrongly) accepted as ARGB by many applications.
-            Byte[] dibData = ConvertToDib(image);
-            dibMemStream.Write(dibData, 0, dibData.Length);
-            data.SetData(DataFormats.Dib, false, dibMemStream);
+      redrawTimer.Enabled = false;
 
-            // The 'copy=true' argument means the MemoryStreams can be safely disposed after the operation.
-            Clipboard.SetDataObject(data, true);
-          }
-        }
-        */
+      int timelimit = 40; // no need to refresh  more then 25 times per seconds
+      if (timelimit < LastDrawTiming) timelimit = (15 * LastDrawTiming) / 10; // refresh starting to get very slow, don't try to go faster than the music
+      if (timelimit > 1000) timelimit = 1000; // if last redraw took more then 1 sec, you are in deep sh*t anayway.
+
+
+
+      if (elapsed < timelimit)
+      {
+        redrawTimer.Interval = timelimit - elapsed;
+        redrawTimer.Enabled = true;
+        //  log("postponed" + elapsed.ToString() + "<" + timelimit.ToString());
+        return;
+      }
+
+      //log("drawing");
+      LastDrawTiming = Draw();
+
+
+
+    }
+
+
+
+
+    private void TimerTick(object sender, EventArgs e)
+    {
+      redrawTimer.Enabled = false;
+      redraw();
+
+    }
+
+    public virtual int usableUiWidth() { return UIContainer.Width; }
+    public virtual int usableUiHeight() { return UIContainer.Height; }
+
+    public void resetProportionalSizeObjectsCachePush(double newcoef)
+    {
+      clearCachedObjects();
+      if (_resizeRule != Proportional.ResizeRule.FIXED)
+        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+          ProportionalToSizeValues[i].containerResizedPushNewCoef(newcoef);
+    }
+
+
+
+
+
+
+    public void resetProportionalSizeObjectsCachePop()
+    {
+      clearCachedObjects();
+      if (_resizeRule != Proportional.ResizeRule.FIXED)
+        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+          ProportionalToSizeValues[i].containerResizedPop();
+    }
+
+
+
+    protected void resetProportionalSizeObjectsCache(double w, double h)
+    {
+      clearCachedObjects();
+      if (_resizeRule != Proportional.ResizeRule.FIXED)
+        for (int i = 0; i < ProportionalToSizeValues.Count; i++)
+          ProportionalToSizeValues[i].containerResized(w, h);
+    }
+
+    public void containerResized()
+    {
+      containerResize(null, null);
+    }
+
+
+
+    private void containerResize(object sender, EventArgs e)
+    {
+      if (((Form)sender).WindowState == FormWindowState.Minimized) return;
+
+      DisableRedraw();
+      // log("resize " + ((Control)sender).Width.ToString() + "/" + ((Control)sender).Height.ToString());
+
+      resetProportionalSizeObjectsCache(usableUiWidth(), usableUiHeight());
+      AllowRedraw();
+      redraw();
+
+    }
+
+    public void proportionnalsizeReset()
+    {
+      resetProportionalSizeObjectsCache(usableUiWidth(), usableUiHeight());
+    }
+
+    private void _snapshotTimer_Tick(object sender, EventArgs e)
+    {
+
+      _snapshotTimer.Enabled = false;
+      _snapshotPanel.enabled = false;
+    }
+    /* can't get the clipboard transparency to work 
+    static void WriteIntToByteArray(Byte[] target, int ofset, int size, bool bidon, UInt32 data)
+    {
+      while(size>0)
+      {
+        target[ofset++] = (byte)( data & 0xff);
+        data >>= 8;
+        size--;
+
+      }
+
+    }
+
+    static Byte[] GetImageData(Bitmap scaledBitmap)
+    {
+      Rectangle rect = new Rectangle(0, 0, scaledBitmap.Width, scaledBitmap.Height);
+      var bitmapData = scaledBitmap.LockBits(rect, ImageLockMode.ReadWrite,  scaledBitmap.PixelFormat);
+      var length = bitmapData.Stride * bitmapData.Height;
+
+      Byte[] bytes = new byte[length];
+
+      // Copy bitmap to byte[]
+      Marshal.Copy(bitmapData.Scan0, bytes, 0, length);
+      scaledBitmap.UnlockBits(bitmapData);
+      return bytes;
+    }
+
+    /// <summary>
+    /// Converts the image to Device Independent Bitmap format of type BITFIELDS.
+    /// This is (wrongly) accepted by many applications as containing transparency,
+    /// so I'm abusing it for that.
+    /// </summary>
+    /// <param name="image">Image to convert to DIB</param>
+    /// <returns>The image converted to DIB, in bytes.</returns>
+    public static Byte[] ConvertToDib(Image image)
+    {
+      Byte[] bm32bData;
+      Int32 width = image.Width;
+      Int32 height = image.Height;
+      // Ensure image is 32bppARGB by painting it on a new 32bppARGB image.
+      using (Bitmap bm32b = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb))
+      {
+        using (Graphics gr = Graphics.FromImage(bm32b))
+          gr.DrawImage(image, new Rectangle(0, 0, bm32b.Width, bm32b.Height));
+        // Bitmap format has its lines reversed.
+        bm32b.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+        bm32bData = GetImageData(bm32b);
+        for (int i = 0; i < bm32bData.Length / 4; i++) bm32bData[i*4+3] = 127;
+      }
+      // BITMAPINFOHEADER struct for DIB.
+      Int32 hdrSize = 0x28;
+      Byte[] fullImage = new Byte[hdrSize + 12 + bm32bData.Length];
+      //Int32 biSize;
+     WriteIntToByteArray(fullImage, 0x00, 4, true, (UInt32)hdrSize);
+      //Int32 biWidth;
+      WriteIntToByteArray(fullImage, 0x04, 4, true, (UInt32)width);
+      //Int32 biHeight; 
+     WriteIntToByteArray(fullImage, 0x08, 4, true, (UInt32)height);
+      //Int16 biPlanes;
+      WriteIntToByteArray(fullImage, 0x0C, 2, true, 1);
+      //Int16 biBitCount;
+      WriteIntToByteArray(fullImage, 0x0E, 2, true, 32);
+      //BITMAPCOMPRESSION biCompression = BITMAPCOMPRESSION.BITFIELDS;
+      WriteIntToByteArray(fullImage, 0x10, 4, true, 3);
+      //Int32 biSizeImage;
+     WriteIntToByteArray(fullImage, 0x14, 4, true, (UInt32)bm32bData.Length);
+      // These are all 0. Since .net clears new arrays, don't bother writing them.
+      //Int32 biXPelsPerMeter = 0;
+      //Int32 biYPelsPerMeter = 0;
+      //Int32 biClrUsed = 0;
+      //Int32 biClrImportant = 0;
+
+      // The aforementioned "BITFIELDS": colour masks applied to the Int32 pixel value to get the R, G and B values.
+      WriteIntToByteArray(fullImage, hdrSize + 0, 4, true, 0x00FF0000);
+      WriteIntToByteArray(fullImage, hdrSize + 4, 4, true, 0x0000FF00);
+      WriteIntToByteArray(fullImage, hdrSize + 8, 4, true, 0x000000FF);
+      Array.Copy(bm32bData, 0, fullImage, hdrSize + 12, bm32bData.Length);
+      return fullImage;
+    }
+
+    /// <summary>
+    /// Copies the given image to the clipboard as PNG, DIB and standard Bitmap format.
+    /// </summary>
+    /// <param name="image">Image to put on the clipboard.</param>
+    /// <param name="imageNoTr">Optional specifically nontransparent version of the image to put on the clipboard.</param>
+    /// <param name="data">Clipboard data object to put the image into. Might already contain other stuff. Leave null to create a new one.</param>
+    public static void SetClipboardImage(Bitmap image, Bitmap imageNoTr, DataObject data)
+    {
+
+
+      Clipboard.Clear();
+      if (data == null)
+        data = new DataObject();
+      if (imageNoTr == null)
+        imageNoTr = image;
+      using (MemoryStream pngMemStream = new MemoryStream())
+      using (MemoryStream dibMemStream = new MemoryStream())
+      {
+        // // As standard bitmap, without transparency support
+        //  data.SetData(DataFormats.Bitmap, true, imageNoTr);
+        // As PNG. Gimp will prefer this over the other two.
+
+        image.Save(pngMemStream, ImageFormat.Png);
+        data.SetData("PNG", false, pngMemStream);
+
+        // As DIB. This is (wrongly) accepted as ARGB by many applications.
+        Byte[] dibData = ConvertToDib(image);
+        dibMemStream.Write(dibData, 0, dibData.Length);
+        data.SetData(DataFormats.Dib, false, dibMemStream);
+
+        // The 'copy=true' argument means the MemoryStreams can be safely disposed after the operation.
+        Clipboard.SetDataObject(data, true);
+      }
+    }
+    */
 
     public void capture() { _Regis_HotKey(); }
 
     void _Regis_HotKey()
     {
 
-     
+
       YDataRenderer.CaptureType captureType = YDataRenderer.CaptureType.SVG;
       YDataRenderer.CaptureFormats captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
       YDataRenderer.CaptureTargets captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
@@ -987,7 +992,7 @@ namespace YDataRendering
       capture(captureType, captureTarget, captureFolder, captureSizePolicy, captureDPI, captureWidth, captureHeight);
 
     }
-    public void  capture (CaptureType captureType, CaptureTargets captureTarget,
+    public void capture(CaptureType captureType, CaptureTargets captureTarget,
                                                string captureFolder,
                                                YDataRenderer.CaptureFormats captureSizePolicy,
                                                 int captureDPI,
@@ -1014,17 +1019,17 @@ namespace YDataRendering
       DisableRedraw();
 
       Bitmap DrawArea = new Bitmap(w, h);
-     
+
 
       YGraphics g;
       switch (captureType)
-      { case CaptureType.PNG :g = new YGraphics(Graphics.FromImage(DrawArea), w, h, captureDPI); break;
-        case CaptureType.SVG : g = new YGraphicsSVG(Graphics.FromImage(DrawArea), w, h, captureDPI);break;
-         default: throw new InvalidOperationException("capture :unknown type");
+      { case CaptureType.PNG: g = new YGraphics(Graphics.FromImage(DrawArea), w, h, captureDPI); break;
+        case CaptureType.SVG: g = new YGraphicsSVG(Graphics.FromImage(DrawArea), w, h, captureDPI); break;
+        default: throw new InvalidOperationException("capture :unknown type");
       }
 
-     
-      if ((captureTarget == YDataRenderer.CaptureTargets.ToClipBoard) && (captureType== CaptureType.PNG))
+
+      if ((captureTarget == YDataRenderer.CaptureTargets.ToClipBoard) && (captureType == CaptureType.PNG))
         g.FillRectangle(new SolidBrush(parentForm.BackColor), 0, 0, w, h);
 
 
@@ -1056,17 +1061,17 @@ namespace YDataRendering
         if (captureTarget == YDataRenderer.CaptureTargets.ToClipBoard)
         {
           Clipboard.Clear();
-          if (captureType == CaptureType.PNG)   Clipboard.SetImage(DrawArea);
+          if (captureType == CaptureType.PNG) Clipboard.SetImage(DrawArea);
           if (captureType == CaptureType.SVG)
           {
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(((YGraphicsSVG)g).get_svgContents());
 
             MemoryStream stream = new MemoryStream(bytes);
-          
+
             Clipboard.SetData("image/svg+xml", stream);
           }
 
-        
+
         }
         else
         {
@@ -1221,7 +1226,17 @@ namespace YDataRendering
 
       UIContainer.Click += RendererCanvas_Click;
       UIContainer.DoubleClick += RendererCanvas_DoubleClick;
+
+      resetRefrenceSize();
+
     }
+    public void resetRefrenceSize()
+    {
+      _refWidth = UIContainer.Width;
+      _refHeight = UIContainer.Height;
+    }
+    public int refWidth  { get { return _refWidth; } }
+    public int refHeight { get { return _refHeight; } }
 
     private void RendererCanvas_Click(object sender, EventArgs e)
     {

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_display.cs 34989 2019-04-05 13:41:16Z seb $
+ * $Id: yocto_display.cs 37000 2019-09-03 06:40:17Z mvuilleu $
  *
  * Implements yFindDisplay(), the high-level API for Display functions
  *
@@ -1283,7 +1283,7 @@ public class YDisplay : YFunction
     {
         int res;
         lock (_thisLock) {
-            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+            if (this._cacheExpiration == 0) {
                 if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
                     return DISPLAYWIDTH_INVALID;
                 }
@@ -1312,7 +1312,7 @@ public class YDisplay : YFunction
     {
         int res;
         lock (_thisLock) {
-            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+            if (this._cacheExpiration == 0) {
                 if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
                     return DISPLAYHEIGHT_INVALID;
                 }

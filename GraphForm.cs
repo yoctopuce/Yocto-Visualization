@@ -176,6 +176,7 @@ namespace YoctoVisualisation
         _cartesianChart.yAxes[i].AxisChanged = AxisParamtersChangedAutomatically;
         _cartesianChart.yAxes[i].AllowAutoShow = true;
       }
+      _cartesianChart.resetRefrenceSize();
       _cartesianChart.AllowPrintScreenCapture = true;
       _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;
       _cartesianChart.AllowRedraw();
@@ -356,9 +357,26 @@ namespace YoctoVisualisation
 
     public string getConfigData()
     {
+
+      double newCoef = 0;
+      if (WindowState == FormWindowState.Maximized)
+      { // if the window is maximized, saved size will be regular size, and maximize
+        //  flag will be stored separately , so we need to save font
+        //  size relative to  regular size (i.e. RestoreBounds.Size);
+
+        int deltaX = Size.Width - _cartesianChart.usableUiWidth();
+        int deltaY = Size.Height - _cartesianChart.usableUiHeight();
+        newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, _cartesianChart.refWidth, _cartesianChart.refHeight, RestoreBounds.Size.Width - deltaX, RestoreBounds.Size.Height - deltaX);
+        _cartesianChart.resetProportionalSizeObjectsCachePush(newCoef);  // reset all size related cached objects    
+      }
+      string dt = manager.getConfigData();
+      if (newCoef != 0) _cartesianChart.resetProportionalSizeObjectsCachePop();
       return "<GraphForm>\n"
-            + manager.getConfigData()
+            + dt
             + "</GraphForm>\n";
+
+
+    
     }
 
     private void showConfiguration(object sender, EventArgs e)

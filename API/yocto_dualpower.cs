@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_dualpower.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_dualpower.cs 37609 2019-10-09 16:59:35Z mvuilleu $
  *
  *  Implements yFindDualPower(), the high-level API for DualPower functions
  *
@@ -184,6 +184,7 @@ public class YDualPower : YFunction
      * <summary>
      *   Changes the selected power source for module functions that require lots of current.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_refframe.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_refframe.cs 37000 2019-09-03 06:40:17Z mvuilleu $
  *
  *  Implements yFindRefFrame(), the high-level API for RefFrame functions
  *
@@ -284,6 +284,24 @@ public enum   MOUNTORIENTATION
         }
     }
 
+    /**
+     * <summary>
+     *   Returns the BNO055 fusion mode.
+     * <para>
+     *   Note this feature is only availabe on Yocto-3D-V2.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a value among <c>YRefFrame.FUSIONMODE_NDOF</c>, <c>YRefFrame.FUSIONMODE_NDOF_FMC_OFF</c>,
+     *   <c>YRefFrame.FUSIONMODE_M4G</c>, <c>YRefFrame.FUSIONMODE_COMPASS</c> and
+     *   <c>YRefFrame.FUSIONMODE_IMU</c> corresponding to the BNO055 fusion mode
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YRefFrame.FUSIONMODE_INVALID</c>.
+     * </para>
+     */
     public int get_fusionMode()
     {
         int res;
@@ -298,6 +316,29 @@ public enum   MOUNTORIENTATION
         return res;
     }
 
+    /**
+     * <summary>
+     *   Change the BNO055 fusion mode.
+     * <para>
+     *   Note: this feature is only availabe on Yocto-3D-V2.
+     *   Remember to call the matching module <c>saveToFlash()</c> method to save the setting permanently.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="newval">
+     *   a value among <c>YRefFrame.FUSIONMODE_NDOF</c>, <c>YRefFrame.FUSIONMODE_NDOF_FMC_OFF</c>,
+     *   <c>YRefFrame.FUSIONMODE_M4G</c>, <c>YRefFrame.FUSIONMODE_COMPASS</c> and <c>YRefFrame.FUSIONMODE_IMU</c>
+     * </param>
+     * <para>
+     * </para>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
     public int set_fusionMode(int newval)
     {
         string rest_val;
