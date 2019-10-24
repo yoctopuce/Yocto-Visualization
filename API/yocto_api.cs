@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 37692 2019-10-14 14:58:03Z seb $
+ * $Id: yocto_api.cs 37796 2019-10-24 07:39:24Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -283,12 +283,16 @@ internal static class SafeNativeMethods
                         dll_path = assemblyDir + "\\libyapi-aarch64";
                         break;
                 }
-
-                IntPtr loadLibrary = NativeMethods.LoadLibrary(dll_path);
-                if (loadLibrary == IntPtr.Zero) {
-                    debugDll("Unable to preload dll with :" + dll_path);
-                } else {
-                    debugDll("YAPI preloaded from " + dll_path);
+                debugDll("try to load library using assembly directory("+dll_path+")");
+                try {
+                    IntPtr loadLibrary = NativeMethods.LoadLibrary(dll_path);
+                    if (loadLibrary == IntPtr.Zero) {
+                        debugDll("Unable to preload dll with :" + dll_path);
+                    } else {
+                        debugDll("YAPI preloaded from " + dll_path);
+                    }
+                } catch (System.EntryPointNotFoundException ex) {
+                    debugDll("Entry point not found:"+ex.Message);
                 }
             }
         }
@@ -2767,7 +2771,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "37780";
+    public const string YOCTO_API_BUILD_NO = "37796";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;

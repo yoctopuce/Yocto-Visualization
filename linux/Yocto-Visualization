@@ -1,2 +1,3 @@
 #!/bin/bash
+cd /usr/lib/Yocto-Visualization/
 exec mono /usr/lib/Yocto-Visualization/YoctoVisualization.exe
