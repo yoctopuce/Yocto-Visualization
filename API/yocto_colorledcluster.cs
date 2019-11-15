@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_colorledcluster.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_colorledcluster.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindColorLedCluster(), the high-level API for ColorLedCluster functions
  *
@@ -57,12 +57,12 @@ using YFUN_DESCR = System.Int32;
 //--- (YColorLedCluster class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface
- *   allows you to drive a color LED cluster.
+ *   The YColorLedCluster class allows you to drive a
+ *   color LED cluster, for instance using a Yocto-Color-V2.
  * <para>
  *   Unlike the ColorLed class, the ColorLedCluster
- *   allows to handle several LEDs at one. Color changes can be done   using RGB coordinates as well as
- *   HSL coordinates.
+ *   allows to handle several LEDs at one. Color changes can be done using RGB
+ *   coordinates as well as HSL coordinates.
  *   The module performs all conversions form RGB to HSL automatically. It is then
  *   self-evident to turn on a LED with a given hue and to progressively vary its
  *   saturation or lightness. If needed, you can find more information on the
@@ -410,7 +410,8 @@ public class YColorLedCluster : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the RGB LED cluster
+     *   a string that uniquely characterizes the RGB LED cluster, for instance
+     *   <c>YRGBLED2.colorLedCluster</c>.
      * </param>
      * <returns>
      *   a <c>YColorLedCluster</c> object allowing you to drive the RGB LED cluster.

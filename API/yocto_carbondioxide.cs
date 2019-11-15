@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_carbondioxide.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_carbondioxide.cs 38030 2019-11-04 17:56:01Z mvuilleu $
  *
  *  Implements yFindCarbonDioxide(), the high-level API for CarbonDioxide functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YCarbonDioxide class start)
 /**
  * <summary>
- *   The Yoctopuce class YCarbonDioxide allows you to read and configure Yoctopuce CO2
- *   sensors.
+ *   The YCarbonDioxide class allows you to read and configure Yoctopuce CO2
+ *   sensors, for instance using a Yocto-CO2-V2.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions,  to access the autonomous datalogger.
@@ -75,7 +75,7 @@ public class YCarbonDioxide : YSensor
     public new delegate void ValueCallback(YCarbonDioxide func, string value);
     public new delegate void TimedReportCallback(YCarbonDioxide func, YMeasure measure);
 
-    public const int ABCPERIOD_INVALID = YAPI.INVALID_INT;
+    public const int ABCPERIOD_INVALID = YAPI.INVALID_UINT;
     public const string COMMAND_INVALID = YAPI.INVALID_STRING;
     protected int _abcPeriod = ABCPERIOD_INVALID;
     protected string _command = COMMAND_INVALID;
@@ -237,7 +237,8 @@ public class YCarbonDioxide : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the CO2 sensor
+     *   a string that uniquely characterizes the CO2 sensor, for instance
+     *   <c>YCO2MK02.carbonDioxide</c>.
      * </param>
      * <returns>
      *   a <c>YCarbonDioxide</c> object allowing you to drive the CO2 sensor.

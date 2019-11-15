@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_steppermotor.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_steppermotor.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindStepperMotor(), the high-level API for StepperMotor functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YStepperMotor class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to drive a stepper motor.
+ *   The YStepperMotor class allows you to drive a stepper motor.
  * <para>
  * </para>
  * <para>
@@ -928,7 +928,8 @@ public class YStepperMotor : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the stepper motor
+     *   a string that uniquely characterizes the stepper motor, for instance
+     *   <c>MyDevice.stepperMotor1</c>.
      * </param>
      * <returns>
      *   a <c>YStepperMotor</c> object allowing you to drive the stepper motor.

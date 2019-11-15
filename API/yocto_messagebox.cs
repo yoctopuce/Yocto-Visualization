@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_messagebox.cs 34989 2019-04-05 13:41:16Z seb $
+ * $Id: yocto_messagebox.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  * Implements yFindMessageBox(), the high-level API for MessageBox functions
  *
@@ -1366,8 +1366,8 @@ public class YSms
 //--- (generated code: YMessageBox class start)
 /**
  * <summary>
- *   YMessageBox functions provides SMS sending and receiving capability to
- *   GSM-enabled Yoctopuce devices.
+ *   The YMessageBox class provides SMS sending and receiving capability to
+ *   GSM-enabled Yoctopuce devices, for instance using a YoctoHub-GSM-3G-NA, a YoctoHub-GSM-3G-EU or a YoctoHub-GSM-2G.
  * <para>
  * </para>
  * <para>
@@ -1696,7 +1696,8 @@ public class YMessageBox : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the MessageBox interface
+     *   a string that uniquely characterizes the MessageBox interface, for instance
+     *   <c>YHUBGSM4.messageBox</c>.
      * </param>
      * <returns>
      *   a <c>YMessageBox</c> object allowing you to drive the MessageBox interface.

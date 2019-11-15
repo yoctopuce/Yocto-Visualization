@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_dualpower.cs 37609 2019-10-09 16:59:35Z mvuilleu $
+ *  $Id: yocto_dualpower.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindDualPower(), the high-level API for DualPower functions
  *
@@ -284,7 +284,8 @@ public class YDualPower : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the power control
+     *   a string that uniquely characterizes the power control, for instance
+     *   <c>SERVORC1.dualPower</c>.
      * </param>
      * <returns>
      *   a <c>YDualPower</c> object allowing you to drive the power control.

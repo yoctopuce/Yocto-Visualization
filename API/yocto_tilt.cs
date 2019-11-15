@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_tilt.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_tilt.cs 38030 2019-11-04 17:56:01Z mvuilleu $
  *
  *  Implements yFindTilt(), the high-level API for Tilt functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YTilt class start)
 /**
  * <summary>
- *   The YSensor class is the parent class for all Yoctopuce sensors.
+ *   The YSensor class is the parent class for all Yoctopuce sensor types.
  * <para>
  *   It can be
  *   used to read the current value and unit of any sensor, read the min/max
@@ -80,7 +80,7 @@ public class YTilt : YSensor
     public new delegate void ValueCallback(YTilt func, string value);
     public new delegate void TimedReportCallback(YTilt func, YMeasure measure);
 
-    public const int BANDWIDTH_INVALID = YAPI.INVALID_INT;
+    public const int BANDWIDTH_INVALID = YAPI.INVALID_UINT;
     public const int AXIS_X = 0;
     public const int AXIS_Y = 1;
     public const int AXIS_Z = 2;
@@ -233,7 +233,8 @@ public class YTilt : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the tilt sensor
+     *   a string that uniquely characterizes the tilt sensor, for instance
+     *   <c>Y3DMK002.tilt1</c>.
      * </param>
      * <returns>
      *   a <c>YTilt</c> object allowing you to drive the tilt sensor.

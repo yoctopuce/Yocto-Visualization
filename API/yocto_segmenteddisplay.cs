@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_segmenteddisplay.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_segmenteddisplay.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindSegmentedDisplay(), the high-level API for SegmentedDisplay functions
  *
@@ -229,7 +229,8 @@ public class YSegmentedDisplay : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the segmented displays
+     *   a string that uniquely characterizes the segmented displays, for instance
+     *   <c>MyDevice.segmentedDisplay</c>.
      * </param>
      * <returns>
      *   a <c>YSegmentedDisplay</c> object allowing you to drive the segmented displays.

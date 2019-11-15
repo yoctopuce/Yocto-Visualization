@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_motor.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_motor.cs 38030 2019-11-04 17:56:01Z mvuilleu $
  *
  *  Implements yFindMotor(), the high-level API for Motor functions
  *
@@ -57,11 +57,11 @@ using YFUN_DESCR = System.Int32;
 //--- (YMotor class start)
 /**
  * <summary>
- *   Yoctopuce application programming interface allows you to drive the
- *   power sent to the motor to make it turn both ways, but also to drive accelerations
- *   and decelerations.
+ *   The YMotor class allows you to drive a DC motor, for instance using a Yocto-Motor-DC.
  * <para>
- *   The motor will then accelerate automatically: you will not
+ *   It can be used to configure the
+ *   power sent to the motor to make it turn both ways, but also to drive accelerations
+ *   and decelerations. The motor will then accelerate automatically: you will not
  *   have to monitor it. The API also allows to slow down the motor by shortening
  *   its terminals: the motor will then act as an electromagnetic brake.
  * </para>
@@ -88,9 +88,9 @@ public class YMotor : YFunction
     public const double DRIVINGFORCE_INVALID = YAPI.INVALID_DOUBLE;
     public const double BRAKINGFORCE_INVALID = YAPI.INVALID_DOUBLE;
     public const double CUTOFFVOLTAGE_INVALID = YAPI.INVALID_DOUBLE;
-    public const int OVERCURRENTLIMIT_INVALID = YAPI.INVALID_INT;
+    public const int OVERCURRENTLIMIT_INVALID = YAPI.INVALID_UINT;
     public const double FREQUENCY_INVALID = YAPI.INVALID_DOUBLE;
-    public const int STARTERTIME_INVALID = YAPI.INVALID_INT;
+    public const int STARTERTIME_INVALID = YAPI.INVALID_UINT;
     public const int FAILSAFETIMEOUT_INVALID = YAPI.INVALID_UINT;
     public const string COMMAND_INVALID = YAPI.INVALID_STRING;
     protected int _motorStatus = MOTORSTATUS_INVALID;
@@ -406,6 +406,24 @@ public class YMotor : YFunction
         return res;
     }
 
+    /**
+     * <summary>
+     *   Returns the current threshold (in mA) above which the controller automatically
+     *   switches to error state.
+     * <para>
+     *   A zero value means that there is no limit.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to the current threshold (in mA) above which the controller automatically
+     *   switches to error state
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YMotor.OVERCURRENTLIMIT_INVALID</c>.
+     * </para>
+     */
     public int get_overCurrentLimit()
     {
         int res;
@@ -718,7 +736,8 @@ public class YMotor : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the motor
+     *   a string that uniquely characterizes the motor, for instance
+     *   <c>MOTORCTL.motor</c>.
      * </param>
      * <returns>
      *   a <c>YMotor</c> object allowing you to drive the motor.

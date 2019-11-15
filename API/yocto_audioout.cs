@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_audioout.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_audioout.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindAudioOut(), the high-level API for AudioOut functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YAudioOut class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to configure the volume of the outout.
+ *   The YAudioOut class allows you to configure the volume of an audio outout.
  * <para>
  * </para>
  * <para>
@@ -375,7 +375,8 @@ public class YAudioOut : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the audio output
+     *   a string that uniquely characterizes the audio output, for instance
+     *   <c>MyDevice.audioOut1</c>.
      * </param>
      * <returns>
      *   a <c>YAudioOut</c> object allowing you to drive the audio output.

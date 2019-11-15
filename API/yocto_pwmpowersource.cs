@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_pwmpowersource.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_pwmpowersource.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindPwmPowerSource(), the high-level API for PwmPowerSource functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YPwmPowerSource class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to configure
- *   the voltage source used by all PWM on the same device.
+ *   The YPwmPowerSource class allows you to configure
+ *   the voltage source used by all PWM outputs on the same device, for instance using a Yocto-PWM-Tx.
  * <para>
  * </para>
  * <para>
@@ -212,7 +212,8 @@ public class YPwmPowerSource : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the voltage source
+     *   a string that uniquely characterizes the voltage source, for instance
+     *   <c>YPWMTX01.pwmPowerSource</c>.
      * </param>
      * <returns>
      *   a <c>YPwmPowerSource</c> object allowing you to drive the voltage source.

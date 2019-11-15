@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_gps.cs 37165 2019-09-13 16:57:27Z mvuilleu $
+ *  $Id: yocto_gps.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindGps(), the high-level API for Gps functions
  *
@@ -57,12 +57,13 @@ using YFUN_DESCR = System.Int32;
 //--- (YGps class start)
 /**
  * <summary>
- *   The GPS function allows you to extract positioning
- *   data from the GPS device.
+ *   The YGps class allows you to retrieve positioning
+ *   data from a GPS sensor, for instance using a Yocto-GPS.
  * <para>
  *   This class can provides
- *   complete positioning information: However, if you
- *   wish to define callbacks on position changes, you
+ *   complete positioning information. However, if you
+ *   wish to define callbacks on position changes or record
+ *   the position in the datalogger, you
  *   should use the YLatitude et YLongitude classes.
  * </para>
  * <para>
@@ -749,7 +750,8 @@ public class YGps : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the GPS
+     *   a string that uniquely characterizes the GPS, for instance
+     *   <c>YGNSSMK1.gps</c>.
      * </param>
      * <returns>
      *   a <c>YGps</c> object allowing you to drive the GPS.

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_arithmeticsensor.cs 35698 2019-06-05 17:25:12Z mvuilleu $
+ *  $Id: yocto_arithmeticsensor.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindArithmeticSensor(), the high-level API for ArithmeticSensor functions
  *
@@ -57,9 +57,12 @@ using YFUN_DESCR = System.Int32;
 //--- (YArithmeticSensor class start)
 /**
  * <summary>
- *   The YArithmeticSensor class can produce measurements computed using an arithmetic
- *   formula based on one or more measured signals and temperature measurements.
+ *   The YArithmeticSensor class allows some Yoctopuce devices to compute in real-time
+ *   values based on an arithmetic formula involving one or more measured signals as
+ *   well as the temperature.
  * <para>
+ *   This functionality is only available on specific
+ *   Yoctopuce devices, for instance using a Yocto-MaxiMicroVolt-Rx.
  * </para>
  * <para>
  * </para>
@@ -229,7 +232,8 @@ public class YArithmeticSensor : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the arithmetic sensor
+     *   a string that uniquely characterizes the arithmetic sensor, for instance
+     *   <c>RXUVOLT1.arithmeticSensor1</c>.
      * </param>
      * <returns>
      *   a <c>YArithmeticSensor</c> object allowing you to drive the arithmetic sensor.

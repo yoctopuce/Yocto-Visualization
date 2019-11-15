@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_display.cs 37000 2019-09-03 06:40:17Z mvuilleu $
+ * $Id: yocto_display.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  * Implements yFindDisplay(), the high-level API for Display functions
  *
@@ -908,10 +908,10 @@ public enum   ALIGN
 //--- (generated code: YDisplay class start)
 /**
  * <summary>
- *   Yoctopuce display interface has been designed to easily
- *   show information and images.
+ *   The YDisplay class allows to drive Yoctopuce displays, for instance using a Yocto-MaxiDisplay, a Yocto-MiniDisplay, a Yocto-MaxiDisplay-G or a Yocto-Display.
  * <para>
- *   The device provides built-in
+ *   Yoctopuce display interface has been designed to easily
+ *   show information and images. The device provides built-in
  *   multi-layer rendering. Layers can be drawn offline, individually,
  *   and freely moved on the display. It can also replay recorded
  *   sequences (animations).
@@ -1505,7 +1505,8 @@ public class YDisplay : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the display
+     *   a string that uniquely characterizes the display, for instance
+     *   <c>YD128X64.display</c>.
      * </param>
      * <returns>
      *   a <c>YDisplay</c> object allowing you to drive the display.

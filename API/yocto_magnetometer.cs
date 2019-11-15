@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_magnetometer.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_magnetometer.cs 38030 2019-11-04 17:56:01Z mvuilleu $
  *
  *  Implements yFindMagnetometer(), the high-level API for Magnetometer functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YMagnetometer class start)
 /**
  * <summary>
- *   The YSensor class is the parent class for all Yoctopuce sensors.
+ *   The YSensor class is the parent class for all Yoctopuce sensor types.
  * <para>
  *   It can be
  *   used to read the current value and unit of any sensor, read the min/max
@@ -80,7 +80,7 @@ public class YMagnetometer : YSensor
     public new delegate void ValueCallback(YMagnetometer func, string value);
     public new delegate void TimedReportCallback(YMagnetometer func, YMeasure measure);
 
-    public const int BANDWIDTH_INVALID = YAPI.INVALID_INT;
+    public const int BANDWIDTH_INVALID = YAPI.INVALID_UINT;
     public const double XVALUE_INVALID = YAPI.INVALID_DOUBLE;
     public const double YVALUE_INVALID = YAPI.INVALID_DOUBLE;
     public const double ZVALUE_INVALID = YAPI.INVALID_DOUBLE;
@@ -315,7 +315,8 @@ public class YMagnetometer : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the magnetometer
+     *   a string that uniquely characterizes the magnetometer, for instance
+     *   <c>Y3DMK002.magnetometer</c>.
      * </param>
      * <returns>
      *   a <c>YMagnetometer</c> object allowing you to drive the magnetometer.

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_wakeupmonitor.cs 37000 2019-09-03 06:40:17Z mvuilleu $
+ *  $Id: yocto_wakeupmonitor.cs 38030 2019-11-04 17:56:01Z mvuilleu $
  *
  *  Implements yFindWakeUpMonitor(), the high-level API for WakeUpMonitor functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YWakeUpMonitor class start)
 /**
  * <summary>
- *   The WakeUpMonitor function handles globally all wake-up sources, as well
- *   as automated sleep mode.
+ *   The YWakeUpMonitor class handles globally all wake-up sources, as well
+ *   as automated sleep mode, for instance using a YoctoHub-Wireless-g, a YoctoHub-GSM-3G-NA, a YoctoHub-GSM-3G-EU or a YoctoHub-Wireless-SR.
  * <para>
  * </para>
  * <para>
@@ -72,8 +72,8 @@ public class YWakeUpMonitor : YFunction
     public new delegate void ValueCallback(YWakeUpMonitor func, string value);
     public new delegate void TimedReportCallback(YWakeUpMonitor func, YMeasure measure);
 
-    public const int POWERDURATION_INVALID = YAPI.INVALID_INT;
-    public const int SLEEPCOUNTDOWN_INVALID = YAPI.INVALID_INT;
+    public const int POWERDURATION_INVALID = YAPI.INVALID_UINT;
+    public const int SLEEPCOUNTDOWN_INVALID = YAPI.INVALID_UINT;
     public const long NEXTWAKEUP_INVALID = YAPI.INVALID_LONG;
     public const int WAKEUPREASON_USBPOWER = 0;
     public const int WAKEUPREASON_EXTPOWER = 1;
@@ -439,7 +439,8 @@ public class YWakeUpMonitor : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the monitor
+     *   a string that uniquely characterizes the monitor, for instance
+     *   <c>YHUBWLN3.wakeUpMonitor</c>.
      * </param>
      * <returns>
      *   a <c>YWakeUpMonitor</c> object allowing you to drive the monitor.

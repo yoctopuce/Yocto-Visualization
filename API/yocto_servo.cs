@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_servo.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_servo.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindServo(), the high-level API for Servo functions
  *
@@ -57,11 +57,12 @@ using YFUN_DESCR = System.Int32;
 //--- (YServo class start)
 /**
  * <summary>
- *   Yoctopuce application programming interface allows you not only to move
- *   a servo to a given position, but also to specify the time interval
- *   in which the move should be performed.
+ *   The YServo class is designed to drive remote-control servo motors
+ *   outputs, for instance using a Yocto-Servo.
  * <para>
- *   This makes it possible to
+ *   This class allows you not only to move
+ *   a servo to a given position, but also to specify the time interval
+ *   in which the move should be performed. This makes it possible to
  *   synchronize two servos involved in a same move.
  * </para>
  * <para>
@@ -615,7 +616,8 @@ public class YServo : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the servo
+     *   a string that uniquely characterizes the servo, for instance
+     *   <c>SERVORC1.servo1</c>.
      * </param>
      * <returns>
      *   a <c>YServo</c> object allowing you to drive the servo.

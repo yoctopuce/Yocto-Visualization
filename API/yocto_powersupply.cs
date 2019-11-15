@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_powersupply.cs 37653 2019-10-11 17:37:17Z mvuilleu $
+ *  $Id: yocto_powersupply.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindPowerSupply(), the high-level API for PowerSupply functions
  *
@@ -57,9 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YPowerSupply class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to change the voltage set point,
- *   the current limit and the enable/disable the output.
+ *   The YPowerSupply class allows you to drive a Yoctopuce power supply$DEV_ENà.
  * <para>
+ *   It can be use to change the voltage set point,
+ *   the current limit and the enable/disable the output.
  * </para>
  * <para>
  * </para>
@@ -762,7 +763,8 @@ public class YPowerSupply : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the regulated power supply
+     *   a string that uniquely characterizes the regulated power supply, for instance
+     *   <c>MyDevice.powerSupply</c>.
      * </param>
      * <returns>
      *   a <c>YPowerSupply</c> object allowing you to drive the regulated power supply.

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_multisenscontroller.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_multisenscontroller.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindMultiSensController(), the high-level API for MultiSensController functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YMultiSensController class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to setup a customized
- *   sensor chain.
+ *   The YMultiSensController class allows you to setup a customized
+ *   sensor chain on devices featuring that functionality, for instance using a Yocto-Temperature-IR.
  * <para>
  * </para>
  * <para>
@@ -336,7 +336,8 @@ public class YMultiSensController : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the multi-sensor controller
+     *   a string that uniquely characterizes the multi-sensor controller, for instance
+     *   <c>YTEMPIR1.multiSensController</c>.
      * </param>
      * <returns>
      *   a <c>YMultiSensController</c> object allowing you to drive the multi-sensor controller.

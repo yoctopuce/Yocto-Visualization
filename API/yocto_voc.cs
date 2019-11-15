@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_voc.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_voc.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindVoc(), the high-level API for Voc functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YVoc class start)
 /**
  * <summary>
- *   The Yoctopuce class YVoc allows you to read and configure Yoctopuce Volatile Organic
- *   Compound sensors.
+ *   The YVoc class allows you to read and configure Yoctopuce Volatile Organic
+ *   Compound sensors, for instance using a Yocto-VOC-V3.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.
@@ -136,7 +136,8 @@ public class YVoc : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the Volatile Organic Compound sensor
+     *   a string that uniquely characterizes the Volatile Organic Compound sensor, for instance
+     *   <c>YVOCMK03.voc</c>.
      * </param>
      * <returns>
      *   a <c>YVoc</c> object allowing you to drive the Volatile Organic Compound sensor.

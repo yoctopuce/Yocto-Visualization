@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_led.cs 36554 2019-07-29 12:21:31Z mvuilleu $
+ *  $Id: yocto_led.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindLed(), the high-level API for Led functions
  *
@@ -57,10 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YLed class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface
- *   allows you not only to drive the intensity of the LED, but also to
- *   have it blink at various preset frequencies.
+ *   The YLed class allows you to drive a monocolor LED, for instance using a Yocto-Buzzer.
  * <para>
+ *   You can not only to drive the intensity of the LED, but also to
+ *   have it blink at various preset frequencies.
  * </para>
  * <para>
  * </para>
@@ -340,7 +340,8 @@ public class YLed : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the LED
+     *   a string that uniquely characterizes the LED, for instance
+     *   <c>YBUZZER2.led1</c>.
      * </param>
      * <returns>
      *   a <c>YLed</c> object allowing you to drive the LED.

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_colorled.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_colorled.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindColorLed(), the high-level API for ColorLed functions
  *
@@ -57,9 +57,9 @@ using YFUN_DESCR = System.Int32;
 //--- (YColorLed class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface
- *   allows you to drive a color LED using RGB coordinates as well as HSL coordinates.
+ *   The YColorLed class allows you to drive a color LED, for instance using a Yocto-Color-V2 or a Yocto-PowerColor.
  * <para>
+ *   The color can be specified using RGB coordinates as well as HSL coordinates.
  *   The module performs all conversions form RGB to HSL automatically. It is then
  *   self-evident to turn on a LED with a given hue and to progressively vary its
  *   saturation or lightness. If needed, you can find more information on the
@@ -428,14 +428,16 @@ public class YColorLed : YFunction
 
     /**
      * <summary>
-     *   Changes the color that the LED will display by default when the module is turned on.
+     *   Changes the color that the LED displays by default when the module is turned on.
      * <para>
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>
      * </summary>
      * <param name="newval">
-     *   an integer corresponding to the color that the LED will display by default when the module is turned on
+     *   an integer corresponding to the color that the LED displays by default when the module is turned on
      * </param>
      * <para>
      * </para>
@@ -612,7 +614,8 @@ public class YColorLed : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the RGB LED
+     *   a string that uniquely characterizes the RGB LED, for instance
+     *   <c>YRGBLED2.colorLed1</c>.
      * </param>
      * <returns>
      *   a <c>YColorLed</c> object allowing you to drive the RGB LED.

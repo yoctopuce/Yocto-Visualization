@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 37796 2019-10-24 07:39:24Z seb $
+ * $Id: yocto_api.cs 38137 2019-11-14 10:23:36Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -194,7 +194,7 @@ internal static class SafeNativeMethods
     }
 
 
-    private enum YAPIDLL_VERSION
+    internal enum YAPIDLL_VERSION
     {
         WIN32,
         WIN64,
@@ -206,7 +206,7 @@ internal static class SafeNativeMethods
         LINAARCH64
     }
 
-    private static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.WIN32;
+    internal static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.WIN32;
 
     private static bool IsMacOS()
     {
@@ -2771,7 +2771,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "37796";
+    public const string YOCTO_API_BUILD_NO = "38155";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -4847,6 +4847,31 @@ public class YAPI
     public static _yapiDeviceLogCallback native_yDeviceLogDelegate = native_yDeviceLogCallback;
     static GCHandle native_yDeviceLogAnchor = GCHandle.Alloc(native_yDeviceLogDelegate);
 
+    public static String GetDllArchitecture()
+    {
+        switch (SafeNativeMethods._dllVersion)
+        {
+            default:
+                return "Unknown";
+            case SafeNativeMethods.YAPIDLL_VERSION.WIN32:
+                return "Win32";
+            case SafeNativeMethods.YAPIDLL_VERSION.WIN64:
+                return "Win64";
+            case SafeNativeMethods.YAPIDLL_VERSION.MACOS32:
+                return "MacOs32";
+            case SafeNativeMethods.YAPIDLL_VERSION.MACOS64:
+                return "MacOs64";
+            case SafeNativeMethods.YAPIDLL_VERSION.LIN64:
+                return "Linux64";
+            case SafeNativeMethods.YAPIDLL_VERSION.LIN32:
+                return "Linux32";
+            case SafeNativeMethods.YAPIDLL_VERSION.LINARMHF:
+                return "Armhf32";
+            case SafeNativeMethods.YAPIDLL_VERSION.LINAARCH64:
+                return "Aarch64";
+        }
+    }
+
 
     /**
      * <summary>
@@ -4876,7 +4901,14 @@ public class YAPI
     {
         string version = default(string);
         string date = default(string);
-        apiGetAPIVersion(ref version, ref date);
+        try {
+            apiGetAPIVersion(ref version, ref date);
+        } catch (System.DllNotFoundException ex) {
+            if (YAPI.ExceptionsDisabled) {
+                return "Unable to load yapi.dll (" + ex.Message + ")";
+            }
+            throw;
+        }
         return YOCTO_API_VERSION_STR + "." + YOCTO_API_BUILD_NO + " (" + version + ")";
     }
 
@@ -7809,13 +7841,13 @@ public class YConsolidatedDataSet
     {
         //--- (generated code: YConsolidatedDataSet attributes initialization)
         //--- (end of generated code: YConsolidatedDataSet attributes initialization)
-        this._init(startTime, endTime, sensorList);
+        this.imm_init(startTime, endTime, sensorList);
     }
 
     //--- (generated code: YConsolidatedDataSet implementation)
 
 
-    public virtual int _init(double startt, double endt, List<YSensor> sensorList)
+    public virtual int imm_init(double startt, double endt, List<YSensor> sensorList)
     {
         this._start = startt;
         this._end = endt;
@@ -8637,7 +8669,8 @@ public class YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the function
+     *   a string that uniquely characterizes the function, for instance
+     *   <c>MyDevice.</c>.
      * </param>
      * <returns>
      *   a <c>YFunction</c> object allowing you to drive the function.
@@ -9577,7 +9610,7 @@ public class YFunction
 //--- (generated code: YModule class start)
 /**
  * <summary>
- *   This interface is identical for all Yoctopuce USB modules.
+ *   The YModule class can be used with all Yoctopuce USB devices.
  * <para>
  *   It can be used to control the module global parameters, and
  *   to enumerate the functions provided by each module.
@@ -12093,7 +12126,7 @@ public class YModule : YFunction
 //--- (generated code: YSensor class start)
 /**
  * <summary>
- *   The YSensor class is the parent class for all Yoctopuce sensors.
+ *   The YSensor class is the parent class for all Yoctopuce sensor types.
  * <para>
  *   It can be
  *   used to read the current value and unit of any sensor, read the min/max
@@ -12801,7 +12834,8 @@ public class YSensor : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the sensor
+     *   a string that uniquely characterizes the sensor, for instance
+     *   <c>MyDevice.</c>.
      * </param>
      * <returns>
      *   a <c>YSensor</c> object allowing you to drive the sensor.
@@ -13529,10 +13563,12 @@ public class YSensor : YFunction
 //--- (generated code: YDataLogger class start)
 /**
  * <summary>
- *   Yoctopuce sensors include a non-volatile memory capable of storing ongoing measured
- *   data automatically, without requiring a permanent connection to a computer.
+ *   A non-volatile memory for storing ongoing measured data is available on most Yoctopuce
+ *   sensors, for instance using a Yocto-Light-V3, a Yocto-Meteo-V2, a Yocto-Watt or a Yocto-3D-V2.
  * <para>
- *   The DataLogger function controls the global parameters of the internal data
+ *   Recording can happen automatically, without requiring a permanent
+ *   connection to a computer.
+ *   The YDataLogger class controls the global parameters of the internal data
  *   logger. Recording control (start/stop) as well as data retreival is done at
  *   sensor objects level.
  * </para>
@@ -13990,7 +14026,8 @@ public class YDataLogger : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the data logger
+     *   a string that uniquely characterizes the data logger, for instance
+     *   <c>LIGHTMK3.dataLogger</c>.
      * </param>
      * <returns>
      *   a <c>YDataLogger</c> object allowing you to drive the data logger.

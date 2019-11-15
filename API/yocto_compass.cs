@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_compass.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_compass.cs 38030 2019-11-04 17:56:01Z mvuilleu $
  *
  *  Implements yFindCompass(), the high-level API for Compass functions
  *
@@ -57,17 +57,11 @@ using YFUN_DESCR = System.Int32;
 //--- (YCompass class start)
 /**
  * <summary>
- *   The YSensor class is the parent class for all Yoctopuce sensors.
+ *   The YCompass class allows you to read and configure Yoctopuce compass
+ *   sensors, for instance using a Yocto-3D-V2.
  * <para>
- *   It can be
- *   used to read the current value and unit of any sensor, read the min/max
- *   value, configure autonomous recording frequency and access recorded data.
- *   It also provide a function to register a callback invoked each time the
- *   observed value changes, or at a predefined interval. Using this class rather
- *   than a specific subclass makes it possible to create generic applications
- *   that work with any Yoctopuce sensor, even those that do not yet exist.
- *   Note: The YAnButton class is the only analog input which does not inherit
- *   from YSensor.
+ *   It inherits from YSensor class the core functions to read measurements,
+ *   to register callback functions, to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -80,7 +74,7 @@ public class YCompass : YSensor
     public new delegate void ValueCallback(YCompass func, string value);
     public new delegate void TimedReportCallback(YCompass func, YMeasure measure);
 
-    public const int BANDWIDTH_INVALID = YAPI.INVALID_INT;
+    public const int BANDWIDTH_INVALID = YAPI.INVALID_UINT;
     public const int AXIS_X = 0;
     public const int AXIS_Y = 1;
     public const int AXIS_Z = 2;
@@ -268,7 +262,8 @@ public class YCompass : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the compass
+     *   a string that uniquely characterizes the compass, for instance
+     *   <c>Y3DMK002.compass</c>.
      * </param>
      * <returns>
      *   a <c>YCompass</c> object allowing you to drive the compass.

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_audioin.cs 37619 2019-10-11 11:52:42Z mvuilleu $
+ *  $Id: yocto_audioin.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindAudioIn(), the high-level API for AudioIn functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YAudioIn class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to configure the volume of the input channel.
+ *   The YAudioIn class allows you to configure the volume of an audio input.
  * <para>
  * </para>
  * <para>
@@ -375,7 +375,8 @@ public class YAudioIn : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the audio input
+     *   a string that uniquely characterizes the audio input, for instance
+     *   <c>MyDevice.audioIn1</c>.
      * </param>
      * <returns>
      *   a <c>YAudioIn</c> object allowing you to drive the audio input.

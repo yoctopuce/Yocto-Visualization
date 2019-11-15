@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_hubport.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_hubport.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindHubPort(), the high-level API for HubPort functions
  *
@@ -57,9 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YHubPort class start)
 /**
  * <summary>
- *   YHubPort objects provide control over the power supply for every
- *   YoctoHub port and provide information about the device connected to it.
+ *   The YHubPort class provides control over the power supply for every port
+ *   on a YoctoHub, for instance using a YoctoHub-Ethernet, a YoctoHub-Wireless-g, a YoctoHub-Shield or a YoctoHub-GSM-3G-NA.
  * <para>
+ *   It provide information about the device connected to it.
  *   The logical name of a YHubPort is always automatically set to the
  *   unique serial number of the Yoctopuce device connected to it.
  * </para>
@@ -284,7 +285,8 @@ public class YHubPort : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the Yocto-hub port
+     *   a string that uniquely characterizes the Yocto-hub port, for instance
+     *   <c>YHUBETH1.hubPort1</c>.
      * </param>
      * <returns>
      *   a <c>YHubPort</c> object allowing you to drive the Yocto-hub port.

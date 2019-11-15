@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_groundspeed.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_groundspeed.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindGroundSpeed(), the high-level API for GroundSpeed functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YGroundSpeed class start)
 /**
  * <summary>
- *   The Yoctopuce class YGroundSpeed allows you to read the ground speed from Yoctopuce
- *   geolocation sensors.
+ *   The YGroundSpeed class allows you to read the ground speed from Yoctopuce
+ *   geolocation sensors, for instance using a Yocto-GPS.
  * <para>
  *   It inherits from the YSensor class the core functions to
  *   read measurements, register callback functions, access the autonomous
@@ -137,7 +137,8 @@ public class YGroundSpeed : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the ground speed sensor
+     *   a string that uniquely characterizes the ground speed sensor, for instance
+     *   <c>YGNSSMK1.groundSpeed</c>.
      * </param>
      * <returns>
      *   a <c>YGroundSpeed</c> object allowing you to drive the ground speed sensor.

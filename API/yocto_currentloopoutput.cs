@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_currentloopoutput.cs 34989 2019-04-05 13:41:16Z seb $
+ *  $Id: yocto_currentloopoutput.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindCurrentLoopOutput(), the high-level API for CurrentLoopOutput functions
  *
@@ -57,9 +57,9 @@ using YFUN_DESCR = System.Int32;
 //--- (YCurrentLoopOutput class start)
 /**
  * <summary>
- *   The Yoctopuce application programming interface allows you to change the value of the 4-20mA
- *   output as well as to know the current loop state.
+ *   The YCurrentLoopOutput class allows you to drive a 4-20mA output, for instance using a Yocto-4-20mA-Tx.
  * <para>
+ *   It can also provide information about the power state of the current loop.
  * </para>
  * <para>
  * </para>
@@ -337,7 +337,8 @@ public class YCurrentLoopOutput : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the 4-20mA output
+     *   a string that uniquely characterizes the 4-20mA output, for instance
+     *   <c>TX420MA1.currentLoopOutput</c>.
      * </param>
      * <returns>
      *   a <c>YCurrentLoopOutput</c> object allowing you to drive the 4-20mA output.

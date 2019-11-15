@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_rangefinder.cs 37149 2019-09-12 21:24:53Z mvuilleu $
+ *  $Id: yocto_rangefinder.cs 37827 2019-10-25 13:07:48Z mvuilleu $
  *
  *  Implements yFindRangeFinder(), the high-level API for RangeFinder functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YRangeFinder class start)
 /**
  * <summary>
- *   The Yoctopuce class YRangeFinder allows you to use and configure Yoctopuce range finder
- *   sensors.
+ *   The YRangeFinder class allows you to use and configure Yoctopuce range finder
+ *   sensors, for instance using a Yocto-RangeFinder.
  * <para>
  *   It inherits from the YSensor class the core functions to read measurements,
  *   register callback functions, access the autonomous datalogger.
@@ -450,7 +450,8 @@ public class YRangeFinder : YSensor
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the range finder
+     *   a string that uniquely characterizes the range finder, for instance
+     *   <c>YRNGFND1.rangeFinder1</c>.
      * </param>
      * <returns>
      *   a <c>YRangeFinder</c> object allowing you to drive the range finder.
