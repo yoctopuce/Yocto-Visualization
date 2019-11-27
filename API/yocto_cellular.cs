@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_cellular.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ * $Id: yocto_cellular.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  * Implements yFindCellular(), the high-level API for Cellular functions
  *
@@ -87,36 +87,106 @@ public class YCellRecord
     //--- (generated code: YCellRecord implementation)
 
 
+    /**
+     * <summary>
+     *   Returns the name of the the cell operator.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a string with the name of the the cell operator.
+     * </returns>
+     */
     public virtual string get_cellOperator()
     {
         return this._oper;
     }
 
+    /**
+     * <summary>
+     *   Returns the Mobile Country Code (MCC).
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the Mobile Country Code (MCC).
+     * </returns>
+     */
     public virtual int get_mobileCountryCode()
     {
         return this._mcc;
     }
 
+    /**
+     * <summary>
+     *   Returns the Mobile Network Code (MNC).
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the Mobile Network Code (MNC).
+     * </returns>
+     */
     public virtual int get_mobileNetworkCode()
     {
         return this._mnc;
     }
 
+    /**
+     * <summary>
+     *   Returns the Location Area Code (LAC).
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the Location Area Code (LAC).
+     * </returns>
+     */
     public virtual int get_locationAreaCode()
     {
         return this._lac;
     }
 
+    /**
+     * <summary>
+     *   Returns the Cell Id.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the Cell Id.
+     * </returns>
+     */
     public virtual int get_cellId()
     {
         return this._cid;
     }
 
+    /**
+     * <summary>
+     *   Returns the signal strength.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the signal strength.
+     * </returns>
+     */
     public virtual int get_signalStrength()
     {
         return this._dbm;
     }
 
+    /**
+     * <summary>
+     *   Returns the Timing Advance (TA).
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the Timing Advance (TA).
+     * </returns>
+     */
     public virtual int get_timingAdvance()
     {
         return this._tad;
@@ -137,7 +207,7 @@ public class YCellRecord
 /**
  * <summary>
  *   The YCellular class provides control over cellular network parameters
- *   and status for devices that are GSM-enabled, for instance using a YoctoHub-GSM-3G-NA, a YoctoHub-GSM-3G-EU or a YoctoHub-GSM-2G.
+ *   and status for devices that are GSM-enabled, for instance using a YoctoHub-GSM-2G, a YoctoHub-GSM-3G-EU or a YoctoHub-GSM-3G-NA.
  * <para>
  * </para>
  * <para>
@@ -1074,7 +1144,7 @@ public class YCellular : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the cellular interface, for instance
-     *   <c>YHUBGSM4.cellular</c>.
+     *   <c>YHUBGSM1.cellular</c>.
      * </param>
      * <returns>
      *   a <c>YCellular</c> object allowing you to drive the cellular interface.

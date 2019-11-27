@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_current.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_current.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindCurrent(), the high-level API for Current functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YCurrent class allows you to read and configure Yoctopuce current
- *   sensors, for instance using a Yocto-Watt, a Yocto-Amp or a Yocto-Motor-DC.
+ *   sensors, for instance using a Yocto-Amp, a Yocto-Motor-DC or a Yocto-Watt.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.
@@ -211,7 +211,7 @@ public class YCurrent : YSensor
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the current sensor, for instance
-     *   <c>YWATTMK1.current1</c>.
+     *   <c>YAMPMK01.current1</c>.
      * </param>
      * <returns>
      *   a <c>YCurrent</c> object allowing you to drive the current sensor.

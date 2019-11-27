@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_gps.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_gps.cs 38462 2019-11-25 17:14:30Z seb $
  *
  *  Implements yFindGps(), the high-level API for Gps functions
  *
@@ -81,17 +81,19 @@ public class YGps : YFunction
     public const int ISFIXED_TRUE = 1;
     public const int ISFIXED_INVALID = -1;
     public const long SATCOUNT_INVALID = YAPI.INVALID_LONG;
+    public const long SATPERCONST_INVALID = YAPI.INVALID_LONG;
+    public const double GPSREFRESHRATE_INVALID = YAPI.INVALID_DOUBLE;
     public const int COORDSYSTEM_GPS_DMS = 0;
     public const int COORDSYSTEM_GPS_DM = 1;
     public const int COORDSYSTEM_GPS_D = 2;
     public const int COORDSYSTEM_INVALID = -1;
-    public const int CONSTELLATION_GPS = 0;
-    public const int CONSTELLATION_GLONASS = 1;
-    public const int CONSTELLATION_GALLILEO = 2;
-    public const int CONSTELLATION_GNSS = 3;
+    public const int CONSTELLATION_GNSS = 0;
+    public const int CONSTELLATION_GPS = 1;
+    public const int CONSTELLATION_GLONASS = 2;
+    public const int CONSTELLATION_GALILEO = 3;
     public const int CONSTELLATION_GPS_GLONASS = 4;
-    public const int CONSTELLATION_GPS_GALLILEO = 5;
-    public const int CONSTELLATION_GLONASS_GALLELIO = 6;
+    public const int CONSTELLATION_GPS_GALILEO = 5;
+    public const int CONSTELLATION_GLONASS_GALILEO = 6;
     public const int CONSTELLATION_INVALID = -1;
     public const string LATITUDE_INVALID = YAPI.INVALID_STRING;
     public const string LONGITUDE_INVALID = YAPI.INVALID_STRING;
@@ -105,6 +107,8 @@ public class YGps : YFunction
     public const string COMMAND_INVALID = YAPI.INVALID_STRING;
     protected int _isFixed = ISFIXED_INVALID;
     protected long _satCount = SATCOUNT_INVALID;
+    protected long _satPerConst = SATPERCONST_INVALID;
+    protected double _gpsRefreshRate = GPSREFRESHRATE_INVALID;
     protected int _coordSystem = COORDSYSTEM_INVALID;
     protected int _constellation = CONSTELLATION_INVALID;
     protected string _latitude = LATITUDE_INVALID;
@@ -139,6 +143,14 @@ public class YGps : YFunction
         if (json_val.has("satCount"))
         {
             _satCount = json_val.getLong("satCount");
+        }
+        if (json_val.has("satPerConst"))
+        {
+            _satPerConst = json_val.getLong("satPerConst");
+        }
+        if (json_val.has("gpsRefreshRate"))
+        {
+            _gpsRefreshRate = Math.Round(json_val.getDouble("gpsRefreshRate") * 1000.0 / 65536.0) / 1000.0;
         }
         if (json_val.has("coordSystem"))
         {
@@ -223,14 +235,14 @@ public class YGps : YFunction
 
     /**
      * <summary>
-     *   Returns the count of visible satellites.
+     *   Returns the total count of satellites used to compute GPS position.
      * <para>
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   an integer corresponding to the count of visible satellites
+     *   an integer corresponding to the total count of satellites used to compute GPS position
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YGps.SATCOUNT_INVALID</c>.
@@ -246,6 +258,69 @@ public class YGps : YFunction
                 }
             }
             res = this._satCount;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Returns the count of visible satellites per constellation encoded
+     *   on a 32 bit integer: bits 0..
+     * <para>
+     *   5: GPS satellites count,  bits 6..11 : Glonass, bits 12..17 : Galileo.
+     *   this value is refreshed every 5 seconds only.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to the count of visible satellites per constellation encoded
+     *   on a 32 bit integer: bits 0.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YGps.SATPERCONST_INVALID</c>.
+     * </para>
+     */
+    public long get_satPerConst()
+    {
+        long res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return SATPERCONST_INVALID;
+                }
+            }
+            res = this._satPerConst;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Returns effective GPS data refresh frequency.
+     * <para>
+     *   this value is refreshed every 5 seconds only.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a floating point number corresponding to effective GPS data refresh frequency
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YGps.GPSREFRESHRATE_INVALID</c>.
+     * </para>
+     */
+    public double get_gpsRefreshRate()
+    {
+        double res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return GPSREFRESHRATE_INVALID;
+                }
+            }
+            res = this._gpsRefreshRate;
         }
         return res;
     }
@@ -322,10 +397,10 @@ public class YGps : YFunction
      * </para>
      * </summary>
      * <returns>
-     *   a value among <c>YGps.CONSTELLATION_GPS</c>, <c>YGps.CONSTELLATION_GLONASS</c>,
-     *   <c>YGps.CONSTELLATION_GALLILEO</c>, <c>YGps.CONSTELLATION_GNSS</c>,
-     *   <c>YGps.CONSTELLATION_GPS_GLONASS</c>, <c>YGps.CONSTELLATION_GPS_GALLILEO</c> and
-     *   <c>YGps.CONSTELLATION_GLONASS_GALLELIO</c> corresponding to the the satellites constellation used to compute
+     *   a value among <c>YGps.CONSTELLATION_GNSS</c>, <c>YGps.CONSTELLATION_GPS</c>,
+     *   <c>YGps.CONSTELLATION_GLONASS</c>, <c>YGps.CONSTELLATION_GALILEO</c>,
+     *   <c>YGps.CONSTELLATION_GPS_GLONASS</c>, <c>YGps.CONSTELLATION_GPS_GALILEO</c> and
+     *   <c>YGps.CONSTELLATION_GLONASS_GALILEO</c> corresponding to the the satellites constellation used to compute
      *   positioning data
      * </returns>
      * <para>
@@ -351,17 +426,17 @@ public class YGps : YFunction
      *   Changes the satellites constellation used to compute
      *   positioning data.
      * <para>
-     *   Possible  constellations are GPS, Glonass, Galileo ,
-     *   GNSS ( = GPS + Glonass + Galileo) and the 3 possible pairs. This seeting has effect on Yocto-GPS rev A.
+     *   Possible  constellations are GNSS ( = all supported constellations),
+     *   GPS, Glonass, Galileo , and the 3 possible pairs. This setting has  no effect on Yocto-GPS (V1).
      * </para>
      * <para>
      * </para>
      * </summary>
      * <param name="newval">
-     *   a value among <c>YGps.CONSTELLATION_GPS</c>, <c>YGps.CONSTELLATION_GLONASS</c>,
-     *   <c>YGps.CONSTELLATION_GALLILEO</c>, <c>YGps.CONSTELLATION_GNSS</c>,
-     *   <c>YGps.CONSTELLATION_GPS_GLONASS</c>, <c>YGps.CONSTELLATION_GPS_GALLILEO</c> and
-     *   <c>YGps.CONSTELLATION_GLONASS_GALLELIO</c> corresponding to the satellites constellation used to compute
+     *   a value among <c>YGps.CONSTELLATION_GNSS</c>, <c>YGps.CONSTELLATION_GPS</c>,
+     *   <c>YGps.CONSTELLATION_GLONASS</c>, <c>YGps.CONSTELLATION_GALILEO</c>,
+     *   <c>YGps.CONSTELLATION_GPS_GLONASS</c>, <c>YGps.CONSTELLATION_GPS_GALILEO</c> and
+     *   <c>YGps.CONSTELLATION_GLONASS_GALILEO</c> corresponding to the satellites constellation used to compute
      *   positioning data
      * </param>
      * <para>

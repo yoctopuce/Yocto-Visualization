@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_poweroutput.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_poweroutput.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindPowerOutput(), the high-level API for PowerOutput functions
  *
@@ -211,7 +211,7 @@ public class YPowerOutput : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the power output control, for instance
-     *   <c>YSPIMK01.powerOutput</c>.
+     *   <c>YI2CMK01.powerOutput</c>.
      * </param>
      * <returns>
      *   a <c>YPowerOutput</c> object allowing you to drive the power output control.

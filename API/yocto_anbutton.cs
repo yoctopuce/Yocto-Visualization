@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_anbutton.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_anbutton.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindAnButton(), the high-level API for AnButton functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YAnButton class allows you to access simple resistive inputs on Yoctopuce
- *   devices, for instance using a Yocto-Knob, a Yocto-MaxiDisplay, a Yocto-Buzzer or a Yocto-MaxiDisplay-G.
+ *   devices, for instance using a Yocto-Buzzer, a Yocto-Display, a Yocto-Knob or a Yocto-MaxiDisplay.
  * <para>
  *   Such inputs can be used to measure the state
  *   of a simple button as well as to read an analog potentiometer (variable resistance).
@@ -679,7 +679,7 @@ public class YAnButton : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the analog input, for instance
-     *   <c>YBUTTON1.anButton1</c>.
+     *   <c>YBUZZER2.anButton1</c>.
      * </param>
      * <returns>
      *   a <c>YAnButton</c> object allowing you to drive the analog input.

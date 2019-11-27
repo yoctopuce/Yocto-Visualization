@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_serialport.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ * $Id: yocto_serialport.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  * Implements yFindSerialPort(), the high-level API for SerialPort functions
  *
@@ -75,16 +75,46 @@ public class YSnoopingRecord
   //--- (generated code: YSnoopingRecord implementation)
 
 
+    /**
+     * <summary>
+     *   Returns the elapsed time, in ms, since the beginning of the preceding message.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the elapsed time, in ms, since the beginning of the preceding message.
+     * </returns>
+     */
     public virtual int get_time()
     {
         return this._tim;
     }
 
+    /**
+     * <summary>
+     *   Returns the message direction (RX=0 , TX=1) .
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the message direction (RX=0 , TX=1) .
+     * </returns>
+     */
     public virtual int get_direction()
     {
         return this._dir;
     }
 
+    /**
+     * <summary>
+     *   Returns the message content.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the message content.
+     * </returns>
+     */
     public virtual string get_message()
     {
         return this._msg;
@@ -102,7 +132,7 @@ public class YSnoopingRecord
 //--- (generated code: YSerialPort class start)
 /**
  * <summary>
- *   The YSerialPort class allows you to fully drive a Yoctopuce serial port, for instance using a Yocto-RS232, a Yocto-RS485 or a Yocto-Serial.
+ *   The YSerialPort class allows you to fully drive a Yoctopuce serial port, for instance using a Yocto-RS232, a Yocto-RS485-V2 or a Yocto-Serial.
  * <para>
  *   It can be used to send and receive data, and to configure communication
  *   parameters (baud rate, bit count, parity, flow control and protocol).

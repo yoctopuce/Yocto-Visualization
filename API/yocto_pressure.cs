@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_pressure.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_pressure.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindPressure(), the high-level API for Pressure functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YPressure class allows you to read and configure Yoctopuce pressure
- *   sensors, for instance using a Yocto-Meteo-V2, a Yocto-Pressure, a Yocto-CO2-V2 or a Yocto-Altimeter-V2.
+ *   sensors, for instance using a Yocto-Altimeter-V2, a Yocto-CO2-V2, a Yocto-Meteo-V2 or a Yocto-Pressure.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.
@@ -137,7 +137,7 @@ public class YPressure : YSensor
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the pressure sensor, for instance
-     *   <c>METEOMK2.pressure</c>.
+     *   <c>YALTIMK2.pressure</c>.
      * </param>
      * <returns>
      *   a <c>YPressure</c> object allowing you to drive the pressure sensor.

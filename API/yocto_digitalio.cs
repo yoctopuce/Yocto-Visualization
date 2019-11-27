@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_digitalio.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_digitalio.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindDigitalIO(), the high-level API for DigitalIO functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YDigitalIO class start)
 /**
  * <summary>
- *   The YDigitalIO class allows you drive a Yoctopuce digital input/output port, for instance using a Yocto-Maxi-IO-V2 or a Yocto-IO.
+ *   The YDigitalIO class allows you drive a Yoctopuce digital input/output port, for instance using a Yocto-IO or a Yocto-Maxi-IO-V2.
  * <para>
  *   It can be used to setup the direction of each channel, to read the state of each channel
  *   and to switch the state of each channel configures as an output.
@@ -602,7 +602,7 @@ public class YDigitalIO : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the digital IO port, for instance
-     *   <c>MAXIIO02.digitalIO</c>.
+     *   <c>YMINIIO0.digitalIO</c>.
      * </param>
      * <returns>
      *   a <c>YDigitalIO</c> object allowing you to drive the digital IO port.

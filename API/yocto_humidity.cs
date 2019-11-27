@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_humidity.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_humidity.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindHumidity(), the high-level API for Humidity functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YHumidity class allows you to read and configure Yoctopuce humidity
- *   sensors, for instance using a Yocto-Meteo-V2, a Yocto-VOC-V3 or a Yocto-CO2-V2.
+ *   sensors, for instance using a Yocto-CO2-V2, a Yocto-Meteo-V2 or a Yocto-VOC-V3.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.
@@ -244,7 +244,7 @@ public class YHumidity : YSensor
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the humidity sensor, for instance
-     *   <c>METEOMK2.humidity</c>.
+     *   <c>YCO2MK02.humidity</c>.
      * </param>
      * <returns>
      *   a <c>YHumidity</c> object allowing you to drive the humidity sensor.

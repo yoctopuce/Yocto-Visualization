@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_realtimeclock.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_realtimeclock.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindRealTimeClock(), the high-level API for RealTimeClock functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YRealTimeClock class provide access to the embedded real-time clock available on some Yoctopuce
- *   devices, for instance using a YoctoHub-Wireless-g, a YoctoHub-GSM-3G-NA, a YoctoHub-GSM-3G-EU or a YoctoHub-Wireless-SR.
+ *   devices, for instance using a YoctoHub-GSM-3G-EU, a YoctoHub-GSM-3G-NA, a YoctoHub-Wireless-SR or a YoctoHub-Wireless-g.
  * <para>
  *   It can provide current date and time, even after a power outage
  *   lasting several days. It is the base for automated wake-up functions provided by the WakeUpScheduler.
@@ -343,7 +343,7 @@ public class YRealTimeClock : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the clock, for instance
-     *   <c>YHUBWLN3.realTimeClock</c>.
+     *   <c>YHUBGSM3.realTimeClock</c>.
      * </param>
      * <returns>
      *   a <c>YRealTimeClock</c> object allowing you to drive the clock.

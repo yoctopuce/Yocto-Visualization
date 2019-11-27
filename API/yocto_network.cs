@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_network.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_network.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindNetwork(), the high-level API for Network functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   YNetwork objects provide access to TCP/IP parameters of Yoctopuce
- *   devices that include a built-in network interface, for instance using a YoctoHub-Ethernet, a YoctoHub-Wireless-g, a YoctoHub-GSM-3G-NA or a YoctoHub-GSM-3G-EU.
+ *   devices that include a built-in network interface, for instance using a YoctoHub-Ethernet, a YoctoHub-GSM-3G-EU, a YoctoHub-GSM-3G-NA or a YoctoHub-Wireless-g.
  * <para>
  * </para>
  * <para>

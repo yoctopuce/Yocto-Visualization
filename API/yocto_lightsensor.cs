@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_lightsensor.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_lightsensor.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindLightSensor(), the high-level API for LightSensor functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YLightSensor class allows you to read and configure Yoctopuce light
- *   sensors, for instance using a Yocto-Light-V3, a Yocto-RangeFinder or a Yocto-Proximity.
+ *   sensors, for instance using a Yocto-Light-V3, a Yocto-Proximity or a Yocto-RangeFinder.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.

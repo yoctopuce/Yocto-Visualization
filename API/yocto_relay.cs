@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_relay.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_relay.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindRelay(), the high-level API for Relay functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YRelay class start)
 /**
  * <summary>
- *   The YRelay class allows you to drive a Yoctopuce Relay, for instance using a Yocto-PowerRelay-V3, a Yocto-Relay, a Yocto-MaxiPowerRelay or a Yocto-MaxiCoupler-V2.
+ *   The YRelay class allows you to drive a Yoctopuce Relay, for instance using a Yocto-MaxiCoupler-V2, a Yocto-MaxiPowerRelay, a Yocto-PowerRelay-V3 or a Yocto-Relay.
  * <para>
  *   It can be used to simply switch the relay, but also to automatically generate short pulses of
  *   determined duration.
@@ -680,7 +680,7 @@ public class YRelay : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the relay, for instance
-     *   <c>RELAYHI3.relay1</c>.
+     *   <c>MXCOUPL2.relay1</c>.
      * </param>
      * <returns>
      *   a <c>YRelay</c> object allowing you to drive the relay.

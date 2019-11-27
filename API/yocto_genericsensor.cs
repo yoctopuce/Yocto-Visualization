@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_genericsensor.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_genericsensor.cs 38510 2019-11-26 15:36:38Z mvuilleu $
  *
  *  Implements yFindGenericSensor(), the high-level API for GenericSensor functions
  *
@@ -58,7 +58,7 @@ using YFUN_DESCR = System.Int32;
 /**
  * <summary>
  *   The YGenericSensor class allows you to read and configure Yoctopuce signal
- *   transducers, for instance using a Yocto-4-20mA-Rx, a Yocto-0-10V-Rx, a Yocto-milliVolt-Rx or a Yocto-RS232.
+ *   transducers, for instance using a Yocto-0-10V-Rx, a Yocto-4-20mA-Rx, a Yocto-RS232 or a Yocto-milliVolt-Rx.
  * <para>
  *   It inherits from YSensor class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.
@@ -621,7 +621,7 @@ public class YGenericSensor : YSensor
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the generic sensor, for instance
-     *   <c>RX420MA1.genericSensor1</c>.
+     *   <c>RX010V01.genericSensor1</c>.
      * </param>
      * <returns>
      *   a <c>YGenericSensor</c> object allowing you to drive the generic sensor.
