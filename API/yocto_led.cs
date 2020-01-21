@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_led.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_led.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindLed(), the high-level API for Led functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YLed class start)
 /**
  * <summary>
- *   The YLed class allows you to drive a monocolor LED, for instance using a Yocto-Buzzer.
+ *   The <c>YLed</c> class allows you to drive a monocolor LED.
  * <para>
  *   You can not only to drive the intensity of the LED, but also to
  *   have it blink at various preset frequencies.
@@ -117,6 +117,7 @@ public class YLed : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the current LED state.
@@ -174,6 +175,7 @@ public class YLed : YFunction
             return _setAttr("power", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -234,6 +236,7 @@ public class YLed : YFunction
             return _setAttr("luminosity", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -297,9 +300,10 @@ public class YLed : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retrieves a LED for a given identifier.
+     *   Retrieves a monochrome LED for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -323,11 +327,11 @@ public class YLed : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the LED is online at the time
+     *   This function does not require that the monochrome LED is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YLed.isOnline()</c> to test if the LED is
+     *   Use the method <c>YLed.isOnline()</c> to test if the monochrome LED is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a LED by logical name, no error is notified: the first instance
+     *   a monochrome LED by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -340,11 +344,11 @@ public class YLed : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the LED, for instance
+     *   a string that uniquely characterizes the monochrome LED, for instance
      *   <c>YBUZZER2.led1</c>.
      * </param>
      * <returns>
-     *   a <c>YLed</c> object allowing you to drive the LED.
+     *   a <c>YLed</c> object allowing you to drive the monochrome LED.
      * </returns>
      */
     public static YLed FindLed(string func)
@@ -359,6 +363,7 @@ public class YLed : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -397,6 +402,7 @@ public class YLed : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackLed != null) {
@@ -409,17 +415,17 @@ public class YLed : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of LEDs started using <c>yFirstLed()</c>.
+     *   Continues the enumeration of monochrome LEDs started using <c>yFirstLed()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned LEDs order.
-     *   If you want to find a specific a LED, use <c>Led.findLed()</c>
+     *   Caution: You can't make any assumption about the returned monochrome LEDs order.
+     *   If you want to find a specific a monochrome LED, use <c>Led.findLed()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YLed</c> object, corresponding to
-     *   a LED currently online, or a <c>null</c> pointer
-     *   if there are no more LEDs to enumerate.
+     *   a monochrome LED currently online, or a <c>null</c> pointer
+     *   if there are no more monochrome LEDs to enumerate.
      * </returns>
      */
     public YLed nextLed()
@@ -438,15 +444,15 @@ public class YLed : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of LEDs currently accessible.
+     *   Starts the enumeration of monochrome LEDs currently accessible.
      * <para>
      *   Use the method <c>YLed.nextLed()</c> to iterate on
-     *   next LEDs.
+     *   next monochrome LEDs.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YLed</c> object, corresponding to
-     *   the first LED currently online, or a <c>null</c> pointer
+     *   the first monochrome LED currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

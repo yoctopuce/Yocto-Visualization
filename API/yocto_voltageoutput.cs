@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_voltageoutput.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_voltageoutput.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindVoltageOutput(), the high-level API for VoltageOutput functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YVoltageOutput class start)
 /**
  * <summary>
- *   The YVoltageOutput class allows you to drive a voltage output, for instance using a Yocto-0-10V-Tx.
+ *   The <c>YVoltageOutput</c> class allows you to drive a voltage output.
  * <para>
  * </para>
  * <para>
@@ -137,6 +137,7 @@ public class YVoltageOutput : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the output voltage set point, in V.
@@ -165,6 +166,7 @@ public class YVoltageOutput : YFunction
         }
         return res;
     }
+
 
     public string get_voltageTransition()
     {
@@ -220,6 +222,7 @@ public class YVoltageOutput : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the selected voltage output at device startup, in V.
@@ -248,6 +251,7 @@ public class YVoltageOutput : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -312,6 +316,7 @@ public class YVoltageOutput : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -349,6 +354,7 @@ public class YVoltageOutput : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackVoltageOutput != null) {
@@ -358,6 +364,7 @@ public class YVoltageOutput : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_temperature.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_temperature.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindTemperature(), the high-level API for Temperature functions
  *
@@ -57,13 +57,12 @@ using YFUN_DESCR = System.Int32;
 //--- (YTemperature class start)
 /**
  * <summary>
- *   The YTemperature class allows you to read and configure Yoctopuce temperature
- *   sensors, for instance using a Yocto-Meteo-V2, a Yocto-PT100, a Yocto-Temperature or a Yocto-Thermocouple.
+ *   The <c>YTemperature</c> class allows you to read and configure Yoctopuce temperature sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements, to
- *   register callback functions, to access the autonomous datalogger.
- *   This class adds the ability to configure some specific parameters for some
- *   sensors (connection type, temperature mapping table).
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
+ *   This class adds the ability to configure some specific parameters
+ *   for some sensors (connection type, temperature mapping table).
  * </para>
  * <para>
  * </para>
@@ -174,6 +173,7 @@ public class YTemperature : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the temperature sensor type.
@@ -253,6 +253,7 @@ public class YTemperature : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current value of the electrical signal measured by the sensor.
@@ -281,6 +282,7 @@ public class YTemperature : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -311,6 +313,7 @@ public class YTemperature : YSensor
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -333,6 +336,7 @@ public class YTemperature : YSensor
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -397,6 +401,7 @@ public class YTemperature : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -434,6 +439,7 @@ public class YTemperature : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackTemperature != null) {
@@ -443,6 +449,7 @@ public class YTemperature : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -457,7 +464,7 @@ public class YTemperature : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -475,6 +482,7 @@ public class YTemperature : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackTemperature != null) {
@@ -484,6 +492,7 @@ public class YTemperature : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -528,6 +537,7 @@ public class YTemperature : YSensor
         resValues.Add(res100);
         return this.set_thermistorResponseTable(tempValues, resValues);
     }
+
 
     /**
      * <summary>
@@ -598,6 +608,7 @@ public class YTemperature : YSensor
         }
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_voltage.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_voltage.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindVoltage(), the high-level API for Voltage functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YVoltage class start)
 /**
  * <summary>
- *   The YVoltage class allows you to read and configure Yoctopuce voltage
- *   sensors, for instance using a Yocto-Motor-DC, a Yocto-Volt or a Yocto-Watt.
+ *   The <c>YVoltage</c> class allows you to read and configure Yoctopuce voltage sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -100,6 +99,7 @@ public class YVoltage : YSensor
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -167,6 +167,7 @@ public class YVoltage : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Retrieves a voltage sensor for a given identifier.
@@ -230,6 +231,7 @@ public class YVoltage : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -267,6 +269,7 @@ public class YVoltage : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackVoltage != null) {
@@ -276,6 +279,7 @@ public class YVoltage : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -290,7 +294,7 @@ public class YVoltage : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -307,6 +311,7 @@ public class YVoltage : YSensor
         this._timedReportCallbackVoltage = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

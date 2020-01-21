@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_multiaxiscontroller.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_multiaxiscontroller.cs 38913 2019-12-20 18:59:49Z mvuilleu $
  *
  *  Implements yFindMultiAxisController(), the high-level API for MultiAxisController functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YMultiAxisController class start)
 /**
  * <summary>
- *   The YMultiAxisController class allows you to drive multiple stepper motors
+ *   The <c>YMultiAxisController</c> class allows you to drive multiple stepper motors
  *   synchronously.
  * <para>
  * </para>
@@ -113,6 +113,7 @@ public class YMultiAxisController : YFunction
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -172,6 +173,7 @@ public class YMultiAxisController : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the stepper motor set overall state.
@@ -204,6 +206,7 @@ public class YMultiAxisController : YFunction
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -226,6 +229,7 @@ public class YMultiAxisController : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -290,6 +294,7 @@ public class YMultiAxisController : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -327,6 +332,7 @@ public class YMultiAxisController : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackMultiAxisController != null) {
@@ -336,6 +342,7 @@ public class YMultiAxisController : YFunction
         }
         return 0;
     }
+
 
     public virtual int sendCommand(string command)
     {
@@ -354,6 +361,7 @@ public class YMultiAxisController : YFunction
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Reinitialize all controllers and clear all alert flags.
@@ -369,6 +377,7 @@ public class YMultiAxisController : YFunction
     {
         return this.set_command("Z");
     }
+
 
     /**
      * <summary>
@@ -398,6 +407,7 @@ public class YMultiAxisController : YFunction
         }
         return this.sendCommand(cmd);
     }
+
 
     /**
      * <summary>
@@ -431,6 +441,7 @@ public class YMultiAxisController : YFunction
         return this.sendCommand(cmd);
     }
 
+
     /**
      * <summary>
      *   Starts all motors synchronously to reach a given relative position.
@@ -463,6 +474,7 @@ public class YMultiAxisController : YFunction
         return this.sendCommand(cmd);
     }
 
+
     /**
      * <summary>
      *   Keep the motor in the same state for the specified amount of time, before processing next command.
@@ -482,6 +494,7 @@ public class YMultiAxisController : YFunction
         return this.sendCommand("_"+Convert.ToString(waitMs));
     }
 
+
     /**
      * <summary>
      *   Stops the motor with an emergency alert, without taking any additional precaution.
@@ -498,6 +511,7 @@ public class YMultiAxisController : YFunction
         return this.set_command("!");
     }
 
+
     /**
      * <summary>
      *   Stops the motor smoothly as soon as possible, without waiting for ongoing move completion.
@@ -513,6 +527,7 @@ public class YMultiAxisController : YFunction
     {
         return this.set_command("B");
     }
+
 
     /**
      * <summary>

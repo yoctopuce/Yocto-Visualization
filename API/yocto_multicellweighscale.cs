@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_multicellweighscale.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_multicellweighscale.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindMultiCellWeighScale(), the high-level API for MultiCellWeighScale functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YMultiCellWeighScale class start)
 /**
  * <summary>
- *   The YMultiCellWeighScale class provides a weight measurement from a set of ratiometric
- *   sensors, for instance using a Yocto-MaxiBridge.
+ *   The <c>YMultiCellWeighScale</c> class provides a weight measurement from a set of ratiometric
+ *   sensors.
  * <para>
  *   It can be used to control the bridge excitation parameters, in order to avoid
  *   measure shifts caused by temperature variation in the electronics, and can also
@@ -183,6 +183,7 @@ public class YMultiCellWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the number of load cells in use.
@@ -242,6 +243,7 @@ public class YMultiCellWeighScale : YSensor
             return _setAttr("cellCount", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -340,6 +342,7 @@ public class YMultiCellWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the averaged temperature update rate, in per mille.
@@ -407,6 +410,7 @@ public class YMultiCellWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the temperature change update rate, in per mille.
@@ -439,6 +443,7 @@ public class YMultiCellWeighScale : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current averaged temperature, used for thermal compensation.
@@ -468,6 +473,7 @@ public class YMultiCellWeighScale : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current temperature variation, used for thermal compensation.
@@ -496,6 +502,7 @@ public class YMultiCellWeighScale : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -560,6 +567,7 @@ public class YMultiCellWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the zero tracking threshold value.
@@ -592,6 +600,7 @@ public class YMultiCellWeighScale : YSensor
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -614,6 +623,7 @@ public class YMultiCellWeighScale : YSensor
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -678,6 +688,7 @@ public class YMultiCellWeighScale : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -715,6 +726,7 @@ public class YMultiCellWeighScale : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackMultiCellWeighScale != null) {
@@ -724,6 +736,7 @@ public class YMultiCellWeighScale : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -738,7 +751,7 @@ public class YMultiCellWeighScale : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -756,6 +769,7 @@ public class YMultiCellWeighScale : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackMultiCellWeighScale != null) {
@@ -765,6 +779,7 @@ public class YMultiCellWeighScale : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -786,6 +801,7 @@ public class YMultiCellWeighScale : YSensor
     {
         return this.set_command("T");
     }
+
 
     /**
      * <summary>

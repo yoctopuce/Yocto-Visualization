@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_wireless.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ * $Id: yocto_wireless.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  * Implements yFindWireless(), the high-level API for Wireless functions
  *
@@ -51,15 +51,11 @@ using YFUN_DESCR = System.Int32;
 #pragma warning disable 1591
 //--- (generated code: YWlanRecord class start)
 /**
- * <summary>
- *   YWlanRecord objects are used to describe a wireless network.
- * <para>
- *   These objects are  used in particular in conjunction with the
- *   YWireless class.
- * </para>
+ * <c>YWlanRecord</c> objects are used to describe a wireless network.
+ * These objects are  used in particular in conjunction with the
+ * <c>YWireless</c> class.
  * <para>
  * </para>
- * </summary>
  */
 public class YWlanRecord
 {
@@ -87,6 +83,7 @@ public class YWlanRecord
   //--- (generated code: YWlanRecord implementation)
 
 
+
     /**
      * <summary>
      *   Returns the name of the wireless network (SSID).
@@ -102,14 +99,15 @@ public class YWlanRecord
         return this._ssid;
     }
 
+
     /**
      * <summary>
-     *   Returns the 802.11 channel.
+     *   Returns the 802.11 b/g/n channel number used by this network.
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   the 802.11 channel.
+     *   an integer corresponding to the channel.
      * </returns>
      */
     public virtual int get_channel()
@@ -117,10 +115,12 @@ public class YWlanRecord
         return this._channel;
     }
 
+
     /**
      * <summary>
      *   Returns the security algorithm used by the wireless network.
      * <para>
+     *   If the network implements to security, the value is <c>"OPEN"</c>.
      * </para>
      * </summary>
      * <returns>
@@ -132,6 +132,7 @@ public class YWlanRecord
         return this._sec;
     }
 
+
     /**
      * <summary>
      *   Returns the quality of the wireless network link, in per cents.
@@ -139,7 +140,7 @@ public class YWlanRecord
      * </para>
      * </summary>
      * <returns>
-     *   the quality of the wireless network link, in per cents.
+     *   an integer between 0 and 100 corresponding to the signal quality.
      * </returns>
      */
     public virtual int get_linkQuality()
@@ -156,8 +157,9 @@ public class YWlanRecord
 /**
  * <summary>
  *   The YWireless class provides control over wireless network parameters
- *   and status for devices that are wireless-enabled, for instance using a YoctoHub-Wireless, a YoctoHub-Wireless-SR or a YoctoHub-Wireless-g.
+ *   and status for devices that are wireless-enabled.
  * <para>
+ *   Note that TCP/IP parameters are configured separately, using class <c>YNetwork</c>.
  * </para>
  * <para>
  * </para>
@@ -239,6 +241,7 @@ public class YWireless : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the link quality, expressed in percent.
@@ -267,6 +270,7 @@ public class YWireless : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -297,6 +301,7 @@ public class YWireless : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the 802.11 channel currently used, or 0 when the selected network has not been found.
@@ -325,6 +330,7 @@ public class YWireless : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -357,6 +363,7 @@ public class YWireless : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the latest status message from the wireless interface.
@@ -386,6 +393,7 @@ public class YWireless : YFunction
         return res;
     }
 
+
     public string get_wlanConfig()
     {
         string res;
@@ -408,6 +416,7 @@ public class YWireless : YFunction
             return _setAttr("wlanConfig", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -453,9 +462,10 @@ public class YWireless : YFunction
         return res;
     }
 
+
     /**
      * <summary>
-     *   Retrieves a wireless lan interface for a given identifier.
+     *   Retrieves a wireless LAN interface for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -479,11 +489,11 @@ public class YWireless : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the wireless lan interface is online at the time
+     *   This function does not require that the wireless LAN interface is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YWireless.isOnline()</c> to test if the wireless lan interface is
+     *   Use the method <c>YWireless.isOnline()</c> to test if the wireless LAN interface is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a wireless lan interface by logical name, no error is notified: the first instance
+     *   a wireless LAN interface by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -496,11 +506,11 @@ public class YWireless : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the wireless lan interface, for instance
+     *   a string that uniquely characterizes the wireless LAN interface, for instance
      *   <c>YHUBWLN1.wireless</c>.
      * </param>
      * <returns>
-     *   a <c>YWireless</c> object allowing you to drive the wireless lan interface.
+     *   a <c>YWireless</c> object allowing you to drive the wireless LAN interface.
      * </returns>
      */
     public static YWireless FindWireless(string func)
@@ -515,6 +525,7 @@ public class YWireless : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -553,6 +564,7 @@ public class YWireless : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackWireless != null) {
@@ -562,6 +574,7 @@ public class YWireless : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -588,6 +601,7 @@ public class YWireless : YFunction
         return this.set_wlanConfig(config);
     }
 
+
     /**
      * <summary>
      *   Changes the configuration of the wireless lan interface to connect to an existing
@@ -613,6 +627,7 @@ public class YWireless : YFunction
     {
         return this.set_wlanConfig("INFRA:"+ ssid+"\\"+securityKey);
     }
+
 
     /**
      * <summary>
@@ -650,6 +665,7 @@ public class YWireless : YFunction
     {
         return this.set_wlanConfig("ADHOC:"+ ssid+"\\"+securityKey);
     }
+
 
     /**
      * <summary>
@@ -691,9 +707,10 @@ public class YWireless : YFunction
         return this.set_wlanConfig("SOFTAP:"+ ssid+"\\"+securityKey);
     }
 
+
     /**
      * <summary>
-     *   Returns a list of YWlanRecord objects that describe detected Wireless networks.
+     *   Returns a list of <c>YWlanRecord</c> objects that describe detected Wireless networks.
      * <para>
      *   This list is not updated when the module is already connected to an access point (infrastructure mode).
      *   To force an update of this list, <c>startWlanScan()</c> must be called.
@@ -727,17 +744,17 @@ public class YWireless : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of wireless lan interfaces started using <c>yFirstWireless()</c>.
+     *   Continues the enumeration of wireless LAN interfaces started using <c>yFirstWireless()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned wireless lan interfaces order.
-     *   If you want to find a specific a wireless lan interface, use <c>Wireless.findWireless()</c>
+     *   Caution: You can't make any assumption about the returned wireless LAN interfaces order.
+     *   If you want to find a specific a wireless LAN interface, use <c>Wireless.findWireless()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YWireless</c> object, corresponding to
-     *   a wireless lan interface currently online, or a <c>null</c> pointer
-     *   if there are no more wireless lan interfaces to enumerate.
+     *   a wireless LAN interface currently online, or a <c>null</c> pointer
+     *   if there are no more wireless LAN interfaces to enumerate.
      * </returns>
      */
     public YWireless nextWireless()
@@ -756,15 +773,15 @@ public class YWireless : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of wireless lan interfaces currently accessible.
+     *   Starts the enumeration of wireless LAN interfaces currently accessible.
      * <para>
      *   Use the method <c>YWireless.nextWireless()</c> to iterate on
-     *   next wireless lan interfaces.
+     *   next wireless LAN interfaces.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YWireless</c> object, corresponding to
-     *   the first wireless lan interface currently online, or a <c>null</c> pointer
+     *   the first wireless LAN interface currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_voc.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_voc.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindVoc(), the high-level API for Voc functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YVoc class start)
 /**
  * <summary>
- *   The YVoc class allows you to read and configure Yoctopuce Volatile Organic
- *   Compound sensors, for instance using a Yocto-VOC-V3.
+ *   The <c>YVoc</c> class allows you to read and configure Yoctopuce Volatile Organic Compound sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -92,6 +91,7 @@ public class YVoc : YSensor
     {
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -156,6 +156,7 @@ public class YVoc : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -193,6 +194,7 @@ public class YVoc : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackVoc != null) {
@@ -202,6 +204,7 @@ public class YVoc : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -216,7 +219,7 @@ public class YVoc : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -233,6 +236,7 @@ public class YVoc : YSensor
         this._timedReportCallbackVoc = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

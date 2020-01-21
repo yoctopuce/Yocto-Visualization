@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_currentloopoutput.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_currentloopoutput.cs 38913 2019-12-20 18:59:49Z mvuilleu $
  *
  *  Implements yFindCurrentLoopOutput(), the high-level API for CurrentLoopOutput functions
  *
@@ -57,7 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YCurrentLoopOutput class start)
 /**
  * <summary>
- *   The YCurrentLoopOutput class allows you to drive a 4-20mA output, for instance using a Yocto-4-20mA-Tx.
+ *   The <c>YCurrentLoopOutput</c> class allows you to drive a 4-20mA output
+ *   by regulating the current flowing through the current loop.
  * <para>
  *   It can also provide information about the power state of the current loop.
  * </para>
@@ -149,6 +150,7 @@ public class YCurrentLoopOutput : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the loop current set point in mA.
@@ -177,6 +179,7 @@ public class YCurrentLoopOutput : YFunction
         }
         return res;
     }
+
 
     public string get_currentTransition()
     {
@@ -232,6 +235,7 @@ public class YCurrentLoopOutput : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current in the loop at device startup, in mA.
@@ -260,6 +264,7 @@ public class YCurrentLoopOutput : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -293,6 +298,7 @@ public class YCurrentLoopOutput : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -357,6 +363,7 @@ public class YCurrentLoopOutput : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -394,6 +401,7 @@ public class YCurrentLoopOutput : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackCurrentLoopOutput != null) {
@@ -403,6 +411,7 @@ public class YCurrentLoopOutput : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_display.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ * $Id: yocto_display.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  * Implements yFindDisplay(), the high-level API for Display functions
  *
@@ -52,8 +52,8 @@ using YFUN_DESCR = System.Int32;
 //--- (generated code: YDisplayLayer class start)
 /**
  * <summary>
- *   A DisplayLayer is an image layer containing objects to display
- *   (bitmaps, text, etc.).
+ *   Each <c>DisplayLayer</c> represents an image layer containing objects
+ *   to display (bitmaps, text, etc.).
  * <para>
  *   The content is displayed only when
  *   the layer is active on the screen (and not masked by other
@@ -99,6 +99,7 @@ public enum   ALIGN
   //--- (generated code: YDisplayLayer implementation)
 
 
+
     /**
      * <summary>
      *   Reverts the layer to its initial state (fully transparent, default settings).
@@ -121,6 +122,7 @@ public enum   ALIGN
         return this.command_flush("X");
     }
 
+
     /**
      * <summary>
      *   Erases the whole content of the layer (makes it fully transparent).
@@ -141,6 +143,7 @@ public enum   ALIGN
     {
         return this.command_flush("x");
     }
+
 
     /**
      * <summary>
@@ -166,6 +169,7 @@ public enum   ALIGN
     {
         return this.command_push("c"+String.Format("{0:x06}",color));
     }
+
 
     /**
      * <summary>
@@ -194,6 +198,7 @@ public enum   ALIGN
         return this.command_push("g"+Convert.ToString(graylevel));
     }
 
+
     /**
      * <summary>
      *   Selects an eraser instead of a pen for all subsequent drawing functions,
@@ -215,6 +220,7 @@ public enum   ALIGN
     {
         return this.command_push("e");
     }
+
 
     /**
      * <summary>
@@ -244,6 +250,7 @@ public enum   ALIGN
         return this.command_push("a"+(mode?"1":"0"));
     }
 
+
     /**
      * <summary>
      *   Draws a single pixel at the specified position.
@@ -267,6 +274,7 @@ public enum   ALIGN
     {
         return this.command_flush("P"+Convert.ToString(x)+","+Convert.ToString(y));
     }
+
 
     /**
      * <summary>
@@ -298,6 +306,7 @@ public enum   ALIGN
         return this.command_flush("R"+Convert.ToString(x1)+","+Convert.ToString(y1)+","+Convert.ToString(x2)+","+Convert.ToString(y2));
     }
 
+
     /**
      * <summary>
      *   Draws a filled rectangular bar at a specified position.
@@ -328,6 +337,7 @@ public enum   ALIGN
         return this.command_flush("B"+Convert.ToString(x1)+","+Convert.ToString(y1)+","+Convert.ToString(x2)+","+Convert.ToString(y2));
     }
 
+
     /**
      * <summary>
      *   Draws an empty circle at a specified position.
@@ -354,6 +364,7 @@ public enum   ALIGN
     {
         return this.command_flush("C"+Convert.ToString(x)+","+Convert.ToString(y)+","+Convert.ToString(r));
     }
+
 
     /**
      * <summary>
@@ -382,6 +393,7 @@ public enum   ALIGN
         return this.command_flush("D"+Convert.ToString(x)+","+Convert.ToString(y)+","+Convert.ToString(r));
     }
 
+
     /**
      * <summary>
      *   Selects a font to use for the next text drawing functions, by providing the name of the
@@ -408,6 +420,7 @@ public enum   ALIGN
     {
         return this.command_push("&"+fontname+""+((char)(27)).ToString());
     }
+
 
     /**
      * <summary>
@@ -450,6 +463,7 @@ public enum   ALIGN
         return this.command_flush("T"+Convert.ToString(x)+","+Convert.ToString(y)+","+((int)(anchor)).ToString()+","+text+""+((char)(27)).ToString());
     }
 
+
     /**
      * <summary>
      *   Draws a GIF image at the specified position.
@@ -480,6 +494,7 @@ public enum   ALIGN
     {
         return this.command_flush("*"+Convert.ToString(x)+","+Convert.ToString(y)+","+imagename+""+((char)(27)).ToString());
     }
+
 
     /**
      * <summary>
@@ -524,6 +539,7 @@ public enum   ALIGN
         return this._display.upload(destname,bitmap);
     }
 
+
     /**
      * <summary>
      *   Moves the drawing pointer of this layer to the specified position.
@@ -547,6 +563,7 @@ public enum   ALIGN
     {
         return this.command_push("@"+Convert.ToString(x)+","+Convert.ToString(y));
     }
+
 
     /**
      * <summary>
@@ -574,6 +591,7 @@ public enum   ALIGN
         return this.command_flush("-"+Convert.ToString(x)+","+Convert.ToString(y));
     }
 
+
     /**
      * <summary>
      *   Outputs a message in the console area, and advances the console pointer accordingly.
@@ -598,6 +616,7 @@ public enum   ALIGN
     {
         return this.command_flush("!"+text+""+((char)(27)).ToString());
     }
+
 
     /**
      * <summary>
@@ -629,6 +648,7 @@ public enum   ALIGN
         return this.command_push("m"+Convert.ToString(x1)+","+Convert.ToString(y1)+","+Convert.ToString(x2)+","+Convert.ToString(y2));
     }
 
+
     /**
      * <summary>
      *   Sets up the background color used by the <c>clearConsole</c> function and by
@@ -652,6 +672,7 @@ public enum   ALIGN
         return this.command_push("b"+Convert.ToString(bgcol));
     }
 
+
     /**
      * <summary>
      *   Sets up the wrapping behavior used by the <c>consoleOut</c> function.
@@ -674,6 +695,7 @@ public enum   ALIGN
         return this.command_push("w"+(wordwrap?"1":"0"));
     }
 
+
     /**
      * <summary>
      *   Blanks the console area within console margins, and resets the console pointer
@@ -692,6 +714,7 @@ public enum   ALIGN
     {
         return this.command_flush("^");
     }
+
 
     /**
      * <summary>
@@ -723,6 +746,7 @@ public enum   ALIGN
         return this.command_flush("#"+Convert.ToString(x)+","+Convert.ToString(y)+","+Convert.ToString(scrollTime));
     }
 
+
     /**
      * <summary>
      *   Hides the layer.
@@ -747,6 +771,7 @@ public enum   ALIGN
         return this.flush_now();
     }
 
+
     /**
      * <summary>
      *   Shows the layer.
@@ -767,6 +792,7 @@ public enum   ALIGN
         return this.command_flush("s");
     }
 
+
     /**
      * <summary>
      *   Gets parent YDisplay.
@@ -782,6 +808,7 @@ public enum   ALIGN
     {
         return this._display;
     }
+
 
     /**
      * <summary>
@@ -801,6 +828,7 @@ public enum   ALIGN
         return this._display.get_displayWidth();
     }
 
+
     /**
      * <summary>
      *   Returns the display height, in pixels.
@@ -818,6 +846,7 @@ public enum   ALIGN
     {
         return this._display.get_displayHeight();
     }
+
 
     /**
      * <summary>
@@ -837,6 +866,7 @@ public enum   ALIGN
         return this._display.get_layerWidth();
     }
 
+
     /**
      * <summary>
      *   Returns the height of the layers to draw on, in pixels.
@@ -854,6 +884,7 @@ public enum   ALIGN
     {
         return this._display.get_layerHeight();
     }
+
 
     public virtual int resetHiddenFlag()
     {
@@ -908,13 +939,19 @@ public enum   ALIGN
 //--- (generated code: YDisplay class start)
 /**
  * <summary>
- *   The YDisplay class allows to drive Yoctopuce displays, for instance using a Yocto-Display, a Yocto-MaxiDisplay, a Yocto-MaxiDisplay-G or a Yocto-MiniDisplay.
+ *   The <c>YDisplay</c> class allows to drive Yoctopuce displays.
  * <para>
  *   Yoctopuce display interface has been designed to easily
  *   show information and images. The device provides built-in
  *   multi-layer rendering. Layers can be drawn offline, individually,
  *   and freely moved on the display. It can also replay recorded
  *   sequences (animations).
+ * </para>
+ * <para>
+ *   In order to draw on the screen, you should use the
+ *   <c>display.get_displayLayer</c> method to retrieve the layer(s) on
+ *   which you want to draw, and then use methods defined in
+ *   <c>YDisplayLayer</c> to draw on the layers.
  * </para>
  * <para>
  * </para>
@@ -1020,6 +1057,7 @@ public class YDisplay : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns true if the screen is powered, false otherwise.
@@ -1079,6 +1117,7 @@ public class YDisplay : YFunction
             return _setAttr("enabled", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -1140,6 +1179,7 @@ public class YDisplay : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the luminosity of the  module informative LEDs (from 0 to 100).
@@ -1200,6 +1240,7 @@ public class YDisplay : YFunction
             return _setAttr("brightness", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -1264,6 +1305,7 @@ public class YDisplay : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the display width, in pixels.
@@ -1293,6 +1335,7 @@ public class YDisplay : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the display height, in pixels.
@@ -1321,6 +1364,7 @@ public class YDisplay : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1352,6 +1396,7 @@ public class YDisplay : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the width of the layers to draw on, in pixels.
@@ -1380,6 +1425,7 @@ public class YDisplay : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1410,6 +1456,7 @@ public class YDisplay : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the number of available layers to draw on.
@@ -1439,6 +1486,7 @@ public class YDisplay : YFunction
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -1461,6 +1509,7 @@ public class YDisplay : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -1525,6 +1574,7 @@ public class YDisplay : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -1562,6 +1612,7 @@ public class YDisplay : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackDisplay != null) {
@@ -1571,6 +1622,7 @@ public class YDisplay : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -1595,6 +1647,7 @@ public class YDisplay : YFunction
         this.resetHiddenLayerFlags();
         return this.sendCommand("Z");
     }
+
 
     /**
      * <summary>
@@ -1622,6 +1675,7 @@ public class YDisplay : YFunction
         return this.sendCommand("+"+Convert.ToString(brightness)+","+Convert.ToString(duration));
     }
 
+
     /**
      * <summary>
      *   Starts to record all display commands into a sequence, for later replay.
@@ -1644,6 +1698,7 @@ public class YDisplay : YFunction
         this._recording = true;
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>
@@ -1674,6 +1729,7 @@ public class YDisplay : YFunction
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Replays a display sequence previously recorded using
@@ -1696,6 +1752,7 @@ public class YDisplay : YFunction
         this.flushLayers();
         return this.sendCommand("S"+sequenceName);
     }
+
 
     /**
      * <summary>
@@ -1725,6 +1782,7 @@ public class YDisplay : YFunction
         return this.sendCommand("W"+Convert.ToString(delay_ms));
     }
 
+
     /**
      * <summary>
      *   Stops immediately any ongoing sequence replay.
@@ -1744,6 +1802,7 @@ public class YDisplay : YFunction
         this.flushLayers();
         return this.sendCommand("S");
     }
+
 
     /**
      * <summary>
@@ -1771,6 +1830,7 @@ public class YDisplay : YFunction
     {
         return this._upload(pathname, content);
     }
+
 
     /**
      * <summary>
@@ -1801,6 +1861,7 @@ public class YDisplay : YFunction
         this.flushLayers();
         return this.sendCommand("o"+Convert.ToString(srcLayerId)+","+Convert.ToString(dstLayerId));
     }
+
 
     /**
      * <summary>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_quadraturedecoder.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_quadraturedecoder.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindQuadratureDecoder(), the high-level API for QuadratureDecoder functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YQuadratureDecoder class start)
 /**
  * <summary>
- *   The YQuadratureDecoder class allows you to decode a two-wire signal produced by a
- *   quadrature encoder, for instance using a Yocto-PWM-Rx.
+ *   The <c>YQuadratureDecoder</c> class allows you to read and configure Yoctopuce quadrature decoders.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -137,6 +136,7 @@ public class YQuadratureDecoder : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the increments frequency, in Hz.
@@ -165,6 +165,7 @@ public class YQuadratureDecoder : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -227,6 +228,7 @@ public class YQuadratureDecoder : YSensor
             return _setAttr("decoding", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -291,6 +293,7 @@ public class YQuadratureDecoder : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -328,6 +331,7 @@ public class YQuadratureDecoder : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackQuadratureDecoder != null) {
@@ -337,6 +341,7 @@ public class YQuadratureDecoder : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -351,7 +356,7 @@ public class YQuadratureDecoder : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -368,6 +373,7 @@ public class YQuadratureDecoder : YSensor
         this._timedReportCallbackQuadratureDecoder = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

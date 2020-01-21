@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_messagebox.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ * $Id: yocto_messagebox.cs 38913 2019-12-20 18:59:49Z mvuilleu $
  *
  * Implements yFindMessageBox(), the high-level API for MessageBox functions
  *
@@ -60,14 +60,10 @@ using YFUN_DESCR = System.Int32;
 //--- (end of generated code: YSms dlldef)
 //--- (generated code: YSms class start)
 /**
- * <summary>
- *   YSms objects are used to describe a SMS.
- * <para>
- *   These objects are used in particular in conjunction with the YMessageBox class.
- * </para>
+ * <c>YSms</c> objects are used to describe an SMS message, received or to be sent.
+ * These objects are used in particular in conjunction with the <c>YMessageBox</c> class.
  * <para>
  * </para>
- * </summary>
  */
 public class YSms
 {
@@ -105,45 +101,54 @@ public class YSms
     //--- (generated code: YSms implementation)
 
 
+
     public virtual int get_slot()
     {
         return this._slot;
     }
+
 
     public virtual string get_smsc()
     {
         return this._smsc;
     }
 
+
     public virtual int get_msgRef()
     {
         return this._mref;
     }
+
 
     public virtual string get_sender()
     {
         return this._orig;
     }
 
+
     public virtual string get_recipient()
     {
         return this._dest;
     }
+
 
     public virtual int get_protocolId()
     {
         return this._pid;
     }
 
+
     public virtual bool isReceived()
     {
         return this._deliv;
     }
 
+
     public virtual int get_alphabet()
     {
         return this._alphab;
     }
+
 
     public virtual int get_msgClass()
     {
@@ -153,25 +158,30 @@ public class YSms
         return ((this._mclass) & (3));
     }
 
+
     public virtual int get_dcs()
     {
         return ((this._mclass) | ((((this._alphab) << (2)))));
     }
+
 
     public virtual string get_timestamp()
     {
         return this._stamp;
     }
 
+
     public virtual byte[] get_userDataHeader()
     {
         return this._udh;
     }
 
+
     public virtual byte[] get_userData()
     {
         return this._udata;
     }
+
 
     /**
      * <summary>
@@ -209,6 +219,7 @@ public class YSms
         return YAPI.DefaultEncoding.GetString(this._udata);
     }
 
+
     public virtual List<int> get_unicodeData()
     {
         List<int> res = new List<int>();
@@ -242,6 +253,7 @@ public class YSms
         return res;
     }
 
+
     public virtual int get_partCount()
     {
         if (this._npdu == 0) {
@@ -249,6 +261,7 @@ public class YSms
         }
         return this._npdu;
     }
+
 
     public virtual byte[] get_pdu()
     {
@@ -258,6 +271,7 @@ public class YSms
         return this._pdu;
     }
 
+
     public virtual List<YSms> get_parts()
     {
         if (this._npdu == 0) {
@@ -265,6 +279,7 @@ public class YSms
         }
         return this._parts;
     }
+
 
     public virtual string get_concatSignature()
     {
@@ -274,6 +289,7 @@ public class YSms
         return this._aggSig;
     }
 
+
     public virtual int get_concatIndex()
     {
         if (this._npdu == 0) {
@@ -281,6 +297,7 @@ public class YSms
         }
         return this._aggIdx;
     }
+
 
     public virtual int get_concatCount()
     {
@@ -290,17 +307,20 @@ public class YSms
         return this._aggCnt;
     }
 
+
     public virtual int set_slot(int val)
     {
         this._slot = val;
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_received(bool val)
     {
         this._deliv = val;
         return YAPI.SUCCESS;
     }
+
 
     public virtual int set_smsc(string val)
     {
@@ -309,12 +329,14 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_msgRef(int val)
     {
         this._mref = val;
         this._npdu = 0;
         return YAPI.SUCCESS;
     }
+
 
     public virtual int set_sender(string val)
     {
@@ -323,12 +345,14 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_recipient(string val)
     {
         this._dest = val;
         this._npdu = 0;
         return YAPI.SUCCESS;
     }
+
 
     public virtual int set_protocolId(int val)
     {
@@ -337,12 +361,14 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_alphabet(int val)
     {
         this._alphab = val;
         this._npdu = 0;
         return YAPI.SUCCESS;
     }
+
 
     public virtual int set_msgClass(int val)
     {
@@ -355,6 +381,7 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_dcs(int val)
     {
         this._alphab = (((((val) >> (2)))) & (3));
@@ -363,12 +390,14 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_timestamp(string val)
     {
         this._stamp = val;
         this._npdu = 0;
         return YAPI.SUCCESS;
     }
+
 
     public virtual int set_userDataHeader(byte[] val)
     {
@@ -378,12 +407,14 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int set_userData(byte[] val)
     {
         this._udata = val;
         this._npdu = 0;
         return YAPI.SUCCESS;
     }
+
 
     public virtual int convertToUnicode()
     {
@@ -411,6 +442,7 @@ public class YSms
         this.addUnicodeData(ucs2);
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>
@@ -488,6 +520,7 @@ public class YSms
         return this.set_userData(udata);
     }
 
+
     /**
      * <summary>
      *   Add a unicode text to the SMS.
@@ -555,12 +588,14 @@ public class YSms
         return this.set_userData(udata);
     }
 
+
     public virtual int set_pdu(byte[] pdu)
     {
         this._pdu = pdu;
         this._npdu = 1;
         return this.parsePdu(pdu);
     }
+
 
     public virtual int set_parts(List<YSms> parts)
     {
@@ -629,6 +664,7 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual byte[] encodeAddress(string addr)
     {
         byte[] bytes;
@@ -682,6 +718,7 @@ public class YSms
         }
         return res;
     }
+
 
     public virtual string decodeAddress(byte[] addr, int ofs, int siz)
     {
@@ -740,6 +777,7 @@ public class YSms
             return res;
         }
     }
+
 
     public virtual byte[] encodeTimeStamp(string exp)
     {
@@ -825,6 +863,7 @@ public class YSms
         return res;
     }
 
+
     public virtual string decodeTimeStamp(byte[] exp, int ofs, int siz)
     {
         int n;
@@ -893,6 +932,7 @@ public class YSms
         return res;
     }
 
+
     public virtual int udataSize()
     {
         int res;
@@ -911,6 +951,7 @@ public class YSms
         }
         return res;
     }
+
 
     public virtual byte[] encodeUserData()
     {
@@ -988,6 +1029,7 @@ public class YSms
         return res;
     }
 
+
     public virtual int generateParts()
     {
         int udhsize;
@@ -1050,6 +1092,7 @@ public class YSms
         }
         return YAPI.SUCCESS;
     }
+
 
     public virtual int generatePdu()
     {
@@ -1136,6 +1179,7 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     public virtual int parseUserDataHeader()
     {
         int udhlen;
@@ -1174,6 +1218,7 @@ public class YSms
         }
         return YAPI.SUCCESS;
     }
+
 
     public virtual int parsePdu(byte[] pdu)
     {
@@ -1294,6 +1339,7 @@ public class YSms
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Sends the SMS to the recipient.
@@ -1333,6 +1379,7 @@ public class YSms
         return retcode;
     }
 
+
     public virtual int deleteFromSIM()
     {
         int i;
@@ -1366,8 +1413,8 @@ public class YSms
 //--- (generated code: YMessageBox class start)
 /**
  * <summary>
- *   The YMessageBox class provides SMS sending and receiving capability to
- *   GSM-enabled Yoctopuce devices, for instance using a YoctoHub-GSM-2G, a YoctoHub-GSM-3G-EU or a YoctoHub-GSM-3G-NA.
+ *   The <c>YMessageBox</c> class provides SMS sending and receiving capability for
+ *   GSM-enabled Yoctopuce devices.
  * <para>
  * </para>
  * <para>
@@ -1442,6 +1489,7 @@ public class YMessageBox : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the number of message storage slots currently in use.
@@ -1470,6 +1518,7 @@ public class YMessageBox : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1500,6 +1549,7 @@ public class YMessageBox : YFunction
         return res;
     }
 
+
     public string get_slotsBitmap()
     {
         string res;
@@ -1513,6 +1563,7 @@ public class YMessageBox : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1572,6 +1623,7 @@ public class YMessageBox : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the number of SMS units received so far.
@@ -1630,6 +1682,7 @@ public class YMessageBox : YFunction
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -1653,9 +1706,10 @@ public class YMessageBox : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retrieves a MessageBox interface for a given identifier.
+     *   Retrieves a SMS message box interface for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -1679,11 +1733,11 @@ public class YMessageBox : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the MessageBox interface is online at the time
+     *   This function does not require that the SMS message box interface is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YMessageBox.isOnline()</c> to test if the MessageBox interface is
+     *   Use the method <c>YMessageBox.isOnline()</c> to test if the SMS message box interface is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a MessageBox interface by logical name, no error is notified: the first instance
+     *   a SMS message box interface by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -1696,11 +1750,11 @@ public class YMessageBox : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the MessageBox interface, for instance
+     *   a string that uniquely characterizes the SMS message box interface, for instance
      *   <c>YHUBGSM1.messageBox</c>.
      * </param>
      * <returns>
-     *   a <c>YMessageBox</c> object allowing you to drive the MessageBox interface.
+     *   a <c>YMessageBox</c> object allowing you to drive the SMS message box interface.
      * </returns>
      */
     public static YMessageBox FindMessageBox(string func)
@@ -1715,6 +1769,7 @@ public class YMessageBox : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -1753,6 +1808,7 @@ public class YMessageBox : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackMessageBox != null) {
@@ -1763,17 +1819,20 @@ public class YMessageBox : YFunction
         return 0;
     }
 
+
     public virtual int nextMsgRef()
     {
         this._nextMsgRef = this._nextMsgRef + 1;
         return this._nextMsgRef;
     }
 
+
     public virtual int clearSIMSlot(int slot)
     {
         this._prevBitmapStr = "";
         return this.set_command("DS"+Convert.ToString(slot));
     }
+
 
     public virtual YSms fetchPdu(int slot)
     {
@@ -1790,6 +1849,7 @@ public class YMessageBox : YFunction
         sms.parsePdu(YAPI._hexStrToBin(hexPdu));
         return sms;
     }
+
 
     public virtual int initGsm2Unicode()
     {
@@ -1875,6 +1935,7 @@ public class YMessageBox : YFunction
         return YAPI.SUCCESS;
     }
 
+
     public virtual List<int> gsm2unicode(byte[] gsm)
     {
         int i;
@@ -1958,6 +2019,7 @@ public class YMessageBox : YFunction
         }
         return res;
     }
+
 
     public virtual string gsm2str(byte[] gsm)
     {
@@ -2050,6 +2112,7 @@ public class YMessageBox : YFunction
         return resstr;
     }
 
+
     public virtual byte[] str2gsm(string msg)
     {
         byte[] asc;
@@ -2125,6 +2188,7 @@ public class YMessageBox : YFunction
         }
         return res;
     }
+
 
     public virtual int checkNewMessages()
     {
@@ -2253,11 +2317,13 @@ public class YMessageBox : YFunction
         return YAPI.SUCCESS;
     }
 
+
     public virtual List<YSms> get_pdus()
     {
         this.checkNewMessages();
         return this._pdus;
     }
+
 
     /**
      * <summary>
@@ -2283,6 +2349,7 @@ public class YMessageBox : YFunction
         retcode = this.set_pduSent(0);
         return retcode;
     }
+
 
     /**
      * <summary>
@@ -2318,6 +2385,7 @@ public class YMessageBox : YFunction
         sms.addText(message);
         return sms.send();
     }
+
 
     /**
      * <summary>
@@ -2356,6 +2424,7 @@ public class YMessageBox : YFunction
         return sms.send();
     }
 
+
     /**
      * <summary>
      *   Creates a new empty SMS message, to be configured and sent later on.
@@ -2381,6 +2450,7 @@ public class YMessageBox : YFunction
         return sms;
     }
 
+
     /**
      * <summary>
      *   Returns the list of messages received and not deleted.
@@ -2404,17 +2474,17 @@ public class YMessageBox : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of MessageBox interfaces started using <c>yFirstMessageBox()</c>.
+     *   Continues the enumeration of SMS message box interfaces started using <c>yFirstMessageBox()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned MessageBox interfaces order.
-     *   If you want to find a specific a MessageBox interface, use <c>MessageBox.findMessageBox()</c>
+     *   Caution: You can't make any assumption about the returned SMS message box interfaces order.
+     *   If you want to find a specific a SMS message box interface, use <c>MessageBox.findMessageBox()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YMessageBox</c> object, corresponding to
-     *   a MessageBox interface currently online, or a <c>null</c> pointer
-     *   if there are no more MessageBox interfaces to enumerate.
+     *   a SMS message box interface currently online, or a <c>null</c> pointer
+     *   if there are no more SMS message box interfaces to enumerate.
      * </returns>
      */
     public YMessageBox nextMessageBox()
@@ -2433,15 +2503,15 @@ public class YMessageBox : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of MessageBox interfaces currently accessible.
+     *   Starts the enumeration of SMS message box interfaces currently accessible.
      * <para>
      *   Use the method <c>YMessageBox.nextMessageBox()</c> to iterate on
-     *   next MessageBox interfaces.
+     *   next SMS message box interfaces.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YMessageBox</c> object, corresponding to
-     *   the first MessageBox interface currently online, or a <c>null</c> pointer
+     *   the first SMS message box interface currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

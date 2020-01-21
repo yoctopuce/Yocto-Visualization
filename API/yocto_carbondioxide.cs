@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_carbondioxide.cs 38030 2019-11-04 17:56:01Z mvuilleu $
+ *  $Id: yocto_carbondioxide.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindCarbonDioxide(), the high-level API for CarbonDioxide functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YCarbonDioxide class start)
 /**
  * <summary>
- *   The YCarbonDioxide class allows you to read and configure Yoctopuce CO2
- *   sensors, for instance using a Yocto-CO2-V2.
+ *   The <c>YCarbonDioxide</c> class allows you to read and configure Yoctopuce CO2 sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions,  to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  *   This class adds the ability to perform manual calibration if required.
  * </para>
  * <para>
@@ -105,6 +104,7 @@ public class YCarbonDioxide : YSensor
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -171,6 +171,7 @@ public class YCarbonDioxide : YSensor
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -193,6 +194,7 @@ public class YCarbonDioxide : YSensor
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -257,6 +259,7 @@ public class YCarbonDioxide : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -294,6 +297,7 @@ public class YCarbonDioxide : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackCarbonDioxide != null) {
@@ -303,6 +307,7 @@ public class YCarbonDioxide : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -317,7 +322,7 @@ public class YCarbonDioxide : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -335,6 +340,7 @@ public class YCarbonDioxide : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackCarbonDioxide != null) {
@@ -344,6 +350,7 @@ public class YCarbonDioxide : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -372,10 +379,12 @@ public class YCarbonDioxide : YSensor
         return this.set_command("BC");
     }
 
+
     public virtual int triggetBaselineCalibration()
     {
         return this.triggerBaselineCalibration();
     }
+
 
     /**
      * <summary>
@@ -405,6 +414,7 @@ public class YCarbonDioxide : YSensor
     {
         return this.set_command("ZC");
     }
+
 
     public virtual int triggetZeroCalibration()
     {

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_proximity.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_proximity.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindProximity(), the high-level API for Proximity functions
  *
@@ -57,13 +57,12 @@ using YFUN_DESCR = System.Int32;
 //--- (YProximity class start)
 /**
  * <summary>
- *   The YProximity class allows you to use and configure Yoctopuce proximity
- *   sensors, for instance using a Yocto-Proximity.
+ *   The <c>YProximity</c> class allows you to read and configure Yoctopuce proximity sensors.
  * <para>
- *   It inherits from the YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
- *   This class adds the ability to easily perform a one-point linear calibration
- *   to compensate the effect of a glass or filter placed in front of the sensor.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
+ *   This class adds the ability to setup a detection threshold and to count the
+ *   number of detected state changes.
  * </para>
  * <para>
  * </para>
@@ -166,6 +165,7 @@ public class YProximity : YSensor
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the current value of signal measured by the proximity sensor.
@@ -194,6 +194,7 @@ public class YProximity : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -260,6 +261,7 @@ public class YProximity : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the hysteresis used to determine the logical state of the proximity sensor, when considered
@@ -325,6 +327,7 @@ public class YProximity : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the minimal detection duration before signalling a presence event.
@@ -387,6 +390,7 @@ public class YProximity : YSensor
             return _setAttr("presenceMinTime", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -451,6 +455,7 @@ public class YProximity : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns true if the input (considered as binary) is active (detection value is smaller than the specified <c>threshold</c>), and false otherwise.
@@ -481,6 +486,7 @@ public class YProximity : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -513,6 +519,7 @@ public class YProximity : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the number of elapsed milliseconds between the module power on and the last observed
@@ -543,6 +550,7 @@ public class YProximity : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -585,6 +593,7 @@ public class YProximity : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the timer of the pulse counter (ms).
@@ -613,6 +622,7 @@ public class YProximity : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -681,6 +691,7 @@ public class YProximity : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Retrieves a proximity sensor for a given identifier.
@@ -744,6 +755,7 @@ public class YProximity : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -781,6 +793,7 @@ public class YProximity : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackProximity != null) {
@@ -790,6 +803,7 @@ public class YProximity : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -804,7 +818,7 @@ public class YProximity : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -822,6 +836,7 @@ public class YProximity : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackProximity != null) {
@@ -831,6 +846,7 @@ public class YProximity : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>

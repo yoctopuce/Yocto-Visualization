@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_dualpower.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_dualpower.cs 38913 2019-12-20 18:59:49Z mvuilleu $
  *
  *  Implements yFindDualPower(), the high-level API for DualPower functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YDualPower class start)
 /**
  * <summary>
- *   Yoctopuce application programming interface allows you to control
+ *   The <c>YDualPower</c> class allows you to control
  *   the power source to use for module functions that require high current.
  * <para>
  *   The module can also automatically disconnect the external power
@@ -118,6 +118,7 @@ public class YDualPower : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the current power source for module functions that require lots of current.
@@ -148,6 +149,7 @@ public class YDualPower : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -212,6 +214,7 @@ public class YDualPower : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the measured voltage on the external power source, in millivolts.
@@ -241,9 +244,10 @@ public class YDualPower : YFunction
         return res;
     }
 
+
     /**
      * <summary>
-     *   Retrieves a dual power control for a given identifier.
+     *   Retrieves a dual power switch for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -267,11 +271,11 @@ public class YDualPower : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the power control is online at the time
+     *   This function does not require that the dual power switch is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YDualPower.isOnline()</c> to test if the power control is
+     *   Use the method <c>YDualPower.isOnline()</c> to test if the dual power switch is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a dual power control by logical name, no error is notified: the first instance
+     *   a dual power switch by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -284,11 +288,11 @@ public class YDualPower : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the power control, for instance
+     *   a string that uniquely characterizes the dual power switch, for instance
      *   <c>SERVORC1.dualPower</c>.
      * </param>
      * <returns>
-     *   a <c>YDualPower</c> object allowing you to drive the power control.
+     *   a <c>YDualPower</c> object allowing you to drive the dual power switch.
      * </returns>
      */
     public static YDualPower FindDualPower(string func)
@@ -303,6 +307,7 @@ public class YDualPower : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -341,6 +346,7 @@ public class YDualPower : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackDualPower != null) {
@@ -353,17 +359,17 @@ public class YDualPower : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of dual power controls started using <c>yFirstDualPower()</c>.
+     *   Continues the enumeration of dual power switches started using <c>yFirstDualPower()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned dual power controls order.
-     *   If you want to find a specific a dual power control, use <c>DualPower.findDualPower()</c>
+     *   Caution: You can't make any assumption about the returned dual power switches order.
+     *   If you want to find a specific a dual power switch, use <c>DualPower.findDualPower()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YDualPower</c> object, corresponding to
-     *   a dual power control currently online, or a <c>null</c> pointer
-     *   if there are no more dual power controls to enumerate.
+     *   a dual power switch currently online, or a <c>null</c> pointer
+     *   if there are no more dual power switches to enumerate.
      * </returns>
      */
     public YDualPower nextDualPower()
@@ -382,15 +388,15 @@ public class YDualPower : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of dual power controls currently accessible.
+     *   Starts the enumeration of dual power switches currently accessible.
      * <para>
      *   Use the method <c>YDualPower.nextDualPower()</c> to iterate on
-     *   next dual power controls.
+     *   next dual power switches.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YDualPower</c> object, corresponding to
-     *   the first dual power control currently online, or a <c>null</c> pointer
+     *   the first dual power switch currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

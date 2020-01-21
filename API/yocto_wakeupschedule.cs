@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_wakeupschedule.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_wakeupschedule.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindWakeUpSchedule(), the high-level API for WakeUpSchedule functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YWakeUpSchedule class start)
 /**
  * <summary>
- *   The YWakeUpSchedule class implements a wake up condition, for instance using a YoctoHub-GSM-3G-EU, a YoctoHub-GSM-3G-NA, a YoctoHub-Wireless-SR or a YoctoHub-Wireless-g.
+ *   The <c>YWakeUpSchedule</c> class implements a wake up condition.
  * <para>
  *   The wake up time is
  *   specified as a set of months and/or days and/or hours and/or minutes when the
@@ -134,6 +134,7 @@ public class YWakeUpSchedule : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the minutes in the 00-29 interval of each hour scheduled for wake up.
@@ -193,6 +194,7 @@ public class YWakeUpSchedule : YFunction
             return _setAttr("minutesA", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -254,6 +256,7 @@ public class YWakeUpSchedule : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the hours scheduled for wake up.
@@ -313,6 +316,7 @@ public class YWakeUpSchedule : YFunction
             return _setAttr("hours", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -374,6 +378,7 @@ public class YWakeUpSchedule : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the days of the month scheduled for wake up.
@@ -433,6 +438,7 @@ public class YWakeUpSchedule : YFunction
             return _setAttr("monthDays", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -494,6 +500,7 @@ public class YWakeUpSchedule : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the date/time (seconds) of the next wake up occurrence.
@@ -522,6 +529,7 @@ public class YWakeUpSchedule : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -586,6 +594,7 @@ public class YWakeUpSchedule : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -623,6 +632,7 @@ public class YWakeUpSchedule : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackWakeUpSchedule != null) {
@@ -632,6 +642,7 @@ public class YWakeUpSchedule : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -649,6 +660,7 @@ public class YWakeUpSchedule : YFunction
         res = res + this.get_minutesA();
         return res;
     }
+
 
     /**
      * <summary>

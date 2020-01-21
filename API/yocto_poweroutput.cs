@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_poweroutput.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_poweroutput.cs 38913 2019-12-20 18:59:49Z mvuilleu $
  *
  *  Implements yFindPowerOutput(), the high-level API for PowerOutput functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YPowerOutput class start)
 /**
  * <summary>
- *   Yoctopuce application programming interface allows you to control
- *   the power output featured on some devices such as the Yocto-Serial.
+ *   The <c>YPowerOutput</c> class allows you to control
+ *   the power output featured on some Yoctopuce devices.
  * <para>
  * </para>
  * <para>
@@ -100,6 +100,7 @@ public class YPowerOutput : YFunction
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -167,9 +168,10 @@ public class YPowerOutput : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retrieves a dual power  output control for a given identifier.
+     *   Retrieves a power output for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -193,11 +195,11 @@ public class YPowerOutput : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the power output control is online at the time
+     *   This function does not require that the power output is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YPowerOutput.isOnline()</c> to test if the power output control is
+     *   Use the method <c>YPowerOutput.isOnline()</c> to test if the power output is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a dual power  output control by logical name, no error is notified: the first instance
+     *   a power output by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -210,11 +212,11 @@ public class YPowerOutput : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the power output control, for instance
+     *   a string that uniquely characterizes the power output, for instance
      *   <c>YI2CMK01.powerOutput</c>.
      * </param>
      * <returns>
-     *   a <c>YPowerOutput</c> object allowing you to drive the power output control.
+     *   a <c>YPowerOutput</c> object allowing you to drive the power output.
      * </returns>
      */
     public static YPowerOutput FindPowerOutput(string func)
@@ -229,6 +231,7 @@ public class YPowerOutput : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -267,6 +270,7 @@ public class YPowerOutput : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackPowerOutput != null) {
@@ -279,17 +283,17 @@ public class YPowerOutput : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of dual power output controls started using <c>yFirstPowerOutput()</c>.
+     *   Continues the enumeration of power output started using <c>yFirstPowerOutput()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned dual power output controls order.
-     *   If you want to find a specific a dual power  output control, use <c>PowerOutput.findPowerOutput()</c>
+     *   Caution: You can't make any assumption about the returned power output order.
+     *   If you want to find a specific a power output, use <c>PowerOutput.findPowerOutput()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YPowerOutput</c> object, corresponding to
-     *   a dual power  output control currently online, or a <c>null</c> pointer
-     *   if there are no more dual power output controls to enumerate.
+     *   a power output currently online, or a <c>null</c> pointer
+     *   if there are no more power output to enumerate.
      * </returns>
      */
     public YPowerOutput nextPowerOutput()
@@ -308,15 +312,15 @@ public class YPowerOutput : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of dual power output controls currently accessible.
+     *   Starts the enumeration of power output currently accessible.
      * <para>
      *   Use the method <c>YPowerOutput.nextPowerOutput()</c> to iterate on
-     *   next dual power output controls.
+     *   next power output.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YPowerOutput</c> object, corresponding to
-     *   the first dual power output control currently online, or a <c>null</c> pointer
+     *   the first power output currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

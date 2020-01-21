@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_digitalio.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_digitalio.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindDigitalIO(), the high-level API for DigitalIO functions
  *
@@ -57,14 +57,14 @@ using YFUN_DESCR = System.Int32;
 //--- (YDigitalIO class start)
 /**
  * <summary>
- *   The YDigitalIO class allows you drive a Yoctopuce digital input/output port, for instance using a Yocto-IO or a Yocto-Maxi-IO-V2.
+ *   The <c>YDigitalIO</c> class allows you drive a Yoctopuce digital input/output port.
  * <para>
  *   It can be used to setup the direction of each channel, to read the state of each channel
  *   and to switch the state of each channel configures as an output.
  *   You can work on all channels at once, or one by one. Most functions
  *   use a binary representation for channels where bit 0 matches channel #0 , bit 1 matches channel
  *   #1 and so on. If you are not familiar with numbers binary representation, you will find more
- *   information here: en.wikipedia.org/wiki/Binary_number#Representation. It is also possible
+ *   information here: <c>https://en.wikipedia.org/wiki/Binary_number#Representation</c>. It is also possible
  *   to automatically generate short pulses of a determined duration. Electrical behavior
  *   of each I/O can be modified (open drain and reverse polarity).
  * </para>
@@ -148,6 +148,7 @@ public class YDigitalIO : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the digital IO port state as an integer with each bit
@@ -224,6 +225,7 @@ public class YDigitalIO : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the I/O direction of all channels of the port (bitmap): 0 makes a bit an input, 1 makes it an output.
@@ -284,6 +286,7 @@ public class YDigitalIO : YFunction
             return _setAttr("portDirection", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -347,6 +350,7 @@ public class YDigitalIO : YFunction
             return _setAttr("portOpenDrain", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -412,6 +416,7 @@ public class YDigitalIO : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the port state diagnostics (Yocto-IO and Yocto-MaxiIO-V2 only).
@@ -444,6 +449,7 @@ public class YDigitalIO : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the number of bits (i.e.
@@ -473,6 +479,7 @@ public class YDigitalIO : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -535,6 +542,7 @@ public class YDigitalIO : YFunction
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -557,6 +565,7 @@ public class YDigitalIO : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -621,6 +630,7 @@ public class YDigitalIO : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -658,6 +668,7 @@ public class YDigitalIO : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackDigitalIO != null) {
@@ -667,6 +678,7 @@ public class YDigitalIO : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -695,6 +707,7 @@ public class YDigitalIO : YFunction
         return this.set_command(""+((char)(82+bitstate)).ToString()+""+Convert.ToString(bitno));
     }
 
+
     /**
      * <summary>
      *   Returns the state of a single bit (i.e.
@@ -719,6 +732,7 @@ public class YDigitalIO : YFunction
         return ((((portVal) >> (bitno))) & (1));
     }
 
+
     /**
      * <summary>
      *   Reverts a single bit (i.e.
@@ -740,6 +754,7 @@ public class YDigitalIO : YFunction
     {
         return this.set_command("T"+Convert.ToString(bitno));
     }
+
 
     /**
      * <summary>
@@ -769,6 +784,7 @@ public class YDigitalIO : YFunction
         return this.set_command(""+((char)(73+6*bitdirection)).ToString()+""+Convert.ToString(bitno));
     }
 
+
     /**
      * <summary>
      *   Returns the direction of a single bit (i.e.
@@ -792,6 +808,7 @@ public class YDigitalIO : YFunction
         portDir = this.get_portDirection();
         return ((((portDir) >> (bitno))) & (1));
     }
+
 
     /**
      * <summary>
@@ -820,6 +837,7 @@ public class YDigitalIO : YFunction
         return this.set_command(""+((char)(110+4*bitpolarity)).ToString()+""+Convert.ToString(bitno));
     }
 
+
     /**
      * <summary>
      *   Returns the polarity of a single bit from the I/O port (0 means the I/O works in regular mode, 1 means the I/O  works in reverse mode).
@@ -842,6 +860,7 @@ public class YDigitalIO : YFunction
         portPol = this.get_portPolarity();
         return ((((portPol) >> (bitno))) & (1));
     }
+
 
     /**
      * <summary>
@@ -871,6 +890,7 @@ public class YDigitalIO : YFunction
         return this.set_command(""+((char)(100-32*opendrain)).ToString()+""+Convert.ToString(bitno));
     }
 
+
     /**
      * <summary>
      *   Returns the type of electrical interface of a single bit from the I/O port.
@@ -895,6 +915,7 @@ public class YDigitalIO : YFunction
         portOpenDrain = this.get_portOpenDrain();
         return ((((portOpenDrain) >> (bitno))) & (1));
     }
+
 
     /**
      * <summary>
@@ -922,6 +943,7 @@ public class YDigitalIO : YFunction
     {
         return this.set_command("Z"+Convert.ToString( bitno)+",0,"+Convert.ToString(ms_duration));
     }
+
 
     /**
      * <summary>

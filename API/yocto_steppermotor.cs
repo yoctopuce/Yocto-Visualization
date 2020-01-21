@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_steppermotor.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_steppermotor.cs 38913 2019-12-20 18:59:49Z mvuilleu $
  *
  *  Implements yFindStepperMotor(), the high-level API for StepperMotor functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YStepperMotor class start)
 /**
  * <summary>
- *   The YStepperMotor class allows you to drive a stepper motor.
+ *   The <c>YStepperMotor</c> class allows you to drive a stepper motor.
  * <para>
  * </para>
  * <para>
@@ -190,6 +190,7 @@ public class YStepperMotor : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the motor working state.
@@ -221,6 +222,7 @@ public class YStepperMotor : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -285,6 +287,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current logical motor position, measured in steps.
@@ -314,6 +317,7 @@ public class YStepperMotor : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -375,6 +379,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the motor speed immediately reachable from stop state, measured in steps per second.
@@ -434,6 +439,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the maximal motor acceleration, measured in steps per second^2.
@@ -492,6 +498,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the maximal motor speed, measured in steps per second.
@@ -520,6 +527,7 @@ public class YStepperMotor : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -583,6 +591,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the overcurrent alert and emergency stop threshold, measured in mA.
@@ -640,6 +649,7 @@ public class YStepperMotor : YFunction
             return _setAttr("overcurrent", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -699,6 +709,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the torque regulation current when the motor is running, measured in mA.
@@ -757,6 +768,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     public string get_alertMode()
     {
         string res;
@@ -780,6 +792,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     public string get_auxMode()
     {
         string res;
@@ -802,6 +815,7 @@ public class YStepperMotor : YFunction
             return _setAttr("auxMode", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -862,6 +876,7 @@ public class YStepperMotor : YFunction
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -884,6 +899,7 @@ public class YStepperMotor : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -948,6 +964,7 @@ public class YStepperMotor : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -985,6 +1002,7 @@ public class YStepperMotor : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackStepperMotor != null) {
@@ -994,6 +1012,7 @@ public class YStepperMotor : YFunction
         }
         return 0;
     }
+
 
     public virtual int sendCommand(string command)
     {
@@ -1015,6 +1034,7 @@ public class YStepperMotor : YFunction
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Reinitialize the controller and clear all alert flags.
@@ -1030,6 +1050,7 @@ public class YStepperMotor : YFunction
     {
         return this.set_command("Z");
     }
+
 
     /**
      * <summary>
@@ -1049,6 +1070,7 @@ public class YStepperMotor : YFunction
     {
         return this.sendCommand("H"+Convert.ToString((int) Math.Round(1000*speed)));
     }
+
 
     /**
      * <summary>
@@ -1072,6 +1094,7 @@ public class YStepperMotor : YFunction
         return this.sendCommand("R"+Convert.ToString((int) Math.Round(1000*speed)));
     }
 
+
     /**
      * <summary>
      *   Starts the motor to reach a given absolute position.
@@ -1094,6 +1117,7 @@ public class YStepperMotor : YFunction
         return this.sendCommand("M"+Convert.ToString((int) Math.Round(16*absPos)));
     }
 
+
     /**
      * <summary>
      *   Starts the motor to reach a given relative position.
@@ -1115,6 +1139,7 @@ public class YStepperMotor : YFunction
     {
         return this.sendCommand("m"+Convert.ToString((int) Math.Round(16*relPos)));
     }
+
 
     /**
      * <summary>
@@ -1141,6 +1166,7 @@ public class YStepperMotor : YFunction
         return this.sendCommand("m"+Convert.ToString((int) Math.Round(16*relPos))+"@"+Convert.ToString((int) Math.Round(1000*maxSpeed)));
     }
 
+
     /**
      * <summary>
      *   Keep the motor in the same state for the specified amount of time, before processing next command.
@@ -1160,6 +1186,7 @@ public class YStepperMotor : YFunction
         return this.sendCommand("_"+Convert.ToString(waitMs));
     }
 
+
     /**
      * <summary>
      *   Stops the motor with an emergency alert, without taking any additional precaution.
@@ -1175,6 +1202,7 @@ public class YStepperMotor : YFunction
     {
         return this.set_command("!");
     }
+
 
     /**
      * <summary>
@@ -1193,6 +1221,7 @@ public class YStepperMotor : YFunction
     {
         return this.set_command(".");
     }
+
 
     /**
      * <summary>
@@ -1219,6 +1248,7 @@ public class YStepperMotor : YFunction
         return this.set_command(".-");
     }
 
+
     /**
      * <summary>
      *   Stops the motor smoothly as soon as possible, without waiting for ongoing move completion.
@@ -1234,6 +1264,7 @@ public class YStepperMotor : YFunction
     {
         return this.set_command("B");
     }
+
 
     /**
      * <summary>

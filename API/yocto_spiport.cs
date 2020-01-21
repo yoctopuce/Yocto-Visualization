@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_spiport.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_spiport.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindSpiPort(), the high-level API for SpiPort functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YSpiPort class start)
 /**
  * <summary>
- *   The YSpiPort class allows you to fully drive a Yoctopuce SPI port, for instance using a Yocto-SPI.
+ *   The <c>YSpiPort</c> class allows you to fully drive a Yoctopuce SPI port.
  * <para>
  *   It can be used to send and receive data, and to configure communication
  *   parameters (baud rate, bit count, parity, flow control and protocol).
@@ -83,6 +83,8 @@ public class YSpiPort : YFunction
     public const string LASTMSG_INVALID = YAPI.INVALID_STRING;
     public const string CURRENTJOB_INVALID = YAPI.INVALID_STRING;
     public const string STARTUPJOB_INVALID = YAPI.INVALID_STRING;
+    public const int JOBMAXTASK_INVALID = YAPI.INVALID_UINT;
+    public const int JOBMAXSIZE_INVALID = YAPI.INVALID_UINT;
     public const string COMMAND_INVALID = YAPI.INVALID_STRING;
     public const string PROTOCOL_INVALID = YAPI.INVALID_STRING;
     public const int VOLTAGELEVEL_OFF = 0;
@@ -109,6 +111,8 @@ public class YSpiPort : YFunction
     protected string _lastMsg = LASTMSG_INVALID;
     protected string _currentJob = CURRENTJOB_INVALID;
     protected string _startupJob = STARTUPJOB_INVALID;
+    protected int _jobMaxTask = JOBMAXTASK_INVALID;
+    protected int _jobMaxSize = JOBMAXSIZE_INVALID;
     protected string _command = COMMAND_INVALID;
     protected string _protocol = PROTOCOL_INVALID;
     protected int _voltageLevel = VOLTAGELEVEL_INVALID;
@@ -165,6 +169,14 @@ public class YSpiPort : YFunction
         {
             _startupJob = json_val.getString("startupJob");
         }
+        if (json_val.has("jobMaxTask"))
+        {
+            _jobMaxTask = json_val.getInt("jobMaxTask");
+        }
+        if (json_val.has("jobMaxSize"))
+        {
+            _jobMaxSize = json_val.getInt("jobMaxSize");
+        }
         if (json_val.has("command"))
         {
             _command = json_val.getString("command");
@@ -191,6 +203,7 @@ public class YSpiPort : YFunction
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -221,6 +234,7 @@ public class YSpiPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the total number of bytes transmitted since last reset.
@@ -249,6 +263,7 @@ public class YSpiPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -279,6 +294,7 @@ public class YSpiPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the total number of messages received since last reset.
@@ -307,6 +323,7 @@ public class YSpiPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -337,6 +354,7 @@ public class YSpiPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the latest message fully received (for Line and Frame protocols).
@@ -365,6 +383,7 @@ public class YSpiPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -426,6 +445,7 @@ public class YSpiPort : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the job file to use when the device is powered on.
@@ -486,6 +506,67 @@ public class YSpiPort : YFunction
         }
     }
 
+
+    /**
+     * <summary>
+     *   Returns the maximum number of tasks in a job that the device can handle.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to the maximum number of tasks in a job that the device can handle
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YSpiPort.JOBMAXTASK_INVALID</c>.
+     * </para>
+     */
+    public int get_jobMaxTask()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration == 0) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return JOBMAXTASK_INVALID;
+                }
+            }
+            res = this._jobMaxTask;
+        }
+        return res;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns maximum size allowed for job files.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to maximum size allowed for job files
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YSpiPort.JOBMAXSIZE_INVALID</c>.
+     * </para>
+     */
+    public int get_jobMaxSize()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration == 0) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return JOBMAXSIZE_INVALID;
+                }
+            }
+            res = this._jobMaxSize;
+        }
+        return res;
+    }
+
+
     public string get_command()
     {
         string res;
@@ -508,6 +589,7 @@ public class YSpiPort : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -578,6 +660,7 @@ public class YSpiPort : YFunction
             return _setAttr("protocol", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -652,6 +735,7 @@ public class YSpiPort : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the SPI port communication parameters, as a string such as
@@ -720,6 +804,7 @@ public class YSpiPort : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the SS line polarity.
@@ -781,6 +866,7 @@ public class YSpiPort : YFunction
             return _setAttr("ssPolarity", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -847,6 +933,7 @@ public class YSpiPort : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Retrieves a SPI port for a given identifier.
@@ -910,6 +997,7 @@ public class YSpiPort : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -947,6 +1035,7 @@ public class YSpiPort : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackSpiPort != null) {
@@ -957,10 +1046,12 @@ public class YSpiPort : YFunction
         return 0;
     }
 
+
     public virtual int sendCommand(string text)
     {
         return this.set_command(text);
     }
+
 
     /**
      * <summary>
@@ -1006,6 +1097,7 @@ public class YSpiPort : YFunction
         res = this._json_get_string(YAPI.DefaultEncoding.GetBytes(msgarr[0]));
         return res;
     }
+
 
     /**
      * <summary>
@@ -1066,6 +1158,7 @@ public class YSpiPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Changes the current internal stream position to the specified value.
@@ -1088,6 +1181,7 @@ public class YSpiPort : YFunction
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Returns the current absolute stream position pointer of the API object.
@@ -1102,6 +1196,7 @@ public class YSpiPort : YFunction
     {
         return this._rxptr;
     }
+
 
     /**
      * <summary>
@@ -1128,6 +1223,7 @@ public class YSpiPort : YFunction
         res = YAPI._atoi((YAPI.DefaultEncoding.GetString(buff)).Substring( 0, bufflen));
         return res;
     }
+
 
     /**
      * <summary>
@@ -1175,6 +1271,7 @@ public class YSpiPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Saves the job definition string (JSON data) into a job file.
@@ -1200,6 +1297,7 @@ public class YSpiPort : YFunction
         this._upload(jobfile, YAPI.DefaultEncoding.GetBytes(jsonDef));
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>
@@ -1227,6 +1325,7 @@ public class YSpiPort : YFunction
         return this.set_currentJob(jobfile);
     }
 
+
     /**
      * <summary>
      *   Clears the serial port buffer and resets counters to zero.
@@ -1251,6 +1350,7 @@ public class YSpiPort : YFunction
         return this.sendCommand("Z");
     }
 
+
     /**
      * <summary>
      *   Sends a single byte to the serial port.
@@ -1271,6 +1371,7 @@ public class YSpiPort : YFunction
     {
         return this.sendCommand("$"+String.Format("{0:X02}",code));
     }
+
 
     /**
      * <summary>
@@ -1316,6 +1417,7 @@ public class YSpiPort : YFunction
         return this._upload("txdata", buff);
     }
 
+
     /**
      * <summary>
      *   Sends a binary buffer to the serial port, as is.
@@ -1336,6 +1438,7 @@ public class YSpiPort : YFunction
     {
         return this._upload("txdata", buff);
     }
+
 
     /**
      * <summary>
@@ -1372,6 +1475,7 @@ public class YSpiPort : YFunction
         res = this._upload("txdata", buff);
         return res;
     }
+
 
     /**
      * <summary>
@@ -1412,6 +1516,7 @@ public class YSpiPort : YFunction
         res = this._upload("txdata", buff);
         return res;
     }
+
 
     /**
      * <summary>
@@ -1456,6 +1561,7 @@ public class YSpiPort : YFunction
         // send string using file upload
         return this._upload("txdata", buff);
     }
+
 
     /**
      * <summary>
@@ -1532,6 +1638,7 @@ public class YSpiPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Reads data from the receive buffer as a string, starting at current stream position.
@@ -1574,6 +1681,7 @@ public class YSpiPort : YFunction
         res = (YAPI.DefaultEncoding.GetString(buff)).Substring( 0, bufflen);
         return res;
     }
+
 
     /**
      * <summary>
@@ -1623,6 +1731,7 @@ public class YSpiPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1674,6 +1783,7 @@ public class YSpiPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1727,6 +1837,7 @@ public class YSpiPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>

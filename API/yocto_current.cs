@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_current.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_current.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindCurrent(), the high-level API for Current functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YCurrent class start)
 /**
  * <summary>
- *   The YCurrent class allows you to read and configure Yoctopuce current
- *   sensors, for instance using a Yocto-Amp, a Yocto-Motor-DC or a Yocto-Watt.
+ *   The <c>YCurrent</c> class allows you to read and configure Yoctopuce current sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -100,6 +99,7 @@ public class YCurrent : YSensor
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -167,6 +167,7 @@ public class YCurrent : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Retrieves a current sensor for a given identifier.
@@ -230,6 +231,7 @@ public class YCurrent : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -267,6 +269,7 @@ public class YCurrent : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackCurrent != null) {
@@ -276,6 +279,7 @@ public class YCurrent : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -290,7 +294,7 @@ public class YCurrent : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -307,6 +311,7 @@ public class YCurrent : YSensor
         this._timedReportCallbackCurrent = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

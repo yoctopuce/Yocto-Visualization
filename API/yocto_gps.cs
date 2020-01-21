@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_gps.cs 38462 2019-11-25 17:14:30Z seb $
+ *  $Id: yocto_gps.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindGps(), the high-level API for Gps functions
  *
@@ -57,14 +57,14 @@ using YFUN_DESCR = System.Int32;
 //--- (YGps class start)
 /**
  * <summary>
- *   The YGps class allows you to retrieve positioning
- *   data from a GPS sensor, for instance using a Yocto-GPS.
+ *   The <c>YGps</c> class allows you to retrieve positioning
+ *   data from a GPS/GNSS sensor.
  * <para>
  *   This class can provides
  *   complete positioning information. However, if you
  *   wish to define callbacks on position changes or record
  *   the position in the datalogger, you
- *   should use the YLatitude et YLongitude classes.
+ *   should use the <c>YLatitude</c> et <c>YLongitude</c> classes.
  * </para>
  * <para>
  * </para>
@@ -203,6 +203,7 @@ public class YGps : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns TRUE if the receiver has found enough satellites to work.
@@ -233,6 +234,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the total count of satellites used to compute GPS position.
@@ -261,6 +263,7 @@ public class YGps : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -295,6 +298,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns effective GPS data refresh frequency.
@@ -324,6 +328,7 @@ public class YGps : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -386,6 +391,7 @@ public class YGps : YFunction
             return _setAttr("coordSystem", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -457,6 +463,7 @@ public class YGps : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current latitude.
@@ -486,6 +493,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current longitude.
@@ -514,6 +522,7 @@ public class YGps : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -546,6 +555,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current altitude.
@@ -577,6 +587,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current ground speed in Km/h.
@@ -605,6 +616,7 @@ public class YGps : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -637,6 +649,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current time in Unix format (number of
@@ -668,6 +681,7 @@ public class YGps : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current time in the form "YYYY/MM/DD hh:mm:ss".
@@ -696,6 +710,7 @@ public class YGps : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -759,6 +774,7 @@ public class YGps : YFunction
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -782,9 +798,10 @@ public class YGps : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retrieves a GPS for a given identifier.
+     *   Retrieves a geolocalization module for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -808,11 +825,11 @@ public class YGps : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the GPS is online at the time
+     *   This function does not require that the geolocalization module is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YGps.isOnline()</c> to test if the GPS is
+     *   Use the method <c>YGps.isOnline()</c> to test if the geolocalization module is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a GPS by logical name, no error is notified: the first instance
+     *   a geolocalization module by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -825,11 +842,11 @@ public class YGps : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the GPS, for instance
+     *   a string that uniquely characterizes the geolocalization module, for instance
      *   <c>YGNSSMK1.gps</c>.
      * </param>
      * <returns>
-     *   a <c>YGps</c> object allowing you to drive the GPS.
+     *   a <c>YGps</c> object allowing you to drive the geolocalization module.
      * </returns>
      */
     public static YGps FindGps(string func)
@@ -844,6 +861,7 @@ public class YGps : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -882,6 +900,7 @@ public class YGps : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackGps != null) {
@@ -894,17 +913,17 @@ public class YGps : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of GPS started using <c>yFirstGps()</c>.
+     *   Continues the enumeration of geolocalization modules started using <c>yFirstGps()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned GPS order.
-     *   If you want to find a specific a GPS, use <c>Gps.findGps()</c>
+     *   Caution: You can't make any assumption about the returned geolocalization modules order.
+     *   If you want to find a specific a geolocalization module, use <c>Gps.findGps()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YGps</c> object, corresponding to
-     *   a GPS currently online, or a <c>null</c> pointer
-     *   if there are no more GPS to enumerate.
+     *   a geolocalization module currently online, or a <c>null</c> pointer
+     *   if there are no more geolocalization modules to enumerate.
      * </returns>
      */
     public YGps nextGps()
@@ -923,15 +942,15 @@ public class YGps : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of GPS currently accessible.
+     *   Starts the enumeration of geolocalization modules currently accessible.
      * <para>
      *   Use the method <c>YGps.nextGps()</c> to iterate on
-     *   next GPS.
+     *   next geolocalization modules.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YGps</c> object, corresponding to
-     *   the first GPS currently online, or a <c>null</c> pointer
+     *   the first geolocalization module currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

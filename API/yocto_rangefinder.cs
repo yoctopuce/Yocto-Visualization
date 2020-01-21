@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_rangefinder.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_rangefinder.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindRangeFinder(), the high-level API for RangeFinder functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YRangeFinder class start)
 /**
  * <summary>
- *   The YRangeFinder class allows you to use and configure Yoctopuce range finder
- *   sensors, for instance using a Yocto-RangeFinder.
+ *   The <c>YRangeFinder</c> class allows you to read and configure Yoctopuce range finders.
  * <para>
- *   It inherits from the YSensor class the core functions to read measurements,
- *   register callback functions, access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  *   This class adds the ability to easily perform a one-point linear calibration
  *   to compensate the effect of a glass or filter placed in front of the sensor.
  * </para>
@@ -169,6 +168,7 @@ public class YRangeFinder : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the range finder running mode.
@@ -235,6 +235,7 @@ public class YRangeFinder : YSensor
             return _setAttr("rangeFinderMode", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -303,6 +304,7 @@ public class YRangeFinder : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns a measure quality estimate, based on measured dispersion.
@@ -332,6 +334,7 @@ public class YRangeFinder : YSensor
         return res;
     }
 
+
     public string get_hardwareCalibration()
     {
         string res;
@@ -354,6 +357,7 @@ public class YRangeFinder : YSensor
             return _setAttr("hardwareCalibration", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -384,6 +388,7 @@ public class YRangeFinder : YSensor
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -406,6 +411,7 @@ public class YRangeFinder : YSensor
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -470,6 +476,7 @@ public class YRangeFinder : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -507,6 +514,7 @@ public class YRangeFinder : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackRangeFinder != null) {
@@ -516,6 +524,7 @@ public class YRangeFinder : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -530,7 +539,7 @@ public class YRangeFinder : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -548,6 +557,7 @@ public class YRangeFinder : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackRangeFinder != null) {
@@ -557,6 +567,7 @@ public class YRangeFinder : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -581,6 +592,7 @@ public class YRangeFinder : YSensor
         return YAPI._atoi((hwcal).Substring(1, (hwcal).Length));
     }
 
+
     /**
      * <summary>
      *   Triggers a sensor calibration according to the current ambient temperature.
@@ -601,6 +613,7 @@ public class YRangeFinder : YSensor
         return this.set_command("T");
     }
 
+
     /**
      * <summary>
      *   Triggers the photon detector hardware calibration.
@@ -619,6 +632,7 @@ public class YRangeFinder : YSensor
     {
         return this.set_command("S");
     }
+
 
     /**
      * <summary>
@@ -649,6 +663,7 @@ public class YRangeFinder : YSensor
         return this.set_command("O"+Convert.ToString(distmm));
     }
 
+
     /**
      * <summary>
      *   Triggers the hardware cross-talk calibration of the distance sensor.
@@ -677,6 +692,7 @@ public class YRangeFinder : YSensor
         }
         return this.set_command("X"+Convert.ToString(distmm));
     }
+
 
     /**
      * <summary>

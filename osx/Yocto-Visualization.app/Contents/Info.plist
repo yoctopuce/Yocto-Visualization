@@ -1,26 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>CFBundleName</key>
-	<string>yoctovisualization</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.yoctopuce.yoctovisualization</string>
-	<key>CFBundleVersion</key>
-	<string>2.0.38545</string>
-	<key>CFBundleShortVersionString</key>
-	<string>2.0.38545</string>
-	<key>CFBundleGetInfoString</key>
-	<string>Yocto-Visualization</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2018 Yoctopuce Sarl</string>
-	<key>CFBundleExecutable</key>
-	<string>YoctoVisualization.sh</string>
-	<key>CFBundleIconFile</key>
-	<string>YoctoVisualization.icns</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-</dict>
-</plist>
+Package: yoctovisualization
+Version: 39218
+Sections: electronics
+Priority: optional
+Architecture: all
+Maintainer: Yoctopuce <dev@yoctopuce.com>
+Homepage:http://www.yoctopuce.com
+Installed-Size: 4000
+Section: electronics
+Description: Yocto-Visualization utility.
+ The Yocto-Visualization is a utility that allow one to easily
+ view the values measured by Yoctopuce sensors. It can display
+ graphics, indicators and other gadgets in a few clicks.

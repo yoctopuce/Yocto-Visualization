@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_audioin.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_audioin.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindAudioIn(), the high-level API for AudioIn functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YAudioIn class start)
 /**
  * <summary>
- *   The YAudioIn class allows you to configure the volume of an audio input.
+ *   The <c>YAudioIn</c> class allows you to configure the volume of an audio input.
  * <para>
  * </para>
  * <para>
@@ -121,6 +121,7 @@ public class YAudioIn : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns audio input gain, in per cents.
@@ -180,6 +181,7 @@ public class YAudioIn : YFunction
             return _setAttr("volume", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -241,6 +243,7 @@ public class YAudioIn : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the supported volume range.
@@ -274,6 +277,7 @@ public class YAudioIn : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the detected input signal level.
@@ -303,6 +307,7 @@ public class YAudioIn : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the number of seconds elapsed without detecting a signal.
@@ -331,6 +336,7 @@ public class YAudioIn : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -395,6 +401,7 @@ public class YAudioIn : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -431,6 +438,7 @@ public class YAudioIn : YFunction
         }
         return 0;
     }
+
 
     public override int _invokeValueCallback(string value)
     {

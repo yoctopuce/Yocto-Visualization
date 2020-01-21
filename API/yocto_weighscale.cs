@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_weighscale.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_weighscale.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindWeighScale(), the high-level API for WeighScale functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YWeighScale class start)
 /**
  * <summary>
- *   The YWeighScale class provides a weight measurement from a ratiometric sensor, for instance using a Yocto-Bridge or a Yocto-MaxiBridge.
+ *   The <c>YWeighScale</c> class provides a weight measurement from a ratiometric sensor.
  * <para>
  *   It can be used to control the bridge excitation parameters, in order to avoid
  *   measure shifts caused by temperature variation in the electronics, and can also
@@ -176,6 +176,7 @@ public class YWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current load cell bridge excitation method.
@@ -273,6 +274,7 @@ public class YWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the averaged temperature update rate, in per mille.
@@ -340,6 +342,7 @@ public class YWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the temperature change update rate, in per mille.
@@ -372,6 +375,7 @@ public class YWeighScale : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current averaged temperature, used for thermal compensation.
@@ -401,6 +405,7 @@ public class YWeighScale : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current temperature variation, used for thermal compensation.
@@ -429,6 +434,7 @@ public class YWeighScale : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -493,6 +499,7 @@ public class YWeighScale : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the zero tracking threshold value.
@@ -525,6 +532,7 @@ public class YWeighScale : YSensor
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -547,6 +555,7 @@ public class YWeighScale : YSensor
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -611,6 +620,7 @@ public class YWeighScale : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -648,6 +658,7 @@ public class YWeighScale : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackWeighScale != null) {
@@ -657,6 +668,7 @@ public class YWeighScale : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -671,7 +683,7 @@ public class YWeighScale : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -689,6 +701,7 @@ public class YWeighScale : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackWeighScale != null) {
@@ -698,6 +711,7 @@ public class YWeighScale : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -719,6 +733,7 @@ public class YWeighScale : YSensor
     {
         return this.set_command("T");
     }
+
 
     /**
      * <summary>
@@ -746,6 +761,7 @@ public class YWeighScale : YSensor
     {
         return this.set_command("S"+Convert.ToString( (int) Math.Round(1000*currWeight))+":"+Convert.ToString((int) Math.Round(1000*maxWeight)));
     }
+
 
     public virtual int setCompensationTable(int tableIndex, List<double> tempValues, List<double> compValues)
     {
@@ -789,6 +805,7 @@ public class YWeighScale : YSensor
         return YAPI.SUCCESS;
     }
 
+
     public virtual int loadCompensationTable(int tableIndex, List<double> tempValues, List<double> compValues)
     {
         string id;
@@ -817,6 +834,7 @@ public class YWeighScale : YSensor
         }
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>
@@ -849,6 +867,7 @@ public class YWeighScale : YSensor
         return this.setCompensationTable(0, tempValues, compValues);
     }
 
+
     /**
      * <summary>
      *   Retrieves the weight offset thermal compensation table previously configured using the
@@ -879,6 +898,7 @@ public class YWeighScale : YSensor
     {
         return this.loadCompensationTable(0, tempValues, compValues);
     }
+
 
     /**
      * <summary>
@@ -911,6 +931,7 @@ public class YWeighScale : YSensor
         return this.setCompensationTable(1, tempValues, compValues);
     }
 
+
     /**
      * <summary>
      *   Retrieves the weight offset thermal compensation table previously configured using the
@@ -941,6 +962,7 @@ public class YWeighScale : YSensor
     {
         return this.loadCompensationTable(1, tempValues, compValues);
     }
+
 
     /**
      * <summary>
@@ -973,6 +995,7 @@ public class YWeighScale : YSensor
         return this.setCompensationTable(2, tempValues, compValues);
     }
 
+
     /**
      * <summary>
      *   Retrieves the weight span thermal compensation table previously configured using the
@@ -1004,6 +1027,7 @@ public class YWeighScale : YSensor
         return this.loadCompensationTable(2, tempValues, compValues);
     }
 
+
     /**
      * <summary>
      *   Records a weight span thermal compensation table, in order to automatically correct the
@@ -1034,6 +1058,7 @@ public class YWeighScale : YSensor
     {
         return this.setCompensationTable(3, tempValues, compValues);
     }
+
 
     /**
      * <summary>

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_multisenscontroller.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_multisenscontroller.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindMultiSensController(), the high-level API for MultiSensController functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YMultiSensController class start)
 /**
  * <summary>
- *   The YMultiSensController class allows you to setup a customized
- *   sensor chain on devices featuring that functionality, for instance using a Yocto-Temperature-IR.
+ *   The <c>YMultiSensController</c> class allows you to setup a customized
+ *   sensor chain on devices featuring that functionality.
  * <para>
  * </para>
  * <para>
@@ -115,6 +115,7 @@ public class YMultiSensController : YFunction
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -179,6 +180,7 @@ public class YMultiSensController : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the maximum configurable sensor count allowed on this device.
@@ -207,6 +209,7 @@ public class YMultiSensController : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -270,6 +273,7 @@ public class YMultiSensController : YFunction
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -292,6 +296,7 @@ public class YMultiSensController : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -356,6 +361,7 @@ public class YMultiSensController : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -393,6 +399,7 @@ public class YMultiSensController : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackMultiSensController != null) {
@@ -402,6 +409,7 @@ public class YMultiSensController : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>

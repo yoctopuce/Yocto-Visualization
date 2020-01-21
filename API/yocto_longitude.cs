@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_longitude.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_longitude.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindLongitude(), the high-level API for Longitude functions
  *
@@ -57,12 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YLongitude class start)
 /**
  * <summary>
- *   The YLongitude class allows you to read the longitude from Yoctopuce
- *   geolocation sensors, for instance using a Yocto-GPS.
+ *   The <c>YLongitude</c> class allows you to read and configure Yoctopuce longitude sensors.
  * <para>
- *   It inherits from the YSensor class the core functions to
- *   read measurements, register callback functions, access the autonomous
- *   datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -93,6 +91,7 @@ public class YLongitude : YSensor
     {
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -157,6 +156,7 @@ public class YLongitude : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -194,6 +194,7 @@ public class YLongitude : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackLongitude != null) {
@@ -203,6 +204,7 @@ public class YLongitude : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -217,7 +219,7 @@ public class YLongitude : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -234,6 +236,7 @@ public class YLongitude : YSensor
         this._timedReportCallbackLongitude = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

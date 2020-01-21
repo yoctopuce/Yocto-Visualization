@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_humidity.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_humidity.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindHumidity(), the high-level API for Humidity functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YHumidity class start)
 /**
  * <summary>
- *   The YHumidity class allows you to read and configure Yoctopuce humidity
- *   sensors, for instance using a Yocto-CO2-V2, a Yocto-Meteo-V2 or a Yocto-VOC-V3.
+ *   The <c>YHumidity</c> class allows you to read and configure Yoctopuce humidity sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -142,6 +141,7 @@ public class YHumidity : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current relative humidity, in per cents.
@@ -171,6 +171,7 @@ public class YHumidity : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the current absolute humidity, in grams per cubic meter of air.
@@ -199,6 +200,7 @@ public class YHumidity : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -263,6 +265,7 @@ public class YHumidity : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -300,6 +303,7 @@ public class YHumidity : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackHumidity != null) {
@@ -309,6 +313,7 @@ public class YHumidity : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -323,7 +328,7 @@ public class YHumidity : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -340,6 +345,7 @@ public class YHumidity : YSensor
         this._timedReportCallbackHumidity = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

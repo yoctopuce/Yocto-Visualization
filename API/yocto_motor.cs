@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_motor.cs 38030 2019-11-04 17:56:01Z mvuilleu $
+ *  $Id: yocto_motor.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindMotor(), the high-level API for Motor functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YMotor class start)
 /**
  * <summary>
- *   The YMotor class allows you to drive a DC motor, for instance using a Yocto-Motor-DC.
+ *   The <c>YMotor</c> class allows you to drive a DC motor.
  * <para>
  *   It can be used to configure the
  *   power sent to the motor to make it turn both ways, but also to drive accelerations
@@ -156,6 +156,7 @@ public class YMotor : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Return the controller state.
@@ -244,6 +245,7 @@ public class YMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the power sent to the motor, as a percentage between -100% and +100%.
@@ -303,6 +305,7 @@ public class YMotor : YFunction
             return _setAttr("brakingForce", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -372,6 +375,7 @@ public class YMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the threshold voltage under which the controller automatically switches to error state
@@ -405,6 +409,7 @@ public class YMotor : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -507,6 +512,7 @@ public class YMotor : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the PWM frequency used to control the motor.
@@ -535,6 +541,7 @@ public class YMotor : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -599,6 +606,7 @@ public class YMotor : YFunction
             return _setAttr("starterTime", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -670,6 +678,7 @@ public class YMotor : YFunction
         }
     }
 
+
     public string get_command()
     {
         string res;
@@ -692,6 +701,7 @@ public class YMotor : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -756,6 +766,7 @@ public class YMotor : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -793,6 +804,7 @@ public class YMotor : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackMotor != null) {
@@ -802,6 +814,7 @@ public class YMotor : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -819,6 +832,7 @@ public class YMotor : YFunction
         return this.set_command("K");
     }
 
+
     /**
      * <summary>
      *   Reset the controller state to IDLE.
@@ -832,6 +846,7 @@ public class YMotor : YFunction
     {
         return this.set_motorStatus(MOTORSTATUS_IDLE);
     }
+
 
     /**
      * <summary>
@@ -856,6 +871,7 @@ public class YMotor : YFunction
     {
         return this.set_command("P"+Convert.ToString((int) Math.Round(targetPower*10))+","+Convert.ToString(delay));
     }
+
 
     /**
      * <summary>

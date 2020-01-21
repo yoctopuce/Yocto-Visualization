@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_relay.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_relay.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindRelay(), the high-level API for Relay functions
  *
@@ -57,10 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YRelay class start)
 /**
  * <summary>
- *   The YRelay class allows you to drive a Yoctopuce Relay, for instance using a Yocto-MaxiCoupler-V2, a Yocto-MaxiPowerRelay, a Yocto-PowerRelay-V3 or a Yocto-Relay.
+ *   The <c>YRelay</c> class allows you to drive a Yoctopuce relay or optocoupled output.
  * <para>
- *   It can be used to simply switch the relay, but also to automatically generate short pulses of
- *   determined duration.
+ *   It can be used to simply switch the output on or off, but also to automatically generate short
+ *   pulses of determined duration.
  *   On devices with two output for each relay (double throw), the two outputs are named A and B,
  *   with output A corresponding to the idle position (normally closed) and the output B corresponding to the
  *   active state (normally open).
@@ -76,7 +76,7 @@ public class YRelay : YFunction
     public new delegate void ValueCallback(YRelay func, string value);
     public new delegate void TimedReportCallback(YRelay func, YMeasure measure);
 
-    public class YRelayDelayedPulse
+    public /* struct */ class YRelayDelayedPulse
     {
         public int target = YAPI.INVALID_INT;
         public int ms = YAPI.INVALID_INT;
@@ -166,6 +166,7 @@ public class YRelay : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the state of the relays (A for the idle position, B for the active position).
@@ -226,9 +227,11 @@ public class YRelay : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Returns the state of the relays at device startup (A for the idle position, B for the active position, UNCHANGED for no change).
+     *   Returns the state of the relays at device startup (A for the idle position,
+     *   B for the active position, UNCHANGED to leave the relay state as is).
      * <para>
      * </para>
      * <para>
@@ -237,7 +240,8 @@ public class YRelay : YFunction
      * <returns>
      *   a value among <c>YRelay.STATEATPOWERON_UNCHANGED</c>, <c>YRelay.STATEATPOWERON_A</c> and
      *   <c>YRelay.STATEATPOWERON_B</c> corresponding to the state of the relays at device startup (A for
-     *   the idle position, B for the active position, UNCHANGED for no change)
+     *   the idle position,
+     *   B for the active position, UNCHANGED to leave the relay state as is)
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YRelay.STATEATPOWERON_INVALID</c>.
@@ -260,7 +264,7 @@ public class YRelay : YFunction
     /**
      * <summary>
      *   Changes the state of the relays at device startup (A for the idle position,
-     *   B for the active position, UNCHANGED for no modification).
+     *   B for the active position, UNCHANGED to leave the relay state as is).
      * <para>
      *   Remember to call the matching module <c>saveToFlash()</c>
      *   method, otherwise this call will have no effect.
@@ -272,7 +276,7 @@ public class YRelay : YFunction
      *   a value among <c>YRelay.STATEATPOWERON_UNCHANGED</c>, <c>YRelay.STATEATPOWERON_A</c> and
      *   <c>YRelay.STATEATPOWERON_B</c> corresponding to the state of the relays at device startup (A for
      *   the idle position,
-     *   B for the active position, UNCHANGED for no modification)
+     *   B for the active position, UNCHANGED to leave the relay state as is)
      * </param>
      * <para>
      * </para>
@@ -292,9 +296,10 @@ public class YRelay : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Returns the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state
+     *   Returns the maximum time (ms) allowed for the relay to stay in state
      *   A before automatically switching back in to B state.
      * <para>
      *   Zero means no time limit.
@@ -303,7 +308,7 @@ public class YRelay : YFunction
      * </para>
      * </summary>
      * <returns>
-     *   an integer corresponding to the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state
+     *   an integer corresponding to the maximum time (ms) allowed for the relay to stay in state
      *   A before automatically switching back in to B state
      * </returns>
      * <para>
@@ -326,7 +331,7 @@ public class YRelay : YFunction
 
     /**
      * <summary>
-     *   Changes the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state A
+     *   Changes the maximum time (ms) allowed for the relay to stay in state A
      *   before automatically switching back in to B state.
      * <para>
      *   Use zero for no time limit.
@@ -337,7 +342,7 @@ public class YRelay : YFunction
      * </para>
      * </summary>
      * <param name="newval">
-     *   an integer corresponding to the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state A
+     *   an integer corresponding to the maximum time (ms) allowed for the relay to stay in state A
      *   before automatically switching back in to B state
      * </param>
      * <para>
@@ -358,9 +363,10 @@ public class YRelay : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retourne the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state B
+     *   Retourne the maximum time (ms) allowed for the relay to stay in state B
      *   before automatically switching back in to A state.
      * <para>
      *   Zero means no time limit.
@@ -391,7 +397,7 @@ public class YRelay : YFunction
 
     /**
      * <summary>
-     *   Changes the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state B before
+     *   Changes the maximum time (ms) allowed for the relay to stay in state B before
      *   automatically switching back in to A state.
      * <para>
      *   Use zero for no time limit.
@@ -402,7 +408,7 @@ public class YRelay : YFunction
      * </para>
      * </summary>
      * <param name="newval">
-     *   an integer corresponding to the maximum time (ms) allowed for $THEFUNCTIONS$ to stay in state B before
+     *   an integer corresponding to the maximum time (ms) allowed for the relay to stay in state B before
      *   automatically switching back in to A state
      * </param>
      * <para>
@@ -422,6 +428,7 @@ public class YRelay : YFunction
             return _setAttr("maxTimeOnStateB", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -482,6 +489,7 @@ public class YRelay : YFunction
             return _setAttr("output", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -552,6 +560,7 @@ public class YRelay : YFunction
         return _setAttr("pulseTimer", rest_val);
     }
 
+
     public YRelayDelayedPulse get_delayedPulseTimer()
     {
         YRelayDelayedPulse res;
@@ -605,6 +614,7 @@ public class YRelay : YFunction
         return _setAttr("delayedPulseTimer", rest_val);
     }
 
+
     /**
      * <summary>
      *   Returns the number of milliseconds remaining before a pulse (delayedPulse() call)
@@ -635,6 +645,7 @@ public class YRelay : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -699,6 +710,7 @@ public class YRelay : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -736,6 +748,7 @@ public class YRelay : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackRelay != null) {
@@ -745,6 +758,7 @@ public class YRelay : YFunction
         }
         return 0;
     }
+
 
     /**
      * <summary>

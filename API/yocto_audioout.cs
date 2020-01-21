@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_audioout.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_audioout.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindAudioOut(), the high-level API for AudioOut functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YAudioOut class start)
 /**
  * <summary>
- *   The YAudioOut class allows you to configure the volume of an audio outout.
+ *   The <c>YAudioOut</c> class allows you to configure the volume of an audio output.
  * <para>
  * </para>
  * <para>
@@ -121,6 +121,7 @@ public class YAudioOut : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns audio output volume, in per cents.
@@ -180,6 +181,7 @@ public class YAudioOut : YFunction
             return _setAttr("volume", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -241,6 +243,7 @@ public class YAudioOut : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the supported volume range.
@@ -274,6 +277,7 @@ public class YAudioOut : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the detected output current level.
@@ -303,6 +307,7 @@ public class YAudioOut : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the number of seconds elapsed without detecting a signal.
@@ -331,6 +336,7 @@ public class YAudioOut : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -395,6 +401,7 @@ public class YAudioOut : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -431,6 +438,7 @@ public class YAudioOut : YFunction
         }
         return 0;
     }
+
 
     public override int _invokeValueCallback(string value)
     {

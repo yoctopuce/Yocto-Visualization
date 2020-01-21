@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_colorledcluster.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_colorledcluster.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindColorLedCluster(), the high-level API for ColorLedCluster functions
  *
@@ -57,11 +57,11 @@ using YFUN_DESCR = System.Int32;
 //--- (YColorLedCluster class start)
 /**
  * <summary>
- *   The YColorLedCluster class allows you to drive a
- *   color LED cluster, for instance using a Yocto-Color-V2.
+ *   The <c>YColorLedCluster</c> class allows you to drive a
+ *   color LED cluster.
  * <para>
- *   Unlike the ColorLed class, the ColorLedCluster
- *   allows to handle several LEDs at one. Color changes can be done using RGB
+ *   Unlike the <c>ColorLed</c> class, the <c>YColorLedCluster</c>
+ *   class allows to handle several LEDs at once. Color changes can be done using RGB
  *   coordinates as well as HSL coordinates.
  *   The module performs all conversions form RGB to HSL automatically. It is then
  *   self-evident to turn on a LED with a given hue and to progressively vary its
@@ -135,6 +135,7 @@ public class YColorLedCluster : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the number of LEDs currently handled by the device.
@@ -194,6 +195,7 @@ public class YColorLedCluster : YFunction
             return _setAttr("activeLedCount", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -257,6 +259,7 @@ public class YColorLedCluster : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the maximum number of LEDs that the device can handle.
@@ -285,6 +288,7 @@ public class YColorLedCluster : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -315,6 +319,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the maximum length of sequences.
@@ -344,6 +349,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -366,6 +372,7 @@ public class YColorLedCluster : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -430,6 +437,7 @@ public class YColorLedCluster : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -467,6 +475,7 @@ public class YColorLedCluster : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackColorLedCluster != null) {
@@ -477,10 +486,12 @@ public class YColorLedCluster : YFunction
         return 0;
     }
 
+
     public virtual int sendCommand(string command)
     {
         return this.set_command(command);
     }
+
 
     /**
      * <summary>
@@ -510,6 +521,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("SR"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+String.Format("{0:x}",rgbValue));
     }
 
+
     /**
      * <summary>
      *   Changes the  color at device startup of consecutive LEDs in the cluster, using a RGB color.
@@ -538,6 +550,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("SC"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+String.Format("{0:x}",rgbValue));
     }
+
 
     /**
      * <summary>
@@ -570,6 +583,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("SC"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+String.Format("{0:x}",rgbValue));
     }
 
+
     /**
      * <summary>
      *   Changes the current color of consecutive LEDs in the cluster, using a HSL color.
@@ -597,6 +611,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("SH"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+String.Format("{0:x}",hslValue));
     }
+
 
     /**
      * <summary>
@@ -629,6 +644,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("MR"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+String.Format("{0:x}",rgbValue)+","+Convert.ToString(delay));
     }
+
 
     /**
      * <summary>
@@ -666,6 +682,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("MH"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+String.Format("{0:x}",hslValue)+","+Convert.ToString(delay));
     }
 
+
     /**
      * <summary>
      *   Adds an RGB transition to a sequence.
@@ -695,6 +712,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("AR"+Convert.ToString(seqIndex)+","+String.Format("{0:x}",rgbValue)+","+Convert.ToString(delay));
     }
+
 
     /**
      * <summary>
@@ -726,6 +744,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("AH"+Convert.ToString(seqIndex)+","+String.Format("{0:x}",hslValue)+","+Convert.ToString(delay));
     }
 
+
     /**
      * <summary>
      *   Adds a mirror ending to a sequence.
@@ -751,6 +770,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("AC"+Convert.ToString(seqIndex)+",0,0");
     }
+
 
     /**
      * <summary>
@@ -779,6 +799,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("AC"+Convert.ToString(seqIndex)+",100,"+Convert.ToString(linkSeqIndex)+",1000");
     }
 
+
     /**
      * <summary>
      *   Adds a to a sequence a hard stop code.
@@ -802,6 +823,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("AC"+Convert.ToString(seqIndex)+",100,-1,1000");
     }
+
 
     /**
      * <summary>
@@ -837,6 +859,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("LS"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+Convert.ToString(seqIndex)+","+Convert.ToString(offset));
     }
 
+
     /**
      * <summary>
      *   Links adjacent LEDs to a specific sequence at device power-on.
@@ -870,6 +893,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("LO"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+Convert.ToString(seqIndex)+","+Convert.ToString(offset));
     }
+
 
     /**
      * <summary>
@@ -905,6 +929,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("LP"+Convert.ToString(ledIndex)+","+Convert.ToString(count)+","+Convert.ToString(seqIndex)+","+Convert.ToString(periods));
     }
 
+
     /**
      * <summary>
      *   Unlinks adjacent LEDs from a  sequence.
@@ -929,6 +954,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("US"+Convert.ToString(ledIndex)+","+Convert.ToString(count));
     }
 
+
     /**
      * <summary>
      *   Starts a sequence execution: every LED linked to that sequence starts to
@@ -951,6 +977,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("SS"+Convert.ToString(seqIndex));
     }
+
 
     /**
      * <summary>
@@ -975,6 +1002,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("XS"+Convert.ToString(seqIndex));
     }
 
+
     /**
      * <summary>
      *   Stops a sequence execution and resets its contents.
@@ -997,6 +1025,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("ZS"+Convert.ToString(seqIndex));
     }
+
 
     /**
      * <summary>
@@ -1026,6 +1055,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("AS"+Convert.ToString(seqIndex)+","+Convert.ToString(autostart));
     }
 
+
     /**
      * <summary>
      *   Changes the execution speed of a sequence.
@@ -1053,6 +1083,7 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("CS"+Convert.ToString(seqIndex)+","+Convert.ToString(speed));
     }
 
+
     /**
      * <summary>
      *   Saves the LEDs power-on configuration.
@@ -1074,10 +1105,12 @@ public class YColorLedCluster : YFunction
         return this.sendCommand("WL");
     }
 
+
     public virtual int saveLedsState()
     {
         return this.sendCommand("WL");
     }
+
 
     /**
      * <summary>
@@ -1102,6 +1135,7 @@ public class YColorLedCluster : YFunction
     {
         return this.sendCommand("WS"+Convert.ToString(seqIndex));
     }
+
 
     /**
      * <summary>
@@ -1128,6 +1162,7 @@ public class YColorLedCluster : YFunction
     {
         return this._upload("rgb:0:"+Convert.ToString(ledIndex), buff);
     }
+
 
     /**
      * <summary>
@@ -1171,6 +1206,7 @@ public class YColorLedCluster : YFunction
         res = this._upload("rgb:0:"+Convert.ToString(ledIndex), buff);
         return res;
     }
+
 
     /**
      * <summary>
@@ -1219,6 +1255,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Sets up a smooth RGB color transition to the specified pixel-by-pixel list of RGB
@@ -1249,6 +1286,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Sends a binary buffer to the LED HSL buffer, as is.
@@ -1274,6 +1312,7 @@ public class YColorLedCluster : YFunction
     {
         return this._upload("hsl:0:"+Convert.ToString(ledIndex), buff);
     }
+
 
     /**
      * <summary>
@@ -1318,6 +1357,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Sets up a smooth HSL color transition to the specified pixel-by-pixel list of HSL
@@ -1347,6 +1387,7 @@ public class YColorLedCluster : YFunction
         res = this.hslArrayOfs_move(0,hslList, delay);
         return res;
     }
+
 
     /**
      * <summary>
@@ -1395,6 +1436,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns a binary buffer with content from the LED RGB buffer, as is.
@@ -1420,6 +1462,7 @@ public class YColorLedCluster : YFunction
     {
         return this._download("rgb.bin?typ=0&pos="+Convert.ToString(3*ledIndex)+"&len="+Convert.ToString(3*count));
     }
+
 
     /**
      * <summary>
@@ -1465,6 +1508,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns a list on 24bit RGB color values with the RGB LEDs startup colors.
@@ -1508,6 +1552,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns a list on sequence index for each RGB LED.
@@ -1547,6 +1592,7 @@ public class YColorLedCluster : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1593,6 +1639,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns a list of integers with the current speed for specified blinking sequences.
@@ -1632,6 +1679,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns a list of integers with the "auto-start at power on" flag state for specified blinking sequences.
@@ -1668,6 +1716,7 @@ public class YColorLedCluster : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -1706,6 +1755,7 @@ public class YColorLedCluster : YFunction
         return res;
     }
 
+
     public virtual int hsl2rgbInt(int temp1, int temp2, int temp3)
     {
         if (temp3 >= 170) {
@@ -1719,6 +1769,7 @@ public class YColorLedCluster : YFunction
         }
         return (((temp1*255 + (temp2-temp1) * (6 * temp3) + 32512)) / (65025));
     }
+
 
     public virtual int hsl2rgb(int hslValue)
     {

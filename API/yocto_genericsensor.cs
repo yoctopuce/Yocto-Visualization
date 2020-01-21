@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_genericsensor.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_genericsensor.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindGenericSensor(), the high-level API for GenericSensor functions
  *
@@ -57,10 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YGenericSensor class start)
 /**
  * <summary>
- *   The YGenericSensor class allows you to read and configure Yoctopuce signal
- *   transducers, for instance using a Yocto-0-10V-Rx, a Yocto-4-20mA-Rx, a Yocto-RS232 or a Yocto-milliVolt-Rx.
+ *   The <c>YGenericSensor</c> class allows you to read and configure Yoctopuce signal
+ *   transducers.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
  *   to register callback functions, to access the autonomous datalogger.
  *   This class adds the ability to configure the automatic conversion between the
  *   measured signal and the corresponding engineering unit.
@@ -175,6 +175,7 @@ public class YGenericSensor : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current value of the electrical signal measured by the sensor.
@@ -204,6 +205,7 @@ public class YGenericSensor : YSensor
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the measuring unit of the electrical signal used by the sensor.
@@ -232,6 +234,7 @@ public class YGenericSensor : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -303,6 +306,7 @@ public class YGenericSensor : YSensor
             return _setAttr("signalRange", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -405,6 +409,7 @@ public class YGenericSensor : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the electric signal bias for zero shift adjustment.
@@ -435,6 +440,7 @@ public class YGenericSensor : YSensor
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -512,6 +518,7 @@ public class YGenericSensor : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Returns the activation state of this input.
@@ -577,6 +584,7 @@ public class YGenericSensor : YSensor
         }
     }
 
+
     /**
      * <summary>
      *   Retrieves a generic sensor for a given identifier.
@@ -640,6 +648,7 @@ public class YGenericSensor : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -677,6 +686,7 @@ public class YGenericSensor : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackGenericSensor != null) {
@@ -686,6 +696,7 @@ public class YGenericSensor : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -700,7 +711,7 @@ public class YGenericSensor : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -718,6 +729,7 @@ public class YGenericSensor : YSensor
         return 0;
     }
 
+
     public override int _invokeTimedReportCallback(YMeasure value)
     {
         if (this._timedReportCallbackGenericSensor != null) {
@@ -727,6 +739,7 @@ public class YGenericSensor : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>

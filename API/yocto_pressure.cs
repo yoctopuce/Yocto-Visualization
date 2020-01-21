@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_pressure.cs 38510 2019-11-26 15:36:38Z mvuilleu $
+ *  $Id: yocto_pressure.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindPressure(), the high-level API for Pressure functions
  *
@@ -57,11 +57,10 @@ using YFUN_DESCR = System.Int32;
 //--- (YPressure class start)
 /**
  * <summary>
- *   The YPressure class allows you to read and configure Yoctopuce pressure
- *   sensors, for instance using a Yocto-Altimeter-V2, a Yocto-CO2-V2, a Yocto-Meteo-V2 or a Yocto-Pressure.
+ *   The <c>YPressure</c> class allows you to read and configure Yoctopuce pressure sensors.
  * <para>
- *   It inherits from YSensor class the core functions to read measurements,
- *   to register callback functions, to access the autonomous datalogger.
+ *   It inherits from <c>YSensor</c> class the core functions to read measurements,
+ *   to register callback functions, and to access the autonomous datalogger.
  * </para>
  * <para>
  * </para>
@@ -92,6 +91,7 @@ public class YPressure : YSensor
     {
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -156,6 +156,7 @@ public class YPressure : YSensor
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -193,6 +194,7 @@ public class YPressure : YSensor
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackPressure != null) {
@@ -202,6 +204,7 @@ public class YPressure : YSensor
         }
         return 0;
     }
+
 
     /**
      * <summary>
@@ -216,7 +219,7 @@ public class YPressure : YSensor
      * </summary>
      * <param name="callback">
      *   the callback function to call, or a null pointer. The callback function should take two
-     *   arguments: the function object of which the value has changed, and an YMeasure object describing
+     *   arguments: the function object of which the value has changed, and an <c>YMeasure</c> object describing
      *   the new advertised value.
      * @noreturn
      * </param>
@@ -233,6 +236,7 @@ public class YPressure : YSensor
         this._timedReportCallbackPressure = callback;
         return 0;
     }
+
 
     public override int _invokeTimedReportCallback(YMeasure value)
     {

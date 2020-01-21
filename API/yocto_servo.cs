@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_servo.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_servo.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindServo(), the high-level API for Servo functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YServo class start)
 /**
  * <summary>
- *   The YServo class is designed to drive remote-control servo motors
- *   outputs, for instance using a Yocto-Servo.
+ *   The <c>YServo</c> class is designed to drive remote-control servo motors
+ *   outputs.
  * <para>
  *   This class allows you not only to move
  *   a servo to a given position, but also to specify the time interval
@@ -76,7 +76,7 @@ public class YServo : YFunction
     public new delegate void ValueCallback(YServo func, string value);
     public new delegate void TimedReportCallback(YServo func, YMeasure measure);
 
-    public class YServoMove
+    public /* struct */ class YServoMove
     {
         public int target = YAPI.INVALID_INT;
         public int ms = YAPI.INVALID_INT;
@@ -156,6 +156,7 @@ public class YServo : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the current servo position.
@@ -214,16 +215,17 @@ public class YServo : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Returns the state of the servos.
+     *   Returns the state of the RC servo motors.
      * <para>
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   either <c>YServo.ENABLED_FALSE</c> or <c>YServo.ENABLED_TRUE</c>, according to the state of the servos
+     *   either <c>YServo.ENABLED_FALSE</c> or <c>YServo.ENABLED_TRUE</c>, according to the state of the RC servo motors
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YServo.ENABLED_INVALID</c>.
@@ -245,7 +247,7 @@ public class YServo : YFunction
 
     /**
      * <summary>
-     *   Stops or starts the servo.
+     *   Stops or starts the RC servo motor.
      * <para>
      * </para>
      * <para>
@@ -271,6 +273,7 @@ public class YServo : YFunction
             return _setAttr("enabled", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -336,6 +339,7 @@ public class YServo : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the duration in microseconds of a neutral pulse for the servo.
@@ -399,6 +403,7 @@ public class YServo : YFunction
         }
     }
 
+
     public YServoMove get_move()
     {
         YServoMove res;
@@ -451,6 +456,7 @@ public class YServo : YFunction
         rest_val = (target).ToString()+":"+(ms_duration).ToString();
         return _setAttr("move", rest_val);
     }
+
 
     /**
      * <summary>
@@ -511,6 +517,7 @@ public class YServo : YFunction
             return _setAttr("positionAtPowerOn", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -573,9 +580,10 @@ public class YServo : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retrieves a servo for a given identifier.
+     *   Retrieves a RC servo motor for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -599,11 +607,11 @@ public class YServo : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the servo is online at the time
+     *   This function does not require that the RC servo motor is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YServo.isOnline()</c> to test if the servo is
+     *   Use the method <c>YServo.isOnline()</c> to test if the RC servo motor is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a servo by logical name, no error is notified: the first instance
+     *   a RC servo motor by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -616,11 +624,11 @@ public class YServo : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the servo, for instance
+     *   a string that uniquely characterizes the RC servo motor, for instance
      *   <c>SERVORC1.servo1</c>.
      * </param>
      * <returns>
-     *   a <c>YServo</c> object allowing you to drive the servo.
+     *   a <c>YServo</c> object allowing you to drive the RC servo motor.
      * </returns>
      */
     public static YServo FindServo(string func)
@@ -635,6 +643,7 @@ public class YServo : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -673,6 +682,7 @@ public class YServo : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackServo != null) {
@@ -685,17 +695,17 @@ public class YServo : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of servos started using <c>yFirstServo()</c>.
+     *   Continues the enumeration of RC servo motors started using <c>yFirstServo()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned servos order.
-     *   If you want to find a specific a servo, use <c>Servo.findServo()</c>
+     *   Caution: You can't make any assumption about the returned RC servo motors order.
+     *   If you want to find a specific a RC servo motor, use <c>Servo.findServo()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YServo</c> object, corresponding to
-     *   a servo currently online, or a <c>null</c> pointer
-     *   if there are no more servos to enumerate.
+     *   a RC servo motor currently online, or a <c>null</c> pointer
+     *   if there are no more RC servo motors to enumerate.
      * </returns>
      */
     public YServo nextServo()
@@ -714,15 +724,15 @@ public class YServo : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of servos currently accessible.
+     *   Starts the enumeration of RC servo motors currently accessible.
      * <para>
      *   Use the method <c>YServo.nextServo()</c> to iterate on
-     *   next servos.
+     *   next RC servo motors.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YServo</c> object, corresponding to
-     *   the first servo currently online, or a <c>null</c> pointer
+     *   the first RC servo motor currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

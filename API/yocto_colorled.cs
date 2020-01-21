@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_colorled.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_colorled.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindColorLed(), the high-level API for ColorLed functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YColorLed class start)
 /**
  * <summary>
- *   The YColorLed class allows you to drive a color LED, for instance using a Yocto-Color-V2 or a Yocto-PowerColor.
+ *   The <c>ColorLed</c> class allows you to drive a color LED.
  * <para>
  *   The color can be specified using RGB coordinates as well as HSL coordinates.
  *   The module performs all conversions form RGB to HSL automatically. It is then
@@ -76,7 +76,7 @@ public class YColorLed : YFunction
     public new delegate void ValueCallback(YColorLed func, string value);
     public new delegate void TimedReportCallback(YColorLed func, YMeasure measure);
 
-    public class YColorLedMove
+    public /* struct */ class YColorLedMove
     {
         public int target = YAPI.INVALID_INT;
         public int ms = YAPI.INVALID_INT;
@@ -173,6 +173,7 @@ public class YColorLed : YFunction
         base._parseAttr(json_val);
     }
 
+
     /**
      * <summary>
      *   Returns the current RGB color of the LED.
@@ -231,6 +232,7 @@ public class YColorLed : YFunction
             return _setAttr("rgbColor", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -291,6 +293,7 @@ public class YColorLed : YFunction
         }
     }
 
+
     public YColorLedMove get_rgbMove()
     {
         YColorLedMove res;
@@ -344,6 +347,7 @@ public class YColorLed : YFunction
         return _setAttr("rgbMove", rest_val);
     }
 
+
     public YColorLedMove get_hslMove()
     {
         YColorLedMove res;
@@ -396,6 +400,7 @@ public class YColorLed : YFunction
         rest_val = (hsl_target).ToString()+":"+(ms_duration).ToString();
         return _setAttr("hslMove", rest_val);
     }
+
 
     /**
      * <summary>
@@ -457,6 +462,7 @@ public class YColorLed : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the current length of the blinking sequence.
@@ -486,6 +492,7 @@ public class YColorLed : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the maximum length of the blinking sequence.
@@ -514,6 +521,7 @@ public class YColorLed : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -548,6 +556,7 @@ public class YColorLed : YFunction
         return res;
     }
 
+
     public string get_command()
     {
         string res;
@@ -570,6 +579,7 @@ public class YColorLed : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -634,6 +644,7 @@ public class YColorLed : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -671,6 +682,7 @@ public class YColorLed : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackColorLed != null) {
@@ -681,10 +693,12 @@ public class YColorLed : YFunction
         return 0;
     }
 
+
     public virtual int sendCommand(string command)
     {
         return this.set_command(command);
     }
+
 
     /**
      * <summary>
@@ -709,6 +723,7 @@ public class YColorLed : YFunction
         return this.sendCommand("H"+Convert.ToString(HSLcolor)+","+Convert.ToString(msDelay));
     }
 
+
     /**
      * <summary>
      *   Adds a new transition to the blinking sequence, the move is
@@ -732,6 +747,7 @@ public class YColorLed : YFunction
         return this.sendCommand("R"+Convert.ToString(RGBcolor)+","+Convert.ToString(msDelay));
     }
 
+
     /**
      * <summary>
      *   Starts the preprogrammed blinking sequence.
@@ -751,6 +767,7 @@ public class YColorLed : YFunction
         return this.sendCommand("S");
     }
 
+
     /**
      * <summary>
      *   Stops the preprogrammed blinking sequence.
@@ -766,6 +783,7 @@ public class YColorLed : YFunction
     {
         return this.sendCommand("X");
     }
+
 
     /**
      * <summary>

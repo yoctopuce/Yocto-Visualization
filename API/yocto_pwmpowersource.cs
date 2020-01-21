@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_pwmpowersource.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_pwmpowersource.cs 38899 2019-12-20 17:21:03Z mvuilleu $
  *
  *  Implements yFindPwmPowerSource(), the high-level API for PwmPowerSource functions
  *
@@ -57,8 +57,8 @@ using YFUN_DESCR = System.Int32;
 //--- (YPwmPowerSource class start)
 /**
  * <summary>
- *   The YPwmPowerSource class allows you to configure
- *   the voltage source used by all PWM outputs on the same device, for instance using a Yocto-PWM-Tx.
+ *   The <c>YPwmPowerSource</c> class allows you to configure
+ *   the voltage source used by all PWM outputs on the same device.
  * <para>
  * </para>
  * <para>
@@ -99,6 +99,7 @@ public class YPwmPowerSource : YFunction
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -169,9 +170,10 @@ public class YPwmPowerSource : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Retrieves a voltage source for a given identifier.
+     *   Retrieves a PWM generator power source for a given identifier.
      * <para>
      *   The identifier can be specified using several formats:
      * </para>
@@ -195,11 +197,11 @@ public class YPwmPowerSource : YFunction
      * <para>
      * </para>
      * <para>
-     *   This function does not require that the voltage source is online at the time
+     *   This function does not require that the PWM generator power source is online at the time
      *   it is invoked. The returned object is nevertheless valid.
-     *   Use the method <c>YPwmPowerSource.isOnline()</c> to test if the voltage source is
+     *   Use the method <c>YPwmPowerSource.isOnline()</c> to test if the PWM generator power source is
      *   indeed online at a given time. In case of ambiguity when looking for
-     *   a voltage source by logical name, no error is notified: the first instance
+     *   a PWM generator power source by logical name, no error is notified: the first instance
      *   found is returned. The search is performed first by hardware name,
      *   then by logical name.
      * </para>
@@ -212,11 +214,11 @@ public class YPwmPowerSource : YFunction
      * </para>
      * </summary>
      * <param name="func">
-     *   a string that uniquely characterizes the voltage source, for instance
+     *   a string that uniquely characterizes the PWM generator power source, for instance
      *   <c>YPWMTX01.pwmPowerSource</c>.
      * </param>
      * <returns>
-     *   a <c>YPwmPowerSource</c> object allowing you to drive the voltage source.
+     *   a <c>YPwmPowerSource</c> object allowing you to drive the PWM generator power source.
      * </returns>
      */
     public static YPwmPowerSource FindPwmPowerSource(string func)
@@ -231,6 +233,7 @@ public class YPwmPowerSource : YFunction
         }
         return obj;
     }
+
 
     /**
      * <summary>
@@ -269,6 +272,7 @@ public class YPwmPowerSource : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackPwmPowerSource != null) {
@@ -281,17 +285,17 @@ public class YPwmPowerSource : YFunction
 
     /**
      * <summary>
-     *   Continues the enumeration of Voltage sources started using <c>yFirstPwmPowerSource()</c>.
+     *   Continues the enumeration of PWM generator power sources started using <c>yFirstPwmPowerSource()</c>.
      * <para>
-     *   Caution: You can't make any assumption about the returned Voltage sources order.
-     *   If you want to find a specific a voltage source, use <c>PwmPowerSource.findPwmPowerSource()</c>
+     *   Caution: You can't make any assumption about the returned PWM generator power sources order.
+     *   If you want to find a specific a PWM generator power source, use <c>PwmPowerSource.findPwmPowerSource()</c>
      *   and a hardwareID or a logical name.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YPwmPowerSource</c> object, corresponding to
-     *   a voltage source currently online, or a <c>null</c> pointer
-     *   if there are no more Voltage sources to enumerate.
+     *   a PWM generator power source currently online, or a <c>null</c> pointer
+     *   if there are no more PWM generator power sources to enumerate.
      * </returns>
      */
     public YPwmPowerSource nextPwmPowerSource()
@@ -310,15 +314,15 @@ public class YPwmPowerSource : YFunction
 
     /**
      * <summary>
-     *   Starts the enumeration of Voltage sources currently accessible.
+     *   Starts the enumeration of PWM generator power sources currently accessible.
      * <para>
      *   Use the method <c>YPwmPowerSource.nextPwmPowerSource()</c> to iterate on
-     *   next Voltage sources.
+     *   next PWM generator power sources.
      * </para>
      * </summary>
      * <returns>
      *   a pointer to a <c>YPwmPowerSource</c> object, corresponding to
-     *   the first source currently online, or a <c>null</c> pointer
+     *   the first PWM generator power source currently online, or a <c>null</c> pointer
      *   if there are none.
      * </returns>
      */

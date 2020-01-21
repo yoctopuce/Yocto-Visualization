@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_i2cport.cs 37827 2019-10-25 13:07:48Z mvuilleu $
+ *  $Id: yocto_i2cport.cs 38934 2019-12-23 09:29:53Z seb $
  *
  *  Implements yFindI2cPort(), the high-level API for I2cPort functions
  *
@@ -57,7 +57,7 @@ using YFUN_DESCR = System.Int32;
 //--- (YI2cPort class start)
 /**
  * <summary>
- *   The YI2cPort classe allows you to fully drive a Yoctopuce I2C port, for instance using a Yocto-I2C.
+ *   The <c>YI2cPort</c> classe allows you to fully drive a Yoctopuce I2C port.
  * <para>
  *   It can be used to send and receive data, and to configure communication
  *   parameters (baud rate, etc).
@@ -83,6 +83,8 @@ public class YI2cPort : YFunction
     public const string LASTMSG_INVALID = YAPI.INVALID_STRING;
     public const string CURRENTJOB_INVALID = YAPI.INVALID_STRING;
     public const string STARTUPJOB_INVALID = YAPI.INVALID_STRING;
+    public const int JOBMAXTASK_INVALID = YAPI.INVALID_UINT;
+    public const int JOBMAXSIZE_INVALID = YAPI.INVALID_UINT;
     public const string COMMAND_INVALID = YAPI.INVALID_STRING;
     public const string PROTOCOL_INVALID = YAPI.INVALID_STRING;
     public const int I2CVOLTAGELEVEL_OFF = 0;
@@ -98,6 +100,8 @@ public class YI2cPort : YFunction
     protected string _lastMsg = LASTMSG_INVALID;
     protected string _currentJob = CURRENTJOB_INVALID;
     protected string _startupJob = STARTUPJOB_INVALID;
+    protected int _jobMaxTask = JOBMAXTASK_INVALID;
+    protected int _jobMaxSize = JOBMAXSIZE_INVALID;
     protected string _command = COMMAND_INVALID;
     protected string _protocol = PROTOCOL_INVALID;
     protected int _i2cVoltageLevel = I2CVOLTAGELEVEL_INVALID;
@@ -152,6 +156,14 @@ public class YI2cPort : YFunction
         {
             _startupJob = json_val.getString("startupJob");
         }
+        if (json_val.has("jobMaxTask"))
+        {
+            _jobMaxTask = json_val.getInt("jobMaxTask");
+        }
+        if (json_val.has("jobMaxSize"))
+        {
+            _jobMaxSize = json_val.getInt("jobMaxSize");
+        }
         if (json_val.has("command"))
         {
             _command = json_val.getString("command");
@@ -170,6 +182,7 @@ public class YI2cPort : YFunction
         }
         base._parseAttr(json_val);
     }
+
 
     /**
      * <summary>
@@ -200,6 +213,7 @@ public class YI2cPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the total number of bytes transmitted since last reset.
@@ -228,6 +242,7 @@ public class YI2cPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -258,6 +273,7 @@ public class YI2cPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the total number of messages received since last reset.
@@ -286,6 +302,7 @@ public class YI2cPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -316,6 +333,7 @@ public class YI2cPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Returns the latest message fully received (for Line and Frame protocols).
@@ -344,6 +362,7 @@ public class YI2cPort : YFunction
         }
         return res;
     }
+
 
     /**
      * <summary>
@@ -405,6 +424,7 @@ public class YI2cPort : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the job file to use when the device is powered on.
@@ -465,6 +485,67 @@ public class YI2cPort : YFunction
         }
     }
 
+
+    /**
+     * <summary>
+     *   Returns the maximum number of tasks in a job that the device can handle.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to the maximum number of tasks in a job that the device can handle
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YI2cPort.JOBMAXTASK_INVALID</c>.
+     * </para>
+     */
+    public int get_jobMaxTask()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration == 0) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return JOBMAXTASK_INVALID;
+                }
+            }
+            res = this._jobMaxTask;
+        }
+        return res;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns maximum size allowed for job files.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to maximum size allowed for job files
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YI2cPort.JOBMAXSIZE_INVALID</c>.
+     * </para>
+     */
+    public int get_jobMaxSize()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration == 0) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return JOBMAXSIZE_INVALID;
+                }
+            }
+            res = this._jobMaxSize;
+        }
+        return res;
+    }
+
+
     public string get_command()
     {
         string res;
@@ -487,6 +568,7 @@ public class YI2cPort : YFunction
             return _setAttr("command", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -556,6 +638,7 @@ public class YI2cPort : YFunction
         }
     }
 
+
     /**
      * <summary>
      *   Returns the voltage level used on the I2C bus.
@@ -618,9 +701,10 @@ public class YI2cPort : YFunction
         }
     }
 
+
     /**
      * <summary>
-     *   Returns the SPI port communication parameters, as a string such as
+     *   Returns the I2C port communication parameters, as a string such as
      *   "400kbps,2000ms,NoRestart".
      * <para>
      *   The string includes the baud rate, the
@@ -632,7 +716,7 @@ public class YI2cPort : YFunction
      * </para>
      * </summary>
      * <returns>
-     *   a string corresponding to the SPI port communication parameters, as a string such as
+     *   a string corresponding to the I2C port communication parameters, as a string such as
      *   "400kbps,2000ms,NoRestart"
      * </returns>
      * <para>
@@ -655,7 +739,7 @@ public class YI2cPort : YFunction
 
     /**
      * <summary>
-     *   Changes the SPI port communication parameters, with a string such as
+     *   Changes the I2C port communication parameters, with a string such as
      *   "400kbps,2000ms".
      * <para>
      *   The string includes the baud rate, the
@@ -669,7 +753,7 @@ public class YI2cPort : YFunction
      * </para>
      * </summary>
      * <param name="newval">
-     *   a string corresponding to the SPI port communication parameters, with a string such as
+     *   a string corresponding to the I2C port communication parameters, with a string such as
      *   "400kbps,2000ms"
      * </param>
      * <para>
@@ -689,6 +773,7 @@ public class YI2cPort : YFunction
             return _setAttr("i2cMode", rest_val);
         }
     }
+
 
     /**
      * <summary>
@@ -753,6 +838,7 @@ public class YI2cPort : YFunction
         return obj;
     }
 
+
     /**
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
@@ -790,6 +876,7 @@ public class YI2cPort : YFunction
         return 0;
     }
 
+
     public override int _invokeValueCallback(string value)
     {
         if (this._valueCallbackI2cPort != null) {
@@ -800,10 +887,12 @@ public class YI2cPort : YFunction
         return 0;
     }
 
+
     public virtual int sendCommand(string text)
     {
         return this.set_command(text);
     }
+
 
     /**
      * <summary>
@@ -849,6 +938,7 @@ public class YI2cPort : YFunction
         res = this._json_get_string(YAPI.DefaultEncoding.GetBytes(msgarr[0]));
         return res;
     }
+
 
     /**
      * <summary>
@@ -909,6 +999,7 @@ public class YI2cPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Changes the current internal stream position to the specified value.
@@ -931,6 +1022,7 @@ public class YI2cPort : YFunction
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Returns the current absolute stream position pointer of the API object.
@@ -945,6 +1037,7 @@ public class YI2cPort : YFunction
     {
         return this._rxptr;
     }
+
 
     /**
      * <summary>
@@ -971,6 +1064,7 @@ public class YI2cPort : YFunction
         res = YAPI._atoi((YAPI.DefaultEncoding.GetString(buff)).Substring( 0, bufflen));
         return res;
     }
+
 
     /**
      * <summary>
@@ -1018,6 +1112,7 @@ public class YI2cPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Saves the job definition string (JSON data) into a job file.
@@ -1032,7 +1127,7 @@ public class YI2cPort : YFunction
      *   a string containing a JSON definition of the job
      * </param>
      * <returns>
-     *   <c>YAPI_SUCCESS</c> if the call succeeds.
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1043,6 +1138,7 @@ public class YI2cPort : YFunction
         this._upload(jobfile, YAPI.DefaultEncoding.GetBytes(jsonDef));
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>
@@ -1059,7 +1155,7 @@ public class YI2cPort : YFunction
      *   name of the job file (on the device filesystem)
      * </param>
      * <returns>
-     *   <c>YAPI_SUCCESS</c> if the call succeeds.
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
      * </returns>
      * <para>
      *   On failure, throws an exception or returns a negative error code.
@@ -1069,6 +1165,7 @@ public class YI2cPort : YFunction
     {
         return this.set_currentJob(jobfile);
     }
+
 
     /**
      * <summary>
@@ -1093,6 +1190,7 @@ public class YI2cPort : YFunction
 
         return this.sendCommand("Z");
     }
+
 
     /**
      * <summary>
@@ -1139,6 +1237,7 @@ public class YI2cPort : YFunction
         return YAPI.SUCCESS;
     }
 
+
     /**
      * <summary>
      *   Sends a one-way message (provided as a list of integer) to a device on the I2C bus.
@@ -1183,6 +1282,7 @@ public class YI2cPort : YFunction
         if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "I2C protocol error"); return YAPI.IO_ERROR; }
         return YAPI.SUCCESS;
     }
+
 
     /**
      * <summary>
@@ -1241,6 +1341,7 @@ public class YI2cPort : YFunction
         rcvbytes = YAPI._hexStrToBin(reply);
         return rcvbytes;
     }
+
 
     /**
      * <summary>
@@ -1307,6 +1408,7 @@ public class YI2cPort : YFunction
         return res;
     }
 
+
     /**
      * <summary>
      *   Sends a text-encoded I2C code stream to the I2C bus, as is.
@@ -1362,6 +1464,7 @@ public class YI2cPort : YFunction
         return this._upload("txdata", buff);
     }
 
+
     /**
      * <summary>
      *   Sends a text-encoded I2C code stream to the I2C bus, and terminate
@@ -1402,6 +1505,7 @@ public class YI2cPort : YFunction
         return this._upload("txdata", buff);
     }
 
+
     /**
      * <summary>
      *   Sends a single byte to the I2C bus.
@@ -1424,6 +1528,7 @@ public class YI2cPort : YFunction
     {
         return this.sendCommand("+"+String.Format("{0:X02}",code));
     }
+
 
     /**
      * <summary>
@@ -1455,6 +1560,7 @@ public class YI2cPort : YFunction
 
         return this._upload("txdata", buff);
     }
+
 
     /**
      * <summary>
@@ -1491,6 +1597,7 @@ public class YI2cPort : YFunction
 
         return this.writeHex(msg);
     }
+
 
     /**
      * <summary>
