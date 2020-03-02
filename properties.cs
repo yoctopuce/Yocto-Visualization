@@ -77,7 +77,8 @@ namespace YoctoVisualisation
    
     public const string DevConfAffected = " Changing this value will affect the device configuration.";
     public const string CheckSensor = "If the sensor you want to use is connected, but not listed or listed as OFFLINE, check USB / Network configuration in the global configuration.";
-
+    public const string AnnotationGraph = "Annotation text.  Use \\n for carriage returns. Some variables are available: $DAY$ $MONTH$ $YEAR$ for date, $HOUR$ $MINUTE$ $SECOND$ for time, $AVGVALUE1$ $MINVALUE1$ $MAXVALUE1$ $NAME1$ $UNIT1$  for first series data, $AVGVALUE2$ $MINVALUE2$ $MAXVALUE2$ $NAME2$ $UNIT2$  for second series data and so on";
+    public const string Annotation = "Annotation text.  Use \\n for carriage returns. Some variables are available: $DAY$ $MONTH$ $YEAR$ for date, $HOUR$ $MINUTE$ $SECOND$ for time, $AVGVALUE$ $MINVALUE$ $MAXVALUE$ $NAME$ $UNIT$ for sensor related data.";
 
 
   }
@@ -457,7 +458,36 @@ public static class sensorPrecisionTypeDescription
       return !(_DataSource_source is NullYSensor);
     }
 
- 
+
+    private AnnotationPanelDescription _annotationPanels0 = new AnnotationPanelDescription(
+        GenericPanel.HorizontalAlignPos.CENTER, GenericPanel.VerticalAlignPos.BOTTOM,0, false,"$NAME$",
+        YColor.FromArgb(0, 127, 127, 127), YColor.FromArgb(0, 127, 127, 127),
+        10.0, YColor.FromArgb(255, 0, 0, 0));
+    [
+     DisplayName("Annotation 1"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panels")]
+    public AnnotationPanelDescription SolidGauge_annotationPanels0
+    {
+      get { return _annotationPanels0; }
+      set { _annotationPanels0 = value; }
+    }
+
+    private AnnotationPanelDescription _annotationPanels1 = new AnnotationPanelDescription(
+         GenericPanel.HorizontalAlignPos.LEFT, GenericPanel.VerticalAlignPos.TOP,0, true, "$HOUR$:$MINUTE$",
+         YColor.FromArgb(255, 255, 255, 255), YColor.FromArgb(255, 0, 0, 0),
+         8.0, YColor.FromArgb(255, 0, 0, 0));
+    [
+     DisplayName("Annotation 2"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panels")]
+    public AnnotationPanelDescription SolidGauge_annotationPanels1
+    {
+      get { return _annotationPanels1; }
+      set { _annotationPanels1 = value; }
+    }
 
 
 
@@ -894,6 +924,36 @@ public static class sensorPrecisionTypeDescription
       set { _AngularGauge_zones2 = value; }
     }
 
+    private AnnotationPanelDescription _annotationPanels0 = new AnnotationPanelDescription(
+       GenericPanel.HorizontalAlignPos.CENTER, GenericPanel.VerticalAlignPos.CENTER,-15, true, "$NAME$",
+       YColor.FromArgb(0, 127, 127, 127), YColor.FromArgb(0, 127, 127, 127),
+       8.0, YColor.FromArgb(255, 127, 127, 127));
+    [
+     DisplayName("Annotation 1"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panels")]
+    public AnnotationPanelDescription AngularGauge_annotationPanels0
+    {
+      get { return _annotationPanels0; }
+      set { _annotationPanels0 = value; }
+    }
+
+    private AnnotationPanelDescription _annotationPanels1 = new AnnotationPanelDescription(
+         GenericPanel.HorizontalAlignPos.CENTER, GenericPanel.VerticalAlignPos.BOTTOM,0, false, "$HOUR$:$MINUTE$",
+         YColor.FromArgb(255, 255, 255, 255), YColor.FromArgb(255, 127, 127, 127),
+         12.0, YColor.FromArgb(255, 0, 0, 0));
+    [
+     DisplayName("Annotation 2"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panels")]
+    public AnnotationPanelDescription AngularGauge_annotationPanels1
+    {
+      get { return _annotationPanels1; }
+      set { _annotationPanels1 = value; }
+    }
+
 
   }
 
@@ -1280,6 +1340,35 @@ public static class sensorPrecisionTypeDescription
       set { _outOfRangeColor = value; }
     }
 
+    private AnnotationPanelDescription _annotationPanels0 =  new AnnotationPanelDescription(
+         GenericPanel.HorizontalAlignPos.CENTER, GenericPanel.VerticalAlignPos.BOTTOM,0, false, "$NAME$",
+         YColor.FromArgb(0, 127, 127, 127), YColor.FromArgb(0, 127, 127, 127),
+         10.0, YColor.FromArgb(255, 128, 255, 128));
+    [
+     DisplayName("Annotation 1"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panels")]
+    public AnnotationPanelDescription display_annotationPanels0
+    {
+      get { return _annotationPanels0; }
+      set { _annotationPanels0 = value; }
+    }
+
+    private AnnotationPanelDescription _annotationPanels1 = new AnnotationPanelDescription(
+         GenericPanel.HorizontalAlignPos.CENTER, GenericPanel.VerticalAlignPos.TOP,0, false, "$HOUR$:$MINUTE$",
+         YColor.FromArgb(0, 127, 127, 127), YColor.FromArgb(0, 127, 127, 127),
+         8.0, YColor.FromArgb(255, 128, 255, 128));
+    [
+     DisplayName("Annotation 2"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panels")]
+    public AnnotationPanelDescription display_annotationPanels1
+    {
+      get { return _annotationPanels1; }
+      set { _annotationPanels1 = value; }
+    }
 
 
   }
@@ -1371,7 +1460,7 @@ public static class sensorPrecisionTypeDescription
    
     [DisplayName("Trigger action"),
       NotSavedInXMLAttribute(true),
-     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $HWDID$, $NAME$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$. You can check logs to find out if your alarm command line works.")]
+     DescriptionAttribute("System command line executed each time the alarm is triggered, you can use the following variables: $SENSORVALUE$, $UNIT$, $HWDID$, $NAME$, $CONDITION$, $TRIGGER$, $DATATYPE$, $NOW$. You can check logs to find out if your alarm command line works.")]
     public string commandLine
     {
       get {
@@ -1657,6 +1746,128 @@ public static class sensorPrecisionTypeDescription
   }
 
 
+
+  public class AnnotationPanelDescription 
+  {
+
+    public string summary
+    {
+      get { return _enabled ? "Enabled" : "Disabled"; }
+    }
+
+    protected bool _enabled = false;
+    [DisplayName("Enabled"),
+     ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should the annotation panel be shown or not")]
+     public virtual bool enabled { get { return _enabled; } set { _enabled = value; } }
+
+    protected  bool _overlap = false;
+    [DisplayName("Overlap"),
+     DescriptionAttribute("Can the annotation panel overlap the display zone, or should the display zone be squeezed to make space for the panel?")]
+     public virtual bool overlap { get { return _overlap; } set { _overlap = value; } }
+
+    protected String _text = "Date: $DAY$/$MONTH$/$YEAR$";
+    [DisplayName("Text "),
+     DescriptionAttribute(GenericHints.Annotation)]
+     public virtual string text { get { return _text; } set { _text = value; } }
+
+    
+    protected GenericPanel.TextAlign _panelTextAlign = GenericPanel.TextAlign.CENTER;
+    [DisplayName("Text Alignment"),
+     DescriptionAttribute("How text is aligned, makes sense on multi-lines text only.")]
+    public GenericPanel.TextAlign panelTextAlign { get { return _panelTextAlign; } set { _panelTextAlign = value;  } }
+
+
+    private GenericPanel.HorizontalAlignPos _panelHrzAlign = GenericPanel.HorizontalAlignPos.CENTER;
+    [DisplayName("X Position"),
+     DescriptionAttribute("Annotation panel X position")]
+     public GenericPanel.HorizontalAlignPos panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; } }
+
+    private double _positionOffsetX = 0;
+    [DisplayName("X Offset"),
+     DescriptionAttribute("X Position offset, in %  (overlap mode only)")]
+     public double positionOffsetX { get { return _positionOffsetX; } set { _positionOffsetX = value; } }
+
+    private GenericPanel.VerticalAlignPos _panelVrtAlign = GenericPanel.VerticalAlignPos.TOP;
+    [DisplayName("Y Position"),
+     DescriptionAttribute("Annotation panel Y position")]
+     public GenericPanel.VerticalAlignPos panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; } }
+
+    private double _positionOffsetY = 0;
+    [DisplayName("Y Offset"),
+     DescriptionAttribute("Y Position offset, in %  (overlap mode only)")]
+     public double positionOffsetY { get { return _positionOffsetY; } set { _positionOffsetY = value; } }
+
+    private FontDescription _font = new FontDescription("Arial", 12, YColor.FromArgb(255, 32, 32, 32), false, false);
+    [DisplayName("Font"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Panel font")]
+     public FontDescription font
+    {
+      get { return _font; }
+      set { _font = value; }
+    }
+
+    private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
+    [DisplayName("Background color "),
+    DescriptionAttribute("Legend panel background color." + GenericHints.ColorMsg)]
+    public YColor bgColor { get { return _bgColor; } set { _bgColor = value; } }
+
+    private YColor _borderColor = YColor.fromColor(Color.Black);
+    [DisplayName("Border color "),
+
+    DescriptionAttribute("Legend panel border color." + GenericHints.ColorMsg)]
+    public YColor borderColor { get { return _borderColor; } set { _borderColor = value; } }
+
+    private double _borderthickness = 1.0;
+    [DisplayName("Border thickness "),
+     DescriptionAttribute("Panel border thickness")]
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; } }
+
+    private double _padding = 5;
+    [DisplayName("Padding "),
+     DescriptionAttribute("Distance between the panel border and the panel contents")]
+    public double padding { get { return _padding; } set { _padding = value; } }
+
+   
+
+    public  AnnotationPanelDescription()
+    { }
+
+   
+
+    public  AnnotationPanelDescription(GenericPanel.HorizontalAlignPos hrzAlignInit,GenericPanel.VerticalAlignPos vrtAlignInit , double offsetY, bool overlap, string textInit, YColor BgColorInit, YColor BorderColorInit,  double fontSizeInit, YColor FontColorInit )
+    { // allows alternate default value
+      _text = textInit;
+      _positionOffsetY = offsetY;
+      _overlap = overlap;
+      _bgColor = BgColorInit;
+      _borderColor = BorderColorInit;
+      _font.size = fontSizeInit;
+      _font.color = FontColorInit;
+      _panelVrtAlign = vrtAlignInit;
+      _panelHrzAlign = hrzAlignInit;
+    }
+
+  }
+
+  public class AnnotationPanelDescriptionGraph : AnnotationPanelDescription
+  { // overrided  propoerty will be moved back in first 
+    // position, 
+
+    [DisplayName("Enabled"),
+     ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should the annotation panel be shown or not")]
+
+    public override bool enabled { get { return _enabled; }  set { _enabled = value; } }
+    [DisplayName("Overlap"),
+     DescriptionAttribute("Can the annotation panel overlap the graph, or should the graph be squeezed to make space for the panel?")]
+
+    public override bool overlap { get { return _overlap; } set { _overlap = value; } }
+    [DisplayName("Text "), 
+     DescriptionAttribute(GenericHints.AnnotationGraph)]
+    public override string text { get { return _text; } set { _text = value; } }
+  }
 
   public class DataTrackerDescription
   {
@@ -2390,7 +2601,6 @@ public static class sensorPrecisionTypeDescription
       set { _Graph_xAxis = value; }
     }
 
-
     private YaxisDescription _Graph_yAxes0 = new YaxisDescription(0, true);
     [
       DisplayName("YAxis 1"),
@@ -2438,11 +2648,7 @@ public static class sensorPrecisionTypeDescription
     {
       get { return _Graph_legendPanel; }
       set { _Graph_legendPanel = value; }
-
-
     }
-
-
 
     private DataTrackerDescription _Graph_dataTracker = new DataTrackerDescription();
     [
@@ -2456,7 +2662,6 @@ public static class sensorPrecisionTypeDescription
       set { _Graph_dataTracker = value; }
     }
 
-
     private NavigatorDescription _Graph_navigator = new NavigatorDescription();
     [
       DisplayName("Navigator"),
@@ -2468,6 +2673,33 @@ public static class sensorPrecisionTypeDescription
       get { return _Graph_navigator; }
      set { _Graph_navigator = value; }
     }
+
+    private AnnotationPanelDescription _annotationPanels0 = new AnnotationPanelDescriptionGraph();
+    [
+     DisplayName("Annotation 1"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panel 1")]
+     public AnnotationPanelDescription Graph_annotationPanels0
+    {
+      get { return _annotationPanels0; }
+      set { _annotationPanels0 = value; }
+     }
+
+    private AnnotationPanelDescription _annotationPanels1 = new AnnotationPanelDescriptionGraph();
+    [
+     DisplayName("Annotation 2"),
+     CategoryAttribute("Annotations"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Customizable text panel 2")]
+     public AnnotationPanelDescription Graph_annotationPanels1
+    {
+       get { return _annotationPanels1; }
+       set { _annotationPanels1 = value; }
+     }
+
+
+
 
   }
 

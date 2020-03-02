@@ -48,16 +48,10 @@ using System.Windows.Forms;
 
 namespace YDataRendering
 {
-
-
-  
-
   public class YDigitalDisplay : YDataRenderer
   {
-    
 
     public enum HrzAlignment {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Decimal point")]DECIMAL, [Description("Right")]RIGHT };
-    
 
     private Brush _bgBrush = null;
 
@@ -121,74 +115,89 @@ namespace YDataRendering
      
       this._font       = new YFontParams(this,this, Math.Min(ChartContainer.Width/5, ChartContainer.Height/2), null);
       this._font.color = Color.LightGreen;
-     
+
+    
+
+
       AllowRedraw();
       Draw();
 
     }
 
     public override void clearCachedObjects( )
-    { font.ResetFont (null);
+    { if (font!=null) font.ResetFont (null);
       _bgBrush = null;
-
-
 
     }
 
-
-
-
     protected override int Render(YGraphics g, int w, int h)
     {
-     
+
+      ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
+      mainViewPort.Lmargin = 0;
+      mainViewPort.Rmargin = 0;
+      mainViewPort.Tmargin = 0;
+      mainViewPort.Bmargin = 0;
+
       g.SmoothingMode = SmoothingMode.HighQuality;
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
       StringFormat stringFormat = new StringFormat(StringFormatFlags.NoClip);
       stringFormat.Alignment = StringAlignment.Center;
 
-
       if (_bgBrush==null)
         _bgBrush = new LinearGradientBrush(new Point(0,0),
                                            new Point(0,h), _backgroundColor1, _backgroundColor2);
-
       g.FillRectangle(_bgBrush, 0, 0, w, h);
 
+      drawAnnotationPanels(g, _annotationPanels, w, h, false, ref mainViewPort);
+      if (mainViewPort.Tmargin >= 20) mainViewPort.Tmargin -= 10;  // AnnotationPanels adds at least 20px warnings
+      if (mainViewPort.Bmargin >= 20) mainViewPort.Bmargin -= 10;  // which is a bit much for digital display
 
-      // draw unit
-      string svalue;
-      if (_alternateValue == null)
+      g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+      int availWidth  = w- (mainViewPort.Lmargin + mainViewPort.Rmargin);
+      int availHeight = h- (mainViewPort.Tmargin + mainViewPort.Bmargin);
+
+      if ((availWidth > 10) && (availHeight > 10))
+      {// draw unit
+        string svalue;
+        if (_alternateValue == null)
         {
-           svalue = _valueFormater == null ? value.ToString("0.0") : _valueFormater(this, value);
-           if ((!Double.IsNaN(_outOfRangeMin)) && (value < _outOfRangeMin)) font.alternateColor = _outOfRangeColor;
-           else if ((!Double.IsNaN(_outOfRangeMax)) && (value > _outOfRangeMax)) font.alternateColor = _outOfRangeColor;
-           else font.alternateColor = null;
+          svalue = _valueFormater == null ? value.ToString("0.0") : _valueFormater(this, value);
+          if ((!Double.IsNaN(_outOfRangeMin)) && (value < _outOfRangeMin)) font.alternateColor = _outOfRangeColor;
+          else if ((!Double.IsNaN(_outOfRangeMax)) && (value > _outOfRangeMax)) font.alternateColor = _outOfRangeColor;
+          else font.alternateColor = null;
 
-       }
-      else
-      {
-        _font.alternateColor = null;
-        svalue = _alternateValue;
-      }
+        }
+        else
+        {
+          _font.alternateColor = null;
+          svalue = _alternateValue;
+        }
 
-      SizeF size = g.MeasureString(svalue, font.fontObject, 10000, stringFormat);
-      Rectangle pos;
+        SizeF size = g.MeasureString(svalue, font.fontObject, 10000, stringFormat);
+        Rectangle pos;
 
-      HrzAlignment align = _hrzAlignment;
-      if ((_alternateValue != null) && (align == HrzAlignment.DECIMAL)) align = HrzAlignment.RIGHT;
+        HrzAlignment align = _hrzAlignment;
+        if ((_alternateValue != null) && (align == HrzAlignment.DECIMAL)) align = HrzAlignment.RIGHT;
 
-      switch  (align)
-      {
-        case HrzAlignment.LEFT:
-           pos = new Rectangle((int)(w* hrzAlignmentOfset /100 ), (int)((h- size.Height) / 2), (int)(size.Width + 1), (int)(size.Height + 1));
-           g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
-           break;
-        case HrzAlignment.CENTER:
-           pos = new Rectangle((int)((w - size.Width)/2), (int)((h - size.Height) / 2), (int)(size.Width + 1), (int)(size.Height + 1));
-           g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
-           break;
-        case HrzAlignment.DECIMAL:
-          
+        switch (align)
+        {
+          case HrzAlignment.LEFT:
+            pos = new Rectangle(mainViewPort.Lmargin+(int)(availWidth * hrzAlignmentOfset / 100),
+                                mainViewPort.Tmargin+(int)((availHeight - size.Height) / 2), 
+                                (int)(size.Width + 1), (int)(size.Height + 1));
+            g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
+            break;
+          case HrzAlignment.CENTER:
+            pos = new Rectangle(mainViewPort.Lmargin + (int)((availWidth - size.Width) / 2),
+                                mainViewPort.Tmargin+(int)((availHeight - size.Height) / 2), 
+                               (int)(size.Width + 1), (int)(size.Height + 1));
+            g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
+            break;
+          case HrzAlignment.DECIMAL:
+
             string left = "";
 
             int p = svalue.LastIndexOf(',');
@@ -207,18 +216,24 @@ namespace YDataRendering
             }
 
             SizeF lsize = g.MeasureString(left, font.fontObject, 10000, stringFormat);
-            pos = new Rectangle((int)(w - lsize.Width - w * hrzAlignmentOfset / 100), (int)((h - size.Height) / 2), (int)(size.Width + 1), (int)(size.Height + 1));
+            pos = new Rectangle(mainViewPort.Lmargin + (int)(availWidth - lsize.Width - availWidth * hrzAlignmentOfset / 100),
+                                mainViewPort.Tmargin + (int)((availHeight - size.Height) / 2), 
+                                (int)(size.Width + 1), (int)(size.Height + 1));
             g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
             break;
-         
-        case HrzAlignment.RIGHT:
-           pos = new Rectangle((int)(w- size.Width - w * hrzAlignmentOfset / 100), (int)((h - size.Height) / 2), (int)(size.Width + 1), (int)(size.Height + 1));
-           g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
-           break;
 
-      }
+          case HrzAlignment.RIGHT:
+            pos = new Rectangle(mainViewPort.Lmargin + (int)(availWidth - size.Width - availWidth * hrzAlignmentOfset / 100),
+                                mainViewPort.Tmargin + (int)((availHeight - size.Height) / 2), 
+                                (int)(size.Width + 1), (int)(size.Height + 1));
+               
+            g.DrawString(svalue, font.fontObject, font.brushObject, pos, stringFormat);
+            break;
+
+        }
+      }      
+      drawAnnotationPanels(g, _annotationPanels, w, h, true, ref mainViewPort);
       DrawMessagePanels(g, w, h);
-
       return 0;
     } 
 

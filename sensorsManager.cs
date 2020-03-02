@@ -219,6 +219,7 @@ namespace YoctoVisualisation
       Execute = Execute.Replace("$SENSORVALUE$", SensorValue.ToString());
       Execute = Execute.Replace("$HWDID$", parent.get_hardwareId());
       Execute = Execute.Replace("$NAME$", parent.get_friendlyName());
+      Execute = Execute.Replace("$UNIT$", parent.get_unit());
       Execute = Execute.Replace("$CONDITION$", reason);
       Execute = Execute.Replace("$DATATYPE$", src);
       Execute = Execute.Replace("$TRIGGER$", Value.ToString());
@@ -257,6 +258,7 @@ namespace YoctoVisualisation
     protected string friendlyname;
     string unit = "";
     string frequency = "";
+    double resolution = 1;
     bool recording = false;
     private List<Form> FormsToNotify;
     bool online = false;
@@ -290,6 +292,12 @@ namespace YoctoVisualisation
     public List<TimedSensorValue> previewCurData;
     public List<TimedSensorValue> previewMaxData;
 
+    double _lastAvgValue = Double.NaN;
+    double _lastMinValue = Double.NaN;
+    double _lastMaxValue = Double.NaN;
+
+
+
     BackgroundWorker predloadProcess;
     BackgroundWorker loadProcess;
     long dataLoggerStartReadTime = 0;
@@ -311,6 +319,25 @@ namespace YoctoVisualisation
 
 
     }
+
+    public double get_lastAvgValue()
+    {
+      if (online) return _lastAvgValue;
+      return Double.NaN;
+    }
+
+    public double get_lastMaxValue()
+    {
+      if (online) return _lastMaxValue;
+      return Double.NaN;
+    }
+
+    public double get_lastMinValue()
+    {
+      if (online) return _lastMinValue;
+      return Double.NaN;
+    }
+
 
     public void ConfigHasChanged()
     {
@@ -897,6 +924,7 @@ namespace YoctoVisualisation
           {
             unit         = sensor.get_unit();
             friendlyname = sensor.get_friendlyName();
+            resolution   = sensor.get_resolution();
             lastGetConfig = YAPI.GetTickCount();
             mustReloadConfig = false;
           }
@@ -914,6 +942,13 @@ namespace YoctoVisualisation
       if ((lastGetConfig <= 0) || (YAPI.GetTickCount() - lastGetConfig > 5000)) reloadConfig();
       return unit;
 
+    }
+
+    public double get_resolution()
+    {
+      if ((cfgChgNotificationsSupported) && (!mustReloadConfig)) return resolution;
+      if ((lastGetConfig <= 0) || (YAPI.GetTickCount() - lastGetConfig > 5000)) reloadConfig();
+      return resolution;
     }
 
     public void  loadDatalogger(double start, double stop)
@@ -1093,9 +1128,13 @@ namespace YoctoVisualisation
         if ((consecutiveBadTimeStamp == 0) || (consecutiveBadTimeStamp >= 10))
         {
           dataMutex.WaitOne();
-          curData.Add(new TimedSensorValue { DateTime = t, Value = M.get_averageValue() });
-          minData.Add(new TimedSensorValue { DateTime = t, Value = M.get_minValue() });
-          maxData.Add(new TimedSensorValue { DateTime = t, Value = M.get_maxValue() });
+          _lastAvgValue = M.get_averageValue();
+          _lastMinValue = M.get_minValue();
+          _lastMaxValue = M.get_maxValue();
+
+          curData.Add(new TimedSensorValue { DateTime = t, Value = _lastAvgValue });
+          minData.Add(new TimedSensorValue { DateTime = t, Value = _lastMinValue });
+          maxData.Add(new TimedSensorValue { DateTime = t, Value = _lastMaxValue });
          // LogManager.Log(hwdName + " :: Callback : " + t.ToString());
           if (_MaxDataRecords > 0) dataCleanUp();
           dataMutex.ReleaseMutex();

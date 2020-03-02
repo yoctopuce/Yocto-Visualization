@@ -592,7 +592,9 @@ namespace YoctoVisualisation
           else
           if (targetArray is List<DataSerie>)
             FinalTarget = ((List<DataSerie>)targetArray)[int.Parse(index)];
-
+          else
+          if (targetArray is List<AnnotationPanel>)
+            FinalTarget = ((List<AnnotationPanel>)targetArray)[int.Parse(index)];
 
           else
             FinalTarget = ((List<object>)targetArray)[int.Parse(index)];

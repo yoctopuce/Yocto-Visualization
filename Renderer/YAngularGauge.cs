@@ -396,6 +396,11 @@ namespace YDataRendering
 
     protected override int Render(YGraphics g, int w, int h)
     {
+      ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
+      mainViewPort.Lmargin = 0;
+      mainViewPort.Rmargin = 0;
+      mainViewPort.Tmargin = 0;
+      mainViewPort.Bmargin = 0;
 
       g.SmoothingMode = SmoothingMode.HighQuality;
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
@@ -404,14 +409,21 @@ namespace YDataRendering
       stringFormat.Alignment = StringAlignment.Center;
       stringFormat.LineAlignment = StringAlignment.Center;
 
-      double xcenter = w / 2;
-      double ycenter = h / 2;
 
-      double radius = (Math.Min(w, h) / 2) - borderThickness;
+      drawAnnotationPanels(g, _annotationPanels, w, h, false, ref mainViewPort);
+      g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+      double xcenter = mainViewPort.Lmargin + (w - mainViewPort.Lmargin - mainViewPort.Rmargin) / 2;
+      double ycenter = mainViewPort.Tmargin + (h - mainViewPort.Tmargin - mainViewPort.Bmargin) / 2;
+
+      double radius = Math.Min((w - mainViewPort.Lmargin - mainViewPort.Rmargin) / 2,
+                               (h - mainViewPort.Tmargin - mainViewPort.Bmargin) / 2)- borderThickness;
+
+
       int circonference = (int)(2 * radius * 3.14);
       double AngleAperture = 4 * 2 * Math.PI / 5;
 
-
+      
 
       if (_path == null)
       {
@@ -584,6 +596,8 @@ namespace YDataRendering
 
       if ((_borderThickness > 0) && (_path.Length > 3)) g.DrawPolygon(_borderpen, _path);
 
+      drawAnnotationPanels(g, _annotationPanels, w, h, true, ref mainViewPort);
+
       // draw Needle
       if (_showNeedle)
       {
@@ -642,6 +656,8 @@ namespace YDataRendering
         }
 
       }
+
+     
       DrawMessagePanels(g, w, h);
       return 0;
 

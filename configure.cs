@@ -469,7 +469,7 @@ namespace YoctoVisualisation
           heightUnit.ForeColor = inactiveColor;
           break;
       }
-
+      DpiTextBox.Text = constants.captureDPI.ToString();
       heightUnit.Text = "px (" + (25.4 * (double)constants.captureHeight / (constants.captureDPI)).ToString("0.#") + "mm)";
       widthUnit.Text = "px (" + (25.4 * (double)constants.captureWidth / (constants.captureDPI)).ToString("0.#") + "mm)";
    
@@ -491,7 +491,7 @@ namespace YoctoVisualisation
       dbleClickBringsUpContextMenu.Checked = constants.dbleClickBringsUpContextMenu;
 
 
-      DpiTextBox.Text = constants.captureDPI.ToString();
+      
       int n = 0;
       foreach (YDataRenderer.CaptureFormats v in Enum.GetValues(typeof(YDataRenderer.CaptureFormats)))
       {
@@ -518,6 +518,7 @@ namespace YoctoVisualisation
 
     public void Init(XmlNode initData)
     {
+     
       initdone = true;
       foreach (XmlNode node in initData.ChildNodes)
       {

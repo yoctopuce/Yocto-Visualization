@@ -39,6 +39,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -72,9 +73,10 @@ namespace YoctoVisualisation
           YAPI.SetDeviceListValidity(3600);
           Application.EnableVisualStyles();
           Application.SetCompatibleTextRenderingDefault(false);
-         // Application.Run(new StartForm());
-          
-          try  { Application.Run(new StartForm());}
+         if (Debugger.IsAttached)
+            Application.Run(new StartForm(true));
+          else
+          try  { Application.Run(new StartForm(false));}
           catch (OutOfMemoryException)
           {
             string msg = ("Yocto-Visualization ran out of memory");

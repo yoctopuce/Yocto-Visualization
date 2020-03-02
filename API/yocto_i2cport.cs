@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_i2cport.cs 38934 2019-12-23 09:29:53Z seb $
+ *  $Id: yocto_i2cport.cs 39333 2020-01-30 10:05:40Z mvuilleu $
  *
  *  Implements yFindI2cPort(), the high-level API for I2cPort functions
  *
@@ -1096,6 +1096,54 @@ public class YI2cPort : YFunction
         string res;
 
         url = "rxmsg.json?len=1&maxw="+Convert.ToString( maxWait)+"&cmd=!"+this._escapeAttr(query);
+        msgbin = this._download(url);
+        msgarr = this._json_get_array(msgbin);
+        msglen = msgarr.Count;
+        if (msglen == 0) {
+            return "";
+        }
+        // last element of array is the new position
+        msglen = msglen - 1;
+        this._rxptr = YAPI._atoi(msgarr[msglen]);
+        if (msglen == 0) {
+            return "";
+        }
+        res = this._json_get_string(YAPI.DefaultEncoding.GetBytes(msgarr[0]));
+        return res;
+    }
+
+
+    /**
+     * <summary>
+     *   Sends a binary message to the serial port, and reads the reply, if any.
+     * <para>
+     *   This function is intended to be used when the serial port is configured for
+     *   Frame-based protocol.
+     * </para>
+     * </summary>
+     * <param name="hexString">
+     *   the message to send, coded in hexadecimal
+     * </param>
+     * <param name="maxWait">
+     *   the maximum number of milliseconds to wait for a reply.
+     * </param>
+     * <returns>
+     *   the next frame received after sending the message, as a hex string.
+     *   Additional frames can be obtained by calling readHex or readMessages.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns an empty string.
+     * </para>
+     */
+    public virtual string queryHex(string hexString, int maxWait)
+    {
+        string url;
+        byte[] msgbin;
+        List<string> msgarr = new List<string>();
+        int msglen;
+        string res;
+
+        url = "rxmsg.json?len=1&maxw="+Convert.ToString( maxWait)+"&cmd=$"+hexString;
         msgbin = this._download(url);
         msgarr = this._json_get_array(msgbin);
         msglen = msgarr.Count;

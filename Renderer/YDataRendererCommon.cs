@@ -102,13 +102,15 @@ namespace YDataRendering
 
   public abstract class GenericPanel
   {
+    public enum HorizontalAlignPos {[Description("Left")] LEFT, [Description("Center")] CENTER, [Description("Right")] RIGHT };
+    public enum VerticalAlignPos {[Description("Top")] TOP, [Description("Center")] CENTER, [Description("Bottom")] BOTTOM };
+
+
     private Object _userData = null;
     public Object userData { get { return _userData; } set { _userData = value; } }
 
     protected YDataRenderer _parentRenderer = null;
-
-   
-    
+ 
     public enum TextAlign {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Right")]RIGHT };
 
     private Object _directParent = null;
@@ -123,7 +125,7 @@ namespace YDataRendering
     }
 
     protected bool _enabled = false;
-    public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; _parentRenderer.redraw(); } } }
+    public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; _parentRenderer.clearCachedObjects(); _parentRenderer.redraw(); } } }
 
     
 
@@ -131,7 +133,7 @@ namespace YDataRendering
     public TextAlign panelTextAlign { get { return _panelTextAlign; } set { _panelTextAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
     private string _text = "";
-    public string text { get { return _text; } set { _text = value; if (_enabled) _parentRenderer.redraw(); } }
+    public string text { get { return _text; } set { _text = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
 
     private Color _bgColor = Color.FromArgb(255, 255, 255, 192);
     public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled) _parentRenderer.redraw(); } }
@@ -140,10 +142,10 @@ namespace YDataRendering
     public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _parentRenderer.clearCachedObjects(); _pen = null; if (_enabled) _parentRenderer.redraw(); } }
 
     private double _padding = 10;
-    public double padding { get { return _padding; } set { _padding = value; if (_enabled) _parentRenderer.redraw(); } }
+    public double padding { get { return _padding; } set { _padding = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
 
     private double _verticalMargin = 10;
     public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
@@ -178,36 +180,68 @@ namespace YDataRendering
 
   }
 
-    public class MessagePanel: GenericPanel
+   public class MessagePanel: GenericPanel
     {
       
-        public enum HorizontalAlign
-        {
-            [Description("Left")]
-            LEFT,
-            [Description("Center")]
-            CENTER,
-            [Description("Right")]
-            RIGHT
-        };
-        public enum VerticalAlign {[Description("Top")] TOP, [Description("Center")] CENTER, [Description("Bottom")] BOTTOM };
-      
-
+     
         public MessagePanel(YDataRenderer parent, Object directParent): base(parent, directParent)
         { }
      
-        private HorizontalAlign _panelHrzAlign = HorizontalAlign.CENTER;
-        public HorizontalAlign panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) _parentRenderer.redraw(); } }
+        private HorizontalAlignPos _panelHrzAlign = HorizontalAlignPos.CENTER;
+        public HorizontalAlignPos panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
-        private VerticalAlign _panelVrtAlign = VerticalAlign.CENTER;
-        public VerticalAlign panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) _parentRenderer.redraw(); } }
+        private VerticalAlignPos _panelVrtAlign = VerticalAlignPos.CENTER;
+        public VerticalAlignPos panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; if (_enabled) _parentRenderer.redraw(); } }
 
       
     }
 
+  public class AnnotationPanel : GenericPanel
+  {
+
+   
+
+    public AnnotationPanel(YDataRenderer parent, Object directParent) : base(parent, directParent)
+    { }
 
 
-    public class Zone
+    private bool _overlap = false;
+    public bool overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.clearCachedObjects(); _parentRenderer.redraw(); } }
+
+
+    private double _positionOffsetX = 50;
+    public double positionOffsetX { get { return _positionOffsetX; } set { _positionOffsetX = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
+    private double _positionOffsetY = 50;
+    public double positionOffsetY { get { return _positionOffsetY; } set { _positionOffsetY = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
+
+    private HorizontalAlignPos _panelHrzAlign = HorizontalAlignPos.CENTER;
+    public HorizontalAlignPos panelHrzAlign
+    { get { return _panelHrzAlign; }
+      set
+      { if ((!overlap) && (value == HorizontalAlignPos.CENTER) && (_panelVrtAlign == VerticalAlignPos.CENTER))
+           throw new ArgumentException("CENTER / CENTER is now allowed in non overlapping mode");
+        _panelHrzAlign = value; _parentRenderer.clearCachedObjects();
+        if (_enabled)  _parentRenderer.redraw();
+      } }
+
+    private VerticalAlignPos _panelVrtAlign = VerticalAlignPos.TOP;
+    public VerticalAlignPos panelVrtAlign
+      {
+        get { return _panelVrtAlign; }
+       set {
+        if ((!overlap) && (value == VerticalAlignPos.CENTER) && (_panelHrzAlign == HorizontalAlignPos.CENTER))
+          throw new ArgumentException("CENTER / CENTER is now allowed in non overlapping mode");
+        _panelVrtAlign = value; _parentRenderer.clearCachedObjects();
+         if (_enabled) _parentRenderer.redraw();
+       } }
+
+
+  }
+
+
+
+
+  public class Zone
     {
         protected YDataRenderer _parentRenderer = null;
         private Object _directParent = null;
@@ -519,8 +553,10 @@ namespace YDataRendering
       }
     }
   }
-
+ 
   public delegate void ProportionnalValueChangeCallback(Proportional source);
+
+  public delegate string PatchAnnotationCallback(string  text);
 
   public abstract class YDataRenderer
   {
@@ -528,9 +564,14 @@ namespace YDataRendering
     protected int _redrawAllowed = 1;
     private int _refWidth = 1;
     private int _refHeight = 1;
+    
+    protected PatchAnnotationCallback _PatchAnnotationCallback =null;
 
     public delegate void RendererDblClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
     public delegate void RendererRightClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
+
+    protected List<AnnotationPanel> _annotationPanels;
+    public List<AnnotationPanel> annotationPanels { get { return _annotationPanels; } }
 
     public enum CaptureFormats
     {
@@ -543,6 +584,8 @@ namespace YDataRendering
       [Description("Fixed height, keep ration aspect")]
       FixedHeight
     };
+
+   
 
     public enum CaptureType
     {
@@ -572,6 +615,15 @@ namespace YDataRendering
 
     protected List<MessagePanel> _messagePanels;
     public List<MessagePanel> messagePanels { get { return _messagePanels; } }
+
+
+    public AnnotationPanel addAnnotationPanel()
+    {
+      AnnotationPanel p = new AnnotationPanel(this, this);
+      _annotationPanels.Add(p);
+      redraw();
+      return p;
+    }
 
     /*
      *  .NET 3.5 compatibility
@@ -640,9 +692,24 @@ namespace YDataRendering
     private Stopwatch watch = Stopwatch.StartNew();
     private int LastDrawTiming = 0;
 
+    public void setPatchAnnotationCallback(PatchAnnotationCallback callback)
+    { _PatchAnnotationCallback = callback;   } 
 
+    public string patchAnnotation(string text)
+    {
+      text = text.Replace("\\n", "\n");
+      if (text.IndexOf('$') < 0) return text;
+      DateTime now = DateTime.Now;
+      text = text.Replace("$DAY$", now.ToString("dd"));
+      text = text.Replace("$MONTH$", now.ToString("MM"));
+      text = text.Replace("$YEAR$", now.ToString("yy"));
+      text = text.Replace("$HOUR$", now.ToString("hh"));
+      text = text.Replace("$MINUTE$", now.ToString("mm"));
+      text = text.Replace("$SECOND$", now.ToString("ss"));   
+      if (_PatchAnnotationCallback!=null) text = _PatchAnnotationCallback(text);
+       return text;
 
-
+    }
 
     protected Nullable<Point> mousePosition()
     {
@@ -984,7 +1051,7 @@ namespace YDataRendering
       string captureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
       int captureWidth = 1024;
       int captureHeight = 1024;
-      int captureDPI = 70;
+      int captureDPI = 96;
       if (_getCaptureParameters != null) _getCaptureParameters(this, out captureType, out captureTarget,
                                                                      out captureFolder, out captureSizePolicy,
                                                                      out captureDPI, out captureWidth, out captureHeight);
@@ -1034,7 +1101,7 @@ namespace YDataRendering
 
 
 
-      double newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, UIContainer.Size.Width, UIContainer.Size.Height, w, h);
+      double newCoef = Proportional.resizeCoef(Proportional.ResizeRule.RELATIVETOBOTH, refWidth, refHeight, w, h);
 
       log("start capture");
       resetProportionalSizeObjectsCachePush(newCoef);  // reset all size related cached objects
@@ -1191,14 +1258,15 @@ namespace YDataRendering
       this.UIContainer.SizeMode = PictureBoxSizeMode.Normal;
       _logFunction = logFunction;
       parentForm = (Form)UIContainer.Parent;
+      this._annotationPanels = new List<AnnotationPanel>();
       this._messagePanels = new List<MessagePanel>();
 
       DisableRedraw();
       _snapshotPanel = addMessagePanel();
       _snapshotPanel.panelTextAlign = MessagePanel.TextAlign.CENTER;
       _snapshotPanel.text = "Captured to clipboard";
-      _snapshotPanel.panelHrzAlign = MessagePanel.HorizontalAlign.CENTER;
-      _snapshotPanel.panelVrtAlign = MessagePanel.VerticalAlign.CENTER;
+      _snapshotPanel.panelHrzAlign = MessagePanel.HorizontalAlignPos.CENTER;
+      _snapshotPanel.panelVrtAlign = MessagePanel.VerticalAlignPos.CENTER;
       _snapshotPanel.bgColor = Color.FromArgb(200, 0xcc, 0xf7, 0xa1);
       _snapshotPanel.font.size = 16;
       _snapshotTimer = new Timer();
@@ -1275,9 +1343,9 @@ namespace YDataRendering
 
     }
 
-    public void DrawMessagePanels(YGraphics g, int viewPortWidth, int viewPortHeight)
+    public void DrawMessagePanels(YGraphics g,  int viewPortWidth, int viewPortHeight)
     {
-
+     
 
       g.SetClip(new Rectangle(0, 0, viewPortWidth, viewPortHeight));
 
@@ -1297,16 +1365,16 @@ namespace YDataRendering
           double x = 0;
           switch (p.panelHrzAlign)
           {
-            case MessagePanel.HorizontalAlign.LEFT: x = p.horizontalMargin; break;
-            case MessagePanel.HorizontalAlign.RIGHT: x = viewPortWidth - panelWidth - p.horizontalMargin; break;
+            case MessagePanel.HorizontalAlignPos.LEFT: x = p.horizontalMargin; break;
+            case MessagePanel.HorizontalAlignPos.RIGHT: x = viewPortWidth - panelWidth - p.horizontalMargin; break;
             default: x = (viewPortWidth - panelWidth) / 2; break;
           }
 
           double y = 0;
           switch (p.panelVrtAlign)
           {
-            case MessagePanel.VerticalAlign.TOP: y = p.verticalMargin; break;
-            case MessagePanel.VerticalAlign.BOTTOM: y = viewPortHeight - panelHeight - p.verticalMargin; break;
+            case MessagePanel.VerticalAlignPos.TOP: y = p.verticalMargin; break;
+            case MessagePanel.VerticalAlignPos.BOTTOM: y = viewPortHeight - panelHeight - p.verticalMargin; break;
             default: y = (viewPortHeight - panelHeight) / 2; break;
           }
 
@@ -1339,6 +1407,119 @@ namespace YDataRendering
         }
     }
 
+    public void drawAnnotationPanels(YGraphics g, List<AnnotationPanel>  annotationPanels , int viewPortWidth, int viewPortHeight, bool overlap, ref ViewPortSettings mainViewPort)
+    {
+
+      g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+      bool active = false;
+      for (int i = 0; i < annotationPanels.Count; i++)
+        if (annotationPanels[i].enabled) active = true;
+      if (!active) return;
+
+
+
+      g.SetClip(new Rectangle(0, 0, viewPortWidth, viewPortHeight));
+
+      for (int i = 0; i < annotationPanels.Count; i++)
+        if ((annotationPanels[i].enabled) && (annotationPanels[i].overlap == overlap))
+        {
+          AnnotationPanel p = annotationPanels[i];
+          double AvailableWidth = viewPortWidth - 2 * p.padding - p.borderthickness;
+          if (AvailableWidth < 100) AvailableWidth = 100;
+
+          string textToDisplay = p.text.Replace("\\n", "\n");
+
+          if (textToDisplay.IndexOf('$') >= 0)
+          {
+            textToDisplay = textToDisplay.Replace("\\n", "\n");
+            textToDisplay = patchAnnotation(textToDisplay);
+
+          }
+
+          SizeF ssize = g.MeasureString(textToDisplay, p.font.fontObject, (int)AvailableWidth);
+          double panelWidth = ssize.Width + 2 * p.padding + p.borderthickness;
+          double panelHeight = ssize.Height + 2 * p.padding + p.borderthickness;
+
+
+
+          double x = 0;
+          switch (p.panelHrzAlign)
+          {
+            case MessagePanel.HorizontalAlignPos.LEFT:
+              x = p.horizontalMargin;
+              if (!annotationPanels[i].overlap && (mainViewPort.Lmargin < panelWidth + 10))
+                mainViewPort.Lmargin = (int)panelWidth + 10;
+              break;
+            case MessagePanel.HorizontalAlignPos.RIGHT:
+              x = viewPortWidth - panelWidth - p.horizontalMargin;
+              if (!annotationPanels[i].overlap && (mainViewPort.Rmargin < panelWidth + 20))
+                mainViewPort.Rmargin = (int)panelWidth + 20;
+              break;
+
+            default: x = (viewPortWidth - panelWidth) / 2; break;
+          }
+
+
+          double y = 0;
+          switch (p.panelVrtAlign)
+          {
+            case MessagePanel.VerticalAlignPos.TOP:
+              y = p.verticalMargin;
+              if (!annotationPanels[i].overlap && (mainViewPort.Tmargin < panelHeight + 20))
+                mainViewPort.Tmargin = (int)panelHeight + 20;
+              break;
+            case MessagePanel.VerticalAlignPos.BOTTOM:
+              y = viewPortHeight - panelHeight - p.verticalMargin;
+              if (!annotationPanels[i].overlap && (mainViewPort.Bmargin < panelHeight + 20))
+                mainViewPort.Bmargin = (int)panelHeight + 20;
+              break;
+            default: y = (viewPortHeight - panelHeight) / 2; break;
+          }
+
+          if (annotationPanels[i].overlap)
+          {
+            x += (annotationPanels[i].positionOffsetX / 100) * (viewPortWidth - panelWidth);
+            y += (annotationPanels[i].positionOffsetY / 100) * (viewPortHeight - panelHeight);
+
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x > viewPortWidth - panelWidth) x = viewPortWidth - panelWidth;
+            if (y > viewPortHeight - panelHeight) y = viewPortHeight - panelHeight;
+
+          }
+
+
+          g.FillRectangle(p.bgBrush, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
+          if (p.borderthickness > 0) g.DrawRectangle(p.pen, (int)x, (int)y, (int)panelWidth, (int)panelHeight);
+          g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+         
+          StringFormat sf = new StringFormat();
+          switch (p.panelTextAlign)
+          {
+            case MessagePanel.TextAlign.LEFT:
+              sf.LineAlignment = StringAlignment.Near;
+              sf.Alignment = StringAlignment.Near;
+              break;
+            case MessagePanel.TextAlign.RIGHT:
+              sf.LineAlignment = StringAlignment.Far;
+              sf.Alignment = StringAlignment.Far;
+              break;
+            default:
+              sf.LineAlignment = StringAlignment.Center;
+              sf.Alignment = StringAlignment.Center;
+              break;
+          }
+          Rectangle r = new Rectangle((int)(x + p.padding + p.borderthickness / 2),
+
+            (int)(y + p.padding + p.borderthickness / 2),
+                  (int)ssize.Width + 1, (int)ssize.Height + 1);
+          g.DrawString(textToDisplay, p.font.fontObject, p.font.brushObject, r, sf);
+
+
+        }
+
+
+    }
 
     public void log(string s)
     {

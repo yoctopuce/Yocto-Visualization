@@ -83,8 +83,8 @@ namespace YDataRendering
         _max = value; if (_shownValue > _max) _shownValue = _max;  redraw();
       } }
 
-    const int SegmentMaxLength = 8;  
-
+    const int SegmentMaxLength = 8;
+    private ViewPortSettings mainViewPort;
     private Pen _borderpen = null;
     public Pen borderpen
     {
@@ -218,7 +218,7 @@ namespace YDataRendering
      
 
       YGraphics g = new YGraphics(ChartContainer);
-      DrawPrameters p = ComputeDrawParameters(g, UIContainer.Size.Width, UIContainer.Size.Height);
+      DrawPrameters p = ComputeDrawParameters(g, UIContainer.Size.Width, UIContainer.Size.Height, mainViewPort);
       g.Dispose();
       
       AllowRedraw();
@@ -237,12 +237,14 @@ namespace YDataRendering
     
 
 
-    private DrawPrameters ComputeDrawParameters(YGraphics g, int UIw, int UIh)
+    private DrawPrameters ComputeDrawParameters(YGraphics g, int UIw, int UIh, ViewPortSettings mainViewPort)
     {
-     
-      double w = UIw - 5 - _borderThickness;
-      double h = UIh - 5 - _borderThickness;
-      double xcenter = UIw / 2;
+      UIw -= mainViewPort.Lmargin + mainViewPort.Rmargin;
+      UIh -= mainViewPort.Tmargin + mainViewPort.Bmargin;
+
+      double w = UIw - 5 - _borderThickness  ;
+      double h = UIh - 5 - _borderThickness ;
+      double xcenter = mainViewPort.Lmargin + w / 2;
       double outerRadius = 0;
       double angleStart =0 ;
       double angleEnd = 0;
@@ -290,8 +292,8 @@ namespace YDataRendering
           angleEnd = Math.PI;
           lastDrawParameters.heightTop = outerRadius;
           lastDrawParameters.heightBottom =0;
-          ycenter = h;
-          xcenter = UIw / 2 + outerRadius / 2 - minMaxHeight;
+          ycenter = mainViewPort.Tmargin+h;
+          xcenter = mainViewPort.Lmargin+UIw / 2 + outerRadius / 2 - minMaxHeight;
 
           innerRadius = outerRadius * (100 - _thickness) / 100;
           ValueRectangle = new Rectangle((int)(xcenter - innerRadius), (int)(ycenter - innerRadius), (int)innerRadius, (int)innerRadius);
@@ -351,7 +353,7 @@ namespace YDataRendering
           lastDrawParameters.heightBottom = outerRadius ;
           angleStart = 0;
           angleEnd = 3 * Math.PI / 2;
-          ycenter = UIh/ 2;
+          ycenter = mainViewPort.Tmargin+UIh / 2;
           innerRadius = outerRadius * (100 - _thickness) / 100;
 
 
@@ -381,7 +383,7 @@ namespace YDataRendering
           if (outerRadius > w / 2) outerRadius = w / 2;
           lastDrawParameters.heightTop = outerRadius;
           lastDrawParameters.heightBottom = outerRadius * 0.7;
-          ycenter = outerRadius + _borderThickness / 2;
+          ycenter = mainViewPort.Tmargin+outerRadius + _borderThickness / 2;
           angleStart = -Math.PI / 4;
           angleEnd = 5 * Math.PI / 4;
           innerRadius = outerRadius * (100 - _thickness) / 100;
@@ -425,13 +427,14 @@ namespace YDataRendering
 
     protected override int Render(YGraphics g, int w, int h)
     {
+      mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
       
-     
       g.SmoothingMode = SmoothingMode.HighQuality;
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
+      drawAnnotationPanels(g, _annotationPanels, w, h, false, ref mainViewPort);
 
-      DrawPrameters p = ComputeDrawParameters(g,w,h);
+      DrawPrameters p = ComputeDrawParameters(g,w,h, mainViewPort);
 
 
       if (_path == null)
@@ -543,6 +546,7 @@ namespace YDataRendering
         g.DrawString(lastDrawParameters.maxValue, _minMaxFont.fontObject, _minMaxFont.brushObject, lastDrawParameters.maxValueRectangle, lastDrawParameters.maxValueFormat);
 
       }
+      drawAnnotationPanels(g, _annotationPanels, w, h, true, ref mainViewPort);
       DrawMessagePanels(g, w, h);
     
      

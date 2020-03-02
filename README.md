@@ -9,7 +9,7 @@ Yocto-Visualization is a C# .Net application to visualize data from any [Yoctopu
 
 ![Screenshot example](http://www.yoctopuce.com/pubarchive/2018-06/YoctoVisualizationV2-Renderer_1.png)
 
-You will find more information about this application on [Yoctopuce website](https://www.yoctopuce.com/EN/article/version-2-for-the-yocto-visualization). If you are not much into programming and are only interested in installing Yocto-Visualization V2, here is a page linking to [Windows, Linux and macOS binaries](https://www.yoctopuce.com/EN/tools.php) .
+You will find more information about this application on [Yoctopuce website](https://www.yoctopuce.com/EN/article/yocto-visualization-user-s-guide). If you are not much into programming and are only interested in installing Yocto-Visualization V2, here is a page linking to [Windows, Linux and macOS binaries](https://www.yoctopuce.com/EN/tools.php) .
 
 ## Customizing widgets shown at startup
 You do not even need to recompile the software if your intent is simply to pre-configure the widgets shown at startup: the widgets configuration is saved in a xml configuration file, and you can force to use a given configuration file using the command-line option *-config*
@@ -27,7 +27,7 @@ This project normaly requires .Net 4.5 which can't be installed on Windows XP, b
 Make sure that Mono is installed (min version 4) as well as Mono-Develop (min version 5) and open the  *.csprog* project with Mono-Develop. Avoid the flatpak based Mono-Develop version as it is sand-boxed and can't access to the libusb. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-linux)
 
 ### On macOS 
-Install Mono for macOS (Visual Studio channel) and Visual Studio for macOS and open the *.csprog* project with Visual Studio. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-macos)
+Install Mono for macOS (Visual Studio channel) and Visual Studio for macOS and open the *.csprog* project with Visual Studio. More info on [this page](https://www.yoctopuce.com/EN/article/yocto-visualization-v2-on-macos). Note however that Yocto-Visualization will *not* work on Cortana.
 
 ## What you need to know
 - The application is based on the Yoctopuce YSensor generic class. Any past, present and future Yoctopuce sensor compatible with this class will work with this application.

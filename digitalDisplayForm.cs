@@ -49,7 +49,7 @@ namespace YoctoVisualisation
   public partial class digitalDisplayForm : Form
   {
     private XmlNode initDataNode;
-
+    private static int AnnotationPanelCount=0;
     private StartForm mainForm;
     private formManager manager;
     private digitalDisplayFormProperties prop;
@@ -77,6 +77,18 @@ namespace YoctoVisualisation
       prop = new digitalDisplayFormProperties(initData, this);
       manager = new formManager(this, parent, initData, "digital display", prop);
       mainForm = parent;
+
+      if (AnnotationPanelCount == 0)
+        foreach (var p in typeof(digitalDisplayFormProperties).GetProperties())
+        {
+          string name = p.Name;
+          if (name.StartsWith("display_annotationPanels")) AnnotationPanelCount++;
+        }
+      for (int i = 0; i < AnnotationPanelCount; i++)
+      { _display.addAnnotationPanel(); }
+
+      _display.setPatchAnnotationCallback(AnnotationCallback);
+
       initDataNode = initData;
       prop.ApplyAllProperties(this);
       if (!manager.initForm())
@@ -89,6 +101,8 @@ namespace YoctoVisualisation
       catch (TargetInvocationException e) { LogManager.Log("DigitalDisplay initialization raised an exception (" + e.InnerException.Message + ")"); }
       YDataRenderer.minMaxCheckDisabled = false;
 
+      
+
       manager.configureContextMenu(this, contextMenuStrip1, showConfiguration, switchConfiguration, capture);
       _display.resetRefrenceSize();
       _display.AllowPrintScreenCapture = true;
@@ -100,6 +114,38 @@ namespace YoctoVisualisation
       {
         _display.OnRightClick += rendererCanvas_RightClick;
       }
+    }
+
+    private string AnnotationCallback(string text)
+    {
+  
+        CustomYSensor sensor = prop.DataSource_source;
+        string name = "None";
+        string avgvalue = "N/A";
+        string minvalue = "N/A";
+        string maxvalue = "N/A";
+        string unit = "";
+        if (!(sensor is NullYSensor))
+        {
+          string resolution = sensor.get_resolution().ToString().Replace("1", "0");
+          name = sensor.get_friendlyName();
+          if (sensor.isOnline())
+          {
+            avgvalue = sensor.get_lastAvgValue().ToString(resolution);
+            minvalue = sensor.get_lastMinValue().ToString(resolution);
+            maxvalue = sensor.get_lastMaxValue().ToString(resolution);
+          }
+          unit = sensor.get_unit();
+        }
+        text = text.Replace("$NAME$",     name);
+        text = text.Replace("$AVGVALUE$", avgvalue);
+        text = text.Replace("$MAXVALUE$", maxvalue);
+        text = text.Replace("$MINVALUE$", minvalue);
+        text = text.Replace("$UNIT$",     unit);
+
+      
+
+      return text;
     }
 
     private void RendererCanvas_DoubleClick(object sender, EventArgs e)

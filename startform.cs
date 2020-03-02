@@ -66,10 +66,11 @@ namespace YoctoVisualisation
  
 
 
-    public StartForm()
+    public StartForm(bool debuggerAttached)
     {
 
       configWindow = new ConfigForm();
+      configWindow.initCaptureParameters();
       rawDataWindow = new RawDataForm();
       propWindow2 = new PropertiesForm2();
 
@@ -78,7 +79,7 @@ namespace YoctoVisualisation
       MaximizeBox = false;
       LogManager.Log("Application start, Welcome to Yocto-Visualization.");
 
-
+      if (debuggerAttached) LogManager.Log("A debugger is attached.");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.LogNoTS("Optional command line parameters:");
       LogManager.LogNoTS("-config xmlFilePath      Create/Use alternate \"xmlFilePath\" configuration file.");
@@ -91,6 +92,8 @@ namespace YoctoVisualisation
       LogManager.Log("Yocto-Visualization version is " + constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
       LogManager.Log("Architecture is " + (IntPtr.Size * 8).ToString() + " bits (platform " + Environment.OSVersion.Platform.ToString() + ")");
+
+      
 
       if (constants.MonoRunning)
       {
@@ -125,7 +128,7 @@ namespace YoctoVisualisation
 
       }
 
-
+     
 
       if (File.Exists(cfgFile))
       {

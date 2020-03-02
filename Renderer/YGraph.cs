@@ -823,7 +823,7 @@ namespace YDataRendering
       }
     }
 
-
+     
     private Pen _pen = null;
     public Pen pen
     {
@@ -838,7 +838,7 @@ namespace YDataRendering
     public YFontParams font { get { return _font; } }
 
 
-
+    
   }
 
 
@@ -886,8 +886,6 @@ namespace YDataRendering
 
     private bool _overlap = false;
     public bool overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.redraw(); } }
-
-
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
     public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; _parentRenderer.redraw(); } }
@@ -965,9 +963,6 @@ namespace YDataRendering
 
     YFontParams _font = null;
     public YFontParams font { get { return _font; } }
-
-
-
   }
 
 
@@ -1012,8 +1007,6 @@ namespace YDataRendering
       }
     }
 
-
-
     public Navigator(YGraph parent, Object directParent)
     {
       _directParent = directParent;
@@ -1028,12 +1021,8 @@ namespace YDataRendering
     private Color _bgColor1 = Color.FromArgb(255, 225, 225, 225);
     public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; _bgBrush = null; _parentRenderer.redraw(); } }
 
-
     private Color _cursorBorderColor = Color.FromArgb(255, 40, 40, 40);
     public Color cursorBorderColor { get { return _cursorBorderColor; } set { _cursorBorderColor = value; _cursorBorderPen = null; _parentRenderer.redraw(); } }
-
-
-
 
     private YAxisHandling _yAxisHandling = YAxisHandling.AUTO;
     public YAxisHandling yAxisHandling { get { return _yAxisHandling; } set { _yAxisHandling = value; _parentRenderer.redraw(); } }
@@ -1623,7 +1612,7 @@ namespace YDataRendering
   public class DataPanel : GenericPanel
   {
 
-    public enum HorizontalAlign
+    public  enum HorizontalAlign
     {[Description("Left")] LEFTOF, [Description("Center")] CENTERED, [Description("Right")] RIGHTOF };
     public enum VerticalAlign
     {[Description("Top")] ABOVE, [Description("Center")] CENTERED, [Description("Bottom")] BELOW };
@@ -1687,6 +1676,9 @@ namespace YDataRendering
     private LegendPanel _legendPanel;
     public LegendPanel legendPanel { get { return _legendPanel; } }
 
+
+   
+
     private DataTracker _dataTracker;
     public DataTracker dataTracker { get { return _dataTracker; } }
 
@@ -1699,10 +1691,10 @@ namespace YDataRendering
     public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; borderPen = null; redraw(); } }
 
 
+   
 
 
-
-ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
+    ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
 
 
     protected List<DataPanel> _dataPanels;
@@ -1728,6 +1720,7 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
 
       _navigator = new Navigator(this, this);
       _legendPanel = new LegendPanel(this, this);
+     
       _dataTracker = new DataTracker(this, this);
 
       this.UIContainer.MouseDown += MouseDown;
@@ -1810,8 +1803,7 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
 
     }
 
-
-
+   
 
     public DataSerie addSerie()
     {
@@ -2052,6 +2044,8 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
     }
 
 
+   
+
     public void drawLegendPanel(YGraphics g, int viewPortWidth, int viewPortHeight, ref ViewPortSettings mainViewPort)
     {
       if (!_legendPanel.enabled) return;
@@ -2065,6 +2059,7 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
       double totalWidth = 0;
       double maxWidth = 0;
       double maxHeight = 0;
+      g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 
       g.SetClip(new Rectangle(0, 0, viewPortWidth, viewPortHeight));
 
@@ -2259,13 +2254,13 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
 
 
 
-
+     
 
 
       Rectangle r = new Rectangle((int)x, (int)y, (int)w, (int)h);
       g.FillRectangle(_legendPanel.bgBrush, r);
       g.DrawRectangle(_legendPanel.pen, r);
-      
+      g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
       for (int i = 0; i < _series.Count; i++)
         if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
         { 
@@ -2922,6 +2917,7 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
 
 
       g.SmoothingMode = SmoothingMode.HighQuality;
+     
       int yMarginOffset = 5;
 
       /* Step 1, found out margins */
@@ -2942,7 +2938,12 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
 
 
       /* Step 2B-2  Draw Legend if it doesn't overlap the data */
+    
+     
       if (!_legendPanel.overlap) drawLegendPanel(g, UIw, UIh, ref mainViewPort);
+
+      /* Step 2B-3  Draw annotations if it doesn't overlap the data */
+      drawAnnotationPanels(g, _annotationPanels, UIw, UIh, false, ref mainViewPort);
 
       if (mainViewPort.Bmargin == 0) mainViewPort.Bmargin = 5;
       if (mainViewPort.Tmargin == 0) mainViewPort.Tmargin = 5;
@@ -3223,13 +3224,7 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
                       lineCount += DoSegmentRendering(v, ng, mypenb, _series[j].segments[k].data, _series[j].segments[k].count);
                   }
               }
-
-
-
-
-
             }
-
 
             if (_navigator.borderThickness > 0)
             {
@@ -3240,11 +3235,8 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
             DrawMonitorXAxis(v, ng, _navigator.Xrange, xAxis.labelFormat);
             _navigator.setIRLPosition(v.IRLx, v.IRLy, v.zoomx, v.zoomy);
 
-
           }
           if (!(g is YGraphicsSVG))  ng.Dispose();
-
-
 
         }
         // set  7E, copy cache to display
@@ -3252,7 +3244,6 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
         g.SetClip(r);
 
         if (!(g is YGraphicsSVG)) g.DrawImage(navigatorCache, r, r, GraphicsUnit.Pixel);
-
 
         //navigatorCache.Save("C:\\tmp\\t.png", ImageFormat.Png);
         // set  7E, draw Cursor
@@ -3267,33 +3258,20 @@ ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoo
         Point CursorStart = IRLPointToViewPort(_navigator.viewport, new pointXY { x = IRLCursorStart.x, y = 0 });
         Point CursorEnd = IRLPointToViewPort(_navigator.viewport, new pointXY { x = IRLCursorEnd.x, y = 0 });
 
-
         g.FillRectangle(_navigator.cursorBrush, new Rectangle(CursorStart.X - 1, v.Tmargin, CursorEnd.X - CursorStart.X + 2, v.Height - v.Bmargin - v.Tmargin));
         g.DrawLine(_navigator.cursorBorderPen, (int)(CursorStart.X - 1), (int)(v.Tmargin), (int)(CursorStart.X - 1), (int)(v.Height - v.Bmargin));
         g.DrawLine(_navigator.cursorBorderPen, (int)(CursorEnd.X + 1), (int)(v.Tmargin), (int)(CursorEnd.X + 1), (int)(v.Height - v.Bmargin));
-
-
-
-
-
       }
-
-
-
 
       if (_legendPanel.overlap) drawLegendPanel(g, UIw, UIh, ref mainViewPort);
 
+      g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 
-
+      drawAnnotationPanels(g, _annotationPanels, UIw, UIh, true, ref mainViewPort);
       DrawDataPanels(mainViewPort, g, xAxis, _yAxes, UIw, UIh);
-
       DrawDataTracker(g, UIw, UIh);
-
       DrawMessagePanels(g, UIw, UIh);
-
-
       return 0;
-
     }
 
 
