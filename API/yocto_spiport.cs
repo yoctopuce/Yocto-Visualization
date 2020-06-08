@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_spiport.cs 39333 2020-01-30 10:05:40Z mvuilleu $
+ *  $Id: yocto_spiport.cs 40296 2020-05-05 07:56:00Z seb $
  *
  *  Implements yFindSpiPort(), the high-level API for SpiPort functions
  *
@@ -1556,7 +1556,7 @@ public class YSpiPort : YFunction
         buff = new byte[bufflen];
         idx = 0;
         while (idx < bufflen) {
-            hexb = Convert.ToInt32((hexString).Substring( 2 * idx, 2), 16);
+            hexb = YAPI._hexStrToInt((hexString).Substring( 2 * idx, 2));
             buff[idx] = (byte)(hexb & 0xff);
             idx = idx + 1;
         }

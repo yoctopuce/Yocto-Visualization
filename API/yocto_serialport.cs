@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_serialport.cs 39333 2020-01-30 10:05:40Z mvuilleu $
+ * $Id: yocto_serialport.cs 40296 2020-05-05 07:56:00Z seb $
  *
  * Implements yFindSerialPort(), the high-level API for SerialPort functions
  *
@@ -1503,7 +1503,7 @@ public class YSerialPort : YFunction
         buff = new byte[bufflen];
         idx = 0;
         while (idx < bufflen) {
-            hexb = Convert.ToInt32((hexString).Substring( 2 * idx, 2), 16);
+            hexb = YAPI._hexStrToInt((hexString).Substring( 2 * idx, 2));
             buff[idx] = (byte)(hexb & 0xff);
             idx = idx + 1;
         }
@@ -1883,7 +1883,10 @@ public class YSerialPort : YFunction
         int res;
 
         buff = this._download("cts.txt");
-        if (!((buff).Length == 1)) { this._throw( YAPI.IO_ERROR, "invalid CTS reply"); return YAPI.IO_ERROR; }
+        if (!((buff).Length == 1)) {
+            this._throw(YAPI.IO_ERROR, "invalid CTS reply");
+            return YAPI.IO_ERROR;
+        }
         res = buff[0] - 48;
         return res;
     }
@@ -2014,22 +2017,37 @@ public class YSerialPort : YFunction
         url = "rxmsg.json?cmd=:"+ cmd+"&pat=:"+pat;
         msgs = this._download(url);
         reps = this._json_get_array(msgs);
-        if (!(reps.Count > 1)) { this._throw( YAPI.IO_ERROR, "no reply from MODBUS slave"); return res; }
+        if (!(reps.Count > 1)) {
+            this._throw(YAPI.IO_ERROR, "no reply from MODBUS slave");
+            return res;
+        }
         if (reps.Count > 1) {
             rep = this._json_get_string(YAPI.DefaultEncoding.GetBytes(reps[0]));
             replen = (((rep).Length - 3) >> (1));
             i = 0;
             while (i < replen) {
-                hexb = Convert.ToInt32((rep).Substring(2 * i + 3, 2), 16);
+                hexb = YAPI._hexStrToInt((rep).Substring(2 * i + 3, 2));
                 res.Add(hexb);
                 i = i + 1;
             }
             if (res[0] != funCode) {
                 i = res[1];
-                if (!(i > 1)) { this._throw( YAPI.NOT_SUPPORTED, "MODBUS error: unsupported function code"); return res; }
-                if (!(i > 2)) { this._throw( YAPI.INVALID_ARGUMENT, "MODBUS error: illegal data address"); return res; }
-                if (!(i > 3)) { this._throw( YAPI.INVALID_ARGUMENT, "MODBUS error: illegal data value"); return res; }
-                if (!(i > 4)) { this._throw( YAPI.INVALID_ARGUMENT, "MODBUS error: failed to execute function"); return res; }
+                if (!(i > 1)) {
+                    this._throw(YAPI.NOT_SUPPORTED, "MODBUS error: unsupported function code");
+                    return res;
+                }
+                if (!(i > 2)) {
+                    this._throw(YAPI.INVALID_ARGUMENT, "MODBUS error: illegal data address");
+                    return res;
+                }
+                if (!(i > 3)) {
+                    this._throw(YAPI.INVALID_ARGUMENT, "MODBUS error: illegal data value");
+                    return res;
+                }
+                if (!(i > 4)) {
+                    this._throw(YAPI.INVALID_ARGUMENT, "MODBUS error: failed to execute function");
+                    return res;
+                }
             }
         }
         return res;

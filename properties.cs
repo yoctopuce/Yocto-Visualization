@@ -1763,6 +1763,7 @@ public static class sensorPrecisionTypeDescription
 
     protected  bool _overlap = false;
     [DisplayName("Overlap"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Can the annotation panel overlap the display zone, or should the display zone be squeezed to make space for the panel?")]
      public virtual bool overlap { get { return _overlap; } set { _overlap = value; } }
 
@@ -1780,6 +1781,7 @@ public static class sensorPrecisionTypeDescription
 
     private GenericPanel.HorizontalAlignPos _panelHrzAlign = GenericPanel.HorizontalAlignPos.CENTER;
     [DisplayName("X Position"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Annotation panel X position")]
      public GenericPanel.HorizontalAlignPos panelHrzAlign { get { return _panelHrzAlign; } set { _panelHrzAlign = value; } }
 
@@ -1790,6 +1792,7 @@ public static class sensorPrecisionTypeDescription
 
     private GenericPanel.VerticalAlignPos _panelVrtAlign = GenericPanel.VerticalAlignPos.TOP;
     [DisplayName("Y Position"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Annotation panel Y position")]
      public GenericPanel.VerticalAlignPos panelVrtAlign { get { return _panelVrtAlign; } set { _panelVrtAlign = value; } }
 
@@ -1861,6 +1864,7 @@ public static class sensorPrecisionTypeDescription
 
     public override bool enabled { get { return _enabled; }  set { _enabled = value; } }
     [DisplayName("Overlap"),
+     ChangeCausesParentRefreshAttribute(true),
      DescriptionAttribute("Can the annotation panel overlap the graph, or should the graph be squeezed to make space for the panel?")]
 
     public override bool overlap { get { return _overlap; } set { _overlap = value; } }

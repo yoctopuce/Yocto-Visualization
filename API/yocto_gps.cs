@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_gps.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_gps.cs 39658 2020-03-12 15:36:29Z seb $
  *
  *  Implements yFindGps(), the high-level API for Gps functions
  *
@@ -843,7 +843,7 @@ public class YGps : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the geolocalization module, for instance
-     *   <c>YGNSSMK1.gps</c>.
+     *   <c>YGNSSMK2.gps</c>.
      * </param>
      * <returns>
      *   a <c>YGps</c> object allowing you to drive the geolocalization module.

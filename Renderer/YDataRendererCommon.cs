@@ -206,7 +206,15 @@ namespace YDataRendering
 
 
     private bool _overlap = false;
-    public bool overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.clearCachedObjects(); _parentRenderer.redraw(); } }
+    public bool overlap { get { return _overlap; }
+      set {
+        if ((!value) && (_panelHrzAlign == HorizontalAlignPos.CENTER) && (_panelVrtAlign == VerticalAlignPos.CENTER))
+        {
+          panelVrtAlign = VerticalAlignPos.TOP;
+
+        }
+        _overlap = value;
+        _parentRenderer.clearCachedObjects(); _parentRenderer.redraw(); } }
 
 
     private double _positionOffsetX = 50;
@@ -219,7 +227,7 @@ namespace YDataRendering
     { get { return _panelHrzAlign; }
       set
       { if ((!overlap) && (value == HorizontalAlignPos.CENTER) && (_panelVrtAlign == VerticalAlignPos.CENTER))
-           throw new ArgumentException("CENTER / CENTER is now allowed in non overlapping mode");
+          _panelVrtAlign = VerticalAlignPos.TOP;
         _panelHrzAlign = value; _parentRenderer.clearCachedObjects();
         if (_enabled)  _parentRenderer.redraw();
       } }
@@ -230,7 +238,7 @@ namespace YDataRendering
         get { return _panelVrtAlign; }
        set {
         if ((!overlap) && (value == VerticalAlignPos.CENTER) && (_panelHrzAlign == HorizontalAlignPos.CENTER))
-          throw new ArgumentException("CENTER / CENTER is now allowed in non overlapping mode");
+          _panelHrzAlign = HorizontalAlignPos.RIGHT;
         _panelVrtAlign = value; _parentRenderer.clearCachedObjects();
          if (_enabled) _parentRenderer.redraw();
        } }

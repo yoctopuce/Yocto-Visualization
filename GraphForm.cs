@@ -346,16 +346,33 @@ namespace YoctoVisualisation
 
     }
 
+
+    object GetPropertyValue(UIElement src)
+    {
+      string fullpropname = "";
+      string propType = "";
+      string OriginalPropName = "";
+      List<string> path = src.ExtractPropPath(ref OriginalPropName, ref fullpropname, ref propType);
+      switch (propType)
+      {
+        case "Form":
+          return GenericProperties.newGetProperty(this, prop, fullpropname, path);
+          
+        case "Graph":
+          return GenericProperties.newGetProperty(_cartesianChart, prop, fullpropname, path);
+          
+
+      }
+      return null;
+
+    }
+
     void PropertyChanged2(UIElement src)
     {
       string fullpropname = "";
       string propType = "";
       string OriginalPropName = "";
-
-
       List<string> path = src.ExtractPropPath(ref OriginalPropName, ref fullpropname, ref propType);
-
-
       switch (propType)
       {
         case "Form":
@@ -427,12 +444,12 @@ namespace YoctoVisualisation
 
     private void showConfiguration(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, true);
+      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, GetPropertyValue,true);
     }
 
     private void switchConfiguration(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, false);
+      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, GetPropertyValue,false);
     }
     public int getSensorDataType(int index)
     {
@@ -710,7 +727,7 @@ namespace YoctoVisualisation
 
     private void GraphForm_Enter(object sender, EventArgs e)
     {
-      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, false);
+      mainForm.ShowPropertyForm(this, prop, PropertyChanged2, GetPropertyValue,false);
     }
 
     private void GraphForm_Deactivate(object sender, EventArgs e)

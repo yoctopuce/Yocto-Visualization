@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_i2cport.cs 39333 2020-01-30 10:05:40Z mvuilleu $
+ *  $Id: yocto_i2cport.cs 40281 2020-05-04 13:39:55Z seb $
  *
  *  Implements yFindI2cPort(), the high-level API for I2cPort functions
  *
@@ -1277,11 +1277,20 @@ public class YI2cPort : YFunction
         }
 
         reply = this.queryLine(msg,1000);
-        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "No response from I2C device"); return YAPI.IO_ERROR; }
+        if (!((reply).Length > 0)) {
+            this._throw(YAPI.IO_ERROR, "No response from I2C device");
+            return YAPI.IO_ERROR;
+        }
         idx = (reply).IndexOf("[N]!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No I2C ACK received"); return YAPI.IO_ERROR; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "No I2C ACK received");
+            return YAPI.IO_ERROR;
+        }
         idx = (reply).IndexOf("!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "I2C protocol error"); return YAPI.IO_ERROR; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "I2C protocol error");
+            return YAPI.IO_ERROR;
+        }
         return YAPI.SUCCESS;
     }
 
@@ -1323,11 +1332,20 @@ public class YI2cPort : YFunction
         }
 
         reply = this.queryLine(msg,1000);
-        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "No response from I2C device"); return YAPI.IO_ERROR; }
+        if (!((reply).Length > 0)) {
+            this._throw(YAPI.IO_ERROR, "No response from I2C device");
+            return YAPI.IO_ERROR;
+        }
         idx = (reply).IndexOf("[N]!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No I2C ACK received"); return YAPI.IO_ERROR; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "No I2C ACK received");
+            return YAPI.IO_ERROR;
+        }
         idx = (reply).IndexOf("!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "I2C protocol error"); return YAPI.IO_ERROR; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "I2C protocol error");
+            return YAPI.IO_ERROR;
+        }
         return YAPI.SUCCESS;
     }
 
@@ -1380,11 +1398,20 @@ public class YI2cPort : YFunction
 
         reply = this.queryLine(msg,1000);
         rcvbytes = new byte[0];
-        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "No response from I2C device"); return rcvbytes; }
+        if (!((reply).Length > 0)) {
+            this._throw(YAPI.IO_ERROR, "No response from I2C device");
+            return rcvbytes;
+        }
         idx = (reply).IndexOf("[N]!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No I2C ACK received"); return rcvbytes; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "No I2C ACK received");
+            return rcvbytes;
+        }
         idx = (reply).IndexOf("!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "I2C protocol error"); return rcvbytes; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "I2C protocol error");
+            return rcvbytes;
+        }
         reply = (reply).Substring( (reply).Length-2*rcvCount, 2*rcvCount);
         rcvbytes = YAPI._hexStrToBin(reply);
         return rcvbytes;
@@ -1439,11 +1466,20 @@ public class YI2cPort : YFunction
         }
 
         reply = this.queryLine(msg,1000);
-        if (!((reply).Length > 0)) { this._throw( YAPI.IO_ERROR, "No response from I2C device"); return res; }
+        if (!((reply).Length > 0)) {
+            this._throw(YAPI.IO_ERROR, "No response from I2C device");
+            return res;
+        }
         idx = (reply).IndexOf("[N]!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "No I2C ACK received"); return res; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "No I2C ACK received");
+            return res;
+        }
         idx = (reply).IndexOf("!");
-        if (!(idx < 0)) { this._throw( YAPI.IO_ERROR, "I2C protocol error"); return res; }
+        if (!(idx < 0)) {
+            this._throw(YAPI.IO_ERROR, "I2C protocol error");
+            return res;
+        }
         reply = (reply).Substring( (reply).Length-2*rcvCount, 2*rcvCount);
         rcvbytes = YAPI._hexStrToBin(reply);
         res.Clear();

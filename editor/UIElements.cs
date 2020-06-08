@@ -131,7 +131,7 @@ namespace YoctoVisualisation
   //public delegate void targetValueHaschanged(UIElement src);
 
   public delegate void SetValueCallBack2(UIElement src);
-
+  public delegate object GetValueCallBack2(UIElement src);
   public delegate string GetSummaryCallBack();
 
 
@@ -172,6 +172,7 @@ namespace YoctoVisualisation
     protected Object _structRoot;
 
     protected SetValueCallBack2 _valueChangeCallback = null;
+    protected GetValueCallBack2 _getValueCallback = null; 
     protected bool _shown = true;
 
     protected UIElement parentNode { get { return _parentNode; } }
@@ -197,7 +198,8 @@ namespace YoctoVisualisation
     public virtual void refresh()
     {
       if (mainlabel != null) mainlabel.Text = name + getSummary();
-      foreach (UIElement e in subElements) e.refresh();
+      foreach (UIElement e in subElements)
+        e.refresh();
     }
 
     public virtual int tabReOrder(int index)
@@ -418,12 +420,13 @@ namespace YoctoVisualisation
 
     }
 
-    public void startEdit(SetValueCallBack2 callback)
+    public void startEdit(SetValueCallBack2 setcallback, GetValueCallBack2 getCallback)
     {
 
       addToEditor();
-      _valueChangeCallback = callback;
-      foreach (UIElement item in subElements) item.startEdit(callback);
+      _valueChangeCallback = setcallback;
+      _getValueCallback = getCallback;
+      foreach (UIElement item in subElements) item.startEdit(setcallback, getCallback);
 
     }
 
@@ -432,6 +435,7 @@ namespace YoctoVisualisation
 
       removeFromEditor();
       _valueChangeCallback = null;
+      _getValueCallback = null;
       foreach (UIElement item in subElements) item.stopEdit();
 
     }
@@ -1037,7 +1041,8 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
-      string s = (string)_prop.GetValue(_dataContainer, null);
+      if (_getValueCallback == null) return;
+      string s = (string)_getValueCallback(this);
 
       if (input != null) if (s != input.Text) input.Text = s;
       checkForReadOnly();
@@ -1107,7 +1112,7 @@ namespace YoctoVisualisation
     public override void refresh()
     {
       if (input == null) return;
-      int propValue = (int)_prop.GetValue(_dataContainer, null);
+      int propValue = (int)_getValueCallback(this);
       int inputValue;
       bool ok = false;
       if (int.TryParse(input.Text, out inputValue))
@@ -1180,7 +1185,11 @@ namespace YoctoVisualisation
 
     public override void refresh()
     { if (input == null) return;
-      double propValue = (double)_prop.GetValue(_dataContainer, null);
+
+      if (_getValueCallback == null) return;
+     
+
+      double propValue = (double)_getValueCallback(this);
       double inputValue;
       bool  ok = false;
       if  (Double.TryParse(input.Text, out inputValue))
@@ -1251,7 +1260,7 @@ namespace YoctoVisualisation
     {
 
       if (input == null) return;
-      double propValue = ((doubleNan)_prop.GetValue(_dataContainer, null)).value;
+      double propValue = ((doubleNan)_getValueCallback(this)).value;
       if (double.IsNaN(propValue))
        {
         if (input.Text != "") input.Text = "";
@@ -1339,8 +1348,9 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
-
-      bool b = (bool)_prop.GetValue(_dataContainer, null); ;
+      if (_getValueCallback == null) return; 
+      object o = (bool)_getValueCallback(this);
+      bool b = (bool)o;
       if (input != null)
         if (b != ((CheckBox)input).Checked)
         {
@@ -1355,8 +1365,10 @@ namespace YoctoVisualisation
       _value = ((CheckBox)input).Checked;
       _prop.SetValue(_dataContainer, _value, null);
       ((CheckBox)input).Text = _value ? "Yes" : "No";
-      if (_valueChangeCallback != null) _valueChangeCallback(this);
-      if (_changeCausesParentRefresh) parentNode.refresh();
+      if (_valueChangeCallback != null)
+          _valueChangeCallback(this);
+      if (_changeCausesParentRefresh)
+         parentNode.refresh();
 
     }
 
@@ -1452,12 +1464,16 @@ namespace YoctoVisualisation
     {
       if (input != null)
       {
-      
+        if (_getValueCallback == null) return;
+        value = (int)_getValueCallback(this);
+        //value = (int)_prop.GetValue(_dataContainer, null);
 
         elmnt el = ((elmnt)(((ComboBox)input)).SelectedItem);
-        if (_value != el.value())
-          value = (int)_prop.GetValue(_dataContainer, null);
-        
+        if (value != el.value())
+          ((ComboBox)input).SelectedIndex = value;
+
+
+
       }
       checkForReadOnly();
     }
@@ -1467,8 +1483,10 @@ namespace YoctoVisualisation
       elmnt el = ((elmnt)(((ComboBox)input)).SelectedItem);
       _value = el.value();
       _prop.SetValue(_dataContainer, _value, null);
-      if (_valueChangeCallback != null) _valueChangeCallback(this);
-      if (_changeCausesParentRefresh) parentNode.refresh();
+      if (_valueChangeCallback != null)
+        _valueChangeCallback(this);
+      if (_changeCausesParentRefresh)
+          parentNode.refresh();
 
     }
 
@@ -1692,10 +1710,12 @@ namespace YoctoVisualisation
     }
 
     public override void refresh()
-    {
-
-      string s = ((YColors.YColor)_prop.GetValue(_dataContainer, null)).ToString();
-      if (s != input.Text) input.Text = s;
+    { // the color in the widget is not an YColor
+      // so it's difficult to find the original YColor
+      //if (_getValueCallback == null) return;
+      //object o = _getValueCallback(this);
+      //string s = ((Color)o).ToString();
+      //if (s != input.Text) input.Text = s;
       if (Editor != null) Editor.refresh();
     }
 

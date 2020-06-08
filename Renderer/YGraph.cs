@@ -2557,6 +2557,34 @@ namespace YDataRendering
 
     }
 
+#if (!NET35 && !NET40)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    private string  XLabel(double t, ref  XAxis scale, ref TimeResolution scaleFormat , ref MinMaxHandler.MinMax timeRange)
+    {
+      string label = "";
+      if (scale.timeReference == TimeConverter.TimeReference.ABSOLUTE)
+      {
+        if (scale.labelFormat == XAxis.FORMATAUTO)
+          label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scaleFormat.format);
+        else label = t.ToString(scale.labelFormat);
+
+      }
+      else
+      {
+        Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - timeRange.Min));
+#if (!NET35 && !NET40)
+        label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
+#else
+        label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
+
+#endif
+      }
+      return label;
+
+    }
+
+
     private int DrawXAxis(ViewPortSettings w, YGraphics g, XAxis scale, bool simulation)
     {
       //string lastdate = "";
@@ -2591,7 +2619,10 @@ namespace YDataRendering
       }
       if (FirstStep < scale.min) FirstStep += scale.step;
 
-      //log("Viewport Size: " + (scale.max - scale.min).ToString() + "Sec (" + ((scale.max - scale.min)/86400).ToString()+" days)");
+      double timeOffset = 0;
+      if (scale.timeReference != TimeConverter.TimeReference.ABSOLUTE) timeOffset = FirstStep;
+
+       //log("Viewport Size: " + (scale.max - scale.min).ToString() + "Sec (" + ((scale.max - scale.min)/86400).ToString()+" days)");
 
       TimeResolution scaleFormat = scale.bestFormat(timeRange.Max - timeRange.Min, scale.max - scale.min);
 
@@ -2601,8 +2632,14 @@ namespace YDataRendering
 
       scale.step = scaleFormat.step;
 
-
+      // compute the size of the first label
       double t = FirstStep;
+      label = XLabel(t, ref scale, ref scaleFormat, ref timeRange);
+      SizeF ssize = g.MeasureString(label, scale.font.fontObject, 100000);
+
+      // Compute step to skip, to make sure labels don't overlap
+      int mod = 1;
+      while (( mod* (w.Width - w.Rmargin - w.Lmargin) / stepCount) < ssize.Width ) mod++;
 
 
 
@@ -2619,38 +2656,19 @@ namespace YDataRendering
           int x = w.Lmargin + (int)Math.Round((t - scale.min) / XZoom);
           if (x <= w.Width - w.Rmargin)
           {
+
             if (!simulation)
             {
               if (scale.showGrid) g.DrawLine(scale.gridPen, x, w.Tmargin, x, w.Height - w.Bmargin);
               g.DrawLine(scale.pen, x, y + (bottomSide ? 2 : -2), x, y + (bottomSide ? -5 : 5));
             }
 
-            if (scale.timeReference == TimeConverter.TimeReference.ABSOLUTE)
-            {
-              if (scale.labelFormat == XAxis.FORMATAUTO)
-                label = TimeConverter.FromUnixTime(t).ToLocalTime().ToString(scaleFormat.format);
-              else label = t.ToString(scale.labelFormat);
-
-            }
-            else
-            {
-              Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - timeRange.Min));
-
-
-#if (!NET35 && !NET40)
-              label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
-#else
-             label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
-
-#endif
-
-            }
-
-
-            SizeF ssize = g.MeasureString(label, scale.font.fontObject, 100000);
+            label = XLabel(t, ref scale, ref scaleFormat, ref timeRange);
+             ssize = g.MeasureString(label, scale.font.fontObject, 100000);
             if (ssize.Height > UnitHeight) UnitHeight = ssize.Height;
-
-            if (!simulation) g.DrawString(label, scale.font.fontObject, scale.font.brushObject, new Point(x /*- (int)ssize.Width / 2*/, y + ((bottomSide) ? +2 : -(int)ssize.Height)), stringFormat);
+            if (!simulation)
+              if (Math.Round(100*(t - timeOffset))  % Math.Round(100*(scale.step * mod)) == 0)
+               g.DrawString(label, scale.font.fontObject, scale.font.brushObject, new Point(x /*- (int)ssize.Width / 2*/, y + ((bottomSide) ? +2 : -(int)ssize.Height)), stringFormat);
           }
         }
         t += scale.step;

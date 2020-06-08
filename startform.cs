@@ -315,14 +315,15 @@ namespace YoctoVisualisation
       propWindow2.setTopmost(false);
     }
 
-    public void ShowPropertyForm(Form caller, GenericProperties prop,  SetValueCallBack2 PropertyChanged2, bool forceToShow)
+    public void ShowPropertyForm(Form caller, GenericProperties prop,  
+               SetValueCallBack2 PropertyChanged2,
+               GetValueCallBack2 getPropertyValue,
+               bool forceToShow)
     {
-
-
 
       if (propWindow2 != null)
       {
-        propWindow2.showWindow(caller, prop, PropertyChanged2, forceToShow);
+        propWindow2.showWindow(caller, prop, PropertyChanged2, getPropertyValue, forceToShow);
         propWindow2.setTopmost(true);
       }
 

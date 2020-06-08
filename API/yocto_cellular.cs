@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_cellular.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ * $Id: yocto_cellular.cs 40296 2020-05-05 07:56:00Z seb $
  *
  * Implements yFindCellular(), the high-level API for Cellular functions
  *
@@ -255,10 +255,14 @@ public class YCellular : YFunction
     public const int CELLTYPE_HSDPA = 3;
     public const int CELLTYPE_NONE = 4;
     public const int CELLTYPE_CDMA = 5;
+    public const int CELLTYPE_LTE_M = 6;
+    public const int CELLTYPE_NB_IOT = 7;
+    public const int CELLTYPE_EC_GSM_IOT = 8;
     public const int CELLTYPE_INVALID = -1;
     public const string IMSI_INVALID = YAPI.INVALID_STRING;
     public const string MESSAGE_INVALID = YAPI.INVALID_STRING;
     public const string PIN_INVALID = YAPI.INVALID_STRING;
+    public const string RADIOCONFIG_INVALID = YAPI.INVALID_STRING;
     public const string LOCKEDOPERATOR_INVALID = YAPI.INVALID_STRING;
     public const int AIRPLANEMODE_OFF = 0;
     public const int AIRPLANEMODE_ON = 1;
@@ -281,6 +285,7 @@ public class YCellular : YFunction
     protected string _imsi = IMSI_INVALID;
     protected string _message = MESSAGE_INVALID;
     protected string _pin = PIN_INVALID;
+    protected string _radioConfig = RADIOCONFIG_INVALID;
     protected string _lockedOperator = LOCKEDOPERATOR_INVALID;
     protected int _airplaneMode = AIRPLANEMODE_INVALID;
     protected int _enableData = ENABLEDATA_INVALID;
@@ -332,6 +337,10 @@ public class YCellular : YFunction
         if (json_val.has("pin"))
         {
             _pin = json_val.getString("pin");
+        }
+        if (json_val.has("radioConfig"))
+        {
+            _radioConfig = json_val.getString("radioConfig");
         }
         if (json_val.has("lockedOperator"))
         {
@@ -473,8 +482,9 @@ public class YCellular : YFunction
      * </summary>
      * <returns>
      *   a value among <c>YCellular.CELLTYPE_GPRS</c>, <c>YCellular.CELLTYPE_EGPRS</c>,
-     *   <c>YCellular.CELLTYPE_WCDMA</c>, <c>YCellular.CELLTYPE_HSDPA</c>, <c>YCellular.CELLTYPE_NONE</c>
-     *   and <c>YCellular.CELLTYPE_CDMA</c>
+     *   <c>YCellular.CELLTYPE_WCDMA</c>, <c>YCellular.CELLTYPE_HSDPA</c>, <c>YCellular.CELLTYPE_NONE</c>,
+     *   <c>YCellular.CELLTYPE_CDMA</c>, <c>YCellular.CELLTYPE_LTE_M</c>, <c>YCellular.CELLTYPE_NB_IOT</c>
+     *   and <c>YCellular.CELLTYPE_EC_GSM_IOT</c>
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YCellular.CELLTYPE_INVALID</c>.
@@ -497,18 +507,19 @@ public class YCellular : YFunction
 
     /**
      * <summary>
-     *   Returns an opaque string if a PIN code has been configured in the device to access
-     *   the SIM card, or an empty string if none has been configured or if the code provided
-     *   was rejected by the SIM card.
+     *   Returns the International Mobile Subscriber Identity (MSI) that uniquely identifies
+     *   the SIM card.
      * <para>
+     *   The first 3 digits represent the mobile country code (MCC), which
+     *   is followed by the mobile network code (MNC), either 2-digit (European standard)
+     *   or 3-digit (North American standard)
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   a string corresponding to an opaque string if a PIN code has been configured in the device to access
-     *   the SIM card, or an empty string if none has been configured or if the code provided
-     *   was rejected by the SIM card
+     *   a string corresponding to the International Mobile Subscriber Identity (MSI) that uniquely identifies
+     *   the SIM card
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YCellular.IMSI_INVALID</c>.
@@ -629,6 +640,77 @@ public class YCellular : YFunction
         lock (_thisLock) {
             rest_val = newval;
             return _setAttr("pin", rest_val);
+        }
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the type of protocol used over the serial line, as a string.
+     * <para>
+     *   Possible values are "Line" for ASCII messages separated by CR and/or LF,
+     *   "Frame:[timeout]ms" for binary messages separated by a delay time,
+     *   "Char" for a continuous ASCII stream or
+     *   "Byte" for a continuous binary stream.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   a string corresponding to the type of protocol used over the serial line, as a string
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YCellular.RADIOCONFIG_INVALID</c>.
+     * </para>
+     */
+    public string get_radioConfig()
+    {
+        string res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return RADIOCONFIG_INVALID;
+                }
+            }
+            res = this._radioConfig;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Changes the type of protocol used over the serial line.
+     * <para>
+     *   Possible values are "Line" for ASCII messages separated by CR and/or LF,
+     *   "Frame:[timeout]ms" for binary messages separated by a delay time,
+     *   "Char" for a continuous ASCII stream or
+     *   "Byte" for a continuous binary stream.
+     *   The suffix "/[wait]ms" can be added to reduce the transmit rate so that there
+     *   is always at lest the specified number of milliseconds between each bytes sent.
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="newval">
+     *   a string corresponding to the type of protocol used over the serial line
+     * </param>
+     * <para>
+     * </para>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public int set_radioConfig(string newval)
+    {
+        string rest_val;
+        lock (_thisLock) {
+            rest_val = newval;
+            return _setAttr("radioConfig", rest_val);
         }
     }
 
@@ -1285,7 +1367,10 @@ public class YCellular : YFunction
     {
         string gsmMsg;
         gsmMsg = this.get_message();
-        if (!((gsmMsg).Substring(0, 13) == "Enter SIM PUK")) { this._throw(YAPI.INVALID_ARGUMENT, "PUK not expected at this time"); return YAPI.INVALID_ARGUMENT; }
+        if (!((gsmMsg).Substring(0, 13) == "Enter SIM PUK")) {
+            this._throw(YAPI.INVALID_ARGUMENT, "PUK not expected at this time");
+            return YAPI.INVALID_ARGUMENT;
+        }
         if (newPin == "") {
             return this.set_command("AT+CPIN="+puk+",0000;+CLCK=SC,0,0000");
         }
@@ -1527,8 +1612,8 @@ public class YCellular : YFunction
             llen = (recs[ii]).Length - 2;
             if (llen >= 44) {
                 if ((recs[ii]).Substring(41, 3) == "dbm") {
-                    lac = Convert.ToInt32((recs[ii]).Substring(16, 4), 16);
-                    cellId = Convert.ToInt32((recs[ii]).Substring(23, 4), 16);
+                    lac = YAPI._hexStrToInt((recs[ii]).Substring(16, 4));
+                    cellId = YAPI._hexStrToInt((recs[ii]).Substring(23, 4));
                     dbms = (recs[ii]).Substring(37, 4);
                     if ((dbms).Substring(0, 1) == " ") {
                         dbms = (dbms).Substring(1, 3);

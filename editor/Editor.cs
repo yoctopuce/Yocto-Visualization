@@ -13,8 +13,9 @@ namespace YoctoVisualisation
     Dictionary<object, EditedDataSource> EditedDataSourceList = new Dictionary<object, EditedDataSource>();
     EditedDataSource currentEditedDataSource = null;
     SetValueCallBack2 _changeCallback = null;
+    GetValueCallBack2 _getvalueCallback = null;
 
-   class EditedDataSource
+    class EditedDataSource
     {
       object _source;
       UIElement _root;
@@ -73,11 +74,14 @@ namespace YoctoVisualisation
 
       }
 
-    public void showWindow(Form hostWindow,  GenericProperties structData, SetValueCallBack2 valueCallBack, bool ForceToTshow)
+    public void showWindow(Form hostWindow,  GenericProperties structData, 
+                           SetValueCallBack2 setvalueCallBack,
+                           GetValueCallBack2 getvalueCallBack, bool ForceToTshow)
     {
 
-      _changeCallback = valueCallBack;
-     
+      _changeCallback = setvalueCallBack;
+
+      _getvalueCallback = getvalueCallBack;
 
         Text = "Properties of "+ hostWindow.Text;
   
@@ -90,10 +94,10 @@ namespace YoctoVisualisation
           this.WindowState = FormWindowState.Normal;
         }
       }
-      EditObject(structData, valueCallBack);
+      EditObject(structData, setvalueCallBack, getvalueCallBack);
     }
 
-    public void EditObject(object structData, SetValueCallBack2 valueCallBack)
+    public void EditObject(object structData, SetValueCallBack2 setvalueCallBack, GetValueCallBack2 getvalueCallBack)
     {
       string helpYourselfMsg = "This is the property editor. Change any parameter you want. All changes are applied in real time.";
       if (!Visible) return;
@@ -131,7 +135,7 @@ namespace YoctoVisualisation
         currentEditedDataSource.refresh();
       }
 
-      currentEditedDataSource.root.startEdit(valueCallBack);
+      currentEditedDataSource.root.startEdit(setvalueCallBack, getvalueCallBack);
       currentEditedDataSource.root.resizeAll();
       label1.Text = helpYourselfMsg;
       outterpanel.Refresh();

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_weighscale.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_weighscale.cs 40281 2020-05-04 13:39:55Z seb $
  *
  *  Implements yFindWeighScale(), the high-level API for WeighScale functions
  *
@@ -774,11 +774,20 @@ public class YWeighScale : YSensor
         double currComp;
         double idxTemp;
         siz = tempValues.Count;
-        if (!(siz != 1)) { this._throw( YAPI.INVALID_ARGUMENT, "thermal compensation table must have at least two points"); return YAPI.INVALID_ARGUMENT; }
-        if (!(siz == compValues.Count)) { this._throw( YAPI.INVALID_ARGUMENT, "table sizes mismatch"); return YAPI.INVALID_ARGUMENT; }
+        if (!(siz != 1)) {
+            this._throw(YAPI.INVALID_ARGUMENT, "thermal compensation table must have at least two points");
+            return YAPI.INVALID_ARGUMENT;
+        }
+        if (!(siz == compValues.Count)) {
+            this._throw(YAPI.INVALID_ARGUMENT, "table sizes mismatch");
+            return YAPI.INVALID_ARGUMENT;
+        }
 
         res = this.set_command(""+Convert.ToString(tableIndex)+"Z");
-        if (!(res==YAPI.SUCCESS)) { this._throw( YAPI.IO_ERROR, "unable to reset thermal compensation table"); return YAPI.IO_ERROR; }
+        if (!(res==YAPI.SUCCESS)) {
+            this._throw(YAPI.IO_ERROR, "unable to reset thermal compensation table");
+            return YAPI.IO_ERROR;
+        }
         // add records in growing temperature value
         found = 1;
         prev = -999999.0;
@@ -798,7 +807,10 @@ public class YWeighScale : YSensor
             }
             if (found > 0) {
                 res = this.set_command(""+Convert.ToString( tableIndex)+"m"+Convert.ToString( (int) Math.Round(1000*curr))+":"+Convert.ToString((int) Math.Round(1000*currComp)));
-                if (!(res==YAPI.SUCCESS)) { this._throw( YAPI.IO_ERROR, "unable to set thermal compensation table"); return YAPI.IO_ERROR; }
+                if (!(res==YAPI.SUCCESS)) {
+                    this._throw(YAPI.IO_ERROR, "unable to set thermal compensation table");
+                    return YAPI.IO_ERROR;
+                }
                 prev = curr;
             }
         }
@@ -826,8 +838,8 @@ public class YWeighScale : YSensor
         compValues.Clear();
         idx = 0;
         while (idx < siz) {
-            temp = Double.Parse(paramlist[2*idx])/1000.0;
-            comp = Double.Parse(paramlist[2*idx+1])/1000.0;
+            temp = YAPI._atof(paramlist[2*idx])/1000.0;
+            comp = YAPI._atof(paramlist[2*idx+1])/1000.0;
             tempValues.Add(temp);
             compValues.Add(comp);
             idx = idx + 1;

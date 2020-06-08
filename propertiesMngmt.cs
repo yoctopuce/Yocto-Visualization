@@ -555,6 +555,11 @@ namespace YoctoVisualisation
       newSetProperty(rootTarget, source, propertySourceName, path, NoFilter);
     }
 
+    static public object newGetProperty(object rootTarget, object source, string propertySourceName, List<string> path)
+    {
+      return newGetProperty(rootTarget, source, propertySourceName, path, NoFilter);
+    }
+
     static public object getObjectFromPath(object rootTarget, List<string> path)
     {
       System.Reflection.PropertyInfo tinfo = null;
@@ -603,30 +608,31 @@ namespace YoctoVisualisation
       return FinalTarget;
     }
        
+    static private  void computePropertyAccess(object rootTarget, object source, string propertySourceName, List<string> path,
+        out System.Reflection.PropertyInfo tinfo , out string ttype, out string stype, out object FinalTarget, out object TerminalSource)
 
-    static public void newSetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
     {
-      System.Reflection.PropertyInfo tinfo = null;
-      string ttype = "";
+       tinfo = null;
+       ttype = "";
 
 
-      object FinalTarget = getObjectFromPath(rootTarget, path);
+       FinalTarget = getObjectFromPath(rootTarget, path);
 
 
-      object TerminalSource = source;
+       TerminalSource = source;
       System.Reflection.PropertyInfo sinfo = null;
 
       sinfo = TerminalSource.GetType().GetProperty(propertySourceName);
-      TerminalSource = sinfo.GetValue(TerminalSource,null);
+      TerminalSource = sinfo.GetValue(TerminalSource, null);
 
       for (int i = 1; i < path.Count; i++)
       {
         sinfo = TerminalSource.GetType().GetProperty(path[i]);
-        TerminalSource = sinfo.GetValue(TerminalSource,null);
+        TerminalSource = sinfo.GetValue(TerminalSource, null);
 
 
       }
-      string stype = sinfo.PropertyType.FullName;
+       stype = sinfo.PropertyType.FullName;
       if (path.Count > 0)
       {
         string targetname = path[path.Count - 1];
@@ -642,9 +648,54 @@ namespace YoctoVisualisation
       }
       if (tinfo == null) return; // the property does not exists in the widget
       ttype = tinfo.PropertyType.FullName;
+    }
 
+    static public object newGetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
+    {
+      System.Reflection.PropertyInfo tinfo = null;
+      string ttype = "";
+      string stype = "";
+      object FinalTarget;
+      object TerminalSource;
+      computePropertyAccess(rootTarget, source, propertySourceName, path, out tinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
+      if (tinfo == null) return null; // the property does not exists in the widget
 
+      if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Color"))
+          return tinfo.GetValue(FinalTarget,  null);
+    
+      if ((stype == "YoctoVisualisation.doubleNan") && (ttype == "System.Double"))
+        return tinfo.GetValue(FinalTarget,  null);
+           
+      if ((stype == "YoctoVisualisation.doubleNan") && (ttype.StartsWith("System.Nullable")))
+        return  tinfo.GetValue(FinalTarget,  null);
+    
+      if ((stype == "System.String") && (ttype == "System.Windows.Media.FontFamily"))  
+        return tinfo.GetValue(FinalTarget,  null);
 
+      if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush"))      
+        return tinfo.GetValue(FinalTarget,  null);
+    
+      if ((stype == "YColors.YColor") && (ttype == "System.Drawing.Color"))      
+       return   tinfo.GetValue(FinalTarget,  null);
+     
+      if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush")) 
+        return tinfo.GetValue(FinalTarget, null);
+  
+      if ((stype == "YoctoVisualisation.DataTrackerDescription+DataPrecision") && (ttype == "YDataRendering.DataTracker+DataPrecision"))     
+        return tinfo.GetValue(FinalTarget, null);
+    
+      return  tinfo.GetValue(FinalTarget, null);
+    }
+
+  static public void newSetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
+    {
+      System.Reflection.PropertyInfo tinfo = null;
+      string ttype = "";
+      string stype = "";
+      object FinalTarget;
+      object TerminalSource;
+      computePropertyAccess(rootTarget, source, propertySourceName, path, out tinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
+      if (tinfo == null) return; // the property does not exists in the widget
 
       if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Color"))
       {
