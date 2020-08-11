@@ -352,6 +352,9 @@ namespace YoctoVisualisation
       string fullpropname = "";
       string propType = "";
       string OriginalPropName = "";
+     // if src.t "DataSource_recording"
+
+
       List<string> path = src.ExtractPropPath(ref OriginalPropName, ref fullpropname, ref propType);
       switch (propType)
       {
@@ -360,7 +363,9 @@ namespace YoctoVisualisation
           
         case "Graph":
           return GenericProperties.newGetProperty(_cartesianChart, prop, fullpropname, path);
-          
+
+        case "DataSource":
+          return null;
 
       }
       return null;

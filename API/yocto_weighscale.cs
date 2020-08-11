@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_weighscale.cs 40281 2020-05-04 13:39:55Z seb $
+ *  $Id: yocto_weighscale.cs 41112 2020-06-29 13:21:58Z seb $
  *
  *  Implements yFindWeighScale(), the high-level API for WeighScale functions
  *
@@ -718,6 +718,8 @@ public class YWeighScale : YSensor
      *   Adapts the load cell signal bias (stored in the corresponding genericSensor)
      *   so that the current signal corresponds to a zero weight.
      * <para>
+     *   Remember to call the
+     *   <c>saveToFlash()</c> method of the module if the modification must be kept.
      * </para>
      * <para>
      * </para>

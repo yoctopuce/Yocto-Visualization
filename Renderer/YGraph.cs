@@ -78,6 +78,38 @@ namespace YDataRendering
       return sTime.AddSeconds(unixtime);
     }
 
+    public static string RelativeFormat(double dataDeltaTime, double viewportDeltaTime , double resolution )
+    {
+      bool ShowSecondsTenth = true;
+      bool ShowSecondsHundredth = true;
+      bool ShowSeconds = true;
+      bool ShowMinutes = false;
+      bool ShowHours = false;
+      bool ShowDays = false;
+
+      if (dataDeltaTime <= 0.10) { ShowSecondsHundredth = true; }
+      if (dataDeltaTime <= 1) { ShowSecondsTenth = true; }
+      if ((dataDeltaTime >= 60) || (viewportDeltaTime >= 60)) { ShowMinutes = true; }
+      if ((dataDeltaTime >= 3600) || (viewportDeltaTime >= 3600)) { ShowHours = true; }
+      if ((dataDeltaTime >= 86400) || (viewportDeltaTime >= 86400)) { ShowDays = true; }
+
+      if (resolution >= .1) ShowSecondsHundredth = false;
+      if (resolution >= 1) ShowSecondsTenth = false;
+      if (resolution >= 60) ShowSeconds = false;
+      if (resolution >= 3600) ShowMinutes = false;
+      if (resolution >= 86400) ShowHours = false;
+
+      string format = "";
+      if (ShowSecondsTenth) format = "\\.f";
+      if (ShowSecondsHundredth) format = "\\.ff";
+      if (ShowSeconds) format = "ss" + format + "\\s";
+      if (ShowMinutes) format = "mm\\m" + format;
+      if (ShowHours) format = "hh\\h" + format;
+      if (ShowDays) format = "d\\d" + format;
+      return format;
+
+    }
+
     public static TimeResolution BestTimeformat(double dataDeltaTime, double viewportDeltaTime, TimeReference tref)
     {
       TimeResolution res;
@@ -155,26 +187,9 @@ namespace YDataRendering
       else
 
       {
+        res.format=  RelativeFormat(dataDeltaTime, viewportDeltaTime, res.step);
 
-        if (dataDeltaTime <= 0.10) { ShowSecondsHundredth = true; }
-        if (dataDeltaTime <= 1) { ShowSecondsTenth = true; }
-        if ((dataDeltaTime >= 60) || (viewportDeltaTime >= 60)) { ShowMinutes = true; }
-        if ((dataDeltaTime >= 3600) || (viewportDeltaTime >= 3600)) { ShowHours = true; }
-        if ((dataDeltaTime >= 86400) || (viewportDeltaTime >= 86400)) { ShowDays = true; }
 
-        if (res.step >= .1) ShowSecondsHundredth = false;
-        if (res.step >= 1) ShowSecondsTenth = false;
-        if (res.step >= 60) ShowSeconds = false;
-        if (res.step >= 3600) ShowMinutes = false;
-        if (res.step >= 86400) ShowHours = false;
-
-        res.format = "";
-        if (ShowSecondsHundredth) res.format = "\\.ff";
-        if (ShowSecondsTenth) res.format = "\\.f";
-        if (ShowSeconds) res.format = "ss" + res.format + "\\s";
-        if (ShowMinutes) res.format = "mm\\m" + res.format;
-        if (ShowHours) res.format = "hh\\h" + res.format;
-        if (ShowDays) res.format = "d\\d" + res.format;
       }
 
       return res;
@@ -368,14 +383,14 @@ namespace YDataRendering
         if (_legendPen == null)
         {
           _legendPen = new Pen(_color, (float)(_thickness* parent.legendPanel.traceWidthFactor));
-          
+
 
         }
         return _legendPen;
       }
     }
 
-    public void resetlegendPen() { _legendPen = null; } 
+    public void resetlegendPen() { _legendPen = null; }
 
     private Brush _brush = null;
 
@@ -709,6 +724,10 @@ namespace YDataRendering
     private bool _showSerieName = false;
     public bool showSerieName { get { return _showSerieName; } set { _showSerieName = value; _parentRenderer.redraw(); } }
 
+    private bool _showTimeStamp = false;
+    public bool showTimeStamp { get { return _showTimeStamp; } set { _showTimeStamp = value; _parentRenderer.redraw(); } }
+
+
     private string _dataPrecisionString = "";
     public enum DataPrecision
     {
@@ -823,7 +842,7 @@ namespace YDataRendering
       }
     }
 
-     
+
     private Pen _pen = null;
     public Pen pen
     {
@@ -838,7 +857,7 @@ namespace YDataRendering
     public YFontParams font { get { return _font; } }
 
 
-    
+
   }
 
 
@@ -1593,6 +1612,17 @@ namespace YDataRendering
     public TimeConverter.TimeReference timeReference
     { get { return _timeReference; } set { _timeReference = value; _parentRenderer.redraw(); } }
 
+    // in case of relative time reference : position of the Zero
+    protected double _zeroTime = 0;
+    public Double zeroTime
+    { get { return _zeroTime; } set { _zeroTime = value; } }
+
+    //  Max timestamp- Min timestamp of all series values
+    protected double _fullSize = 0;
+    public Double fullSize
+    { get { return _fullSize; } set { _fullSize = value; } }
+
+
     public TimeResolution bestFormat(double dataTimedelta, double viewportTimedelta)
     {
 
@@ -1677,7 +1707,7 @@ namespace YDataRendering
     public LegendPanel legendPanel { get { return _legendPanel; } }
 
 
-   
+
 
     private DataTracker _dataTracker;
     public DataTracker dataTracker { get { return _dataTracker; } }
@@ -1691,7 +1721,7 @@ namespace YDataRendering
     public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; borderPen = null; redraw(); } }
 
 
-   
+
 
 
     ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
@@ -1720,7 +1750,7 @@ namespace YDataRendering
 
       _navigator = new Navigator(this, this);
       _legendPanel = new LegendPanel(this, this);
-     
+
       _dataTracker = new DataTracker(this, this);
 
       this.UIContainer.MouseDown += MouseDown;
@@ -1803,7 +1833,7 @@ namespace YDataRendering
 
     }
 
-   
+
 
     public DataSerie addSerie()
     {
@@ -2044,7 +2074,7 @@ namespace YDataRendering
     }
 
 
-   
+
 
     public void drawLegendPanel(YGraphics g, int viewPortWidth, int viewPortHeight, ref ViewPortSettings mainViewPort)
     {
@@ -2254,7 +2284,7 @@ namespace YDataRendering
 
 
 
-     
+
 
 
       Rectangle r = new Rectangle((int)x, (int)y, (int)w, (int)h);
@@ -2263,7 +2293,7 @@ namespace YDataRendering
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
       for (int i = 0; i < _series.Count; i++)
         if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
-        { 
+        {
           g.DrawString(legends[i], _legendPanel.font.fontObject, _legendPanel.font.brushObject,
              (int)(x + ofsetx[i] + 20 + legendPanel.padding),
              (int)(y + ofsety[i] + legendPanel.padding));
@@ -2463,7 +2493,7 @@ namespace YDataRendering
 
             y = w.Height - w.Bmargin - y;
             double v = FirstStep + i * axis.startStopStep.step;
-            
+
 
 
             if (!simulation)
@@ -2472,9 +2502,9 @@ namespace YDataRendering
 
               if ((Math.Abs(v) <1E-6) && axis.highlightZero)
               {
-               
+
                   g.DrawLine(axis.pen, w.Lmargin, y, w.Width - w.Rmargin, y);
-                
+
 
               }
                g.DrawLine(axis.pen, x + ((leftSide) ? -2 : 2), y, x + ((leftSide) ? 5 : -5), y);
@@ -2620,7 +2650,13 @@ namespace YDataRendering
       if (FirstStep < scale.min) FirstStep += scale.step;
 
       double timeOffset = 0;
-      if (scale.timeReference != TimeConverter.TimeReference.ABSOLUTE) timeOffset = FirstStep;
+      if (scale.timeReference != TimeConverter.TimeReference.ABSOLUTE)
+      {
+        timeOffset = FirstStep;
+        scale.zeroTime = timeRange.Min;
+
+      }
+      scale.fullSize = timeRange.Max - timeRange.Min;
 
        //log("Viewport Size: " + (scale.max - scale.min).ToString() + "Sec (" + ((scale.max - scale.min)/86400).ToString()+" days)");
 
@@ -2643,7 +2679,7 @@ namespace YDataRendering
 
 
 
-
+      int steps = (int)Math.Round( (t - timeOffset) / scale.step);
       do
       {
         DateTime d = TimeConverter.FromUnixTime(t);
@@ -2667,11 +2703,16 @@ namespace YDataRendering
              ssize = g.MeasureString(label, scale.font.fontObject, 100000);
             if (ssize.Height > UnitHeight) UnitHeight = ssize.Height;
             if (!simulation)
-              if (Math.Round(100*(t - timeOffset))  % Math.Round(100*(scale.step * mod)) == 0)
-               g.DrawString(label, scale.font.fontObject, scale.font.brushObject, new Point(x /*- (int)ssize.Width / 2*/, y + ((bottomSide) ? +2 : -(int)ssize.Height)), stringFormat);
-          }
+            {
+
+              if (steps % mod ==0)
+              //if (Math.Round(100 * (t - timeOffset)) % Math.Round(100 * (scale.step * mod)) == 0)
+                g.DrawString(label, scale.font.fontObject, scale.font.brushObject, new Point(x /*- (int)ssize.Width / 2*/, y + ((bottomSide) ? +2 : -(int)ssize.Height)), stringFormat);
+            }
+            }
         }
         t += scale.step;
+        steps++;
       } while (t <= scale.max);
 
 
@@ -2700,7 +2741,7 @@ namespace YDataRendering
 
     }
 
-    private void DrawDataTracker(YGraphics g, int viewPortWidth, int viewPortHeight)
+    private void DrawDataTracker(YGraphics g, int viewPortWidth, int viewPortHeight, XAxis scaleX)
     {
       if (!_dataTracker.enabled) { return; }
 
@@ -2771,6 +2812,48 @@ namespace YDataRendering
 
         string strValue = "";
         if (_dataTracker.showSerieName) strValue += _series[bestindex].legend + "\r\n";
+
+        if (_dataTracker.showTimeStamp)
+        {
+          double dtime = scaleX.max - scaleX.min;
+          double dview = mainViewPort.Width - mainViewPort.Lmargin - mainViewPort.Rmargin;
+          if (dtime > 0)
+          {
+
+            double pixelSize = dtime / dview;
+            if (pixelSize > 0)
+            {
+              double t = IRLmatch[bestindex].Value.x;
+              if (scaleX.timeReference == TimeConverter.TimeReference.ABSOLUTE)
+             {
+
+               if (dtime > 86400) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("MMMM dd ");
+               if (pixelSize < 0.1) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss.ff");
+               else if (pixelSize < 1) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss.f");
+               else if (pixelSize < 60) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss");
+               else if (pixelSize < 3600) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm");
+               else if (pixelSize < 86400) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH") + "H";
+               strValue += "\r\n";
+            }
+            else
+             {
+
+               string format =  TimeConverter.RelativeFormat(scaleX.fullSize,dtime, pixelSize);
+               Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - scaleX.zeroTime));
+#if (!NET35 && !NET40)
+                strValue += (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(format) : new TimeSpan(ticks).ToString(format);
+#else
+               strValue += (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
+
+#endif
+                strValue += "\r\n";
+
+              }
+            }
+          }
+
+
+        }
 
         if (_dataTracker.dataPrecision == DataTracker.DataPrecision.PRECISION_NOLIMIT)
           strValue += IRLmatch[bestindex].Value.y.ToString() + _series[bestindex].unit;
@@ -2935,7 +3018,7 @@ namespace YDataRendering
 
 
       g.SmoothingMode = SmoothingMode.HighQuality;
-     
+
       int yMarginOffset = 5;
 
       /* Step 1, found out margins */
@@ -2956,8 +3039,8 @@ namespace YDataRendering
 
 
       /* Step 2B-2  Draw Legend if it doesn't overlap the data */
-    
-     
+
+
       if (!_legendPanel.overlap) drawLegendPanel(g, UIw, UIh, ref mainViewPort);
 
       /* Step 2B-3  Draw annotations if it doesn't overlap the data */
@@ -3287,7 +3370,7 @@ namespace YDataRendering
 
       drawAnnotationPanels(g, _annotationPanels, UIw, UIh, true, ref mainViewPort);
       DrawDataPanels(mainViewPort, g, xAxis, _yAxes, UIw, UIh);
-      DrawDataTracker(g, UIw, UIh);
+      DrawDataTracker(g, UIw, UIh, xAxis);
       DrawMessagePanels(g, UIw, UIh);
       return 0;
     }

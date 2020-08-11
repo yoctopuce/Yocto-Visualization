@@ -754,9 +754,10 @@ namespace YoctoVisualisation
           throw new Exception("Time-stamp inconsistency");
       }
 
-
-      LogManager.Log(hwdName + " loaded " + previewCurData.Count.ToString() +  "/"+ measures.Count.ToString()+ " records over "+ (previewCurData[previewCurData.Count-1].DateTime- previewCurData[0].DateTime).ToString("F3") +" sec");
-
+      if (previewCurData.Count > 1)
+        LogManager.Log(hwdName + " loaded " + previewCurData.Count.ToString() + "/" + measures.Count.ToString() + " records over " + (previewCurData[previewCurData.Count - 1].DateTime - previewCurData[0].DateTime).ToString("F3") + " sec");
+      else
+        LogManager.Log(hwdName + " loaded " + previewCurData.Count.ToString() + " records");
 
       if (previewMinData.Count > 2)
       {
@@ -780,8 +781,10 @@ namespace YoctoVisualisation
         curData.InsertRange(MergeSourceStart, previewCurData);
         maxData.InsertRange(MergeSourceStart, previewMaxData);
         dataMutex.ReleaseMutex();
+      
+        firstDataloggerTimeStamp = curData[0].DateTime;
       }
-      firstDataloggerTimeStamp = curData[0].DateTime;
+
       loadDone = true;
       loadFailed = false;
 

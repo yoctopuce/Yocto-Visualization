@@ -403,14 +403,14 @@ namespace YoctoVisualisation
       {
         fullpropname = p.targetFullName;
         index = fullpropname.IndexOf("_");
-        if (index < 0)
+        if (index < 0) 
         {
           if  (fullpropname!= ARTIFICIALSECTIONNAME) path.Insert(0, fullpropname); // ignore artificial sections
           p = p.parentNode;
           if (p == null) throw new System.ArgumentException("invalid Property name");
         }
 
-      } while (index < 0);
+      } while (index < 0)  ;
 
       propType = fullpropname.Substring(0, index);
       string propname = fullpropname.Substring(index + 1);
@@ -1260,7 +1260,10 @@ namespace YoctoVisualisation
     {
 
       if (input == null) return;
-      double propValue = ((doubleNan)_getValueCallback(this)).value;
+      if (_getValueCallback == null) return;
+
+      object o = _getValueCallback(this);
+      double propValue = o is doubleNan ? ((doubleNan)o).value : (double)o;
       if (double.IsNaN(propValue))
        {
         if (input.Text != "") input.Text = "";
@@ -1348,9 +1351,18 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
-      if (_getValueCallback == null) return; 
-      object o = (bool)_getValueCallback(this);
-      bool b = (bool)o;
+     
+      if (_getValueCallback == null) return;
+      
+      object o = _getValueCallback(this);
+
+      bool b = false;
+
+      if (o == null)
+      {
+        b =(bool) _prop.GetValue(_dataContainer, null);
+      } else  b = (bool)o;
+
       if (input != null)
         if (b != ((CheckBox)input).Checked)
         {
@@ -2019,6 +2031,7 @@ namespace YoctoVisualisation
           if (pathChecker != null) pathChecker.CancelAsync();
          
           pathChecker = new BackgroundWorker();
+          pathChecker.WorkerSupportsCancellation = true;
           pathChecker.DoWork += pathChecker_doWork;
           pathChecker.RunWorkerCompleted+= pathChecker_workDone;
           pathChecker.RunWorkerAsync(strValue);

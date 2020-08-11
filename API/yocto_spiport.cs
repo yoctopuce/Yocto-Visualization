@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_spiport.cs 40296 2020-05-05 07:56:00Z seb $
+ *  $Id: yocto_spiport.cs 41171 2020-07-02 17:49:00Z mvuilleu $
  *
  *  Implements yFindSpiPort(), the high-level API for SpiPort functions
  *
@@ -48,13 +48,92 @@ using YDEV_DESCR = System.Int32;
 using YFUN_DESCR = System.Int32;
 
  #pragma warning disable 1591
-    //--- (YSpiPort return codes)
-    //--- (end of YSpiPort return codes)
-//--- (YSpiPort dlldef)
-//--- (end of YSpiPort dlldef)
-//--- (YSpiPort yapiwrapper)
-//--- (end of YSpiPort yapiwrapper)
-//--- (YSpiPort class start)
+
+//--- (generated code: YSpiSnoopingRecord class start)
+public class YSpiSnoopingRecord
+{
+//--- (end of generated code: YSpiSnoopingRecord class start)
+    //--- (generated code: YSpiSnoopingRecord definitions)
+
+    protected int _tim = 0;
+    protected int _dir = 0;
+    protected string _msg;
+    //--- (end of generated code: YSpiSnoopingRecord definitions)
+
+    public YSpiSnoopingRecord(string data)
+    {
+        //--- (generated code: YSpiSnoopingRecord attributes initialization)
+        //--- (end of generated code: YSpiSnoopingRecord attributes initialization)
+        YAPI.YJSONObject json = new YAPI.YJSONObject(data);
+        json.parse();
+        this._tim = json.getInt("t");
+        string m = json.getString("m");
+        this._dir = (m[0] == '<' ? 1 : 0);
+        this._msg = m.Substring(1);
+    }
+
+  //--- (generated code: YSpiSnoopingRecord implementation)
+
+
+
+    /**
+     * <summary>
+     *   Returns the elapsed time, in ms, since the beginning of the preceding message.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the elapsed time, in ms, since the beginning of the preceding message.
+     * </returns>
+     */
+    public virtual int get_time()
+    {
+        return this._tim;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the message direction (RX=0, TX=1).
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the message direction (RX=0, TX=1).
+     * </returns>
+     */
+    public virtual int get_direction()
+    {
+        return this._dir;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the message content.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the message content.
+     * </returns>
+     */
+    public virtual string get_message()
+    {
+        return this._msg;
+    }
+
+    //--- (end of generated code: YSpiSnoopingRecord implementation)
+
+}
+
+    //--- (generated code: YSpiPort return codes)
+    //--- (end of generated code: YSpiPort return codes)
+//--- (generated code: YSpiPort dlldef)
+//--- (end of generated code: YSpiPort dlldef)
+//--- (generated code: YSpiPort yapiwrapper)
+//--- (end of generated code: YSpiPort yapiwrapper)
+//--- (generated code: YSpiPort class start)
 /**
  * <summary>
  *   The <c>YSpiPort</c> class allows you to fully drive a Yoctopuce SPI port.
@@ -70,8 +149,8 @@ using YFUN_DESCR = System.Int32;
  */
 public class YSpiPort : YFunction
 {
-//--- (end of YSpiPort class start)
-    //--- (YSpiPort definitions)
+//--- (end of generated code: YSpiPort class start)
+    //--- (generated code: YSpiPort definitions)
     public new delegate void ValueCallback(YSpiPort func, string value);
     public new delegate void TimedReportCallback(YSpiPort func, YMeasure measure);
 
@@ -123,17 +202,17 @@ public class YSpiPort : YFunction
     protected int _rxptr = 0;
     protected byte[] _rxbuff;
     protected int _rxbuffptr = 0;
-    //--- (end of YSpiPort definitions)
+    //--- (end of generated code: YSpiPort definitions)
 
     public YSpiPort(string func)
         : base(func)
     {
         _className = "SpiPort";
-        //--- (YSpiPort attributes initialization)
-        //--- (end of YSpiPort attributes initialization)
+        //--- (generated code: YSpiPort attributes initialization)
+        //--- (end of generated code: YSpiPort attributes initialization)
     }
 
-    //--- (YSpiPort implementation)
+    //--- (generated code: YSpiPort implementation)
 
     protected override void _parseAttr(YAPI.YJSONObject json_val)
     {
@@ -1910,6 +1989,55 @@ public class YSpiPort : YFunction
         return this.sendCommand("S"+Convert.ToString(val));
     }
 
+
+    /**
+     * <summary>
+     *   Retrieves messages (both direction) in the SPI port buffer, starting at current position.
+     * <para>
+     * </para>
+     * <para>
+     *   If no message is found, the search waits for one up to the specified maximum timeout
+     *   (in milliseconds).
+     * </para>
+     * </summary>
+     * <param name="maxWait">
+     *   the maximum number of milliseconds to wait for a message if none is found
+     *   in the receive buffer.
+     * </param>
+     * <returns>
+     *   an array of <c>YSpiSnoopingRecord</c> objects containing the messages found, if any.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns an empty array.
+     * </para>
+     */
+    public virtual List<YSpiSnoopingRecord> snoopMessages(int maxWait)
+    {
+        string url;
+        byte[] msgbin;
+        List<string> msgarr = new List<string>();
+        int msglen;
+        List<YSpiSnoopingRecord> res = new List<YSpiSnoopingRecord>();
+        int idx;
+
+        url = "rxmsg.json?pos="+Convert.ToString( this._rxptr)+"&maxw="+Convert.ToString(maxWait)+"&t=0";
+        msgbin = this._download(url);
+        msgarr = this._json_get_array(msgbin);
+        msglen = msgarr.Count;
+        if (msglen == 0) {
+            return res;
+        }
+        // last element of array is the new position
+        msglen = msglen - 1;
+        this._rxptr = YAPI._atoi(msgarr[msglen]);
+        idx = 0;
+        while (idx < msglen) {
+            res.Add(new YSpiSnoopingRecord(msgarr[idx]));
+            idx = idx + 1;
+        }
+        return res;
+    }
+
     /**
      * <summary>
      *   Continues the enumeration of SPI ports started using <c>yFirstSpiPort()</c>.
@@ -1935,9 +2063,9 @@ public class YSpiPort : YFunction
         return FindSpiPort(hwid);
     }
 
-    //--- (end of YSpiPort implementation)
+    //--- (end of generated code: YSpiPort implementation)
 
-    //--- (YSpiPort functions)
+    //--- (generated code: YSpiPort functions)
 
     /**
      * <summary>
@@ -1983,6 +2111,6 @@ public class YSpiPort : YFunction
 
 
 
-    //--- (end of YSpiPort functions)
+    //--- (end of generated code: YSpiPort functions)
 }
 #pragma warning restore 1591

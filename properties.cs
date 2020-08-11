@@ -94,7 +94,7 @@ namespace YoctoVisualisation
   public static class sensorFreqTypeDescription
   {
      static string[] _AllowedValues = new string[]   { "25/s", "10/s", "5/s", "4/s","3/s","2/s","1/s",
-                                   "30/m","12/m","6/m","4/m","3/m","2/m","1/m",
+                                   "60/m","30/m","12/m","6/m","4/m","3/m","2/m","1/m",
                                    "30/h","12/h","6/h","4/h","3/h","2/h","1/h"};
 
 
@@ -1890,8 +1890,13 @@ public static class sensorPrecisionTypeDescription
 
     private bool _showSerieName = false;
     [DisplayName("Show Series legend"),
-     DescriptionAttribute("Should the data tracker show both the value and the value's series legend.")]
+     DescriptionAttribute("Should the data tracker show the value's series legend.")]
      public bool showSerieName { get { return _showSerieName; } set { _showSerieName = value; } }
+
+    private bool _showTimeStamp = false;
+    [DisplayName("Show Timestamp"),
+     DescriptionAttribute("Should the data tracker show the value's timestamp.")]
+    public bool showTimeStamp { get { return _showTimeStamp; } set { _showTimeStamp = value; } }
 
 
     public enum DataPrecision

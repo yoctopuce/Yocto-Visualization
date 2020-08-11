@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 40707 2020-05-26 09:59:14Z seb $
+ * $Id: yocto_api.cs 41171 2020-07-02 17:49:00Z mvuilleu $
  *
  * High-level programming interface, common to all modules
  *
@@ -2760,7 +2760,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "40852";
+    public const string YOCTO_API_BUILD_NO = "41333";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -11006,6 +11006,9 @@ public class YModule : YFunction
         string json_api;
         string json_files;
         string json_extra;
+        int fuperror;
+        int globalres;
+        fuperror = 0;
         json = YAPI.DefaultEncoding.GetString(settings);
         json_api = this._get_json_path(json, "api");
         if (json_api == "") {
@@ -11035,11 +11038,20 @@ public class YModule : YFunction
                 name = this._decode_json_string(name);
                 data = this._get_json_path( files[ii], "data");
                 data = this._decode_json_string(data);
-                this._upload(name, YAPI._hexStrToBin(data));
+                if (name == "") {
+                    fuperror = fuperror + 1;
+                } else {
+                    this._upload(name, YAPI._hexStrToBin(data));
+                }
             }
         }
         // Apply settings a second time for file-dependent settings and dynamic sensor nodes
-        return this.set_allSettings(YAPI.DefaultEncoding.GetBytes(json_api));
+        globalres = this.set_allSettings(YAPI.DefaultEncoding.GetBytes(json_api));
+        if (!(fuperror == 0)) {
+            this._throw(YAPI.IO_ERROR, "Error during file upload");
+            return YAPI.IO_ERROR;
+        }
+        return globalres;
     }
 
 
@@ -14308,7 +14320,7 @@ public class YDataLogger : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the data logger, for instance
-     *   <c>Y3DMK002.dataLogger</c>.
+     *   <c>LIGHTMK3.dataLogger</c>.
      * </param>
      * <returns>
      *   a <c>YDataLogger</c> object allowing you to drive the data logger.

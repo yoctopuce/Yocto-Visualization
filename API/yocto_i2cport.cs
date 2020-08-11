@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_i2cport.cs 40281 2020-05-04 13:39:55Z seb $
+ *  $Id: yocto_i2cport.cs 41171 2020-07-02 17:49:00Z mvuilleu $
  *
  *  Implements yFindI2cPort(), the high-level API for I2cPort functions
  *
@@ -48,13 +48,91 @@ using YDEV_DESCR = System.Int32;
 using YFUN_DESCR = System.Int32;
 
  #pragma warning disable 1591
-    //--- (YI2cPort return codes)
-    //--- (end of YI2cPort return codes)
-//--- (YI2cPort dlldef)
-//--- (end of YI2cPort dlldef)
-//--- (YI2cPort yapiwrapper)
-//--- (end of YI2cPort yapiwrapper)
-//--- (YI2cPort class start)
+//--- (generated code: YI2cSnoopingRecord class start)
+public class YI2cSnoopingRecord
+{
+//--- (end of generated code: YI2cSnoopingRecord class start)
+    //--- (generated code: YI2cSnoopingRecord definitions)
+
+    protected int _tim = 0;
+    protected int _dir = 0;
+    protected string _msg;
+    //--- (end of generated code: YI2cSnoopingRecord definitions)
+
+    public YI2cSnoopingRecord(string data)
+    {
+        //--- (generated code: YI2cSnoopingRecord attributes initialization)
+        //--- (end of generated code: YI2cSnoopingRecord attributes initialization)
+        YAPI.YJSONObject json = new YAPI.YJSONObject(data);
+        json.parse();
+        this._tim = json.getInt("t");
+        string m = json.getString("m");
+        this._dir = (m[0] == '<' ? 1 : 0);
+        this._msg = m.Substring(1);
+    }
+
+  //--- (generated code: YI2cSnoopingRecord implementation)
+
+
+
+    /**
+     * <summary>
+     *   Returns the elapsed time, in ms, since the beginning of the preceding message.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the elapsed time, in ms, since the beginning of the preceding message.
+     * </returns>
+     */
+    public virtual int get_time()
+    {
+        return this._tim;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the message direction (RX=0, TX=1).
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the message direction (RX=0, TX=1).
+     * </returns>
+     */
+    public virtual int get_direction()
+    {
+        return this._dir;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the message content.
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   the message content.
+     * </returns>
+     */
+    public virtual string get_message()
+    {
+        return this._msg;
+    }
+
+    //--- (end of generated code: YI2cSnoopingRecord implementation)
+
+}
+
+    //--- (generated code: YI2cPort return codes)
+    //--- (end of generated code: YI2cPort return codes)
+//--- (generated code: YI2cPort dlldef)
+//--- (end of generated code: YI2cPort dlldef)
+//--- (generated code: YI2cPort yapiwrapper)
+//--- (end of generated code: YI2cPort yapiwrapper)
+//--- (generated code: YI2cPort class start)
 /**
  * <summary>
  *   The <c>YI2cPort</c> classe allows you to fully drive a Yoctopuce I2C port.
@@ -70,8 +148,8 @@ using YFUN_DESCR = System.Int32;
  */
 public class YI2cPort : YFunction
 {
-//--- (end of YI2cPort class start)
-    //--- (YI2cPort definitions)
+//--- (end of generated code: YI2cPort class start)
+    //--- (generated code: YI2cPort definitions)
     public new delegate void ValueCallback(YI2cPort func, string value);
     public new delegate void TimedReportCallback(YI2cPort func, YMeasure measure);
 
@@ -110,17 +188,17 @@ public class YI2cPort : YFunction
     protected int _rxptr = 0;
     protected byte[] _rxbuff;
     protected int _rxbuffptr = 0;
-    //--- (end of YI2cPort definitions)
+    //--- (end of generated code: YI2cPort definitions)
 
     public YI2cPort(string func)
         : base(func)
     {
         _className = "I2cPort";
-        //--- (YI2cPort attributes initialization)
-        //--- (end of YI2cPort attributes initialization)
+        //--- (generated code: YI2cPort attributes initialization)
+        //--- (end of generated code: YI2cPort attributes initialization)
     }
 
-    //--- (YI2cPort implementation)
+    //--- (generated code: YI2cPort implementation)
 
     protected override void _parseAttr(YAPI.YJSONObject json_val)
     {
@@ -1719,6 +1797,55 @@ public class YI2cPort : YFunction
         return this.writeHex(msg);
     }
 
+
+    /**
+     * <summary>
+     *   Retrieves messages (both direction) in the I2C port buffer, starting at current position.
+     * <para>
+     * </para>
+     * <para>
+     *   If no message is found, the search waits for one up to the specified maximum timeout
+     *   (in milliseconds).
+     * </para>
+     * </summary>
+     * <param name="maxWait">
+     *   the maximum number of milliseconds to wait for a message if none is found
+     *   in the receive buffer.
+     * </param>
+     * <returns>
+     *   an array of <c>YI2cSnoopingRecord</c> objects containing the messages found, if any.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns an empty array.
+     * </para>
+     */
+    public virtual List<YI2cSnoopingRecord> snoopMessages(int maxWait)
+    {
+        string url;
+        byte[] msgbin;
+        List<string> msgarr = new List<string>();
+        int msglen;
+        List<YI2cSnoopingRecord> res = new List<YI2cSnoopingRecord>();
+        int idx;
+
+        url = "rxmsg.json?pos="+Convert.ToString( this._rxptr)+"&maxw="+Convert.ToString(maxWait)+"&t=0";
+        msgbin = this._download(url);
+        msgarr = this._json_get_array(msgbin);
+        msglen = msgarr.Count;
+        if (msglen == 0) {
+            return res;
+        }
+        // last element of array is the new position
+        msglen = msglen - 1;
+        this._rxptr = YAPI._atoi(msgarr[msglen]);
+        idx = 0;
+        while (idx < msglen) {
+            res.Add(new YI2cSnoopingRecord(msgarr[idx]));
+            idx = idx + 1;
+        }
+        return res;
+    }
+
     /**
      * <summary>
      *   Continues the enumeration of I2C ports started using <c>yFirstI2cPort()</c>.
@@ -1744,9 +1871,9 @@ public class YI2cPort : YFunction
         return FindI2cPort(hwid);
     }
 
-    //--- (end of YI2cPort implementation)
+    //--- (end of generated code: YI2cPort implementation)
 
-    //--- (YI2cPort functions)
+    //--- (generated code: YI2cPort functions)
 
     /**
      * <summary>
@@ -1792,6 +1919,6 @@ public class YI2cPort : YFunction
 
 
 
-    //--- (end of YI2cPort functions)
+    //--- (end of generated code: YI2cPort functions)
 }
 #pragma warning restore 1591

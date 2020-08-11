@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_serialport.cs 40296 2020-05-05 07:56:00Z seb $
+ * $Id: yocto_serialport.cs 41171 2020-07-02 17:49:00Z mvuilleu $
  *
  * Implements yFindSerialPort(), the high-level API for SerialPort functions
  *
@@ -94,12 +94,12 @@ public class YSnoopingRecord
 
     /**
      * <summary>
-     *   Returns the message direction (RX=0 , TX=1) .
+     *   Returns the message direction (RX=0, TX=1).
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   the message direction (RX=0 , TX=1) .
+     *   the message direction (RX=0, TX=1).
      * </returns>
      */
     public virtual int get_direction()
@@ -658,6 +658,7 @@ public class YSerialPort : YFunction
      *   Returns the type of protocol used over the serial line, as a string.
      * <para>
      *   Possible values are "Line" for ASCII messages separated by CR and/or LF,
+     *   "StxEtx" for ASCII messages delimited by STX/ETX codes,
      *   "Frame:[timeout]ms" for binary messages separated by a delay time,
      *   "Modbus-ASCII" for MODBUS messages in ASCII mode,
      *   "Modbus-RTU" for MODBUS messages in RTU mode,
@@ -695,6 +696,7 @@ public class YSerialPort : YFunction
      *   Changes the type of protocol used over the serial line.
      * <para>
      *   Possible values are "Line" for ASCII messages separated by CR and/or LF,
+     *   "StxEtx" for ASCII messages delimited by STX/ETX codes,
      *   "Frame:[timeout]ms" for binary messages separated by a delay time,
      *   "Modbus-ASCII" for MODBUS messages in ASCII mode,
      *   "Modbus-RTU" for MODBUS messages in RTU mode,
@@ -1941,6 +1943,32 @@ public class YSerialPort : YFunction
             idx = idx + 1;
         }
         return res;
+    }
+
+
+    /**
+     * <summary>
+     *   Sends an ASCII string to the serial port, preceeded with an STX code and
+     *   followed by an ETX code.
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="text">
+     *   the text string to send
+     * </param>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int writeStxEtx(string text)
+    {
+        byte[] buff;
+        buff = YAPI.DefaultEncoding.GetBytes(""+((char)( 2)).ToString()+""+ text+""+((char)(3)).ToString());
+        // send string using file upload
+        return this._upload("txdata", buff);
     }
 
 
