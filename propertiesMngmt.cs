@@ -200,7 +200,9 @@ namespace YoctoVisualisation
 
   }
 
- 
+  
+
+
 
   public class doubleNan
   {
@@ -247,7 +249,7 @@ namespace YoctoVisualisation
     public abstract bool IsDataSourceAssigned();
 
 
-
+    public static double  XmlFileVersion = -1;
 
 
   
@@ -319,8 +321,11 @@ namespace YoctoVisualisation
                     case "System.Boolean":
                       p.SetValue(o, (node.Attributes["value"].InnerText.ToUpper() == "TRUE"),null); break;
                     case "System.Double":
-                        p.SetValue(o, Convert.ToDouble(node.Attributes["value"].InnerText), null);
-                      break;
+                        double d = (XmlFileVersion >= 2.1) ?
+                            Convert.ToDouble(node.Attributes["value"].InnerText, CultureInfo.InvariantCulture)
+                          : Convert.ToDouble(node.Attributes["value"].InnerText);
+                         p.SetValue(o,d, null);
+                         break;
                     case "System.Int32":
                       p.SetValue(o, Int32.Parse(node.Attributes["value"].InnerText), null);
                       break;
@@ -332,9 +337,14 @@ namespace YoctoVisualisation
                       System.Drawing.FontStyle style = System.Drawing.FontStyle.Regular;
                       var values = Enum.GetValues(typeof(System.Drawing.FontStyle));
                       string attr = node.Attributes["style"].InnerText;
-                      foreach (var v in values)
+
+                        foreach (var v in values)
                         if (attr.IndexOf(v.ToString()) >= 0) style |= (System.Drawing.FontStyle)v;
-                      p.SetValue(o, new Font(node.Attributes["value"].InnerText, float.Parse(node.Attributes["size"].InnerText), style), null);
+                        float size = XmlFileVersion >= 2.1 ?
+                            float.Parse(node.Attributes["size"].InnerText, CultureInfo.InvariantCulture)
+                          : float.Parse(node.Attributes["size"].InnerText);
+
+                      p.SetValue(o, new Font(node.Attributes["value"].InnerText, size, style), null);
                       break;
                     case "System.Drawing.Color":
                       value = node.Attributes["value"].InnerText;
@@ -344,7 +354,14 @@ namespace YoctoVisualisation
                       value = node.Attributes["value"].InnerText;
                       p.SetValue(o, new doubleNan(value), null);
                       break;
-
+                     case "YDataRendering.xAxisPosition":
+                        double xpos = XmlFileVersion >= 2.1 ?
+                          Double.Parse(node.Attributes["value"].InnerText, CultureInfo.InvariantCulture)
+                         : Double.Parse( node.Attributes["value"].InnerText);
+                        bool rel = (node.Attributes["relative"].InnerText.ToUpper()=="TRUE");
+                        p.SetValue(o, new xAxisPosition(xpos, rel), null);
+                        break;
+                        
                     case "System.Windows.Media.FontFamily":
                       value = node.Attributes["value"].InnerText;
                       p.SetValue(o, new FontFamily(value),null);
@@ -426,7 +443,7 @@ namespace YoctoVisualisation
     [DisplayName("Background color"),
      CategoryAttribute("Window"),
     
-     DescriptionAttribute("Window background color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Window background color." )]
     public YColor Form_BackColor
     {
       get { return _Form_BackColor; }
@@ -485,15 +502,18 @@ namespace YoctoVisualisation
 
              
               case "System.Boolean": value = (bool)p.GetValue(o, null) ? "TRUE" : "FALSE"; break;
-              case "System.Double":
+              case "System.Double": value = System.Security.SecurityElement.Escape(((double)p.GetValue(o, null)).ToString(CultureInfo.InvariantCulture)); break;
               case "System.Int32":
               case "System.Windows.Media.FontFamily":
               case "System.String": value = System.Security.SecurityElement.Escape(p.GetValue(o, null).ToString()); break;
               case "System.Drawing.Color": value = colorConverter.colorToHex(((Color)p.GetValue(o, null))); break;
-              case "YColors.YColor":
+              case "YColors.YColor": value = p.GetValue(o, null).ToString(); break;
               case "YoctoVisualisation.doubleNan":
-                  value = p.GetValue(o, null).ToString(); break;
-                  
+                  double d = ((doubleNan)(p.GetValue(o, null))).value;
+                  value = d.ToString(CultureInfo.InvariantCulture); break;
+              case "YDataRendering.xAxisPosition":
+                  xAxisPosition it = (xAxisPosition)p.GetValue(o, null);
+                  value = it.value.ToString(CultureInfo.InvariantCulture) + "\" relative=\"" + it.relative.ToString(); break;
               case "YoctoVisualisation.CustomYSensor":
                 CustomYSensor s = (CustomYSensor)p.GetValue(o, null);
                 value = ((s == null) || (s is NullYSensor)) ? "NULL" : s.get_hardwareId();
@@ -520,6 +540,8 @@ namespace YoctoVisualisation
       if (o is CustomYSensor) return false;
       if (o is YColor) return false;
       if (o is doubleNan) return false;
+      if (o is xAxisPosition) return false;
+
       foreach (var p in o.GetType().GetProperties())
       { return true; }
       return false;
@@ -549,10 +571,15 @@ namespace YoctoVisualisation
       path.Insert(0, propname);
       return path;
     }
-
-    static public void newSetProperty(object rootTarget, object source, string propertySourceName, List<string> path)
+    //Direction :Settings To Target
+    static public void copyProperty_STT(object rootTarget, object source, string propertySourceName, List<string> path)
     {
-      newSetProperty(rootTarget, source, propertySourceName, path, NoFilter);
+      copyProperty_STT(rootTarget, source, propertySourceName, path,  NoFilter);
+    }
+    //Direction : Settings From Target
+    static public void copyProperty_SFT(object rootTarget, object source, string propertySourceName, List<string> path)
+    {
+      copyProperty_SFT(rootTarget, source, propertySourceName, path,  NoFilter);
     }
 
     static public object newGetProperty(object rootTarget, object source, string propertySourceName, List<string> path)
@@ -574,6 +601,9 @@ namespace YoctoVisualisation
           name = name.Substring(0, name.Length - 1);
         }
         tinfo = FinalTarget.GetType().GetProperty(name);
+        if (tinfo == null)
+           return null;  //name does not exists in  FinalTarget
+
         if (index == "")
         {
 
@@ -586,8 +616,11 @@ namespace YoctoVisualisation
           if (targetArray is List<YAngularZone>)
             FinalTarget = ((List<YAngularZone>)targetArray)[int.Parse(index)];
           else
-             if (targetArray is List<Zone>)
+            if (targetArray is List<Zone>)
             FinalTarget = ((List<Zone>)targetArray)[int.Parse(index)];
+          else
+              if (targetArray is List<Marker>)
+            FinalTarget = ((List<Marker>)targetArray)[int.Parse(index)];
           else
           if (targetArray is List<XAxis>)
             FinalTarget = ((List<XAxis>)targetArray)[int.Parse(index)];
@@ -607,12 +640,78 @@ namespace YoctoVisualisation
       }
       return FinalTarget;
     }
+
+    //Direction Settings From Target
+    static private void computePropertyAccess_SFT(object WidgetObject, object SettingObject,
+       string propertySourceName, List<string> path,
+       out System.Reflection.PropertyInfo tinfo, out System.Reflection.PropertyInfo sinfo,
+       out string ttype, out string stype, out object FinalTarget, out object TerminalSource)
+
+
+    {
+      tinfo = null;
+      sinfo = null;
+      ttype = "";
+      stype = "";
+      FinalTarget = null;
+      TerminalSource = null;
+
+
+      // FinalTarget = getObjectFromPath(WidgetObject, path);
+
+      
+      TerminalSource = getObjectFromPath(WidgetObject, path);  
+      sinfo = TerminalSource.GetType().GetProperty(path[path.Count - 1]);
+      if (sinfo == null) return;
+      stype = sinfo.PropertyType.FullName;
+      TerminalSource = sinfo.GetValue(TerminalSource, null);
+
+      if (TerminalSource == null)
+         return;  // path not found
+
+      FinalTarget = SettingObject;
+      tinfo = FinalTarget.GetType().GetProperty(propertySourceName);
+      ttype = tinfo.PropertyType.FullName;
+     
+
+      if (path.Count <= 1) return;
+
+      for (int i = 1; i < path.Count; i++)
+      {
+        FinalTarget = tinfo.GetValue(FinalTarget, null);
+        tinfo = FinalTarget.GetType().GetProperty(path[i]);
        
-    static private  void computePropertyAccess(object rootTarget, object source, string propertySourceName, List<string> path,
-        out System.Reflection.PropertyInfo tinfo , out string ttype, out string stype, out object FinalTarget, out object TerminalSource)
+      }
+      ttype = tinfo.PropertyType.FullName;
+      /*
+      if (path.Count > 0)
+      {
+        string targetname = path[path.Count - 1];
+        tinfo = FinalTarget.GetType().GetProperty(targetname);
+      }
+      else
+      {
+        string targetname = propertySourceName;
+        int n = targetname.IndexOf("_");
+        targetname = targetname.Substring(n + 1);
+        tinfo = WidgetObject.GetType().GetProperty(targetname);
+
+      }
+      if (tinfo == null) return; // the property does not exists in the widget
+      ttype = tinfo.PropertyType.FullName;
+      */
+    }
+
+
+    static private  void computePropertyAccess(object rootTarget, object source, 
+        string propertySourceName, List<string> path,
+        out System.Reflection.PropertyInfo tinfo, out System.Reflection.PropertyInfo sinfo, 
+        out string ttype, out string stype, out object FinalTarget, out object TerminalSource)
+
 
     {
        tinfo = null;
+      
        ttype = "";
 
 
@@ -620,7 +719,7 @@ namespace YoctoVisualisation
 
 
        TerminalSource = source;
-      System.Reflection.PropertyInfo sinfo = null;
+       sinfo = null;
 
       sinfo = TerminalSource.GetType().GetProperty(propertySourceName);
       TerminalSource = sinfo.GetValue(TerminalSource, null);
@@ -653,11 +752,13 @@ namespace YoctoVisualisation
     static public object newGetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
     {
       System.Reflection.PropertyInfo tinfo = null;
+      System.Reflection.PropertyInfo sinfo = null;
+
       string ttype = "";
       string stype = "";
       object FinalTarget;
       object TerminalSource;
-      computePropertyAccess(rootTarget, source, propertySourceName, path, out tinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
+      computePropertyAccess(rootTarget, source, propertySourceName, path, out tinfo, out sinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
       if (tinfo == null) return null; // the property does not exists in the widget
 
       if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Color"))
@@ -665,8 +766,11 @@ namespace YoctoVisualisation
     
       if ((stype == "YoctoVisualisation.doubleNan") && (ttype == "System.Double"))
         return tinfo.GetValue(FinalTarget,  null);
-           
-      if ((stype == "YoctoVisualisation.doubleNan") && (ttype.StartsWith("System.Nullable")))
+
+      if ((stype == "YoctoVisualisation.doubleNan") && (ttype == "System.Double"))
+        return tinfo.GetValue(FinalTarget, null);
+
+      if ((stype == "YoctoVisualisation.xAxisPosition") && (ttype.StartsWith("System.Nullable")))
         return  tinfo.GetValue(FinalTarget,  null);
     
       if ((stype == "System.String") && (ttype == "System.Windows.Media.FontFamily"))  
@@ -687,89 +791,144 @@ namespace YoctoVisualisation
       return  tinfo.GetValue(FinalTarget, null);
     }
 
-  static public void newSetProperty(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
+    // Direction : settings From Target
+    static public void copyProperty_SFT(object rootTarget, object source, string propertySourceName, List<string> path,  PropFilter filterAllow)
     {
       System.Reflection.PropertyInfo tinfo = null;
+      System.Reflection.PropertyInfo sinfo = null;
       string ttype = "";
       string stype = "";
       object FinalTarget;
       object TerminalSource;
-      computePropertyAccess(rootTarget, source, propertySourceName, path, out tinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
+
+      computePropertyAccess_SFT(rootTarget, source, propertySourceName, path, out tinfo, out sinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
+     
       if (tinfo == null) return; // the property does not exists in the widget
 
-      if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Color"))
-      {
-        Color c = (Color)TerminalSource;
-        Color C2 = Color.FromArgb(c.A, c.R, c.G, c.B);
-        tinfo.SetValue(FinalTarget, C2,null);
-      }
+      if ((stype == "System.Drawing.Color") && (ttype == "YColors.YColor"))
+        {
+          tinfo.SetValue(FinalTarget, YColor.fromColor((Color)TerminalSource), null);
+        }
+      else if ((stype == "System.Double") && (ttype == "YoctoVisualisation.doubleNan"))
+        {
+          tinfo.SetValue(FinalTarget, new doubleNan((double)TerminalSource), null);
+        }
       else
-
-      if ((stype == "YoctoVisualisation.doubleNan") && (ttype == "System.Double"))
-      {
-        doubleNan v = (doubleNan)TerminalSource;
-        tinfo.SetValue(FinalTarget, v.value, null);
-      }
-      else
-      if ((stype == "YoctoVisualisation.doubleNan") && (ttype.StartsWith("System.Nullable")))
-      {
-        if (Double.IsNaN(((doubleNan)TerminalSource).value))
-          tinfo.SetValue(FinalTarget, null, null);
-        else
-          tinfo.SetValue(FinalTarget, ((doubleNan)TerminalSource).value, null);
-      }
-
-
-      else
-      if ((stype == "System.String") && (ttype == "System.Windows.Media.FontFamily"))
-      {
-        string v = (string)TerminalSource;
-        tinfo.SetValue(FinalTarget, new FontFamily(v),null);
-      }
-
-
-      else
-        if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush"))
-      {
-        Color c = (Color)TerminalSource;
-        byte a = c.A;
-        if (propertySourceName == "Graph2_ScrollBarFill") a = 80; // dirty hack to keep the navigator's cursor semi-transparent 
-        Color C2 = Color.FromArgb(a, c.R, c.G, c.B);
-       SolidBrush b = new SolidBrush(C2);
-        tinfo.SetValue(FinalTarget, b,null);
-      }
-      else
-      if ((stype == "YColors.YColor") && (ttype == "System.Drawing.Color"))
-      {
-          tinfo.SetValue(FinalTarget, ((YColor)TerminalSource).toColor(), null);
-      }
-      
-      else
-        if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush"))
-      {
-        Color c = (Color)TerminalSource;
-        byte a = c.A;
-       // if (propertySourceName == "Graph2_ScrollBarFill") a = 80; // dirty hack to keep the navigator's cursor semi-transparent 
-        Color C2 = Color.FromArgb(a, c.R, c.G, c.B);
-        SolidBrush b = new SolidBrush(C2);
-        tinfo.SetValue(FinalTarget, b,null);
-      }
-      else
-    if ((stype == "YoctoVisualisation.DataTrackerDescription+DataPrecision") && (ttype == "YDataRendering.DataTracker+DataPrecision"))
+      if ((stype == "YDataRendering.DataTracker+DataPrecision") && (ttype == "YoctoVisualisation.DataTrackerDescription+DataPrecision"))
       {  // Mono doesn't like enums implicit conversions
-        YoctoVisualisation.DataTrackerDescription.DataPrecision svalue = (YoctoVisualisation.DataTrackerDescription.DataPrecision)TerminalSource;
+        YDataRendering.DataTracker.DataPrecision svalue = (YDataRendering.DataTracker.DataPrecision)TerminalSource;
         int temp = (int)svalue;
-        YDataRendering.DataTracker.DataPrecision tvalue = (YDataRendering.DataTracker.DataPrecision)(temp);
+        YoctoVisualisation.DataTrackerDescription.DataPrecision tvalue = (YoctoVisualisation.DataTrackerDescription.DataPrecision)(temp);
         tinfo.SetValue(FinalTarget, tvalue, null);
-        //int a = 1;
-      }
-     else
-      { 
-        
-          tinfo.SetValue(FinalTarget, TerminalSource, null);
-        
        
       }
+
+      else tinfo.SetValue(FinalTarget, TerminalSource, null);
+
+    }
+    //Direction :Settings To Target
+    static public void copyProperty_STT(object rootTarget, object source, string propertySourceName, List<string> path, PropFilter filterAllow)
+    {
+      System.Reflection.PropertyInfo tinfo = null;
+      System.Reflection.PropertyInfo sinfo = null;
+      string ttype = "";
+      string stype = "";
+      object FinalTarget;
+      object TerminalSource;
+     
+    
+        computePropertyAccess(rootTarget, source, propertySourceName, path, out tinfo, out sinfo, out ttype, out stype, out FinalTarget, out TerminalSource);
+
+       
+
+     
+      if (tinfo == null) return; // the property does not exists in the widget
+
+     
+
+     
+        if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Color"))
+        {
+          Color c = (Color)TerminalSource;
+          Color C2 = Color.FromArgb(c.A, c.R, c.G, c.B);
+          tinfo.SetValue(FinalTarget, C2, null);
+        }
+        else
+
+       if ((stype == "YDataRendering.xAxisPosition") && (ttype == "System.Double"))
+        {
+          xAxisPosition v = (xAxisPosition)TerminalSource;
+          tinfo.SetValue(FinalTarget, v.value, null);
+        }
+        else
+      if ((stype == "YoctoVisualisation.doubleNan") && (ttype == "System.Double"))
+        {
+          doubleNan v = (doubleNan)TerminalSource;
+          tinfo.SetValue(FinalTarget, v.value, null);
+        }
+        else
+      if ((stype == "YoctoVisualisation.doubleNan") && (ttype.StartsWith("System.Nullable")))
+        {
+          if (Double.IsNaN(((doubleNan)TerminalSource).value))
+            tinfo.SetValue(FinalTarget, null, null);
+          else
+            tinfo.SetValue(FinalTarget, ((doubleNan)TerminalSource).value, null);
+        }
+
+
+        else
+      if ((stype == "System.String") && (ttype == "System.Windows.Media.FontFamily"))
+        {
+          string v = (string)TerminalSource;
+          tinfo.SetValue(FinalTarget, new FontFamily(v), null);
+        }
+
+
+        else
+        if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush"))
+        {
+          Color c = (Color)TerminalSource;
+          byte a = c.A;
+          if (propertySourceName == "Graph2_ScrollBarFill") a = 80; // dirty hack to keep the navigator's cursor semi-transparent 
+          Color C2 = Color.FromArgb(a, c.R, c.G, c.B);
+          SolidBrush b = new SolidBrush(C2);
+          tinfo.SetValue(FinalTarget, b, null);
+        }
+        else
+      if ((stype == "YColors.YColor") && (ttype == "System.Drawing.Color"))
+        {
+          tinfo.SetValue(FinalTarget, ((YColor)TerminalSource).toColor(), null);
+        }
+
+        else
+        if ((stype == "System.Drawing.Color") && (ttype == "System.Windows.Media.Brush"))
+        {
+          Color c = (Color)TerminalSource;
+          byte a = c.A;
+          // if (propertySourceName == "Graph2_ScrollBarFill") a = 80; // dirty hack to keep the navigator's cursor semi-transparent 
+          Color C2 = Color.FromArgb(a, c.R, c.G, c.B);
+          SolidBrush b = new SolidBrush(C2);
+          tinfo.SetValue(FinalTarget, b, null);
+        }
+        else
+    if ((stype == "YoctoVisualisation.DataTrackerDescription+DataPrecision") && (ttype == "YDataRendering.DataTracker+DataPrecision"))
+        {  // Mono doesn't like enums implicit conversions
+          YoctoVisualisation.DataTrackerDescription.DataPrecision svalue = (YoctoVisualisation.DataTrackerDescription.DataPrecision)TerminalSource;
+          int temp = (int)svalue;
+          YDataRendering.DataTracker.DataPrecision tvalue = (YDataRendering.DataTracker.DataPrecision)(temp);
+          tinfo.SetValue(FinalTarget, tvalue, null);
+         
+        }
+        else
+        {
+
+          tinfo.SetValue(FinalTarget, TerminalSource, null);
+
+
+        }
+      
+
+
     }
 
 
@@ -791,11 +950,23 @@ namespace YoctoVisualisation
 
     }
 
+   public enum APPLYDIRECTION
+    { SETTINGS_TO_TARGET, SETTINGS_FROM_TARGET
+    }
+
+
     public void ApplyAllProperties(object target)
-    { ApplyAllProperties(target, NoFilter); }
+    { ApplyAllProperties(target, NoFilter, APPLYDIRECTION.SETTINGS_TO_TARGET); }
+
+    public void RefreshAllProperties(object target)
+    { ApplyAllProperties(target, NoFilter, APPLYDIRECTION.SETTINGS_FROM_TARGET); }
 
 
-    public void ApplyProperties(object rootSource, object rootTarget, string fullpropname, object sourceValue, List<String> path)
+  
+
+
+
+    public void ApplyProperties(object rootSource, object rootTarget, string fullpropname, object sourceValue, List<String> path, APPLYDIRECTION direction)
     {
      if (sourceValue is AlarmSection)  return;  // dirty hack: alarms are no handled through reflexion
 
@@ -805,7 +976,11 @@ namespace YoctoVisualisation
 
       if (!IsStructured(sourceValue))
       {
-        newSetProperty(rootTarget, this, fullpropname, path);
+         if (direction== APPLYDIRECTION.SETTINGS_TO_TARGET)
+            copyProperty_STT(rootTarget, this, fullpropname, path);
+         else
+            copyProperty_SFT(rootTarget, this, fullpropname, path);
+
       }
       else
       {
@@ -823,7 +998,7 @@ namespace YoctoVisualisation
          if (p.CanWrite)
           {
             path.Add(p.Name);
-            ApplyProperties(rootSource, rootTarget, fullpropname, p.GetValue(sourceValue, null), path);
+            ApplyProperties(rootSource, rootTarget, fullpropname, p.GetValue(sourceValue, null), path,direction);
             path.RemoveAt(path.Count - 1);
           }
 
@@ -831,7 +1006,7 @@ namespace YoctoVisualisation
 
     }
 
-    public void ApplyAllProperties(object target, PropFilter filter)
+    public void ApplyAllProperties(object target, PropFilter filter, APPLYDIRECTION direction)
     {
       System.Reflection.PropertyInfo[] props = this.GetType().GetProperties();
       foreach (var p in props)
@@ -842,30 +1017,31 @@ namespace YoctoVisualisation
         if (index < 0) throw new System.ArgumentException("invalid Property name");
         string propType = fullpropname.Substring(0, index);
         string propname = fullpropname.Substring(index + 1);
-        // int arrayIndex = -1;
-        //  propname = ExtractIndex(propname, ref arrayIndex);
         List<String> path = new List<String>();
         path.Add(propname);
 
 
         if ((target is Form) && (propType == "Form"))
-          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path,direction);
 
         if ((target is YDigitalDisplay) && (propType == "display"))
-          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path, direction);
 
 
         if ((target is YAngularGauge) && (propType == "AngularGauge"))
-          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path, direction);
 
         if ((target is YSolidGauge) && (propType == "SolidGauge"))
-          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path, direction);
 
         if ((target is YGraph) && (propType == "Graph"))
-          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path);
+          ApplyProperties(this, target, fullpropname, p.GetValue(this, null), path, direction);
 
         }
     }
+
+  
+
   }
 
 }

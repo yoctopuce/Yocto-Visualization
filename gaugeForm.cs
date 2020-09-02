@@ -156,7 +156,7 @@ namespace YoctoVisualisation
       string unit = "";
       if (!(sensor is NullYSensor))
       {
-        string resolution = sensor.get_resolution().ToString().Replace("1", "0");
+        string resolution = YDataRenderer.FloatToStrformats[Math.Min(sensor.get_resolution().ToString().Length, 6)];
         name = sensor.get_friendlyName();
         if (sensor.isOnline())
         {
@@ -234,10 +234,10 @@ namespace YoctoVisualisation
       switch (propType)
       {
         case "Form":
-          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(this, prop, fullpropname, path);
           break;
         case "SolidGauge":
-          GenericProperties.newSetProperty(_solidGauge, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(_solidGauge, prop, fullpropname, path);
           break;
         case "DataSource":
           manager.AjustHint("");
@@ -260,10 +260,10 @@ namespace YoctoVisualisation
       switch (propType)
       {
         case "Form":
-          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(this, prop, fullpropname, path);
           break;
         case "SolidGauge":
-          GenericProperties.newSetProperty(_solidGauge, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(_solidGauge, prop, fullpropname, path);
           break;
         case "DataSource":
           manager.AjustHint("");

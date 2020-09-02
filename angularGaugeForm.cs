@@ -155,7 +155,7 @@ namespace YoctoVisualisation
       string unit = "";
       if (!(sensor is NullYSensor))
       {
-        string resolution = sensor.get_resolution().ToString().Replace("1", "0");
+        string resolution = YDataRenderer.FloatToStrformats[Math.Min(sensor.get_resolution().ToString().Length, 6)];
         name = sensor.get_friendlyName();
         if (sensor.isOnline())
         {
@@ -235,11 +235,11 @@ void PropertyChanged2(UIElement src)
       switch (propType)
       {
         case "Form":
-          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(this, prop, fullpropname, path);
           break;
         case "AngularGauge":
 
-          GenericProperties.newSetProperty(_angularGauge, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(_angularGauge, prop, fullpropname, path);
 
 
 
@@ -266,11 +266,11 @@ void PropertyChanged2(UIElement src)
       switch (propType)
       {
         case "Form":
-          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(this, prop, fullpropname, path);
           break;
         case "AngularGauge":
      
-           GenericProperties.newSetProperty(_angularGauge, prop, fullpropname, path);
+           GenericProperties.copyProperty_STT(_angularGauge, prop, fullpropname, path);
 
      
 

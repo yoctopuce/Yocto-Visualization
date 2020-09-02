@@ -47,6 +47,8 @@ using System.Runtime.CompilerServices;
 
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
+using System.Drawing.Text;
 
 namespace YDataRendering
 {
@@ -58,10 +60,9 @@ namespace YDataRendering
     public double x;
     public double y;
   }
+  
 
-
-
-
+  public delegate string PatchMarkerTextCallback(string text);
 
 
   public static class TimeConverter
@@ -77,6 +78,95 @@ namespace YDataRendering
     {
       return sTime.AddSeconds(unixtime);
     }
+    
+    public static bool tryParseStringToSecTimeSpan(string st, out double res)
+    {
+      double d = 0;
+      res = 0;
+      st = st.ToUpper();
+      int n = st.IndexOf("D");
+      if (n > 0)
+      {
+        if (!Double.TryParse(st.Substring(0, n), out d)) return false;
+        res = res + d * 86400;
+        if (n == st.Length-1) return true;
+        st = st.Substring(n + 1);
+      }
+      n = st.IndexOf("H");
+      if (n > 0)
+      {
+        if (!Double.TryParse(st.Substring(0, n), out d)) return false;
+        res = res + d * 3600;
+        if (n == st.Length-1) return true;
+        st = st.Substring(n + 1);
+      }
+      n = st.IndexOf("M");
+      if (n > 0)
+      {
+        if (!Double.TryParse(st.Substring(0, n), out d)) return false;
+        res = res + d * 60;
+        if (n == st.Length-1) return true;
+        st = st.Substring(n + 1);
+      }
+
+      n = st.IndexOf("S");
+      if (n < 0) n = st.Length;
+      if (!Double.TryParse(st.Substring(0, n), out d)) return false;
+      res = res + d;
+      return true;
+
+    }
+
+    public static string secTimeSpanToString(double timespan)
+    { return secTimeSpanToString( timespan, 0); }
+
+
+    public static string secTimeSpanToString(double timespan, double resolution)
+    {
+      bool started = false;
+      string res = "";
+      if (timespan < 0) { res = "-"; timespan=-timespan; }
+      if (timespan >= 86400)
+      {  int d = (int)(timespan / 86400);
+         res = res + d.ToString() + "d";
+         timespan -= 86400 * d; 
+         started = true;
+      }
+      if (resolution>=86400) return res!=""? res:"0d";
+      if (timespan >= 3600)
+      {
+        int d = (int)(timespan / 3600);
+        res = res + d.ToString(started?"D2":"d" ) + "h";
+        timespan -= 3600 * d;
+        started = true;
+      }
+      if (resolution >= 3600) return res != "" ? res : "0h";
+      if (timespan < resolution) return res != "" ? res : "0h";
+      if (timespan >= 60)
+      {
+        int d = (int)(timespan / 60);
+        res = res + d.ToString(started ? "D2" : "d") + "m";
+        timespan -= 60 * d;
+        started = true;
+      }
+      if (resolution >= 60) return res != "" ? res : "0m";
+      if (timespan < resolution) return res != "" ? res : "0m";
+      timespan =  Math.Round(timespan * 100) /100;
+
+      string s;
+      
+      if (resolution>0.1)  s= timespan.ToString("F0");
+      else if (resolution > 0.01)  s = timespan.ToString("F1");
+      else if (resolution > 0.001)  s = timespan.ToString("F2");
+      else s = timespan.ToString();
+      if (started && timespan<10) s = "0" + s;
+      res = res + s + "s";
+
+      return res;
+
+      }
+
+
 
     public static string RelativeFormat(double dataDeltaTime, double viewportDeltaTime , double resolution )
     {
@@ -101,7 +191,7 @@ namespace YDataRendering
 
       string format = "";
       if (ShowSecondsTenth) format = "\\.f";
-      if (ShowSecondsHundredth) format = "\\.ff";
+      if (ShowSecondsHundredth) format = "\\.ff";     
       if (ShowSeconds) format = "ss" + format + "\\s";
       if (ShowMinutes) format = "mm\\m" + format;
       if (ShowHours) format = "hh\\h" + format;
@@ -189,7 +279,7 @@ namespace YDataRendering
       {
         res.format=  RelativeFormat(dataDeltaTime, viewportDeltaTime, res.step);
 
-
+       
       }
 
       return res;
@@ -383,14 +473,14 @@ namespace YDataRendering
         if (_legendPen == null)
         {
           _legendPen = new Pen(_color, (float)(_thickness* parent.legendPanel.traceWidthFactor));
-
+          
 
         }
         return _legendPen;
       }
     }
 
-    public void resetlegendPen() { _legendPen = null; }
+    public void resetlegendPen() { _legendPen = null; } 
 
     private Brush _brush = null;
 
@@ -641,12 +731,28 @@ namespace YDataRendering
             if (data[N].x > x) N2 = N; else N1 = N;
           }
           Pos = N1 - 1; if (Pos < 0) Pos = 0;
-          if (x - data[Pos].x < data[Pos + 1].x - x) return data[Pos]; else return data[Pos + 1];
+          if (!AllowInterpolation)
+          {
+            if (x - data[Pos].x < data[Pos + 1].x - x) return data[Pos]; else return data[Pos + 1];
+          }
+          else
+          {
+              Pos++;
+              if (x == data[Pos].x) return data[Pos];
+              if (x == data[Pos+1].x) return data[Pos+1];
+              pointXY p;
+              p.x = x;
+              p.y = data[Pos].y + (data[Pos + 1].y - data[Pos ].y) * (x - data[Pos].x) / (data[Pos + 1].x - data[Pos].x);
+              return p;
+          }
+
+
         }
       }
+      if (AllowInterpolation) return null;
 
       // check for best match outside segments
-      pointXY match = segments[0].data[0];
+        pointXY match = segments[0].data[0];
       double delta = Math.Abs(segments[0].data[0].x - x);
       for (int i = 0; i < segments.Count; i++)
       {
@@ -842,7 +948,7 @@ namespace YDataRendering
       }
     }
 
-
+     
     private Pen _pen = null;
     public Pen pen
     {
@@ -857,7 +963,7 @@ namespace YDataRendering
     public YFontParams font { get { return _font; } }
 
 
-
+    
   }
 
 
@@ -1191,7 +1297,224 @@ namespace YDataRendering
     public YFontParams font { get { return _font; } }
   }
 
+  public  class Marker
+  {
 
+    
+    private Object _userData = null;
+    public Object userData { get { return _userData; } set { _userData = value; } }
+
+
+    private StringFormat _stringFormat = null;
+
+    private double _round100(double v) { return Math.Round(100 * v) / 100; }
+     
+    public StringFormat stringFormat 
+      { get {  if  (_stringFormat!=null) return _stringFormat;
+               _stringFormat = new System.Drawing.StringFormat();
+               _stringFormat.LineAlignment = StringAlignment.Center;
+        switch (_textAlign)
+        {
+          case TextAlign.LEFT: _stringFormat.Alignment = StringAlignment.Near; break;
+          case TextAlign.CENTER: _stringFormat.Alignment = StringAlignment.Center; break;
+          case TextAlign.RIGHT: _stringFormat.Alignment = StringAlignment.Far; break;
+        }
+        return _stringFormat;
+
+
+      }
+      }
+
+
+   
+
+    public PatchMarkerTextCallback _MarkerTextCallback =null;
+
+    public PatchMarkerTextCallback PatchTextCallback { get { return _MarkerTextCallback; }  }
+
+    public void setPatchMarkerTextCallback(PatchMarkerTextCallback callback)
+    { _MarkerTextCallback = callback; }
+
+    protected YDataRenderer _parentRenderer = null;
+
+    public enum TextAlign {[Description("Left")]LEFT, [Description("Center")]CENTER, [Description("Right")]RIGHT };
+
+    private Object _directParent = null;
+    public Object directParent { get { return _directParent; } }
+
+    public Marker(YDataRenderer parent, Object directParent)
+    {
+      this._directParent = directParent;
+      this._parentRenderer = parent;
+      this._font = new YFontParams(parent, this, 8, null);
+
+    }
+
+    public void startCapture()
+    {
+      ((YGraph)this._parentRenderer).startMarkerCapture(this);
+    }
+
+    
+
+    public void setCapturedPosition(double position, XAxis axis)
+    {
+      enabled   = true;
+      _xpositionIsRelative = (axis.timeReference == TimeConverter.TimeReference.RELATIVE) && axis.zeroTime > 0;
+      _xposition = _round100(_xpositionIsRelative ? position- axis.zeroTime :  position);
+      ((YGraph)this._parentRenderer).clearCachedObjects();
+      _parentRenderer.redraw();
+    }
+
+
+    protected bool _enabled = false;
+    public bool enabled { get { return _enabled; } set { if (_enabled != value) { _enabled = value; _parentRenderer.clearCachedObjects(); _parentRenderer.redraw(); } } }
+
+    private Double _xposition = 0.0; 
+    public Double xposition
+    {
+      get { return _xposition; }
+      set
+      {
+
+        
+        _xposition = _round100(value);
+        if (_enabled) _parentRenderer.redraw();
+        
+      }
+    }
+    protected bool _xpositionIsRelative = false;
+    public  TimeConverter.TimeReference timereference {
+
+
+       get { return _xpositionIsRelative ? TimeConverter.TimeReference.RELATIVE : TimeConverter.TimeReference.ABSOLUTE; }
+
+       set {
+        bool v = value == TimeConverter.TimeReference.RELATIVE;
+           if (_xpositionIsRelative != v)
+           { double ZeroPosition = ((XAxis)this._directParent).zeroTime;
+             if (Double.IsNaN(ZeroPosition)) ZeroPosition = 0;
+             if (v)
+              { _xpositionIsRelative = true;
+                _xposition -= ZeroPosition;
+              } 
+             else
+             {
+               _xpositionIsRelative = false;
+               _xposition += ZeroPosition;
+             }
+            _xposition = _round100(_xposition);       
+           _parentRenderer.redraw();
+        } } }
+
+    // a special variant which also to get/set both xposition and xpositionIsRelative at the same time
+    // and allow to start position capture as well. 
+    public xAxisPosition positionOnXAxis  
+    {
+         get { return new xAxisPosition(_xposition, _xpositionIsRelative); }
+         set
+      {
+        if (value.capture) startCapture();
+        else
+        { double v = _round100(value.value);
+          if ((_xpositionIsRelative != value.relative) || (_xposition != v))
+          {
+            _xposition = v;
+            _xpositionIsRelative = value.relative;
+            if (_enabled) _parentRenderer.redraw();
+          }
+        }
+      }
+    }
+
+
+    private Double _yposition = 95.0;
+    public Double yposition { get { return _yposition; } set { _yposition = Math.Min(100,Math.Max(0, value)); if (_enabled) _parentRenderer.redraw(); } }
+
+    private string _text = "Marker";
+    public string text { get { return _text; } set { _text = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
+
+    private TextAlign _textAlign = TextAlign.CENTER;
+    public TextAlign textAlign { get { return _textAlign; } set { _textAlign = value; _stringFormat = null;  if(_enabled) _parentRenderer.redraw(); } }
+
+    public String shortText
+    {
+       get
+      {
+        if (_text.Length <= 20) return _text;
+        return _text.Substring(0, 18) + "..";
+      }
+    }
+
+    private Color _bgColor = Color.FromArgb(255, 255, 255, 192);
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled) _parentRenderer.redraw(); } }
+
+    private Color _borderColor = Color.DarkRed;
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _arrowBrush = null; _pen = null; _navigatorpen = null;  if(_enabled) _parentRenderer.redraw(); } }
+
+    private double _borderthickness = 1;
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _parentRenderer.clearCachedObjects(); _pen = null; if (_enabled) _parentRenderer.redraw(); } }
+
+    private double _arrowSize = 5;
+    public double arrowSize { get { return _arrowSize; } set { _arrowSize = value;  if (_enabled) _parentRenderer.redraw(); } }
+
+    private double _padding = 5;
+    public double padding { get { return _padding; } set { _padding = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
+
+    private double _verticalMargin = 5;
+    public double verticalMargin { get { return _verticalMargin; } set { _verticalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
+
+    private double _horizontalMargin = 5;
+    public double horizontalMargin { get { return _horizontalMargin; } set { _horizontalMargin = value; if (_enabled) _parentRenderer.redraw(); } }
+
+
+    private Brush _bgBrush = null;
+    public Brush bgBrush
+    {
+      get
+      {
+        if (_bgBrush == null)
+          _bgBrush = new SolidBrush(_bgColor);
+        return _bgBrush;
+      }
+    }
+
+    private Brush _arrowBrush = null;
+    public Brush arrowBrush
+    {
+      get
+      {
+        if (_arrowBrush == null)
+          _arrowBrush = new SolidBrush(_borderColor);
+        return _arrowBrush;
+      }
+    }
+
+    private Pen _pen = null;
+    public Pen pen
+    {
+      get
+      {
+        _pen = new Pen(_borderColor, (float)_borderthickness);
+        return _pen;
+      }
+    }
+
+    private Pen _navigatorpen = null;
+    public Pen navigatorpen
+    {
+      get
+      {
+        _navigatorpen = new Pen(_borderColor, (float)1.0);
+        return _navigatorpen;
+      }
+    }
+
+
+    YFontParams _font = null;
+    public YFontParams font { get { return _font; } }
+
+  }
 
 
   public class Legend
@@ -1322,6 +1645,16 @@ namespace YDataRendering
       }
     }
 
+    public  void setMinMax(double min, double max)
+    {  if (min<max)
+       {
+        _min = min;
+        _max = max;
+        _parentRenderer.redraw();
+
+      }
+    }
+
     protected Double _max = Double.NaN;
     public Double max
     {
@@ -1413,6 +1746,96 @@ namespace YDataRendering
     }
 
     public int Count { get { return ContainerList.Count; } }
+  }
+
+
+  public class xAxisPosition
+  {
+
+    public static string  DTdisplayformat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString() + " "
+       + CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern.ToString().Replace("ss", "ss" + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + "FF");
+    public static string   TSdisplayformat = "dd\\.hh\\:mm\\:ss\\" + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + "FF";
+
+
+
+    double _value = 0;
+    bool _isRelative = false;
+    
+
+
+
+    public xAxisPosition(double v, bool rel)
+    {
+      _isRelative = rel;
+      _value = v;
+      _capture = false;
+    }
+
+    public xAxisPosition(string v, bool rel)
+    {
+      _capture = false;
+     _isRelative = rel;
+      if (!Double.TryParse(v, out _value)) _value = 0;
+
+    }
+
+    public override string ToString()
+    {
+      if (_isRelative)
+      {
+        return TimeConverter.secTimeSpanToString(_value);
+
+      }
+      else
+      {
+        string st = TimeConverter.FromUnixTime(_value).ToLocalTime().ToString(DTdisplayformat);
+        if (st.EndsWith(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)) st = st.Substring(0, st.Length - 1);
+        return st;
+      }
+    }
+    
+    public bool TryParse(string str, out double parsedValue)
+    { bool res = false;
+      parsedValue = 0;
+      if (_isRelative)
+      {
+        res = TimeConverter.tryParseStringToSecTimeSpan(str, out parsedValue);
+      }
+      else
+      {
+
+       
+        DateTime dt;
+        str = str.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, "."); // this is such a dirty hack :-(
+        res = DateTime.TryParse(str, out dt);
+        if (res) parsedValue = YDataRendering.TimeConverter.ToUnixTime(dt.ToUniversalTime());
+
+      }
+      return res;
+    }
+
+
+    public bool relative
+    {
+      get { return this._isRelative; }
+      set { this._isRelative = value; }
+    }
+    public double value
+    {
+      get { return this._value; }
+      set { this._value = value; }
+    }
+
+    // a weird way to start the marker position capture
+    // through a property change, as Yocto-Visualization
+    // editor can only change properties. 
+    bool _capture = false;
+    public bool capture
+    {
+      get { return this._capture; }
+      set { this._capture = value; }
+    }
+
   }
 
 
@@ -1566,10 +1989,23 @@ namespace YDataRendering
     public enum VrtPosition {[Description("Top")] TOP, [Description("Bottom")] BOTTOM };
     public enum OverflowHandling {[Description("Do nothing")] DONOTHING, [Description("Scroll contents")] SCROLL, [Description("Squeeze contents")] CONTRACT };
 
-
+    private YGraph _parentGraph =null;
     private VrtPosition _position = VrtPosition.BOTTOM;
     public VrtPosition position { get { return _position; } set { _position = value; _parentRenderer.redraw(); } }
 
+    List<Marker> _markers =null;
+
+    public List<Marker> markers { get { return _markers; } }
+
+    public Marker AddMarker()
+    {
+      Marker m = new Marker(_parentGraph, this);
+      _markers.Add(m);
+      _parentGraph.clearCachedObjects();
+      _parentGraph.redraw();
+      return m;
+
+    }
 
 
     private double _initialZoom = 300;
@@ -1602,11 +2038,14 @@ namespace YDataRendering
 
     public XAxis(YGraph parent, Object directParent) : base(parent, directParent)
     {
+      _parentGraph = parent;
+       _markers = new List<Marker>();
       min = TimeConverter.ToUnixTime(DateTime.UtcNow);
       max = min + initialZoom;
       step = 30;
     }
 
+   
 
     protected TimeConverter.TimeReference _timeReference = TimeConverter.TimeReference.ABSOLUTE;
     public TimeConverter.TimeReference timeReference
@@ -1681,8 +2120,6 @@ namespace YDataRendering
     private int _YScaleIndex = 0;
     public int yScaleIndex { get { return _YScaleIndex; } set { _YScaleIndex = value; if (_enabled) _parentRenderer.redraw(); } }
 
-
-
   }
 
 
@@ -1690,9 +2127,16 @@ namespace YDataRendering
   public class YGraph : YDataRenderer
   {
 
+    public delegate void MarkerCaptureStartedCallback(Marker source);
+    public delegate void MarkerCaptureStoppedCallback(Marker source);
+
     XAxis _xAxis;
     List<YAxis> _yAxes;
     List<DataSerie> _series;
+
+
+    private MarkerCaptureStartedCallback _markerCaptureStartedCallback = null;
+    private MarkerCaptureStoppedCallback _markerCaptureStoppedCallback = null;
 
     public static bool VerticalDragZoomEnabled = false;
 
@@ -1701,13 +2145,14 @@ namespace YDataRendering
     int lastBottomMargin = -1;
 
     Bitmap navigatorCache;
-
+    Marker markerCapture = null;
+      static Cursor captureCursor =null;
 
     private LegendPanel _legendPanel;
     public LegendPanel legendPanel { get { return _legendPanel; } }
 
 
-
+   
 
     private DataTracker _dataTracker;
     public DataTracker dataTracker { get { return _dataTracker; } }
@@ -1721,10 +2166,50 @@ namespace YDataRendering
     public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; borderPen = null; redraw(); } }
 
 
+    private void createCaptureCursor()
+    {
+      if (YGraph.captureCursor != null) return;
+      if (Type.GetType("Mono.Runtime") != null) return; // customs cursor don't work on mono
+
+      // mouse cursor graphics stored  in a base64 encoded PNG
+      // this is just a way to keep the source code monothilic   
+      // no separate ressource file
+      string base64png =
+          "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAALHRFWHRDcmVhdGlvbi"
+        + "BUaW1lAFRodSAyMCBBdWcgMjAyMCAxMjoxNTo1MCArMDEwMP38NhoAAAAHdElNRQfk"
+        + "CBQOJAvCrm0ZAAAACXBIWXMAAFxGAABcRgEUlENBAAAABGdBTUEAALGPC / xhBQAA"
+        + "AmVJREFUeNrtVrFuFDEQHd9eBImAIBFoAgVC0NJQUFDwL / QgRXzAfUz + Iy0pQw"
+        + "sIJAhCQMQBUS5c2DXv7T5fzN5qs / Fxdw0jPY3ttT3jt54ZmyXIYDDoQXnodWBV /"
+        + " SRJXZhJbwCXov65pZ + 4zklfBsZRf2EMxOuTjc / igIu0s0UygAvnonWZ0NP4fB"
+        + "2QkQz6yHvP / i76V4E1jZ / bic4LIuMnND7ZwDl + u4 / me + AnkKPvu + 7r"
+        + "FMNZBzZ64eRTm5w6sQ8cAcUZexVytOCpOnv7j + QdDD + CHgKjMg80nWpeQrYgd4"
+        + "A3wHjWPJAqN4BVoLcsB1ZMd25ZDkzkvwNLd6AMQ4XGIuXElKz6SAo3rYpLhsZKyyJm"
+        + "wu2WTLiF5g / g2NozIY1 / BkacRwaYkZgUPlr7L2EdeAhjLxpqwTOr0vAHOZG37F"
+        + "PIOO3mfXXG1qEWAGvM + TC6Rydk / KmMv7bmWlD / v95qtaCThGpo1TPsFvp7wB"
+        + "O0v4nBqWoYvR0yOeLFThHmdH4TcgGQy8i + hkn5V / WbSjGr7e9oD96372LJB1o7"
+        + "izbPtYHpPw7V / 8u4yvzFkvPTO3MXuMbx8JRPij8svgAcAw / EwCe0f8XGxZYFB6"
+        + "JQZzl + rHWj1Gf5WZLVTj5py5HbVoXjeF4OuMhYnQHKulW / x6U64CPtbfpVxQu7"
+        + "CX0PeicMov3cKup5EZmw / KwMFNb8pMtl5G3MhIyHkOX3PPUSMmXzOX7Fqsw35Gu5"
+        + "NidEwXWr / jnnD + XUFzLARJRaDXnCQ53o0BpSLzcXzQfAK + Cl9EEwXrKTyr1O"
+        + "WGa3sFnLvPDsn6Tg8P0PrBcSMR2NtfsAAAAASUVORK5CYII =";
+
+      try
+      {
+        byte[] data = System.Convert.FromBase64String(base64png);
+        MemoryStream ms = new MemoryStream(data);
+        Bitmap bmp = new Bitmap(Image.FromStream(ms));
+        YGraph.captureCursor = new Cursor(bmp.GetHicon());
+      } catch (Exception)
+      {
+        Console.WriteLine("Cannot create custom cursor");
+
+      }
 
 
+  }
 
-    ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
+
+  ViewPortSettings mainViewPort = new ViewPortSettings() { IRLx = 0, IRLy = 0, zoomx = 1.0, zoomy = 1.0, Lmargin = 0, Rmargin = 0, Tmargin = 0, Bmargin = 0, Capture = false };
 
 
     protected List<DataPanel> _dataPanels;
@@ -1737,20 +2222,33 @@ namespace YDataRendering
       return p;
 
     }
+    public void setMarkerCaptureCallbacks(MarkerCaptureStartedCallback start, MarkerCaptureStoppedCallback stop)
+    {
+       _markerCaptureStartedCallback = start;
+       _markerCaptureStoppedCallback = stop;
+    }
 
+    public void startMarkerCapture(Marker m)
+    {
+      if (_markerCaptureStartedCallback != null) _markerCaptureStartedCallback(m);
+      markerCapture = m;
+      gainFocus();
+    }
 
     public YGraph(PictureBox ChartContainer, logFct logFunction) : base(ChartContainer, logFunction)
     {
+      createCaptureCursor();
 
       _xAxis = new XAxis(this, this);
       _yAxes = new List<YAxis>();
       _series = new List<DataSerie>();
       _dataPanels = new List<DataPanel>();
+    
 
 
       _navigator = new Navigator(this, this);
       _legendPanel = new LegendPanel(this, this);
-
+     
       _dataTracker = new DataTracker(this, this);
 
       this.UIContainer.MouseDown += MouseDown;
@@ -1833,7 +2331,7 @@ namespace YDataRendering
 
     }
 
-
+   
 
     public DataSerie addSerie()
     {
@@ -1844,6 +2342,7 @@ namespace YDataRendering
 
     }
 
+   
 
 
 
@@ -1859,18 +2358,32 @@ namespace YDataRendering
 
     private void MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
     {
+      if ((e.Button == MouseButtons.Right) && (markerCapture!=null))
+         { markerCapture = null;
+          _markerCaptureStoppedCallback(null);
+         }
+
       if (e.Button != MouseButtons.Left) return;
       if ((e.X >= mainViewPort.Lmargin)
           && (e.X <= mainViewPort.Width - mainViewPort.Rmargin)
-          && (e.Y >= mainViewPort.Lmargin)
+          && (e.Y >= mainViewPort.Tmargin)
           && (e.Y <= mainViewPort.Height - mainViewPort.Bmargin))
       {
+        if (markerCapture!=null)
+        {
+          pointXY p2 = ViewPortPointToIRL(mainViewPort, new Point(e.X-(captureCursor!=null?2:0), e.Y));  // the cursor hot spot is shifted by 2 pixels
+          markerCapture.setCapturedPosition(p2.x, xAxis);
+          if (_markerCaptureStartedCallback != null) _markerCaptureStoppedCallback(markerCapture);
+          markerCapture = null;
+          return;
+        }
+        pointXY p = ViewPortPointToIRL(mainViewPort, new Point(e.X, e.Y));
         mainViewPort.OriginalXAxisMin = xAxis.min;
         mainViewPort.OriginalXAxisMax = xAxis.max;
         mainViewPort.OriginalIRLx = mainViewPort.IRLx;
         mainViewPort.OriginalLmargin = mainViewPort.Lmargin;
         mainViewPort.OriginalZoomx = mainViewPort.zoomx;
-        pointXY p = ViewPortPointToIRL(mainViewPort, new Point(e.X, e.Y));
+        
         mainViewPort.CaptureStartY = e.Y;
         mainViewPort.IRLCaptureStartX = p.x;
         mainViewPort.Capture = true;
@@ -1908,8 +2421,19 @@ namespace YDataRendering
       }
     }
 
-    private void MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+    private void MouseMove(object sender, System.Windows.Forms.MouseEventArgs  e)
     {
+
+      if (markerCapture!=null)
+        { if (    (e.X > mainViewPort.Lmargin) && (e.X < mainViewPort.Width - mainViewPort.Rmargin)
+               && (e.Y > mainViewPort.Tmargin) && (e.Y < mainViewPort.Height - mainViewPort.Bmargin))
+          {
+          if ((this.UIContainer.Cursor != YGraph.captureCursor) && (this.UIContainer.Cursor != Cursors.Cross))
+            this.UIContainer.Cursor = YGraph.captureCursor != null ? YGraph.captureCursor : Cursors.Cross;   
+          }
+          else if (this.UIContainer.Cursor != Cursors.Default) this.UIContainer.Cursor = Cursors.Default;
+        } else if (this.UIContainer.Cursor != Cursors.Default) this.UIContainer.Cursor = Cursors.Default;
+
       if (e.Button != MouseButtons.Left)
       {
         mainViewPort.Capture = false;
@@ -2074,7 +2598,7 @@ namespace YDataRendering
     }
 
 
-
+   
 
     public void drawLegendPanel(YGraphics g, int viewPortWidth, int viewPortHeight, ref ViewPortSettings mainViewPort)
     {
@@ -2284,7 +2808,7 @@ namespace YDataRendering
 
 
 
-
+     
 
 
       Rectangle r = new Rectangle((int)x, (int)y, (int)w, (int)h);
@@ -2293,7 +2817,7 @@ namespace YDataRendering
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
       for (int i = 0; i < _series.Count; i++)
         if ((_series[i].segments.Count > 0) && (_series[i].visible) && (!_series[i].disabled))
-        {
+        { 
           g.DrawString(legends[i], _legendPanel.font.fontObject, _legendPanel.font.brushObject,
              (int)(x + ofsetx[i] + 20 + legendPanel.padding),
              (int)(y + ofsety[i] + legendPanel.padding));
@@ -2493,7 +3017,7 @@ namespace YDataRendering
 
             y = w.Height - w.Bmargin - y;
             double v = FirstStep + i * axis.startStopStep.step;
-
+            
 
 
             if (!simulation)
@@ -2502,9 +3026,9 @@ namespace YDataRendering
 
               if ((Math.Abs(v) <1E-6) && axis.highlightZero)
               {
-
+               
                   g.DrawLine(axis.pen, w.Lmargin, y, w.Width - w.Rmargin, y);
-
+                
 
               }
                g.DrawLine(axis.pen, x + ((leftSide) ? -2 : 2), y, x + ((leftSide) ? 5 : -5), y);
@@ -2602,7 +3126,7 @@ namespace YDataRendering
       }
       else
       {
-        Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - timeRange.Min));
+        Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (Math.Round(1000*(t - scale.zeroTime))/1000) );
 #if (!NET35 && !NET40)
         label = (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(scaleFormat.format) : new TimeSpan(ticks).ToString(scaleFormat.format);
 #else
@@ -2633,19 +3157,24 @@ namespace YDataRendering
       double FirstStep = 0;
       MinMaxHandler.MinMax timeRange = MinMaxHandler.DefaultValue();
 
+      for (int i = 0; i < this._series.Count; i++)
+        if (!_series[i].disabled)
+          timeRange = MinMaxHandler.Combine(timeRange, this._series[i].timeRange);
+      scale.zeroTime = timeRange.Min;
+      
+
       if (scale.timeReference == TimeConverter.TimeReference.ABSOLUTE)
       {
+       
         FirstStep = scale.step * (Math.Truncate(scale.min / scale.step));
         timeRange.Min = scale.min; timeRange.Max = scale.max;
 
       }
       else
       {
-        for (int i = 0; i < this._series.Count; i++)
-          if (!_series[i].disabled)
-            timeRange = MinMaxHandler.Combine(timeRange, this._series[i].timeRange);
+       
         if (double.IsNaN(timeRange.Min)) return 0;
-        FirstStep = timeRange.Min + scale.step * (Math.Truncate((scale.min - timeRange.Min) / scale.step));
+        FirstStep = timeRange.Min + scale.step * (Math.Truncate((scale.min - scale.zeroTime) / scale.step));
       }
       if (FirstStep < scale.min) FirstStep += scale.step;
 
@@ -2653,8 +3182,8 @@ namespace YDataRendering
       if (scale.timeReference != TimeConverter.TimeReference.ABSOLUTE)
       {
         timeOffset = FirstStep;
-        scale.zeroTime = timeRange.Min;
-
+        
+        
       }
       scale.fullSize = timeRange.Max - timeRange.Min;
 
@@ -2704,7 +3233,7 @@ namespace YDataRendering
             if (ssize.Height > UnitHeight) UnitHeight = ssize.Height;
             if (!simulation)
             {
-
+              
               if (steps % mod ==0)
               //if (Math.Round(100 * (t - timeOffset)) % Math.Round(100 * (scale.step * mod)) == 0)
                 g.DrawString(label, scale.font.fontObject, scale.font.brushObject, new Point(x /*- (int)ssize.Width / 2*/, y + ((bottomSide) ? +2 : -(int)ssize.Height)), stringFormat);
@@ -2740,6 +3269,54 @@ namespace YDataRendering
       return scale.innerHeight;
 
     }
+    public Double pixelxSize(ViewPortSettings mainViewPort, XAxis scaleX)
+    {
+      double dtime = scaleX.max - scaleX.min;
+      double dview = mainViewPort.Width - mainViewPort.Lmargin - mainViewPort.Rmargin;
+      if (dview > 0) return dtime / dview;
+      return 0;
+    }
+
+    public string TimeToAutoSting(double t, ViewPortSettings mainViewPort, XAxis scaleX)
+    { string strValue = "";
+      double dtime = scaleX.max - scaleX.min;
+     // double dview = mainViewPort.Width - mainViewPort.Lmargin - mainViewPort.Rmargin;
+      if (dtime > 0)
+      {
+        double pixelSize = pixelxSize( mainViewPort,  scaleX);
+        if (pixelSize > 0)
+        {
+
+          if (scaleX.timeReference == TimeConverter.TimeReference.ABSOLUTE)
+          {
+
+            if (dtime > 86400) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("MMMM dd ");
+            if (pixelSize < 0.1) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss.ff");
+            else if (pixelSize < 1) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss.f");
+            else if (pixelSize < 60) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss");
+            else if (pixelSize < 3600) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm");
+            else if (pixelSize < 86400) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH") + "H";
+
+          }
+          else
+          {
+
+            string format = TimeConverter.RelativeFormat(scaleX.fullSize, dtime, pixelSize);
+            Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (Math.Round(100*(t - scaleX.zeroTime))/100));
+#if (!NET35 && !NET40)
+            strValue += (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(format) : new TimeSpan(ticks).ToString(format);
+#else
+               strValue += (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
+
+#endif
+
+
+          }
+        }
+      }
+      return strValue;
+   }
+
 
     private void DrawDataTracker(YGraphics g, int viewPortWidth, int viewPortHeight, XAxis scaleX)
     {
@@ -2815,44 +3392,9 @@ namespace YDataRendering
 
         if (_dataTracker.showTimeStamp)
         {
-          double dtime = scaleX.max - scaleX.min;
-          double dview = mainViewPort.Width - mainViewPort.Lmargin - mainViewPort.Rmargin;
-          if (dtime > 0)
-          {
-
-            double pixelSize = dtime / dview;
-            if (pixelSize > 0)
-            {
-              double t = IRLmatch[bestindex].Value.x;
-              if (scaleX.timeReference == TimeConverter.TimeReference.ABSOLUTE)
-             {
-
-               if (dtime > 86400) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("MMMM dd ");
-               if (pixelSize < 0.1) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss.ff");
-               else if (pixelSize < 1) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss.f");
-               else if (pixelSize < 60) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm:ss");
-               else if (pixelSize < 3600) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH:mm");
-               else if (pixelSize < 86400) strValue += TimeConverter.FromUnixTime(t).ToLocalTime().ToString("HH") + "H";
-               strValue += "\r\n";
-            }
-            else
-             {
-
-               string format =  TimeConverter.RelativeFormat(scaleX.fullSize,dtime, pixelSize);
-               Int64 ticks = (Int64)((double)TimeSpan.TicksPerSecond * (t - scaleX.zeroTime));
-#if (!NET35 && !NET40)
-                strValue += (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString(format) : new TimeSpan(ticks).ToString(format);
-#else
-               strValue += (ticks < 0) ? "-" + new TimeSpan(-ticks).ToString() : new TimeSpan(ticks).ToString();
-
-#endif
-                strValue += "\r\n";
-
-              }
-            }
-          }
-
-
+          double t = IRLmatch[bestindex].Value.x ;
+          strValue += TimeToAutoSting(t, mainViewPort, scaleX) + "\r\n";
+   
         }
 
         if (_dataTracker.dataPrecision == DataTracker.DataPrecision.PRECISION_NOLIMIT)
@@ -2904,6 +3446,150 @@ namespace YDataRendering
                 int x0 =  w.Lmargin + (int)Math.Round((min - scale.min) / XZoom);
      *
      * */
+
+
+   public void DrawMarkers(ViewPortSettings w, YGraphics g, XAxis scaleX,  int viewPortWidth, int viewPortHeight)
+    {  if (_xAxis.markers.Count == 0) return;
+
+        g.SetClip(new Rectangle(w.Lmargin, w.Tmargin, w.Width - w.Rmargin - w.Lmargin, w.Height - w.Bmargin - w.Tmargin));
+        pointXY Bottomleft = ViewPortPointToIRL(w, new Point(w.Lmargin, w.Height - w.Bmargin));
+        pointXY TopRight = ViewPortPointToIRL(w, new Point(w.Width - w.Rmargin, w.Tmargin));
+        double dy = (w.Height - w.Bmargin - w.Tmargin) / 100.0;
+
+        double pixelSize = -1;
+
+      g.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+      for (int i = 0; i < _xAxis.markers.Count; i++)
+        if (_xAxis.markers[i].enabled)
+        {
+          if (pixelSize < 0) pixelSize = pixelxSize(mainViewPort, scaleX);
+
+          bool   mustdraw = true; 
+          double xpos =0;
+          if (_xAxis.markers[i].timereference == TimeConverter.TimeReference.RELATIVE)
+          {
+            if (_xAxis.zeroTime > 0) { xpos = _xAxis.markers[i].xposition + _xAxis.zeroTime; }
+               else mustdraw = false;
+
+          } else xpos = _xAxis.markers[i].xposition;
+         
+
+          if ((xpos > Bottomleft.x-100* pixelSize) && (xpos < TopRight.x+100* pixelSize) && mustdraw)
+          {
+            Point p = IRLPointToViewPort(w, new pointXY { x = xpos, y = 0 });
+            int xxCenter = (int)(p.X);
+            int yyCenter = (int)(w.Height - w.Bmargin - (_xAxis.markers[i].yposition * dy));
+
+
+
+
+            string strValue = _xAxis.markers[i].text.Replace("\\n","\n");
+
+            DateTime now = DateTime.Now;
+            if (strValue.IndexOf('$') >= 0)
+            {
+              
+
+              if (strValue.IndexOf("$MARKERTIME$") >= 0)
+              {
+                // string s = _xAxis.markers[i].xpositionIsRelative ? _xAxis.markers[i].positionOnXAxis.ToString()
+                // : TimeToAutoSting(_xAxis.markers[i].xposition, mainViewPort, scaleX);
+
+                
+                string s = _xAxis.markers[i].timereference == TimeConverter.TimeReference.RELATIVE ? TimeConverter.secTimeSpanToString(_xAxis.markers[i].xposition, pixelSize)
+                 : TimeToAutoSting(_xAxis.markers[i].xposition, mainViewPort, scaleX);
+                strValue = strValue.Replace("$MARKERTIME$", s);
+              }
+
+              if (strValue.IndexOf("$VALUE") >= 0)
+                for (int j=0;j < _series.Count;j++)
+                  if (!_series[j].disabled)
+                   {  Nullable<pointXY> pt = _series[j].findClosestValue(xpos, true);
+                      string st = (pt != null) ? (pt.Value.y).ToString("0.###") : "--";
+                      strValue = strValue.Replace("$VALUE"+(j+1).ToString()+"$", st);
+                   }  else strValue = strValue.Replace("$VALUE" + (j + 1).ToString() + "$", "");
+
+              if (strValue.IndexOf("$UNIT") >= 0)
+                for (int j = 0; j < _series.Count; j++)
+                  if (!_series[j].disabled)
+                    { strValue = strValue.Replace("$UNIT" + (j + 1).ToString() + "$", _series[j].unit);
+                    } else strValue = strValue.Replace("$UNIT" + (j + 1).ToString() + "$", "");
+
+              if (strValue.IndexOf("$LEGEND") >= 0)
+                for (int j = 0; j < _series.Count; j++)
+                  if (!_series[j].disabled)
+                  {
+                    strValue = strValue.Replace("$LEGEND" + (j + 1).ToString() + "$", _series[j].legend);
+                  }
+                  else strValue = strValue.Replace("$LEGEND" + (j + 1).ToString() + "$", "");
+
+
+
+              if (_xAxis.markers[i].PatchTextCallback != null) strValue = _xAxis.markers[i].PatchTextCallback(strValue);
+
+            }
+            SizeF ssize = g.MeasureString(strValue, _xAxis.markers[i].font.fontObject, 10000);
+
+            int labelWidth = (int)(ssize.Width + 2 * _xAxis.markers[i].padding + _xAxis.markers[i].borderthickness);
+            int labelHeight = (int)(ssize.Height + 2 * _xAxis.markers[i].padding + _xAxis.markers[i].borderthickness);
+
+
+            g.FillRectangle(_xAxis.markers[i].bgBrush, xxCenter - (labelWidth >> 1), yyCenter - (labelHeight >> 1), labelWidth, labelHeight);
+            g.DrawRectangle(_xAxis.markers[i].pen, xxCenter - (labelWidth >> 1), yyCenter - (labelHeight >> 1), labelWidth, labelHeight);
+
+            
+          
+            double xText;
+            switch (_xAxis.markers[i].textAlign)
+            {
+              case Marker.TextAlign.LEFT: xText =xxCenter - (labelWidth >> 1) + _xAxis.markers[i].padding; break;
+              case Marker.TextAlign.RIGHT: xText = xxCenter + (labelWidth >> 1) - _xAxis.markers[i].padding; break;
+              default:  xText = xxCenter; break;
+            }
+
+            g.DrawString(strValue, _xAxis.markers[i].font.fontObject, _xAxis.markers[i].font.brushObject, 
+                new PointF((float)xText,   (float)yyCenter ), _xAxis.markers[i].stringFormat);
+            g.DrawLine(_xAxis.markers[i].pen, xxCenter, (int)(w.Tmargin), xxCenter, yyCenter - (labelHeight >> 1));
+            g.DrawLine(_xAxis.markers[i].pen, xxCenter, yyCenter + (labelHeight >> 1), xxCenter, (int)(w.Height - w.Bmargin));
+            if (_xAxis.markers[i].arrowSize > 0)
+            {
+              if (_xAxis.markers[i].yposition > 25)
+              {
+                PointF[] triangle =  { new PointF((float)(xxCenter- _xAxis.markers[i].arrowSize),(float)( yyCenter + (labelHeight >> 1))),
+                            new PointF((float)(xxCenter + _xAxis.markers[i].arrowSize), (float)(yyCenter + (labelHeight >> 1))),
+                            new PointF((float)xxCenter, (float) ((yyCenter + (labelHeight >> 1)  +_xAxis.markers[i].arrowSize) )) };
+
+
+                g.FillPolygon(_xAxis.markers[i].arrowBrush, triangle);
+
+              }
+
+              if (_xAxis.markers[i].yposition < 75)
+              {
+                PointF[] triangle =  { new PointF((float)(xxCenter- _xAxis.markers[i].arrowSize),(float)( yyCenter - (labelHeight >> 1))),
+                            new PointF((float)(xxCenter + _xAxis.markers[i].arrowSize), (float)(yyCenter - (labelHeight >> 1))),
+                            new PointF((float)xxCenter, (float) ((yyCenter - (labelHeight >> 1)  -_xAxis.markers[i].arrowSize) )) };
+
+
+                g.FillPolygon(_xAxis.markers[i].arrowBrush, triangle);
+
+              }
+
+
+            }
+          }
+        }
+        }
+
+
+     
+
+
+
+
+ 
+
 
     public void DrawDataPanels(ViewPortSettings w, YGraphics g, XAxis scaleX, List<YAxis> scalesY, int viewPortWidth, int viewPortHeight)
     {
@@ -3018,7 +3704,7 @@ namespace YDataRendering
 
 
       g.SmoothingMode = SmoothingMode.HighQuality;
-
+     
       int yMarginOffset = 5;
 
       /* Step 1, found out margins */
@@ -3039,8 +3725,8 @@ namespace YDataRendering
 
 
       /* Step 2B-2  Draw Legend if it doesn't overlap the data */
-
-
+    
+     
       if (!_legendPanel.overlap) drawLegendPanel(g, UIw, UIh, ref mainViewPort);
 
       /* Step 2B-3  Draw annotations if it doesn't overlap the data */
@@ -3147,7 +3833,7 @@ namespace YDataRendering
       g.ResetClip();
 
 
-
+      
 
       /* step 3 draw X scale */
       DrawXAxis(mainViewPort, g, _xAxis, false);
@@ -3327,6 +4013,13 @@ namespace YDataRendering
               }
             }
 
+            for (int i = 0; i < _xAxis.markers.Count; i++)
+              if (_xAxis.markers[i].enabled)
+                { Point p = IRLPointToViewPort(v, new pointXY(){ x= _xAxis.markers[i].xposition+ (_xAxis.markers[i].timereference == TimeConverter.TimeReference.RELATIVE? _xAxis.zeroTime:0) , y=0 });
+                  ng.DrawLine(_xAxis.markers[i].navigatorpen,  p.X, v.Tmargin,  p.X, v.Height - v.Bmargin);
+                }
+
+
             if (_navigator.borderThickness > 0)
             {
               ng.DrawLine(_navigator.borderPen, v.Lmargin, v.Tmargin, v.Width - v.Rmargin, v.Tmargin);
@@ -3367,6 +4060,8 @@ namespace YDataRendering
       if (_legendPanel.overlap) drawLegendPanel(g, UIw, UIh, ref mainViewPort);
 
       g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+
+      DrawMarkers(mainViewPort, g, xAxis, UIw, UIh);
 
       drawAnnotationPanels(g, _annotationPanels, UIw, UIh, true, ref mainViewPort);
       DrawDataPanels(mainViewPort, g, xAxis, _yAxes, UIw, UIh);

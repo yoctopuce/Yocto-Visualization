@@ -572,7 +572,9 @@ namespace YDataRendering
     protected int _redrawAllowed = 1;
     private int _refWidth = 1;
     private int _refHeight = 1;
-    
+
+    static public readonly string[] FloatToStrformats = { "0", "0", "0", "0.0", "0.00", "0.000", "0.0000" };
+
     protected PatchAnnotationCallback _PatchAnnotationCallback =null;
 
     public delegate void RendererDblClickCallBack(YDataRenderer source, MouseEventArgs eventArg);
@@ -781,7 +783,7 @@ namespace YDataRendering
 
       g.Dispose();
       long timing = watch.ElapsedMilliseconds;
-      //  log(" refresh done in " + timing.ToString() + "ms");
+     // log(" refresh done in " + timing.ToString() + "ms");
       AllowRedrawNoRefresh();
       renderingPostProcessing();
       return (int)timing;
@@ -1244,7 +1246,13 @@ namespace YDataRendering
         _AllowPrintScreenCapture = false;
         log("Can't register PrintScrn key capture (" + err.Message + ")");
       }
+      
+    }
 
+    public void gainFocus()
+    {
+      if (parentForm.Focused) return;
+      parentForm.Focus();
     }
 
     private void lostFocus(object sender, EventArgs e)

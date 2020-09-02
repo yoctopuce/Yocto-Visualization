@@ -69,9 +69,8 @@ namespace YoctoVisualisation
 
     public void refresh()
       {  if (!Visible) return;
-      if (currentEditedDataSource == null) return;
-      currentEditedDataSource.refresh();
-
+         if (currentEditedDataSource == null) return;
+         currentEditedDataSource.refresh();
       }
 
     public void showWindow(Form hostWindow,  GenericProperties structData, 
@@ -101,15 +100,15 @@ namespace YoctoVisualisation
     {
       string helpYourselfMsg = "This is the property editor. Change any parameter you want. All changes are applied in real time.";
       if (!Visible) return;
-      label1.Text = "Please wait....";
-      label1.Refresh();
+      HelpZone.Text = "Please wait....";
+      HelpZone.Refresh();
 
       //Console.WriteLine(" -> edit");
 
       if (EditedDataSourceList.ContainsKey(structData))
         if (EditedDataSourceList[structData] == currentEditedDataSource)
         {
-          label1.Text = helpYourselfMsg;
+          HelpZone.Text = helpYourselfMsg;
           return;
         }
 
@@ -119,7 +118,7 @@ namespace YoctoVisualisation
 
       if (!EditedDataSourceList.ContainsKey(structData))
       {
-        UIElementBaseParams rootparam = new UIElementBaseParams(panel1, label1, null, null, "root", "Root", "root node","");
+        UIElementBaseParams rootparam = new UIElementBaseParams(panel1, HelpZone, null, null, "root", "Root", "root node","");
         it = new UIElement(rootparam);
         currentEditedDataSource = new EditedDataSource(structData, it);
         EditedDataSourceList[structData] = currentEditedDataSource;
@@ -137,7 +136,7 @@ namespace YoctoVisualisation
 
       currentEditedDataSource.root.startEdit(setvalueCallBack, getvalueCallBack);
       currentEditedDataSource.root.resizeAll();
-      label1.Text = helpYourselfMsg;
+      HelpZone.Text = helpYourselfMsg;
       outterpanel.Refresh();
     }
 

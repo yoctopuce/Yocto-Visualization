@@ -145,6 +145,11 @@
     </Compile>
     <Compile Include="properties.cs" />
     <Compile Include="propertiesMngmt.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="rawDataForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -196,14 +201,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="rawDataForm.resx">
       <DependentUpon>rawDataForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -251,6 +251,10 @@
     <None Include="artwork\info.png" />
     <None Include="artwork\save.png" />
     <None Include="Resources\save.png" />
+    <None Include="artwork\add_marker.png" />
+    <None Include="artwork\disable_marker.png" />
+    <None Include="Resources\add_marker.png" />
+    <None Include="Resources\disable_marker.png" />
     <Content Include="yapi.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

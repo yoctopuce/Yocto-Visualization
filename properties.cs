@@ -63,6 +63,7 @@ using YColors;
 using System.Drawing.Design;
 using System.Drawing.Text;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace YoctoVisualisation
 {
@@ -73,14 +74,10 @@ namespace YoctoVisualisation
 
   public static class GenericHints
   {
-    public const string ColorMsg = " You can use the color chooser drop-down or type directly the color as HSL:xxx or HSL:xxx where xxx is a 8 digit hex number (Alpha transparency is supported). You can also type a color literal name (Red, Yellow etc...).";
-   
     public const string DevConfAffected = " Changing this value will affect the device configuration.";
     public const string CheckSensor = "If the sensor you want to use is connected, but not listed or listed as OFFLINE, check USB / Network configuration in the global configuration.";
     public const string AnnotationGraph = "Annotation text.  Use \\n for carriage returns. Some variables are available: $DAY$ $MONTH$ $YEAR$ for date, $HOUR$ $MINUTE$ $SECOND$ for time, $AVGVALUE1$ $MINVALUE1$ $MAXVALUE1$ $NAME1$ $UNIT1$  for first series data, $AVGVALUE2$ $MINVALUE2$ $MAXVALUE2$ $NAME2$ $UNIT2$  for second series data and so on";
-    public const string Annotation = "Annotation text.  Use \\n for carriage returns. Some variables are available: $DAY$ $MONTH$ $YEAR$ for date, $HOUR$ $MINUTE$ $SECOND$ for time, $AVGVALUE$ $MINVALUE$ $MAXVALUE$ $NAME$ $UNIT$ for sensor related data.";
-
-
+    public const string Annotation = "Annotation text.  Use \\n for carriage returns. Some variables are available: $DAY$ $MONTH$ $YEAR$ for date, $HOUR$ $MINUTE$ $SECOND$ for time, $AVGVALUE$ $MINVALUE$ $MAXVALUE$ $NAME$ $UNIT$ for sensor related data.";       
   }
 
   public static class TypeDescription
@@ -328,7 +325,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Min Color"),
      CategoryAttribute("Values range"),
      
-     DescriptionAttribute("Color for minimum value."+ GenericHints.ColorMsg)]
+     DescriptionAttribute("Color for minimum value.")]
     public YColor SolidGauge_color1
     {
       get { return _SolidGauge_color1; }
@@ -339,7 +336,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Max color"),
      CategoryAttribute("Values range"),
      
-      DescriptionAttribute("Color for maximum value." + GenericHints.ColorMsg)]
+      DescriptionAttribute("Color for maximum value.")]
     public YColor SolidGauge_color2
     {
       get { return _SolidGauge_color2; }
@@ -392,7 +389,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Border color"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial border color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial border color." )]
     public YColor SolidGauge_borderColor
     {
       get { return _SolidGauge_borderColor; }
@@ -414,7 +411,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial background gradient color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 1." )]
     public YColor SolidGauge_backgroundColor1
     {
       get { return _SolidGauge_backgroundColor1; }
@@ -425,7 +422,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Dial"),
     
-     DescriptionAttribute("Dial background gradient color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 2." )]
     public YColor SolidGauge_backgroundColor2
     {
       get { return _SolidGauge_backgroundColor2; }
@@ -681,7 +678,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Main gradation color"),
      CategoryAttribute("Gauge gradations"),
      
-     DescriptionAttribute("Main gradation marks color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Main gradation marks color." )]
     public YColor AngularGauge_graduationColor
     {
       get { return _AngularGauge_graduationColor; }
@@ -735,7 +732,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Sub-gradation color"),
      CategoryAttribute("Gauge gradations"),
     
-     DescriptionAttribute("Sub-gradation marks color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Sub-gradation marks color." )]
     public YColor AngularGauge_subgraduationColor
     {
       get { return _AngularGauge_subgraduationColor; }
@@ -748,7 +745,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Needle color"),
      CategoryAttribute("Needle"),
      
-     DescriptionAttribute("Needle filling color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Needle filling color." )]
     public YColor AngularGauge_needleColor
     {
       get { return _AngularGauge_needleColor; }
@@ -759,7 +756,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Needle contour color"),
      CategoryAttribute("Needle"),
      
-     DescriptionAttribute("Needle contour color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Needle contour color." )]
      public YColor AngularGauge_needleContourColor
      {
        get { return _AngularGauge_needleContourColor; }
@@ -850,7 +847,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Border color"),
      CategoryAttribute("Dial"),
     
-     DescriptionAttribute("Dial border color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial border color." )]
     public YColor AngularGauge_borderColor
     {
       get { return _AngularGauge_borderColor; }
@@ -872,7 +869,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial background gradient color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 1." )]
      public YColor AngularGauge_backgroundColor1
      {
        get { return _AngularGauge_backgroundColor1; }
@@ -883,7 +880,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Dial"),
      
-     DescriptionAttribute("Dial background gradient color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Dial background gradient color 2." )]
      public YColor AngularGauge_backgroundColor2
      {
        get { return _AngularGauge_backgroundColor2; }
@@ -1108,7 +1105,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Font color"),
     
     
-     DescriptionAttribute("Color of the font." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Color of the font." )]
     public YColor color { get { return _color; } set { _color = value; } }
 
     private bool _italic;
@@ -1266,7 +1263,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Display"),
      
-     DescriptionAttribute("Display background gradient color1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Display background gradient color1." )]
      public YColor display_backgroundColor1
     {
        get { return _backgroundColor1; }
@@ -1277,7 +1274,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Display"),
      
-     DescriptionAttribute("Display background gradient color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Display background gradient color 2." )]
     public YColor display_backgroundColor2
     {
       get { return _backgroundColor2; }
@@ -1333,7 +1330,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Out of range Color"),
      CategoryAttribute("Range Control"),
      
-     DescriptionAttribute("Digits color when value is out of range." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Digits color when value is out of range." )]
     public YColor display_outOfRangeColor
     {
       get { return _outOfRangeColor; }
@@ -1620,7 +1617,7 @@ public static class sensorPrecisionTypeDescription
 
     [DisplayName("Color"),
     
-     DescriptionAttribute("Line color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Line color." )]
     public YColor color
     {
       get { return _color; }
@@ -1707,15 +1704,13 @@ public static class sensorPrecisionTypeDescription
 
 
     private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
-    [DisplayName("Background color "),
-    
-    DescriptionAttribute("Legend panel background color." + GenericHints.ColorMsg)]
+    [DisplayName("Background color "),    
+    DescriptionAttribute("Legend panel background color." )]
     public YColor bgColor { get { return _bgColor; } set { _bgColor = value;  } }
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
-    [DisplayName("Border color "),
-    
-    DescriptionAttribute("Legend panel border color." + GenericHints.ColorMsg)]
+    [DisplayName("Border color "),    
+    DescriptionAttribute("Legend panel border color." )]
     public YColor borderColor { get { return _borderColor; } set { _borderColor = value; } }
 
     private double _borderthickness = 1.0;
@@ -1813,13 +1808,13 @@ public static class sensorPrecisionTypeDescription
 
     private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
     [DisplayName("Background color "),
-    DescriptionAttribute("Legend panel background color." + GenericHints.ColorMsg)]
+    DescriptionAttribute("Legend panel background color." )]
     public YColor bgColor { get { return _bgColor; } set { _bgColor = value; } }
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color "),
 
-    DescriptionAttribute("Legend panel border color." + GenericHints.ColorMsg)]
+    DescriptionAttribute("Legend panel border color." )]
     public YColor borderColor { get { return _borderColor; } set { _borderColor = value; } }
 
     private double _borderthickness = 1.0;
@@ -1944,13 +1939,13 @@ public static class sensorPrecisionTypeDescription
     private YColor _bgColor = YColor.FromArgb(200, 255, 255, 255);
     [DisplayName("Background color"),
      
-     DescriptionAttribute("Value panel ground color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Value panel ground color." )]
     public YColor bgColor { get { return _bgColor; } set { _bgColor = value;  } }
 
     private YColor _borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color"),
      
-    DescriptionAttribute("Value panel border and handle  color." + GenericHints.ColorMsg)]
+    DescriptionAttribute("Value panel border and handle  color." )]
     public YColor borderColor { get { return _borderColor; } set { _borderColor = value;  } }
 
     private double _borderthickness = 1.0;
@@ -2000,7 +1995,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _bgColor1 = YColor.FromArgb(255, 225, 225, 225);
     [DisplayName("Background color 1"),
      
-     DescriptionAttribute("Navigator background gradient color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Navigator background gradient color 1." )]
     public YColor bgColor1
     {
       get { return _bgColor1; }
@@ -2011,7 +2006,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _bgColor2 = YColor.FromArgb(255, 225, 225, 225);
     [DisplayName("Background color 2"),
      
-     DescriptionAttribute("Navigator background gradient color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Navigator background gradient color 2." )]
     public YColor bgColor2
     {
       get { return _bgColor2; }
@@ -2030,7 +2025,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _borderColor = YColor.fromColor(Color.Black);
     [DisplayName("Border color"),
      
-     DescriptionAttribute("Navigator Border color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Navigator Border color." )]
     public YColor borderColor
     {
       get { return _borderColor; }
@@ -2048,7 +2043,7 @@ public static class sensorPrecisionTypeDescription
     }
 
     private YColor _cursorBorderColor = YColor.FromArgb(255, 96, 96, 96);
-    [DisplayName("Navigator cursor left/right border color." + GenericHints.ColorMsg),
+    [DisplayName("Navigator cursor left/right border color." ),
     
      DescriptionAttribute("Navigator")]
     public YColor cursorBorderColor
@@ -2079,7 +2074,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _xAxisColor = YColor.fromColor(Color.Black);
     [DisplayName("X axis color"),
      
-     DescriptionAttribute("Navigator X axis color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Navigator X axis color." )]
      public YColor xAxisColor
     {
       get { return _xAxisColor; }
@@ -2214,7 +2209,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Color"),
      
     
-     DescriptionAttribute("Y Axis Color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Y Axis Color." )]
     public YColor color
     {
       get { return _color; }
@@ -2241,7 +2236,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Grid Color"),
     
     
-     DescriptionAttribute("Grid horizontal lines color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Grid horizontal lines color." )]
     public YColor gridColor
     {
       get { return _gridColor; }
@@ -2280,9 +2275,9 @@ public static class sensorPrecisionTypeDescription
 
     private ZoneDescription _zones0 = new ZoneDescription(0, 50, YColor.fromColor(Color.LightGreen));
     [DisplayName("Zone 1"),
-    CategoryAttribute("Zones"),
-      ReadOnlyAttribute(true),
-    DescriptionAttribute("Zone 1 parameters")]
+     CategoryAttribute("Zones"),
+     ReadOnlyAttribute(true),
+     DescriptionAttribute("Zone 1 parameters")]
     public ZoneDescription zones0
     {
       get { return _zones0; }
@@ -2313,6 +2308,117 @@ public static class sensorPrecisionTypeDescription
 
 
   }
+
+
+  //****************************
+  //  graph X-axis markers
+  //  
+  //****************************
+
+  public class MarkerDescription
+  {
+
+    public MarkerDescription(string defaultText)
+    { _text = defaultText;  }
+
+    public string summary
+    {
+      get { return _enabled ? "Enabled" : "Disabled"; }
+    }
+
+    
+
+    private bool _enabled = false;
+    [DisplayName("Enabled"),
+     ChangeCausesParentRefreshAttribute(true),
+     DescriptionAttribute("Should that marker be shown?.")]
+    public bool enabled
+    {
+      get { return _enabled; }
+      set { _enabled = value; }
+    }
+
+
+    private String _text = "";
+    [DisplayName("Text"),
+
+    DescriptionAttribute("Marker text. Use \\n for multi-line text. Some variables are allowed such as $MARKERTIME$, $LEGEND1$, $VALUE1$, $UNIT1$, $LEGEND1$, $VALUE2$ etc.. Extensive use of marker variables migh make the graph rendering significantly slower.")]
+    public String text
+    {
+      get { return _text; }
+      set { _text = value; }
+    }
+
+    
+
+    private Marker.TextAlign _textAlign = Marker.TextAlign.CENTER;
+    [DisplayName("Text Alignment"),
+        DescriptionAttribute("How text is aligned, makes sense on multi-lines text only.")]
+    public Marker.TextAlign textAlign { get { return _textAlign; } set { _textAlign = value; } }
+
+
+    private TimeConverter.TimeReference _timereference = TimeConverter.TimeReference.ABSOLUTE;
+    [DisplayName("Time reference"),
+     ChangeCausesParentRefreshAttribute(true),
+     NotSavedInXMLAttribute(true),
+     DescriptionAttribute("Should the marker time position be absolute or relative to first data timestamp? Note: relative markers won't be drawn until there is actual data.")]
+    public TimeConverter.TimeReference timereference
+    {
+      get { return _timereference; }
+      set { _timereference = value; _positionOnXAxis.relative = value == (TimeConverter.TimeReference.RELATIVE);  }
+    }
+
+    private xAxisPosition _positionOnXAxis = new xAxisPosition(TimeConverter.ToUnixTime(DateTime.UtcNow), false);
+    [DisplayName("Time position"),
+     DescriptionAttribute("Marker position on X axis." )]
+    public xAxisPosition positionOnXAxis
+    {
+      get { return _positionOnXAxis; }
+      set { _positionOnXAxis = value; timereference = value.relative ? TimeConverter.TimeReference.RELATIVE : TimeConverter.TimeReference.ABSOLUTE; }
+    }
+
+    private double _yposition = 95;
+    [DisplayName("Vrt position (%)"),
+     DescriptionAttribute("Vertical position of the marker label in % of available space. Zero is bottom")]
+    public double yposition
+    {
+      get { return _yposition; }
+      set { _yposition = value; }
+    }
+
+    private YColor _bgColor = YColor.FromArgb(200, 255, 255, 192);
+    [DisplayName("Background color "),
+    DescriptionAttribute("Marker  background color." )]
+    public YColor bgColor { get { return _bgColor; } set { _bgColor = value; } }
+
+    private YColor _borderColor = YColor.fromColor(Color.DarkRed);
+    [DisplayName("Border color "),
+    DescriptionAttribute("Marker border color." )]
+    public YColor borderColor { get { return _borderColor; } set { _borderColor = value; } }
+
+    private double _borderthickness = 1.0;
+    [DisplayName("Border thickness "),
+     DescriptionAttribute("Marker border thickness, in pixels.")]
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; } }
+
+    private double _padding = 5;
+    [DisplayName("Padding "),
+     DescriptionAttribute("Distance between the marker border and the marker contents, in pixels.")]
+    public double padding { get { return _padding; } set { _padding = value; } }
+
+
+    private FontDescription _font = new FontDescription("Arial", 7, YColor.fromColor(Color.Black), false, false);
+    [DisplayName("Font"),
+      ReadOnlyAttribute(true),
+     DescriptionAttribute("Marker Font")]
+    public FontDescription font
+    {
+      get { return _font; }
+      set { _font = value; }
+    }
+
+  }
+
 
   //****************************
   //  graph X-axis
@@ -2366,7 +2472,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _color = YColor.FromArgb(255, 127, 127, 127);
     [DisplayName("Color"),
 
-     DescriptionAttribute("X Axis Color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("X Axis Color." )]
     public YColor color
     {
       get { return _color; }
@@ -2391,7 +2497,7 @@ public static class sensorPrecisionTypeDescription
     private YColor _gridColor = YColor.FromArgb(50, 0, 0, 0);
     [DisplayName("Grid Color"),
      
-     DescriptionAttribute("Grid vertical lines color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Grid vertical lines color." )]
     public YColor gridColor
     {
       get { return _gridColor; }
@@ -2426,6 +2532,97 @@ public static class sensorPrecisionTypeDescription
       get { return _legend; }
       set { _legend = value; }
     }
+
+    private MarkerDescription _markers0 = new MarkerDescription("Marker 1");
+    [ DisplayName("Marker 1"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("First marker parameters")]
+    public MarkerDescription markers0
+    {
+      get { return _markers0; }
+      set { _markers0 = value; }
+    }
+
+    private MarkerDescription _markers1 = new MarkerDescription("Marker 2");
+    [DisplayName("Marker 2"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Second marker parameters")]
+    public MarkerDescription markers1
+    {
+      get { return _markers1; }
+      set { _markers1 = value; }
+    }
+
+    private MarkerDescription _markers2 = new MarkerDescription("Marker 3");
+    [DisplayName("Marker 3"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Third marker parameters")]
+    public MarkerDescription markers2
+    {
+      get { return _markers2; }
+      set { _markers2 = value; }
+    }
+
+    private MarkerDescription _markers3 = new MarkerDescription("Marker 4");
+    [DisplayName("Marker 4"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Fourth marker parameters")]
+    public MarkerDescription markers3
+    {
+      get { return _markers3; }
+      set { _markers3 = value; }
+    }
+
+    private MarkerDescription _markers4 = new MarkerDescription("Marker 5");
+    [DisplayName("Marker 5"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Fith marker parameters")]
+    public MarkerDescription markers4
+    {
+      get { return _markers4; }
+      set { _markers4 = value; }
+    }
+
+
+    private MarkerDescription _markers5 = new MarkerDescription("Marker 6");
+    [DisplayName("Marker 6"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Sixth marker parameters")]
+    public MarkerDescription markers5
+    {
+      get { return _markers5; }
+      set { _markers5 = value; }
+    }
+
+    private MarkerDescription _markers6 = new MarkerDescription("Marker 7");
+    [DisplayName("Marker 7"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Seventh marker parameters")]
+    public MarkerDescription markers6
+    {
+      get { return _markers6; }
+      set { _markers6 = value; }
+    }
+
+    private MarkerDescription _markers7 = new MarkerDescription("Marker 8");
+    [DisplayName("Marker 8"),
+      ReadOnlyAttribute(true),
+      CategoryAttribute("Markers"),
+      DescriptionAttribute("Heighth marker parameters")]
+    public MarkerDescription markers7
+    {
+      get { return _markers7; }
+      set { _markers7 = value; }
+    }
+
+
 
   }
 
@@ -2550,7 +2747,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Border color"),
      CategoryAttribute("Graph"),
     
-     DescriptionAttribute("Canvas borders color." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Canvas borders color." )]
     public YColor Graph_borderColor
     {
       get { return _Graph_borderColor; }
@@ -2571,7 +2768,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 1"),
      CategoryAttribute("Graph"),
      
-     DescriptionAttribute("Background gradient color 1." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Background gradient color 1." )]
     public YColor Graph_bgColor1
     {
       get { return _Graph_bgColor1; }
@@ -2582,7 +2779,7 @@ public static class sensorPrecisionTypeDescription
     [DisplayName("Background color 2"),
      CategoryAttribute("Graph"),
     
-     DescriptionAttribute("Background gradient color 2." + GenericHints.ColorMsg)]
+     DescriptionAttribute("Background gradient color 2." )]
     public YColor Graph_bgColor2
     {
       get { return _Graph_bgColor2; }

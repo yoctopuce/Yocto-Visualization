@@ -45,6 +45,7 @@ using System.Xml;
 using System.IO;
 using System.Windows.Forms;
 using YoctoVisualization;
+using System.Globalization;
 
 namespace YoctoVisualisation
 {
@@ -91,6 +92,8 @@ namespace YoctoVisualisation
       LogManager.Log("Current configuration file is " + constants.configfile);
       LogManager.Log("Yocto-Visualization version is " + constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
+      LogManager.Log("Yoctopuce dynamic library path is " + YAPI.GetYAPIDllPath() );
+
       LogManager.Log("Architecture is " + (IntPtr.Size * 8).ToString() + " bits (platform " + Environment.OSVersion.Platform.ToString() + ")");
 
       
@@ -143,14 +146,18 @@ namespace YoctoVisualisation
 
           if (root.Attributes != null
              && root.Attributes["version"] != null)
-            version = Double.Parse(root.Attributes["version"].Value);
+            version = Double.Parse(root.Attributes["version"].Value, CultureInfo.InvariantCulture);
 
-          if (version == 1)
+          GenericProperties.XmlFileVersion = version;
+
+          if (version == 1.0)
           {
             string configdata = XMLConfigTranslator.TranslateFromV1(doc);
             doc = new XmlDocument();
             doc.LoadXml(configdata);
           }
+
+
 
           // sensor configuration must be loaded first
           foreach (XmlNode node in doc.DocumentElement.ChildNodes)
@@ -424,7 +431,14 @@ namespace YoctoVisualisation
 
     public void SaveConfig()
     {
-      string XmlConfigFile = "<?xml version=\"1.0\" ?>\n<ROOT version='2'>\n";
+      string XmlConfigFile = "<?xml version=\"1.0\" ?>\n"
+        +"<!-->\n"
+        +"   ******************************************\n"
+        +"   Yocto-Visualization 2.0 Configuration file\n"
+        +"   ******************************************\n"
+        +"-->\n"
+        +"<ROOT version='2.1'>\n"
+        +"<!-- in 2.1 version, floating point values are saved in CultureInfo.InvariantCulture form -->\n";
       XmlConfigFile += configWindow.GetXMLConfiguration();
       foreach (Form f in formlist)
       {

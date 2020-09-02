@@ -63,8 +63,14 @@ namespace YoctoVisualisation
     private int SeriesCount = 0;
 
     private int ZoneCountPerYaxis = 0;
+    private int MarkerCountPerXaxis = 0;
+    List<Marker> markers = null;
+    ToolStripMenuItem markersMenu = null;
+    ToolStripMenuItem deleteMarkeOption = null;
     private MessagePanel noDataSourcepanel;
     private MessagePanel offLineSourcesPanel;
+    private MessagePanel captureRunningPanel;
+
     private YGraph _cartesianChart;
     public YGraph cartesianChart { get { return _cartesianChart; } }
     private List<ChartSerie> seriesProperties;
@@ -97,6 +103,15 @@ namespace YoctoVisualisation
       offLineSourcesPanel.panelVrtAlign = MessagePanel.VerticalAlignPos.TOP;
 
 
+
+      captureRunningPanel = _cartesianChart.addMessagePanel();
+      captureRunningPanel.bgColor = System.Drawing.Color.FromArgb(240, 200, 255, 193); ;
+      captureRunningPanel.borderColor = System.Drawing.Color.DarkGreen;
+      captureRunningPanel.font.color = System.Drawing.Color.DarkGreen;
+      captureRunningPanel.panelHrzAlign = MessagePanel.HorizontalAlignPos.LEFT;
+      captureRunningPanel.panelVrtAlign = MessagePanel.VerticalAlignPos.TOP;
+
+
       _cartesianChart.setPatchAnnotationCallback(AnnotationCallback);
 
 
@@ -104,6 +119,14 @@ namespace YoctoVisualisation
       {
         if (p.Name.StartsWith("zones")) ZoneCountPerYaxis++;
       }
+
+      foreach (var p in typeof(XaxisDescription).GetProperties())
+      {
+        if (p.Name.StartsWith("markers")) MarkerCountPerXaxis++;
+      }
+
+      
+
 
       foreach (var p in typeof(GraphFormProperties).GetProperties())
       {
@@ -133,7 +156,15 @@ namespace YoctoVisualisation
         for (int j = 0; j < ZoneCountPerYaxis; j++) axis.AddZone();
       }
 
-     
+      markers = new List<Marker>();
+      for (int i = 0; i < MarkerCountPerXaxis; i++)
+      {
+        Marker m = _cartesianChart.xAxis.AddMarker();
+        m.xposition= TimeConverter.ToUnixTime(DateTime.UtcNow) +i*60;
+        markers.Add(m);
+      }
+
+
 
       for (int i = 0; i < AnnotationPanelCount; i++)
       { _cartesianChart.addAnnotationPanel(); }
@@ -189,16 +220,55 @@ namespace YoctoVisualisation
       _cartesianChart.resetRefrenceSize();
       _cartesianChart.AllowPrintScreenCapture = true;
       _cartesianChart.proportionnalValueChangeCallback = manager.proportionalValuechanged;
+      _cartesianChart.setMarkerCaptureCallbacks(MarkedCaptureStarted, MarkedCaptureStopped);
       _cartesianChart.AllowRedraw();
+      deleteMarkeOption = new ToolStripMenuItem("Disable all markers", Resources.disable_marker, disableAllMarkers);
+      contextMenuStrip1.Items.Insert(2, deleteMarkeOption);
+       markersMenu = new ToolStripMenuItem("Place markers", Resources.add_marker);
+      contextMenuStrip1.Items.Insert(2, markersMenu);
+      Pen pIcon = new Pen(Color.DarkRed);
+      SolidBrush bIcon = new SolidBrush(Color.LightYellow);
+      StringFormat stringFormat = new StringFormat();
+      stringFormat.Alignment = StringAlignment.Center;
+      stringFormat.LineAlignment = StringAlignment.Center;
+      Font font1 = new Font("Arial", 9, FontStyle.Regular, GraphicsUnit.Pixel);
+      for (int i = 0; i < markers.Count; i++)
+      { int index = i;
+
+        Bitmap bm = new Bitmap(16, 16);
+        Graphics gr = Graphics.FromImage(bm);
+        gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        gr.FillEllipse(bIcon, new Rectangle(1, 1, 14, 14));
+        gr.DrawEllipse(pIcon, new Rectangle(1, 1, 14, 14));
+
+        gr.DrawString((i + 1).ToString(), font1, Brushes.Black,  new Rectangle(1,1,16, 16),stringFormat);
+
+
+;
+        markersMenu.DropDownItems.Add(new ToolStripMenuItem("Place marker #" + (i + 1).ToString(), bm, (object sender, EventArgs e) => { startMarkerCapture(index); }));
+      }
+      markersMenu.DropDownOpening += updateMakerList;
+      contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Clear dataloggers", Resources.cleardatalogger, clearDataLogger));
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Reset data view", Resources.resetdataview, resetDataView));
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
+      contextMenuStrip1.Opening += ContextMenuStrip1_Opening;
+
 
       _cartesianChart.OnDblClick += rendererCanvas_DoubleClick;
       if (constants.OSX_Running)
       {
         _cartesianChart.OnRightClick += rendererCanvas_RightClick;
       }
+    }
+
+    private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
+    {
+      bool state = false;
+      for (int i = 0; i < markers.Count; i++)
+        if (markers[i].enabled) state = true;
+      deleteMarkeOption.Enabled = state;
+
     }
 
     private string AnnotationCallback(string text)
@@ -215,7 +285,7 @@ namespace YoctoVisualisation
         string unit = "";
         if (!(sensor is NullYSensor))
         {
-          string  resolution = sensor.get_resolution().ToString().Replace("1","0");
+          string resolution = YDataRenderer.FloatToStrformats[Math.Min(sensor.get_resolution().ToString().Length,6)];
           name = s.legend!="" ? s.legend : sensor.get_friendlyName();
           if (sensor.isOnline())
           {
@@ -236,6 +306,29 @@ namespace YoctoVisualisation
 
       return text;
     }
+
+    private void startMarkerCapture(int index)
+    {
+      markers[index].startCapture();
+
+    }
+
+
+    private void MarkedCaptureStarted(Marker src)
+    {
+      string str = src.text != "" ? str = "Click to place the \"" + src.shortText + "\" marker." : str = "Click to place the marker.";
+      str += "\nRight-click to cancel the operation.";
+      captureRunningPanel.text    = str;
+      captureRunningPanel.enabled = true;
+    }
+
+    private void MarkedCaptureStopped(Marker src)
+    {
+      captureRunningPanel.enabled = false;
+      prop.RefreshAllProperties(_cartesianChart); 
+      mainForm.refreshPropertiesForm();
+    }
+
 
     private void rendererCanvas_DoubleClick(object sender, EventArgs e)
     {
@@ -321,14 +414,28 @@ namespace YoctoVisualisation
 
     }
 
+    private void updateMakerList(object sender, EventArgs e)
+    {
+      for (int i = 0; i < markers.Count; i++)
+        markersMenu.DropDownItems[i].Text =  markers[i].shortText + (markers[i].enabled?" (enabled)":"");
+    }
+    
 
+
+    private void disableAllMarkers(object sender, EventArgs e)
+    {
+      if (MessageBox.Show("Do you really want to disable all markers?", "Disable all markers?",
+         MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1) != System.Windows.Forms.DialogResult.Yes) return;
+      for (int i = 0; i < markers.Count; i++)
+        markers[i].enabled = false;
+    }
 
     private void resetDataView(object sender, EventArgs e)
     {
       prop.Graph_showRecordedData = false;
       truncateView();
-
-
+      mainForm.refreshPropertiesForm();
     }
 
 
@@ -381,10 +488,10 @@ namespace YoctoVisualisation
       switch (propType)
       {
         case "Form":
-          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(this, prop, fullpropname, path);
           break;
         case "Graph":
-          GenericProperties.newSetProperty(_cartesianChart, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(_cartesianChart, prop, fullpropname, path);
           break;
 
           //  case "DataSource":
@@ -410,10 +517,10 @@ namespace YoctoVisualisation
       switch (propType)
       {
         case "Form":
-          GenericProperties.newSetProperty(this, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(this, prop, fullpropname, path);
           break;
         case "Graph":
-          GenericProperties.newSetProperty(_cartesianChart, prop, fullpropname, path);
+          GenericProperties.copyProperty_STT(_cartesianChart, prop, fullpropname, path);
           break;
 
           //  case "DataSource":

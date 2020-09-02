@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Windows.Forms;
 using YColors;
+using YDataRendering;
 
 namespace YoctoVisualisation
 {
@@ -36,22 +38,66 @@ namespace YoctoVisualisation
 
 
 
-  public class expandButton : Button
+  public class CustomFlatButtom : Button
   {
 
-    public enum ExpandLocation { LEFT, RIGHT };
+    public enum ButtonLocation { LEFT, RIGHT };
+    public enum ActionType { ACTION_EXPAND, ACTION_PUSH };
 
-    public ExpandLocation _position = ExpandLocation.LEFT;
+    public ButtonLocation _position = ButtonLocation.LEFT;
+    public ActionType _type = ActionType.ACTION_EXPAND;
+    public ActionType type { get { return _type; } }
 
-    public ExpandLocation side { get { return _position; } set { _position = value; } }
+    private Pen _pen = new Pen(Color.Black);
+    public ButtonLocation side { get { return _position; } set { _position = value; } }
     UIElement _parent = null;
+    EventHandler pushEvent = null;
+    EventHandler clickEvent =null;
 
-    public expandButton(UIElement parent): base()
+    private bool _pushed = false;
+    public bool pushed
+      { get { return _pushed; }
+        set { _pushed = value; this.Refresh(); }
+      }
+
+
+   
+    public void setType(ActionType t, EventHandler e)
+    {
+     
+
+      _type = t;
+      if (_type == ActionType.ACTION_EXPAND)
+        this.clickEvent = e;
+      else
+      {
+        this.clickEvent = pushClick;
+        this.pushEvent  = e;
+      }
+
+
+    }
+
+    public void click(object sender, EventArgs e)
+    {
+      if (clickEvent!=null) clickEvent(sender, e);
+    }
+
+    public void pushClick(object sender, EventArgs e)
+    {
+      pushed = !pushed;
+      this.Refresh();
+      this.pushEvent(this, e);
+
+    }
+
+    public CustomFlatButtom(UIElement parent): base()
     {
       _parent = parent;
       FlatStyle = FlatStyle.Flat;
       Paint += ExpandButton_Paint;
       GotFocus += ExpandButtonFocus;
+      this.Click += click;
 
     }
 
@@ -64,7 +110,10 @@ namespace YoctoVisualisation
     public bool expanded
     {
       get { return _expanded; }
-      set { _expanded = value; Refresh(); }
+      set {
+        _expanded = value;
+        Refresh();
+      }
     }
 
     private void ExpandButton_Paint(object sender, PaintEventArgs e)
@@ -73,20 +122,44 @@ namespace YoctoVisualisation
       int w2 = (Width >> 1) + 1;
       int h1 = (Height >> 1) - 1;
       int h2 = (Height >> 1) + 1;
-      e.Graphics.FillRectangle(Brushes.White, new Rectangle(0, 0, Width, Height));
-      if (_position == ExpandLocation.LEFT)
-      {
-        if (!_expanded) e.Graphics.FillRectangle(Brushes.Black, new Rectangle(w1, 2, w2 - w1, Height - 4));
-        e.Graphics.FillRectangle(Brushes.Black, new Rectangle(2, h1, Width - 4, h2 - h1));
-      }
+      if (_pushed)
+        e.Graphics.FillRectangle(Brushes.Lime, new Rectangle(0, 0, Width, Height));
       else
+        e.Graphics.FillRectangle(Brushes.White, new Rectangle(0, 0, Width, Height));
+      
+
+      if (_type == ActionType.ACTION_EXPAND)
       {
-        e.Graphics.FillRectangle(Brushes.Black, new Rectangle(Width >> 2, Height >> 1, 2, 2));
-        e.Graphics.FillRectangle(Brushes.Black, new Rectangle(2 * (Width >> 2), Height >> 1, 2, 2));
-        e.Graphics.FillRectangle(Brushes.Black, new Rectangle(3 * (Width >> 2), Height >> 1, 2, 2));
+        if (_position == ButtonLocation.LEFT)
+        {
+          if (!_expanded) e.Graphics.FillRectangle(Brushes.Black, new Rectangle(w1, 2, w2 - w1, Height - 4));
+          e.Graphics.FillRectangle(Brushes.Black, new Rectangle(2, h1, Width - 4, h2 - h1));
+        }
+        else
+        {
+          e.Graphics.FillRectangle(Brushes.Black, new Rectangle(Width >> 2, Height >> 1, 2, 2));
+          e.Graphics.FillRectangle(Brushes.Black, new Rectangle(2 * (Width >> 2), Height >> 1, 2, 2));
+          e.Graphics.FillRectangle(Brushes.Black, new Rectangle(3 * (Width >> 2), Height >> 1, 2, 2));
+
+        }
+      }
+      if (_type == ActionType.ACTION_PUSH)
+      {
+        int mx = Height >> 1;
+        int my = Width >> 1;
+
+        e.Graphics.DrawLine(_pen, mx,   2        , mx  ,     my-2  );
+        e.Graphics.DrawLine(_pen, mx,   Height- 2, mx  ,     my + 2);
+        e.Graphics.DrawLine(_pen, 2,    my,        mx - 2,   my );
+        e.Graphics.DrawLine(_pen, mx+2, my,        Width- 2, my);
+        // e.Graphics.DrawRectangle(_pen, mx-3, my-3, 6, 6);
+        e.Graphics.DrawArc(_pen, mx-3,mx-3, 6,6 ,0, 400);
+
+
+
+
 
       }
-
       if (Focused) e.Graphics.DrawRectangle(Pens.Black, new Rectangle(0, 0, Width - 1, Height - 1));
     }
   }
@@ -94,7 +167,7 @@ namespace YoctoVisualisation
   public class UIElementBaseParams
   {
     public Panel parentPanel;
-    public Label descriptionLabel;
+    public Label HelpZoneLabel;
     public UIElement parentNode;
     public UIElement RootNode;
     public string internalname;
@@ -114,7 +187,7 @@ namespace YoctoVisualisation
     public UIElementBaseParams(Panel p_parentPanel, Label p_descriptionLabel, UIElement p_parentNode, UIElement p_RootNode, string p_internalname, string p_label, string p_description, string p_isReadonlyCall)
     {
       parentPanel = p_parentPanel;
-      descriptionLabel = p_descriptionLabel;
+      HelpZoneLabel = p_descriptionLabel;
       parentNode = p_parentNode;
       RootNode = p_RootNode;
       internalname = p_internalname;
@@ -152,10 +225,10 @@ namespace YoctoVisualisation
     protected int ExpandableDepth = 0;
 
     protected bool _expanded = false;
-    protected Label _descriptionLabel = null;
+    protected Label _helpZoneLabel = null;
     protected string _description = "";
 
-    protected expandButton expandCtrl = null;
+    protected CustomFlatButtom expandCtrl = null;
     protected Label mainlabel = null;
     protected UIElement _rootNode = null;
     protected UIElement _parentNode = null;
@@ -188,6 +261,9 @@ namespace YoctoVisualisation
       if (expandCtrl != null) _parentPanel.Controls.Remove(expandCtrl);
     }
 
+
+    public virtual string  editorHelpText{ get { return ""; } }
+
     public virtual void addToEditor()
     {
       if ((mainlabel != null) && (!_parentPanel.Controls.Contains(mainlabel))) _parentPanel.Controls.Add(mainlabel);
@@ -219,7 +295,7 @@ namespace YoctoVisualisation
 
     protected virtual void control_LostFocus(object sender, EventArgs e)
     {
-      _descriptionLabel.Text = "";
+      _helpZoneLabel.Text = "";
     }
 
     private void scrollToMakeVisible()
@@ -235,13 +311,15 @@ namespace YoctoVisualisation
           ((Panel)_parentPanel.Parent).VerticalScroll.Value = mainlabel.Top;
         else if (mainlabel.Top > scrollposition + scrollPage - mainlabel.Height)
           ((Panel)_parentPanel.Parent).VerticalScroll.Value = mainlabel.Top - scrollPage + mainlabel.Height;
-      } else  _parentPanel.ScrollControlIntoView(_descriptionLabel);   // does not work on Mono
+      } else  _parentPanel.ScrollControlIntoView(_helpZoneLabel);   // does not work on Mono
 
     }
 
     public virtual void control_GotFocus(object sender, EventArgs e)
     {
-      _descriptionLabel.Text = _description;
+       string extraHelp = this.editorHelpText;
+      if (extraHelp != "") extraHelp = " " + extraHelp;
+      _helpZoneLabel.Text = _description + editorHelpText;
       scrollToMakeVisible();
     }
 
@@ -261,7 +339,7 @@ namespace YoctoVisualisation
     {
       name = p.label;
       _targetFullName = p.internalname;
-      _descriptionLabel = p.descriptionLabel;
+      _helpZoneLabel = p.HelpZoneLabel;
       _description = p.description;
       _changeCausesParentRefresh = p.changeCausesParentRefresh;
       _expandable = p.expandable;
@@ -344,7 +422,7 @@ namespace YoctoVisualisation
             mainlabel.BackColor = Color.FromArgb(255, 237, 246, 253);
             break;
           default:
-            mainlabel.BackColor = Color.Red;
+            mainlabel.BackColor = Color.FromArgb(255, 246, 251, 255);
             break;
         } else mainlabel.BackColor = Color.Transparent;
       mainLabelInitDone = true;
@@ -362,7 +440,7 @@ namespace YoctoVisualisation
 
       if ((_expandable) && (expandCtrl == null))
       {
-        expandCtrl = new expandButton(this);
+        expandCtrl = new CustomFlatButtom(this);
         initExpandButton();
         _parentPanel.Controls.Add(expandCtrl);
       }
@@ -381,7 +459,12 @@ namespace YoctoVisualisation
       expandCtrl.Width = baseheight - 2;
       expandCtrl.Height = baseheight - 2;
       expandCtrl.FlatStyle = FlatStyle.Flat;
-      expandCtrl.Click += ExpandCtrl_Click;
+
+      expandCtrl.setType(CustomFlatButtom.ActionType.ACTION_EXPAND, ExpandCtrl_Click_expand);
+
+
+     
+
       expandCtrl.expanded = _expanded;
       expandCtrl.GotFocus += control_GotFocus;
       expandCtrl.LostFocus += control_LostFocus;
@@ -587,7 +670,7 @@ namespace YoctoVisualisation
               if (subsections.ContainsKey(attr.category)) section = subsections[attr.category];
               else
               {
-                UIElementBaseParams sectionparam = new UIElementBaseParams(_parentPanel, _descriptionLabel, this, _rootNode, ARTIFICIALSECTIONNAME, attr.category, attr.category + " section, expand for more...","");
+                UIElementBaseParams sectionparam = new UIElementBaseParams(_parentPanel, _helpZoneLabel, this, _rootNode, ARTIFICIALSECTIONNAME, attr.category, attr.category + " section, expand for more...","");
                 sectionparam.preExpanded = attr.PreExpandedCategory;
                 sectionparam.expandable = true;
                 sectionparam.structRoot = dataStucture;
@@ -603,7 +686,7 @@ namespace YoctoVisualisation
               }
             }
 
-            UIElementBaseParams elParam = new UIElementBaseParams(_parentPanel, _descriptionLabel, section, _rootNode, ps.Name, attr.displayName, attr.displayDescription, attr.isReadOnlyCall);
+            UIElementBaseParams elParam = new UIElementBaseParams(_parentPanel, _helpZoneLabel, section, _rootNode, ps.Name, attr.displayName, attr.displayDescription, attr.isReadOnlyCall);
             elParam.preExpanded = attr.PreExpanded;
             elParam.changeCausesParentRefresh = attr.changeCausesParentRefresh;
 
@@ -682,6 +765,13 @@ namespace YoctoVisualisation
                   break;
                 }*/
 
+                case "xAxisPosition":
+                  {
+                    UIElementMarkerPos s = new UIElementMarkerPos(elParam, dataStucture, ps);
+                    section.addSubElement(s);
+                    break;
+                  }
+
                 case "YColor":
                   {
                     UIElementColor s = new UIElementColor(elParam, dataStucture, ps);
@@ -749,10 +839,16 @@ namespace YoctoVisualisation
       foreach (UIElement e in subElements) e.hide();
     }
 
-    private void ExpandCtrl_Click(object sender, EventArgs e)
+    private void ExpandCtrl_Click_expand(object sender, EventArgs e)
     {
       expanded = !_expanded;
     }
+
+    private void ExpandCtrl_Click_push(object sender, EventArgs e)
+    {
+      
+    }
+
 
     public void resizeAll()
     {
@@ -812,7 +908,7 @@ namespace YoctoVisualisation
     {
       if (!_shown) return 0;
       int h = rowHeight;
-      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == expandButton.ExpandLocation.LEFT)) h += expandableVerticalOffset;
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT)) h += expandableVerticalOffset;
       if (_expanded)
         foreach (UIElement e in subElements)
           h += e.computeHeight();
@@ -824,7 +920,7 @@ namespace YoctoVisualisation
 
     virtual public int resize(int top, int left1, int left2, int width)
     {
-      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == expandButton.ExpandLocation.LEFT)) top += expandableVerticalOffset;
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT)) top += expandableVerticalOffset;
       if (expandCtrl != null)
       {
         expandCtrl.Visible = _showLabel;
@@ -839,7 +935,7 @@ namespace YoctoVisualisation
         mainlabel.Height = rowHeight;
        
         mainlabel.Text = this.name + getSummary();
-        mainlabel.Left = left1 + (_expandable && (expandCtrl.side == expandButton.ExpandLocation.LEFT) ? expandCtrl.Width + 2 : 0);
+        mainlabel.Left = left1 + (_expandable && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT) ? expandCtrl.Width + 2 : 0);
         mainlabel.Width = width - left1 - (_expandable ? expandCtrl.Width : 0); ;
       }
 
@@ -847,7 +943,7 @@ namespace YoctoVisualisation
       {
         expandCtrl.Visible = _expandable && _showLabel;
         expandCtrl.Top = top + ((mainlabel.Height - expandCtrl.Height) >> 1);
-        expandCtrl.Left = (expandCtrl.side == expandButton.ExpandLocation.LEFT) ? left1 : left1 + width - expandCtrl.Width;
+        expandCtrl.Left = (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT) ? left1 : left1 + width - expandCtrl.Width;
       }
       int y = top + (_showLabel ? rowHeight : 0);
       if (_expanded)
@@ -923,10 +1019,10 @@ namespace YoctoVisualisation
 
     public override int tabReOrder(int index)
     {
-      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == expandButton.ExpandLocation.LEFT)) expandCtrl.TabIndex = index++;
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT)) expandCtrl.TabIndex = index++;
 
       if (input != null) input.TabIndex = index++;
-      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == expandButton.ExpandLocation.RIGHT)) expandCtrl.TabIndex = index++;
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.RIGHT)) expandCtrl.TabIndex = index++;
       foreach (UIElement e in subElements) index = e.tabReOrder(index);
       return index;
 
@@ -971,7 +1067,7 @@ namespace YoctoVisualisation
     public override int resize(int top, int left1, int left2, int width)
     {
       if (!_shown) return 0;
-      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == expandButton.ExpandLocation.LEFT)) top += expandableVerticalOffset;
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT)) top += expandableVerticalOffset;
       if (expandCtrl != null)
       {
         expandCtrl.Width = baseheight - 2;
@@ -981,7 +1077,7 @@ namespace YoctoVisualisation
       if (mainlabel != null)
       {
         mainlabel.Top = top;
-        mainlabel.Left = left1 + (_expandable && (expandCtrl.side == expandButton.ExpandLocation.LEFT) ? expandCtrl.Width + 2 : 0);
+        mainlabel.Left = left1 + (_expandable && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT) ? expandCtrl.Width + 2 : 0);
         mainlabel.Height = rowHeight;
         mainlabel.Width = left2 - left1 - (_expandable ? expandCtrl.Width : 0); ;
       }
@@ -989,7 +1085,7 @@ namespace YoctoVisualisation
       {
         expandCtrl.Visible = _expandable && _showLabel;
         expandCtrl.Top = top + ((mainlabel.Height - expandCtrl.Height) >> 1);
-        expandCtrl.Left = (expandCtrl.side == expandButton.ExpandLocation.LEFT) ? left1 : width - expandCtrl.Width;
+        expandCtrl.Left = (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT) ? left1 : width - expandCtrl.Width;
       }
 
       if (input != null)
@@ -1014,6 +1110,8 @@ namespace YoctoVisualisation
     {
       preExpandIfNeeded();
     }
+
+   
 
     public override void AllocateControls()
     {
@@ -1041,6 +1139,7 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
+      if (input == null) return;
       if (_getValueCallback == null) return;
       string s = (string)_getValueCallback(this);
 
@@ -1112,6 +1211,7 @@ namespace YoctoVisualisation
     public override void refresh()
     {
       if (input == null) return;
+      if (_getValueCallback == null) return;
       int propValue = (int)_getValueCallback(this);
       int inputValue;
       bool ok = false;
@@ -1236,6 +1336,8 @@ namespace YoctoVisualisation
       preExpandIfNeeded();
     }
 
+    public override string editorHelpText { get { return "Leave blank for automatic behavior."; } }
+
     public override void AllocateControls()
     {
       base.AllocateControls();
@@ -1351,7 +1453,7 @@ namespace YoctoVisualisation
 
     public override void refresh()
     {
-     
+      if (input == null) return;
       if (_getValueCallback == null) return;
       
       object o = _getValueCallback(this);
@@ -1675,12 +1777,13 @@ namespace YoctoVisualisation
       Editor.refresh();
 
     }
+    public override string editorHelpText { get { return "Just click on the right button to open the color chosser or type directly the color as HSL:xxx or HSL:xxx where xxx is a 8 digit hex number (Alpha transparency is supported). You can also type a color literal name (Red, Yellow etc...).";  } }
 
     public UIElementColor(UIElementBaseParams p, object dataContainer, PropertyInfo prop) :
               base(p, dataContainer, prop)
     {
       expandable = true;
-      expandCtrl.side = expandButton.ExpandLocation.RIGHT;
+      expandCtrl.side = CustomFlatButtom.ButtonLocation.RIGHT;
       expandCtrl.Width = 2 * baseheight;
 
       previewBox.Width = 20;
@@ -1853,7 +1956,7 @@ namespace YoctoVisualisation
 
       _availableWidthForEditor = width - left1 + 10;
 
-      if ((_expandable) && (expandCtrl != null) && (expandCtrl != null) && (expandCtrl.side == expandButton.ExpandLocation.LEFT)) top += expandableVerticalOffset;
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT)) top += expandableVerticalOffset;
 
       if (Editor != null)
       {
@@ -1880,13 +1983,208 @@ namespace YoctoVisualisation
 
   }
 
+  /***
+  ***  Marker Position
+  ***/
+  class UIElementMarkerPos : UIElementGeneric
+  {
+
+    int _availableWidthForEditor = 200;
+    xAxisPosition _cachedValue = null;
+
+
+
+    public UIElementMarkerPos(UIElementBaseParams p, object dataContainer, PropertyInfo prop) :
+              base(p, dataContainer, prop)
+    {
+
+
+      expandable = true;
+      expandCtrl.side = CustomFlatButtom.ButtonLocation.RIGHT;
+      expandCtrl.Width = 2 * baseheight;
+      expandCtrl.setType(CustomFlatButtom.ActionType.ACTION_PUSH, buttonPush);
+
+
+
+
+
+    }
+
+    const string extra = " You can also use the crosshair button to place the marker directly on the graph. ";
+
+    public override string editorHelpText
+    {
+      
+      get
+      {
+        string p = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+        if (_cachedValue.relative)
+          return "Format for relative values is \"00d00h00m00" + p + "00s\". " +
+            " Here are some examples: \"" + TimeConverter.secTimeSpanToString(1122312) + "\" , "
+                                         + TimeConverter.secTimeSpanToString(42) + "\" , "
+                                         + TimeConverter.secTimeSpanToString(4980) + "\" , "
+                                         + TimeConverter.secTimeSpanToString(12.3) + "\" , \"1.5h\" etc.."+ extra;
+
+
+        else
+          return "Format for relative values is " + xAxisPosition.DTdisplayformat + ". If not specified,  date will be set as today."+ extra;
+
+            
+
+
+      }
+    
+  }
+
+
+    public void buttonPush(object sender, EventArgs e)
+    {
+
+      // Since the editor cahnge change properties, the 
+      // marker position capture call is done through
+      // the special xAxisPosition capture property
+      xAxisPosition value = (xAxisPosition)_prop.GetValue(_dataContainer, null);
+      value.capture = true;
+      _prop.SetValue(_dataContainer, value, null);
+      _valueChangeCallback(this);
+    }
+
+    public override void AllocateControls()
+    {
+      base.AllocateControls();
+      if (input == null)
+      {
+        input = new TextBox();
+        ((TextBox)input).BorderStyle = BorderStyle.None;
+        ((TextBox)input).TextAlign  = HorizontalAlignment.Right;
+        input.AutoSize = false;
+        input.BackColor = Color.White;
+        input.Height = baseheight;
+        _cachedValue = ((xAxisPosition)_prop.GetValue(_dataContainer, null));
+        input.Text = _cachedValue.ToString(); 
+        new InputFieldManager(input, InputFieldManager.dataType.DATA_XAXISPOS, false, Double.NaN, Double.NaN, Text_TextChanged);
+
+        input.LostFocus += control_LostFocus;
+        input.GotFocus += control_GotFocus;
+
+      }
+    }
+
+    public override int tabReOrder(int index)
+    {
+
+      if (input != null) input.TabIndex = index++;
+      if (expandCtrl != null) expandCtrl.TabIndex = index++;
+     
+
+      return index;
+    }
+
+    public override void refresh()
+    {
+      if (input == null) return;
+
+      if (_getValueCallback == null) return;
+
+      
+
+       _cachedValue = (xAxisPosition)_getValueCallback(this);
+      
+      bool ok = false;
+      double ParsedValue;
+      if (_cachedValue.TryParse(input.Text, out ParsedValue))
+      {      
+         ok = (_cachedValue.value == ParsedValue);
+      }
+      if (!ok)
+      {
+         expandCtrl.pushed = false;
+         input.Text = _cachedValue.ToString();
+      }
+      checkForReadOnly();
+
+    }
+
+   
+
+    
+
+   
+
+    private void Text_TextChanged(object sender, EventArgs e)
+    {
+      
+
+      double ParsedValue;
+      if (_cachedValue.TryParse(input.Text, out ParsedValue))
+      {
+        _cachedValue.value  = ParsedValue;      
+        _prop.SetValue(_dataContainer, _cachedValue, null);
+        if (_valueChangeCallback != null) _valueChangeCallback(this);
+        if (_changeCausesParentRefresh) parentNode.refresh();
+        input.BackColor = Color.White;
+    
+      } else input.BackColor = Color.Pink;
+
+    }
+
+   
+    public string value
+    {
+      get { return _cachedValue.ToString(); }
+      set {
+        input.Text = value;
+
+        }
+    }
+
   
+
+    public override int computeHeight()
+    {
+      if (!_shown) return 0;
+      int h = baseheight;
+    
+      return h;
+
+    }
+
+ 
+
+    protected override void initMainLabel()
+    {
+      base.initMainLabel();
+      if (mainlabel != null) mainlabel.BackColor = Color.Transparent;
+    }
+
+    public override int resize(int top, int left1, int left2, int width)
+    {
+
+      base.resize(top, left1, left2, width);
+
+      _availableWidthForEditor = width - left1 + 10;
+
+      if ((_expandable) && (expandCtrl != null) && (expandCtrl != null) && (expandCtrl.side == CustomFlatButtom.ButtonLocation.LEFT)) top += expandableVerticalOffset;
+
+    
+
+      input.Width = width - left2 - 2 - expandCtrl.Width;
+      input.Left = left2 ;
+    
+
+      int y = top + input.Height;
+  
+      return y;
+    }
+
+  }
+
 
   public class InputFieldManager
   {
     public delegate void  InputFieldManagerChange(object sender, EventArgs e);
 
-    public enum dataType { DATA_STRING, DATA_INT, DATA_POSITIVE_INT, DATA_STRICT_POSITIVE_INT , DATA_FLOAT, DATA_POSITIVE_FLOAT, DATA_STRICT_POSITIVE_FLOAT, DATA_COLOR, DATA_PATH };
+    public enum dataType { DATA_STRING, DATA_INT, DATA_POSITIVE_INT, DATA_STRICT_POSITIVE_INT , DATA_FLOAT, DATA_POSITIVE_FLOAT, DATA_STRICT_POSITIVE_FLOAT, DATA_COLOR, DATA_PATH, DATA_XAXISPOS  };
 
     BackgroundWorker pathChecker =null;
 

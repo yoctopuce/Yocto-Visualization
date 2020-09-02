@@ -29,7 +29,7 @@
     private void InitializeComponent()
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PropertiesForm2));
-      this.label1 = new System.Windows.Forms.Label();
+      this.HelpZone = new System.Windows.Forms.Label();
       this.outterpanel = new System.Windows.Forms.Panel();
       this.panel1 = new System.Windows.Forms.Panel();
       this.panel2 = new System.Windows.Forms.Panel();
@@ -37,19 +37,19 @@
       this.panel2.SuspendLayout();
       this.SuspendLayout();
       // 
-      // label1
+      // HelpZone
       // 
-      this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+      this.HelpZone.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.label1.BackColor = System.Drawing.SystemColors.Control;
-      this.label1.Location = new System.Drawing.Point(3, 3);
-      this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(258, 64);
-      this.label1.TabIndex = 0;
-      this.label1.Text = "Please wait...";
-      this.label1.Click += new System.EventHandler(this.label1_Click);
+      this.HelpZone.BackColor = System.Drawing.SystemColors.Control;
+      this.HelpZone.Location = new System.Drawing.Point(3, 3);
+      this.HelpZone.Name = "HelpZone";
+      this.HelpZone.Size = new System.Drawing.Size(258, 64);
+      this.HelpZone.TabIndex = 0;
+      this.HelpZone.Text = "Please wait...";
+      this.HelpZone.Click += new System.EventHandler(this.label1_Click);
       // 
-      // outer panel
+      // outterpanel
       // 
       this.outterpanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -77,7 +77,7 @@
       this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.panel2.Controls.Add(this.label1);
+      this.panel2.Controls.Add(this.HelpZone);
       this.panel2.Location = new System.Drawing.Point(3, 309);
       this.panel2.Name = "panel2";
       this.panel2.Size = new System.Drawing.Size(266, 74);
@@ -107,7 +107,7 @@
 
     #endregion
 
-    private System.Windows.Forms.Label label1;
+    private System.Windows.Forms.Label HelpZone;
     private System.Windows.Forms.Panel outterpanel;
     private System.Windows.Forms.Panel panel1;
     private System.Windows.Forms.Panel panel2;
