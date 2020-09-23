@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Text;
 using System.Drawing.Text;
+using System.Globalization;
 
 namespace YDataRendering
 {
@@ -329,7 +330,7 @@ namespace YDataRendering
 
     public Object directParent { get { return _directParent; } }
 
-    public enum ResizeRule {[Description("Fixed")]FIXED, [Description("Relative to Width")]RELATIVETOWIDTH, [Description("Relatif to height")]RELATIVETOHEIGHT, [Description("Relative to Width and Height")] RELATIVETOBOTH };
+    public enum ResizeRule {[Description("Fixed")]FIXED, [Description("Relative to Width")]RELATIVETOWIDTH, [Description("Relative to height")]RELATIVETOHEIGHT, [Description("Relative to Width and Height")] RELATIVETOBOTH };
 
     ResizeRule _resizeRule = ResizeRule.FIXED;
 
@@ -1858,23 +1859,23 @@ namespace YDataRendering
     int gradientCount = 0;
     static int SVGID = 0;
     private string color2svg(Color c) { return "rgb(" + c.R.ToString() + ", " + c.G.ToString() + ", " + c.B.ToString() + ")"; }
-    private string alpha2svg(Color c) { return (c.A / 255.0).ToString("0.000"); }
+    private string alpha2svg(Color c) { return (c.A / 255.0).ToString("0.000", CultureInfo.InvariantCulture); }
 
     public YGraphicsSVG(Graphics g, int width, int height, double dpi) : base(g, width, height, dpi)
     {
       SVGID++;
       SVGdefs = new StringBuilder();
       SVGcontents = new StringBuilder();
-      SVGdefs.AppendLine("<clipPath id=\"pageClip_" + SVGID.ToString() + "\"><rect x=\"0\" y=\"0\"  width=\"" + width.ToString() + "\" height=\"" + height.ToString() + "\"/></clipPath>");
+      SVGdefs.AppendLine("<clipPath id=\"pageClip_" + SVGID.ToString() + "\"><rect x=\"0\" y=\"0\"  width=\"" + width.ToString(CultureInfo.InvariantCulture) + "\" height=\"" + height.ToString(CultureInfo.InvariantCulture) + "\"/></clipPath>");
     }
 
     public override void DrawLine(Pen p, float x1, float y1, float x2, float y2)
     {
-      SVGcontents.AppendLine("<line x1=\"" + x1.ToString() + "\" "
-                        + " y1 =\"" + y1.ToString() + "\" "
-                        + " x2 =\"" + x2.ToString() + "\" "
-                        + " y2 =\"" + y2.ToString() + "\" "
-                        + "style = \"stroke:" + color2svg(p.Color) + ";stroke-opacity:" + alpha2svg(p.Color) + "; stroke-width:" + p.Width.ToString() + "\"/>");
+      SVGcontents.AppendLine("<line x1=\"" + x1.ToString(CultureInfo.InvariantCulture) + "\" "
+                        + " y1 =\"" + y1.ToString(CultureInfo.InvariantCulture) + "\" "
+                        + " x2 =\"" + x2.ToString(CultureInfo.InvariantCulture) + "\" "
+                        + " y2 =\"" + y2.ToString(CultureInfo.InvariantCulture) + "\" "
+                        + "style = \"stroke:" + color2svg(p.Color) + ";stroke-opacity:" + alpha2svg(p.Color) + "; stroke-width:" + p.Width.ToString(CultureInfo.InvariantCulture) + "\"/>");
     }
 
     public override void DrawLine(Pen p, PointF p1, PointF p2)
@@ -1884,8 +1885,8 @@ namespace YDataRendering
     {
       ResetClip();
 
-      SVGdefs.AppendLine("<clipPath id=\"clip_" + SVGID.ToString() + "_" + clipcount.ToString() + "\"><rect x=\"" + rect.Left.ToString() + "\" y=\"" + rect.Top.ToString()
-                                  + "\"  width=\"" + rect.Width.ToString() + "\" height=\"" + rect.Height.ToString() + "\"/></clipPath>");
+      SVGdefs.AppendLine("<clipPath id=\"clip_" + SVGID.ToString() + "_" + clipcount.ToString() + "\"><rect x=\"" + rect.Left.ToString(CultureInfo.InvariantCulture) + "\" y=\"" + rect.Top.ToString(CultureInfo.InvariantCulture)
+                                  + "\"  width=\"" + rect.Width.ToString(CultureInfo.InvariantCulture) + "\" height=\"" + rect.Height.ToString(CultureInfo.InvariantCulture) + "\"/></clipPath>");
       SVGcontents.AppendLine("<g clip-path=\"url(#clip_" + SVGID.ToString() + "_" + clipcount.ToString() + ")\">");
       clipcount++;
       clipSectionsToClose++;
@@ -1930,10 +1931,10 @@ namespace YDataRendering
 
     public override void FillRectangle(Brush brush, Rectangle rect)
     {
-      SVGcontents.AppendLine("<rect x=\"" + rect.Left.ToString() + "\" "
-                      + " y =\"" + rect.Top.ToString() + "\" "
-                      + " width =\"" + rect.Width.ToString() + "\" "
-                      + " height =\"" + rect.Height.ToString() + "\" "
+      SVGcontents.AppendLine("<rect x=\"" + rect.Left.ToString(CultureInfo.InvariantCulture) + "\" "
+                      + " y =\"" + rect.Top.ToString(CultureInfo.InvariantCulture) + "\" "
+                      + " width =\"" + rect.Width.ToString(CultureInfo.InvariantCulture) + "\" "
+                      + " height =\"" + rect.Height.ToString(CultureInfo.InvariantCulture) + "\" "
                       + BrushToSVG(brush, true)
                       + "style=\"stroke-width:0\"/>");
 
@@ -1945,12 +1946,12 @@ namespace YDataRendering
 
     public override void DrawRectangle(Pen pen, Rectangle rect)
     {
-      SVGcontents.AppendLine("<rect x=\"" + rect.Left.ToString() + "\" "
-                       + " y =\"" + rect.Top.ToString() + "\" "
-                       + " width =\"" + rect.Width.ToString() + "\" "
-                       + " height =\"" + rect.Height.ToString() + "\" "
+      SVGcontents.AppendLine("<rect x=\"" + rect.Left.ToString(CultureInfo.InvariantCulture) + "\" "
+                       + " y =\"" + rect.Top.ToString(CultureInfo.InvariantCulture) + "\" "
+                       + " width =\"" + rect.Width.ToString(CultureInfo.InvariantCulture) + "\" "
+                       + " height =\"" + rect.Height.ToString(CultureInfo.InvariantCulture) + "\" "
                        + " fill=\"none\" "
-                        + "style = \"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString() + "\"/>");
+                        + "style = \"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString(CultureInfo.InvariantCulture) + "\"/>");
 
     }
 
@@ -1961,21 +1962,21 @@ namespace YDataRendering
     public override void DrawEllipse(Pen pen, int x, int y, int width, int height)
 
     {
-      SVGcontents.AppendLine("<ellipse  cx=\"" + (x + width / 2.0).ToString() + "\" "
-                    + " cy =\"" + (y + height / 2.0).ToString() + "\" "
-                    + " rx =\"" + (width / 2).ToString() + "\" "
-                    + " ry =\"" + (height / 2).ToString() + "\" "
+      SVGcontents.AppendLine("<ellipse  cx=\"" + (x + width / 2.0).ToString(CultureInfo.InvariantCulture) + "\" "
+                    + " cy =\"" + (y + height / 2.0).ToString(CultureInfo.InvariantCulture) + "\" "
+                    + " rx =\"" + (width / 2).ToString(CultureInfo.InvariantCulture) + "\" "
+                    + " ry =\"" + (height / 2).ToString(CultureInfo.InvariantCulture) + "\" "
                     + " fill=\"none\" "
-                     + "style = \"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString() + "\"/>");
+                     + "style = \"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString(CultureInfo.InvariantCulture) + "\"/>");
     }
 
     public override void FillEllipse(Brush brush, int x, int y, int width, int height)
 
     {
-      SVGcontents.AppendLine("<ellipse  cx=\"" + (x + width / 2.0).ToString() + "\" "
-                    + " cy =\"" + (y + height / 2.0).ToString() + "\" "
-                    + " rx =\"" + (width / 2).ToString() + "\" "
-                    + " ry =\"" + (height / 2).ToString() + "\" "
+      SVGcontents.AppendLine("<ellipse  cx=\"" + (x + width / 2.0).ToString(CultureInfo.InvariantCulture) + "\" "
+                    + " cy =\"" + (y + height / 2.0).ToString(CultureInfo.InvariantCulture) + "\" "
+                    + " rx =\"" + (width / 2).ToString(CultureInfo.InvariantCulture) + "\" "
+                    + " ry =\"" + (height / 2).ToString(CultureInfo.InvariantCulture) + "\" "
                     + BrushToSVG(brush, false)
                     + "style=\"stroke-width:0\"/>");
     }
@@ -1987,9 +1988,9 @@ namespace YDataRendering
       string[] tokens = s.Split('\n');
       for (int i = 0; i < tokens.Length; i++)
       { s = tokens[i];
-        SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + (y + font.Size * 1.25).ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+        SVGcontents.AppendLine("<text x=\"" + x.ToString(CultureInfo.InvariantCulture) + "\" y=\"" + (y + font.Size * 1.25).ToString(CultureInfo.InvariantCulture) + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
                     + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
-                    + "font-size=\"" + font.SizeInPoints + "pt\" "
+                    + "font-size=\"" + font.SizeInPoints.ToString(CultureInfo.InvariantCulture) + "pt\" "
                     + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
                     + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
                     + BrushToSVG(brush, false)
@@ -2037,9 +2038,9 @@ namespace YDataRendering
      
 
 
-        SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+        SVGcontents.AppendLine("<text x=\"" + x.ToString(CultureInfo.InvariantCulture) + "\" y=\"" + y.ToString(CultureInfo.InvariantCulture) + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
                       + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
-                      + "font-size=\"" + font.SizeInPoints + "pt\" "
+                      + "font-size=\"" + font.SizeInPoints.ToString(CultureInfo.InvariantCulture) + "pt\" "
                       + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
                       + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
                       + BrushToSVG(brush, false)
@@ -2085,9 +2086,9 @@ namespace YDataRendering
 
         }
     
-      SVGcontents.AppendLine("<text x=\"" + x.ToString() + "\" y=\"" + y.ToString() + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
+      SVGcontents.AppendLine("<text x=\"" + x.ToString(CultureInfo.InvariantCulture) + "\" y=\"" + y.ToString(CultureInfo.InvariantCulture) + "\" text-anchor=\"start\" "  // dominant-baseline=\"hanging\" " //Not supported in  Inkscape :-(
                     + "font-family=\"" + font.FontFamily.Name.ToString() + "\" "
-                    + "font-size=\"" + (font.SizeInPoints *1.1).ToString() + "pt\" "
+                    + "font-size=\"" + (font.SizeInPoints *1.1).ToString(CultureInfo.InvariantCulture) + "pt\" "
                     + "font-weight=\"" + (((font.Style & FontStyle.Bold) != 0) ? "bold" : "normal") + "\" "
                     + "font-style=\"" + (((font.Style & FontStyle.Italic) != 0) ? "italic" : "normal") + "\" "
                     + BrushToSVG(brush, false)
@@ -2103,7 +2104,7 @@ namespace YDataRendering
 
     public override void Transform(float dx, float dy, float angle)
     {
-      SVGcontents.AppendLine("<g transform=\"translate(" + dx.ToString() + " " + dy.ToString() + ") rotate(" + angle.ToString() + ")\">");
+      SVGcontents.AppendLine("<g transform=\"translate(" + dx.ToString(CultureInfo.InvariantCulture) + " " + dy.ToString(CultureInfo.InvariantCulture) + ") rotate(" + angle.ToString(CultureInfo.InvariantCulture) + ")\">");
       transformSectionsToClose++;
 
 
@@ -2119,36 +2120,36 @@ namespace YDataRendering
     {
       if (points.Length < 2) return;
 
-      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString(CultureInfo.InvariantCulture) + " " + points[0].Y.ToString(CultureInfo.InvariantCulture));
       for (int i = 1; i < points.Length; i += 1)
-        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+        SVGcontents.Append(" L " + points[i].X.ToString(CultureInfo.InvariantCulture) + " " + points[i].Y.ToString(CultureInfo.InvariantCulture));
 
       SVGcontents.AppendLine(" z\" fill=\"none\" "
-                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString() + "\"/>");
+                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-width:" + pen.Width.ToString(CultureInfo.InvariantCulture) + "\"/>");
     }
 
     public override void DrawLines(Pen pen, PointF[] points)
     {
       if (points.Length < 2) return;
 
-      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString(CultureInfo.InvariantCulture) + " " + points[0].Y.ToString(CultureInfo.InvariantCulture));
       for (int i = 1; i < points.Length; i += 1)
-        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+        SVGcontents.Append(" L " + points[i].X.ToString(CultureInfo.InvariantCulture) + " " + points[i].Y.ToString(CultureInfo.InvariantCulture));
 
       SVGcontents.AppendLine("\" fill=\"none\" "
-                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-linecap:round; stroke-linejoin:round;stroke-width:" + pen.Width.ToString() + "\"/>");
+                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + "; stroke-linecap:round; stroke-linejoin:round;stroke-width:" + pen.Width.ToString(CultureInfo.InvariantCulture) + "\"/>");
     }
 
     public override void DrawLines(Pen pen, Point[] points)
     {
       if (points.Length < 2) return;
 
-      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString(CultureInfo.InvariantCulture) + " " + points[0].Y.ToString(CultureInfo.InvariantCulture));
       for (int i = 1; i < points.Length; i += 1)
-        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+        SVGcontents.Append(" L " + points[i].X.ToString(CultureInfo.InvariantCulture) + " " + points[i].Y.ToString(CultureInfo.InvariantCulture));
 
       SVGcontents.AppendLine("\" fill=\"none\" "
-                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + ";stroke-linecap:round; stroke-linejoin:round;stroke-width:" + pen.Width.ToString() + "\"/>");
+                     + "style=\"stroke:" + color2svg(pen.Color) + ";stroke-opacity:" + alpha2svg(pen.Color) + ";stroke-linecap:round; stroke-linejoin:round;stroke-width:" + pen.Width.ToString(CultureInfo.InvariantCulture) + "\"/>");
     }
 
 
@@ -2156,9 +2157,9 @@ namespace YDataRendering
     {
       if (points.Length < 2) return;
 
-      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString() + " " + points[0].Y.ToString());
+      SVGcontents.Append("<path  d=\"M " + points[0].X.ToString(CultureInfo.InvariantCulture) + " " + points[0].Y.ToString(CultureInfo.InvariantCulture));
       for (int i = 1; i < points.Length; i += 1)
-        SVGcontents.Append(" L " + points[i].X.ToString() + " " + points[i].Y.ToString());
+        SVGcontents.Append(" L " + points[i].X.ToString(CultureInfo.InvariantCulture) + " " + points[i].Y.ToString(CultureInfo.InvariantCulture));
       SVGcontents.AppendLine(" z\" " + BrushToSVG(brush, false)
                   + "style=\"stroke-width:0\"/>\r\n");
     }
@@ -2199,8 +2200,8 @@ namespace YDataRendering
 
     public string get_svgContents()
     {
-      string physicalWidth = (2.54 * (_width / _dpi)).ToString("0.000");
-      string physicalheight = (2.54 * (_height / _dpi)).ToString("0.000");
+      string physicalWidth = (2.54 * (_width / _dpi)).ToString("0.000", CultureInfo.InvariantCulture);
+      string physicalheight = (2.54 * (_height / _dpi)).ToString("0.000", CultureInfo.InvariantCulture);
 
 
       while (clipSectionsToClose > 0)
@@ -2218,7 +2219,7 @@ namespace YDataRendering
 
       return "<?xml version = \"1.0\" standalone = \"no\" ?>\r\n"
                 + "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
-                 + "<svg width = \"" + physicalWidth + "cm\" height = \"" + physicalheight + "cm\" viewBox = \"0 0 " + _width.ToString() + " " + _height.ToString() + "\" "
+                 + "<svg width = \"" + physicalWidth + "cm\" height = \"" + physicalheight + "cm\" viewBox = \"0 0 " + _width.ToString(CultureInfo.InvariantCulture) + " " + _height.ToString(CultureInfo.InvariantCulture) + "\" "
                  + "xmlns = \"http://www.w3.org/2000/svg\" version = \"1.1\" >\r\n"
                  + "<defs>\r\n"
                  + SVGdefs
