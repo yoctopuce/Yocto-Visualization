@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_tilt.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_tilt.cs 42951 2020-12-14 09:43:29Z seb $
  *
  *  Implements yFindTilt(), the high-level API for Tilt functions
  *
@@ -117,14 +117,14 @@ public class YTilt : YSensor
 
     /**
      * <summary>
-     *   Returns the measure update frequency, measured in Hz (Yocto-3D-V2 only).
+     *   Returns the measure update frequency, measured in Hz.
      * <para>
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   an integer corresponding to the measure update frequency, measured in Hz (Yocto-3D-V2 only)
+     *   an integer corresponding to the measure update frequency, measured in Hz
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YTilt.BANDWIDTH_INVALID</c>.
@@ -146,7 +146,7 @@ public class YTilt : YSensor
 
     /**
      * <summary>
-     *   Changes the measure update frequency, measured in Hz (Yocto-3D-V2 only).
+     *   Changes the measure update frequency, measured in Hz.
      * <para>
      *   When the
      *   frequency is lower, the device performs averaging.
@@ -157,7 +157,7 @@ public class YTilt : YSensor
      * </para>
      * </summary>
      * <param name="newval">
-     *   an integer corresponding to the measure update frequency, measured in Hz (Yocto-3D-V2 only)
+     *   an integer corresponding to the measure update frequency, measured in Hz
      * </param>
      * <para>
      * </para>
@@ -346,6 +346,56 @@ public class YTilt : YSensor
             base._invokeTimedReportCallback(value);
         }
         return 0;
+    }
+
+
+    /**
+     * <summary>
+     *   Performs a zero calibration for the tilt measurement (Yocto-Inclinometer only).
+     * <para>
+     *   When this method is invoked, a simple shift (translation)
+     *   is applied so that the current position is reported as a zero angle.
+     *   Be aware that this shift will also affect the measurement boundaries.
+     * </para>
+     * </summary>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int calibrateToZero()
+    {
+        double currentRawVal;
+        List<double> rawVals = new List<double>();
+        List<double> refVals = new List<double>();
+        currentRawVal = this.get_currentRawValue();
+        rawVals.Clear();
+        refVals.Clear();
+        rawVals.Add(currentRawVal);
+        refVals.Add(0.0);
+        return this.calibrateFromPoints(rawVals, refVals);
+    }
+
+
+    /**
+     * <summary>
+     *   Cancels any previous zero calibration for the tilt measurement (Yocto-Inclinometer only).
+     * <para>
+     *   This function restores the factory zero calibration.
+     * </para>
+     * </summary>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public virtual int restoreZeroCalibration()
+    {
+        return this._setAttr("calibrationParam", "0");
     }
 
     /**

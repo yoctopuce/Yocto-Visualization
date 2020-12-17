@@ -480,7 +480,7 @@ namespace YDataRendering
       }
     }
 
-    public void resetlegendPen() { _legendPen = null; } 
+    public void resetlegendPen() { YDataRenderer.Destroy(ref _legendPen ); } 
 
     private Brush _brush = null;
 
@@ -517,7 +517,7 @@ namespace YDataRendering
 
 
     private Color _color = Color.Black;
-    public Color color { get { return _color; } set { _color = value; _pen = null; _legendPen = null; _brush = null; _navigatorpen = null; parent.redraw(); } }
+    public Color color { get { return _color; } set { _color = value; YDataRenderer.Destroy(ref _pen); YDataRenderer.Destroy(ref _legendPen ); YDataRenderer.Destroy(ref _brush ); YDataRenderer.Destroy(ref _navigatorpen); parent.redraw(); } }
 
     private double _thickness = 1.0;
     public double thickness
@@ -526,7 +526,7 @@ namespace YDataRendering
       set
       {
         if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-        _thickness = value; _pen = null; _legendPen = null;  parent.redraw();
+        _thickness = value; YDataRenderer.Destroy(ref _pen); YDataRenderer.Destroy(ref _legendPen);  parent.redraw();
       }
     }
 
@@ -894,10 +894,10 @@ namespace YDataRendering
 
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; _parentRenderer.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; YDataRenderer.Destroy(ref _bgBrush); _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
     public double borderthickness
@@ -906,7 +906,7 @@ namespace YDataRendering
       set
       {
         if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-        _borderthickness = value; _pen = null; _parentRenderer.redraw();
+        _borderthickness = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw();
       }
     }
 
@@ -953,8 +953,8 @@ namespace YDataRendering
     public Pen pen
     {
       get
-      {
-        _pen = new Pen(_borderColor, (float)_borderthickness);
+      {if (_pen==null)
+          _pen = new Pen(_borderColor, (float)_borderthickness);
         return _pen;
       }
     }
@@ -1013,10 +1013,10 @@ namespace YDataRendering
     public bool overlap { get { return _overlap; } set { _overlap = value; _parentRenderer.redraw(); } }
 
     private Color _bgColor = Color.FromArgb(200, 255, 255, 255);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; _parentRenderer.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; YDataRenderer.Destroy(ref _bgBrush ); _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; _parentRenderer.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
     public double borderthickness
@@ -1025,7 +1025,7 @@ namespace YDataRendering
       set
       {
         if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-        _borderthickness = value; _pen = null; _parentRenderer.redraw();
+        _borderthickness = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw();
       }
     }
 
@@ -1080,8 +1080,8 @@ namespace YDataRendering
     public Pen pen
     {
       get
-      {
-        _pen = new Pen(_borderColor, (float)_borderthickness);
+      { if (_pen==null)
+          _pen = new Pen(_borderColor, (float)_borderthickness);
         return _pen;
       }
     }
@@ -1144,20 +1144,20 @@ namespace YDataRendering
     public bool enabled { get { return _enabled; } set { _enabled = value; _parentRenderer.redraw(); } }
 
     private Color _bgColor1 = Color.FromArgb(255, 225, 225, 225);
-    public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; _bgBrush = null; _parentRenderer.redraw(); } }
+    public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; YDataRenderer.Destroy(ref _bgBrush ); _parentRenderer.redraw(); } }
 
     private Color _cursorBorderColor = Color.FromArgb(255, 40, 40, 40);
-    public Color cursorBorderColor { get { return _cursorBorderColor; } set { _cursorBorderColor = value; _cursorBorderPen = null; _parentRenderer.redraw(); } }
+    public Color cursorBorderColor { get { return _cursorBorderColor; } set { _cursorBorderColor = value; YDataRenderer.Destroy(ref _cursorBorderPen); _parentRenderer.redraw(); } }
 
     private YAxisHandling _yAxisHandling = YAxisHandling.AUTO;
     public YAxisHandling yAxisHandling { get { return _yAxisHandling; } set { _yAxisHandling = value; _parentRenderer.redraw(); } }
 
     private Color _bgColor2 = Color.FromArgb(255, 255, 255, 255);
-    public Color bgColor2 { get { return _bgColor2; } set { _bgColor2 = value; _bgBrush = null; _parentRenderer.redraw(); } }
+    public Color bgColor2 { get { return _bgColor2; } set { _bgColor2 = value; YDataRenderer.Destroy(ref _bgBrush ); _parentRenderer.redraw(); } }
 
 
     private Color _cursorColor = Color.FromArgb(100, 0, 255, 0);
-    public Color cursorColor { get { return _cursorColor; } set { _cursorColor = value; _cursorBrush = null; _parentRenderer.redraw(); } }
+    public Color cursorColor { get { return _cursorColor; } set { _cursorColor = value; YDataRenderer.Destroy(ref _cursorBrush ); _parentRenderer.redraw(); } }
 
 
     private Brush _cursorBrush = null;
@@ -1175,7 +1175,7 @@ namespace YDataRendering
     public Pen pen
     {
       get
-      {
+      { if (_pen==null)
         _pen = new Pen(_xAxisColor, (float)_xAxisThickness);
         return _pen;
       }
@@ -1185,7 +1185,7 @@ namespace YDataRendering
     public Pen cursorBorderPen
     {
       get
-      {
+      { if (_cursorBorderPen==null)
         _cursorBorderPen = new Pen(_cursorBorderColor, 1);
         return _cursorBorderPen;
       }
@@ -1196,7 +1196,7 @@ namespace YDataRendering
 
 
     private Color _xAxisColor = Color.Black;
-    public Color xAxisColor { get { return _xAxisColor; } set { _xAxisColor = value; _pen = null; _parentRenderer.redraw(); } }
+    public Color xAxisColor { get { return _xAxisColor; } set { _xAxisColor = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw(); } }
 
     private double _xAxisThickness = 1.0;
     public double xAxisThickness
@@ -1205,7 +1205,7 @@ namespace YDataRendering
       set
       {
         if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-        _xAxisThickness = value; _pen = null; _parentRenderer.redraw();
+        _xAxisThickness = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw();
       }
     }
 
@@ -1215,13 +1215,13 @@ namespace YDataRendering
     {
       get
       {
-        _borderPen = new Pen(_borderColor, (float)_borderThickness);
+        if (_borderPen==null) _borderPen = new Pen(_borderColor, (float)_borderThickness);
         return _borderPen;
       }
     }
 
     private Color _borderColor = Color.DarkGray;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderPen = null; _parentRenderer.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _borderPen ); _parentRenderer.redraw(); } }
 
     private Double _borderThickness = 1.0;
     public Double borderThickness
@@ -1230,7 +1230,7 @@ namespace YDataRendering
       set
       {
         if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-        _borderThickness = value; _borderPen = null; _parentRenderer.redraw();
+        _borderThickness = value; YDataRenderer.Destroy(ref _borderPen); _parentRenderer.redraw();
       }
     }
 
@@ -1238,7 +1238,7 @@ namespace YDataRendering
     private LinearGradientBrush _bgBrush = null;
     public void setPosition(int ParentWidth, int ParentHeight, int Lmargin, int Rmargin, int Tmargin, int Bmargin)
     {
-      if ((_viewport.Lmargin != Lmargin) || (_viewport.Rmargin != Rmargin) || (_viewport.Tmargin != Tmargin) || (_viewport.Bmargin != Bmargin)) _bgBrush = null;
+      if ((_viewport.Lmargin != Lmargin) || (_viewport.Rmargin != Rmargin) || (_viewport.Tmargin != Tmargin) || (_viewport.Bmargin != Bmargin)) YDataRenderer.Destroy(ref _bgBrush);
       _viewport.Lmargin = Lmargin;
       _viewport.Rmargin = Rmargin;
       _viewport.Bmargin = Bmargin;
@@ -1447,13 +1447,13 @@ namespace YDataRendering
     }
 
     private Color _bgColor = Color.FromArgb(255, 255, 255, 192);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled) _parentRenderer.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; YDataRenderer.Destroy(ref _bgBrush ); if (_enabled) _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.DarkRed;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _arrowBrush = null; _pen = null; _navigatorpen = null;  if(_enabled) _parentRenderer.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _arrowBrush ); YDataRenderer.Destroy(ref _pen); YDataRenderer.Destroy(ref _navigatorpen);  if(_enabled) _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _parentRenderer.clearCachedObjects(); _pen = null; if (_enabled) _parentRenderer.redraw(); } }
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _parentRenderer.clearCachedObjects(); YDataRenderer.Destroy(ref _pen); if (_enabled) _parentRenderer.redraw(); } }
 
     private double _arrowSize = 5;
     public double arrowSize { get { return _arrowSize; } set { _arrowSize = value;  if (_enabled) _parentRenderer.redraw(); } }
@@ -1494,8 +1494,7 @@ namespace YDataRendering
     public Pen pen
     {
       get
-      {
-        _pen = new Pen(_borderColor, (float)_borderthickness);
+      {  if (_pen==null) _pen = new Pen(_borderColor, (float)_borderthickness);
         return _pen;
       }
     }
@@ -1505,7 +1504,7 @@ namespace YDataRendering
     {
       get
       {
-        _navigatorpen = new Pen(_borderColor, (float)1.0);
+         if (_navigatorpen==null) _navigatorpen = new Pen(_borderColor, (float)1.0);
         return _navigatorpen;
       }
     }
@@ -1679,19 +1678,19 @@ namespace YDataRendering
       set
       {
         if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-        _thickness = value; _pen = null; _parentRenderer.redraw();
+        _thickness = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw();
       }
     }
 
     protected Color _color = Color.Black;
-    public Color color { get { return _color; } set { _color = value; _pen = null; _parentRenderer.redraw(); } }
+    public Color color { get { return _color; } set { _color = value; YDataRenderer.Destroy(ref _pen); _parentRenderer.redraw(); } }
 
 
     protected bool _showGrid = false;
     public bool showGrid { get { return _showGrid; } set { _showGrid = value; _parentRenderer.redraw(); } }
 
     protected Color _gridColor = Color.FromArgb(50, 0, 0, 0);
-    public Color gridColor { get { return _gridColor; } set { _gridColor = value; _gridPen = null; _parentRenderer.redraw(); } }
+    public Color gridColor { get { return _gridColor; } set { _gridColor = value; YDataRenderer.Destroy(ref _gridPen); _parentRenderer.redraw(); } }
 
     protected Double _gridThickness = 1.0;
     public Double gridThickness
@@ -1700,7 +1699,7 @@ namespace YDataRendering
       set
       {
         if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-        _gridThickness = value; _gridPen = null; _parentRenderer.redraw();
+        _gridThickness = value; YDataRenderer.Destroy(ref _gridPen); _parentRenderer.redraw();
       }
     }
 
@@ -2026,9 +2025,9 @@ namespace YDataRendering
 
       set
       {
-        if (labelFormat != FORMATAUTO)
-          try { 1234.ToString(labelFormat); }
-          catch (Exception) { throw new ArgumentException("\"format\" is not a valid format."); }
+        if (value != FORMATAUTO)
+          try { 1234.ToString(value); }
+          catch (Exception) { throw new ArgumentException("\""+value+"\" is not a valid format."); }
 
 
         _format = value;
@@ -2160,10 +2159,10 @@ namespace YDataRendering
     private Pen borderPen = null;
 
     private Color _borderColor = Color.LightGray;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; borderPen = null; redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref borderPen); redraw(); } }
 
     private Double _borderThickness = 1.0;
-    public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; borderPen = null; redraw(); } }
+    public Double borderThickness { get { return _borderThickness; } set { _borderThickness = value; YDataRenderer.Destroy(ref borderPen); redraw(); } }
 
 
     private void createCaptureCursor()
@@ -2199,6 +2198,7 @@ namespace YDataRendering
         MemoryStream ms = new MemoryStream(data);
         Bitmap bmp = new Bitmap(Image.FromStream(ms));
         YGraph.captureCursor = new Cursor(bmp.GetHicon());
+        bmp.Dispose();
       } catch (Exception)
       {
         Console.WriteLine("Cannot create custom cursor");
@@ -2309,10 +2309,10 @@ namespace YDataRendering
 
 
     private Color _bgColor1 = Color.FromArgb(255, 200, 200, 200);
-    public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; _bgBrush = null; redraw(); } }
+    public Color bgColor1 { get { return _bgColor1; } set { _bgColor1 = value; YDataRenderer.Destroy(ref _bgBrush ); redraw(); } }
 
     private Color _bgColor2 = Color.FromArgb(255, 255, 255, 255);
-    public Color bgColor2 { get { return _bgColor2; } set { _bgColor2 = value; _bgBrush = null; redraw(); } }
+    public Color bgColor2 { get { return _bgColor2; } set { _bgColor2 = value; YDataRenderer.Destroy(ref _bgBrush); redraw(); } }
 
     public XAxis xAxis { get { return _xAxis; } }
 

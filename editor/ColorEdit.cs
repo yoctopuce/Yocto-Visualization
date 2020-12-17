@@ -372,7 +372,9 @@ namespace YColors
       int w = PredefinedPanel.Size.Width;
       int h = PredefinedPanel.Size.Height;
       Bitmap DrawArea = new Bitmap(w, h);
+      Image previous = PredefinedPanel.Image;
       PredefinedPanel.Image = DrawArea;
+      if (previous != null) previous.Dispose();
       Graphics g = Graphics.FromImage(DrawArea);
 
       int x = predefinedColorOffsetX;
@@ -408,7 +410,9 @@ namespace YColors
       int w = pictureBoxHistory.Size.Width;
       int h = pictureBoxHistory.Size.Height;
       Bitmap DrawArea = new Bitmap(w, h);
+      Image previous = pictureBoxHistory.Image;
       pictureBoxHistory.Image = DrawArea;
+      if (previous!=null) previous.Dispose();
       Graphics g = Graphics.FromImage(DrawArea);
       
 
@@ -437,7 +441,9 @@ namespace YColors
 
 
       Bitmap DrawArea = new Bitmap(w, h);
+      Image previous = pictureBoxPreview.Image;
       pictureBoxPreview.Image = DrawArea;
+      if (previous != null)  previous.Dispose();
       Graphics g = Graphics.FromImage(DrawArea);
       g.FillRectangle(Brushes.White, 0, 0, w, h);
       g.FillRectangle(Brushes.Black, 0, 0, w >>1, h>>1);
@@ -605,6 +611,7 @@ namespace YColors
         YColor c = YColor.FromAhsl(255, (byte)i, 255, 127);
         Pen p = new Pen(c.toColor(), 1);
         g.DrawLine(p, i, 0, i, 11);
+        p.Dispose();
       }
       g.Dispose();
 
@@ -705,6 +712,7 @@ namespace YColors
             byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
             Pen p = new Pen(YColor.FromAhsl(255, _color.H, b, _color.L).toColor());
             g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+            p.Dispose();
           }
           break;
         case ColorFunction.COLOR_L:
@@ -713,6 +721,7 @@ namespace YColors
             byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
             Pen p = new Pen(YColor.FromAhsl(255, _color.H, _color.S, b).toColor());
             g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+            p.Dispose();
           }
           break;
 
@@ -723,6 +732,7 @@ namespace YColors
             byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
             Pen p = new Pen(YColor.FromArgb(255, b, _color.G, _color.B).toColor());
             g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+            p.Dispose();
           }
           break;
 
@@ -732,6 +742,7 @@ namespace YColors
             byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
             Pen p = new Pen(YColor.FromArgb(255, _color.R, b, _color.B).toColor());
             g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+            p.Dispose();
           }
           break;
 
@@ -741,6 +752,7 @@ namespace YColors
             byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
             Pen p = new Pen(YColor.FromArgb(255, _color.R, _color.G, b).toColor());
             g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+            p.Dispose();
           }
           break;
 
@@ -756,6 +768,7 @@ namespace YColors
               byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
               Pen p = new Pen(YColor.FromAhsl(b, _color.H, _color.S, _color.L).toColor());
               g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+              p.Dispose();
             }
           else
             for (int i = 0; i < _bitmap.Width - 2; i++)
@@ -763,6 +776,7 @@ namespace YColors
               byte b = (byte)Math.Round(255 * (double)i / (_bitmap.Width - 2));
               Pen p = new Pen(YColor.FromArgb(b, _color.R, _color.G, _color.B).toColor());
               g.DrawLine(p, i + 1, 0, i + 1, _bitmap.Height);
+              p.Dispose();
             }
 
 

@@ -432,7 +432,7 @@ namespace YoctoVisualisation
     public void SaveConfig()
     {
       string XmlConfigFile = "<?xml version=\"1.0\" ?>\n"
-        +"<!-->\n"
+        +"<!--\n"
         +"   ******************************************\n"
         +"   Yocto-Visualization 2.0 Configuration file\n"
         +"   ******************************************\n"
@@ -474,7 +474,7 @@ namespace YoctoVisualisation
     {
       ClosingNow = true;
       SaveConfig();
-
+    
 
 
       Application.Exit();
@@ -483,6 +483,8 @@ namespace YoctoVisualisation
     private void startform_FormClosing(object sender, FormClosingEventArgs e)
     {
       SaveConfig();
+      YAPI.FreeAPI();
+
     }
 
     private void startform_Load(object sender, EventArgs e)

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_display.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ * $Id: yocto_display.cs 42081 2020-10-16 16:23:04Z mvuilleu $
  *
  * Implements yFindDisplay(), the high-level API for Display functions
  *
@@ -66,10 +66,17 @@ using YFUN_DESCR = System.Int32;
 public class YDisplayLayer
 {
 //--- (end of generated code: YDisplayLayer class start)
+
+    private YDisplay _display  = null;
+    private int      _id = -1;
+    private string   _cmdbuff  = "";
+    private bool     _hidden = false;
+
     //--- (generated code: YDisplayLayer definitions)
 
-public enum   ALIGN
-    {   TOP_LEFT = 0,
+    public enum ALIGN
+    {
+        TOP_LEFT = 0,
         CENTER_LEFT = 1,
         BASELINE_LEFT = 2,
         BOTTOM_LEFT = 3,
@@ -85,18 +92,18 @@ public enum   ALIGN
         CENTER_RIGHT = 13,
         BASELINE_RIGHT = 14,
         BOTTOM_RIGHT = 15
-     };
+    };
     //--- (end of generated code: YDisplayLayer definitions)
 
-  public YDisplayLayer(YDisplay parent, string id)
+    public YDisplayLayer(YDisplay parent, int id)
     {
         this._display = parent;
-        this._id = Convert.ToInt32(id);
+        this._id = id;
         //--- (generated code: YDisplayLayer attributes initialization)
         //--- (end of generated code: YDisplayLayer attributes initialization)
     }
 
-  //--- (generated code: YDisplayLayer implementation)
+    //--- (generated code: YDisplayLayer implementation)
 
 
 
@@ -894,12 +901,6 @@ public enum   ALIGN
 
     //--- (end of generated code: YDisplayLayer implementation)
 
-
-  private string   _cmdbuff  = "";
-  private YDisplay _display  = null;
-  private int      _id  = -1;
-  private bool     _hidden=false;
-
   // internal function to flush any pending command for this layer
   public int flush_now()
     { int  res =YAPI.SUCCESS;
@@ -996,6 +997,7 @@ public class YDisplay : YFunction
     protected int _layerCount = LAYERCOUNT_INVALID;
     protected string _command = COMMAND_INVALID;
     protected ValueCallback _valueCallbackDisplay = null;
+    protected List<YDisplayLayer> _allDisplayLayers = new List<YDisplayLayer>();
     //--- (end of generated code: YDisplay definitions)
 
     public YDisplay(string func)
@@ -1894,6 +1896,45 @@ public class YDisplay : YFunction
         return this.sendCommand("E"+Convert.ToString(layerIdA)+","+Convert.ToString(layerIdB));
     }
 
+
+    /**
+     * <summary>
+     *   Returns a YDisplayLayer object that can be used to draw on the specified
+     *   layer.
+     * <para>
+     *   The content is displayed only when the layer is active on the
+     *   screen (and not masked by other overlapping layers).
+     * </para>
+     * </summary>
+     * <param name="layerId">
+     *   the identifier of the layer (a number in range 0..layerCount-1)
+     * </param>
+     * <returns>
+     *   an <c>YDisplayLayer</c> object
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>null</c>.
+     * </para>
+     */
+    public virtual YDisplayLayer get_displayLayer(int layerId)
+    {
+        int layercount;
+        int idx;
+        layercount = this.get_layerCount();
+        if (!((layerId >= 0) && (layerId < layercount))) {
+            this._throw(YAPI.INVALID_ARGUMENT, "invalid DisplayLayer index");
+            return null;
+        }
+        if (this._allDisplayLayers.Count == 0) {
+            idx = 0;
+            while (idx < layercount) {
+                this._allDisplayLayers.Add(new YDisplayLayer(this, idx));
+                idx = idx + 1;
+            }
+        }
+        return this._allDisplayLayers[layerId];
+    }
+
     /**
      * <summary>
      *   Continues the enumeration of displays started using <c>yFirstDisplay()</c>.
@@ -1921,78 +1962,41 @@ public class YDisplay : YFunction
 
     //--- (end of generated code: YDisplay implementation)
 
+    private bool _recording;
+    private string _sequence;
 
-  private YDisplayLayer[] _allDisplayLayers = null;
-  private bool _recording;
-  private string _sequence;
-
-  /**
-   * <summary>
-   *   Returns a YDisplayLayer object that can be used to draw on the specified
-   *   layer.
-   * <para>
-   *   The content is displayed only when the layer is active on the
-   *   screen (and not masked by other overlapping layers).
-   * </para>
-   * </summary>
-   * <param name="layerId">
-   *   the identifier of the layer (a number in range 0..layerCount-1)
-   * </param>
-   * <returns>
-   *   an <c>YDisplayLayer</c> object
-   * </returns>
-   * <para>
-   *   On failure, throws an exception or returns <c>null</c>.
-   * </para>
-   */
-  public YDisplayLayer  get_displayLayer(int layerId)
-  {
-      int i;
-      int layercount = (int)get_layerCount();
-
-      if ((layerId < 0) || (layerId >= layercount)) {
-          _throw(-1, "invalid DisplayLayer index, valid values are [0.." + (layercount - 1).ToString() + "]");
-          return null;
-      }
-
-      if (_allDisplayLayers == null) {
-          _allDisplayLayers = new YDisplayLayer[layercount];
-          for (i = 0 ;i< layercount;i++)
-              { _allDisplayLayers[i] = new YDisplayLayer(this, i.ToString()); }
-      }
-      return _allDisplayLayers[layerId];
-  }
-
-  int flushLayers()
-  {
+    int flushLayers()
+    {
       int i;
       if (_allDisplayLayers != null) {
-          for (i=0;i<=_allDisplayLayers.GetUpperBound(0);i++)
-              { _allDisplayLayers[i].flush_now(); }
+          for (i = 0; i < _allDisplayLayers.Count; i++) {
+              _allDisplayLayers[i].flush_now();
+          }
       }
       return YAPI.SUCCESS;
-  }
+    }
 
-  // internal method to clear all hidden flags in the API
-  void resetHiddenLayerFlags()
-  {
+    // internal method to clear all hidden flags in the API
+    void resetHiddenLayerFlags()
+    {
       int i;
-      if (_allDisplayLayers != null) {
-          for (i=0;i<=_allDisplayLayers.GetUpperBound(0);i++)
-              { _allDisplayLayers[i].resetHiddenFlag(); }
+      if (this._allDisplayLayers.Count > 0) {
+          for (i = 0; i < _allDisplayLayers.Count; i++) {
+              _allDisplayLayers[i].resetHiddenFlag();
+          }
       }
-  }
+    }
 
-  public int sendCommand(string cmd )
-  {
+    public int sendCommand(string cmd )
+    {
       if (!_recording) {
          return this.set_command(cmd);
       }
       _sequence = _sequence + cmd + "\n";
       return YAPI.SUCCESS;
-  }
+    }
 
-  //--- (generated code: YDisplay functions)
+    //--- (generated code: YDisplay functions)
 
     /**
      * <summary>

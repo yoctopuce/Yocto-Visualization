@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_anbutton.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_anbutton.cs 42053 2020-10-14 09:46:00Z seb $
  *
  *  Implements yFindAnButton(), the high-level API for AnButton functions
  *
@@ -92,6 +92,9 @@ public class YAnButton : YFunction
     public const long LASTTIMERELEASED_INVALID = YAPI.INVALID_LONG;
     public const long PULSECOUNTER_INVALID = YAPI.INVALID_LONG;
     public const long PULSETIMER_INVALID = YAPI.INVALID_LONG;
+    public const int INPUTTYPE_ANALOG = 0;
+    public const int INPUTTYPE_DIGITAL4 = 1;
+    public const int INPUTTYPE_INVALID = -1;
     protected int _calibratedValue = CALIBRATEDVALUE_INVALID;
     protected int _rawValue = RAWVALUE_INVALID;
     protected int _analogCalibration = ANALOGCALIBRATION_INVALID;
@@ -103,6 +106,7 @@ public class YAnButton : YFunction
     protected long _lastTimeReleased = LASTTIMERELEASED_INVALID;
     protected long _pulseCounter = PULSECOUNTER_INVALID;
     protected long _pulseTimer = PULSETIMER_INVALID;
+    protected int _inputType = INPUTTYPE_INVALID;
     protected ValueCallback _valueCallbackAnButton = null;
     //--- (end of YAnButton definitions)
 
@@ -161,6 +165,10 @@ public class YAnButton : YFunction
         if (json_val.has("pulseTimer"))
         {
             _pulseTimer = json_val.getLong("pulseTimer");
+        }
+        if (json_val.has("inputType"))
+        {
+            _inputType = json_val.getInt("inputType");
         }
         base._parseAttr(json_val);
     }
@@ -643,6 +651,68 @@ public class YAnButton : YFunction
             res = this._pulseTimer;
         }
         return res;
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the decoding method applied to the input (analog or multiplexed binary switches).
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   either <c>YAnButton.INPUTTYPE_ANALOG</c> or <c>YAnButton.INPUTTYPE_DIGITAL4</c>, according to the
+     *   decoding method applied to the input (analog or multiplexed binary switches)
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YAnButton.INPUTTYPE_INVALID</c>.
+     * </para>
+     */
+    public int get_inputType()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return INPUTTYPE_INVALID;
+                }
+            }
+            res = this._inputType;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Changes the decoding method applied to the input (analog or multiplexed binary switches).
+     * <para>
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the modification must be kept.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="newval">
+     *   either <c>YAnButton.INPUTTYPE_ANALOG</c> or <c>YAnButton.INPUTTYPE_DIGITAL4</c>, according to the
+     *   decoding method applied to the input (analog or multiplexed binary switches)
+     * </param>
+     * <para>
+     * </para>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public int set_inputType(int newval)
+    {
+        string rest_val;
+        lock (_thisLock) {
+            rest_val = (newval).ToString();
+            return _setAttr("inputType", rest_val);
+        }
     }
 
 

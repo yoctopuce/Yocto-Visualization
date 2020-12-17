@@ -210,7 +210,7 @@ namespace YoctoVisualisation
           case 5: reason = "<"; if (SensorValue < Value) alarm = true; break;
       }
       if (!alarm) return;
-      if (((DateTime.Now - lastAlarm).Seconds) < Delay) return;
+      if (((DateTime.Now - lastAlarm).TotalSeconds) < Delay) return;
 
       string source = "ALARM " + (index + 1).ToString();
       LogManager.Log(source+" on " + parent.get_hardwareId() + "/" + parent.get_friendlyName() + " (" + SensorValue.ToString() + reason + Value.ToString() + ")");

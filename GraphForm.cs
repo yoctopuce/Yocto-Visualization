@@ -240,13 +240,12 @@ namespace YoctoVisualisation
         gr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         gr.FillEllipse(bIcon, new Rectangle(1, 1, 14, 14));
         gr.DrawEllipse(pIcon, new Rectangle(1, 1, 14, 14));
-
         gr.DrawString((i + 1).ToString(), font1, Brushes.Black,  new Rectangle(1,1,16, 16),stringFormat);
-
-
-;
         markersMenu.DropDownItems.Add(new ToolStripMenuItem("Place marker #" + (i + 1).ToString(), bm, (object sender, EventArgs e) => { startMarkerCapture(index); }));
+        gr.Dispose();
       }
+      pIcon.Dispose();
+      bIcon.Dispose();
       markersMenu.DropDownOpening += updateMakerList;
       contextMenuStrip1.Items.Insert(2, new ToolStripSeparator());
       contextMenuStrip1.Items.Insert(2, new ToolStripMenuItem("Clear dataloggers", Resources.cleardatalogger, clearDataLogger));

@@ -30,7 +30,9 @@ namespace YoctoVisualisation
           {
             g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
             g.DrawLine(p, Width - buttonWidth, 0, Width - buttonWidth, Height);
+            p.Dispose();
           }
+          
         }
       }
     }
@@ -1212,8 +1214,10 @@ namespace YoctoVisualisation
     {
       if (input == null) return;
       if (_getValueCallback == null) return;
-      int propValue = (int)_getValueCallback(this);
-      int inputValue;
+      object o = _getValueCallback(this);
+      if (o == null) return;
+      int propValue = (int)o;
+      int inputValue ;
       bool ok = false;
       if (int.TryParse(input.Text, out inputValue))
       {
@@ -1288,8 +1292,9 @@ namespace YoctoVisualisation
 
       if (_getValueCallback == null) return;
      
-
-      double propValue = (double)_getValueCallback(this);
+      object o = _getValueCallback(this);
+      if (o == null) return;
+      double propValue = (double)o;
       double inputValue;
       bool  ok = false;
       if  (Double.TryParse(input.Text, out inputValue))
@@ -1905,8 +1910,10 @@ namespace YoctoVisualisation
         int w = 20;
         int h = baseheight;
         Bitmap DrawArea = new Bitmap(w, h);
+        Image previous = previewBox.Image;
         previewBox.Image = DrawArea;
-        Graphics g = Graphics.FromImage(DrawArea);
+        if (previous != null) previous.Dispose();
+         Graphics g = Graphics.FromImage(DrawArea);
         g.FillRectangle(Brushes.White, 0, 0, w, h);
         g.FillRectangle(Brushes.Black, 0, 0, w >> 1, h >> 1);
         g.FillRectangle(Brushes.Black, w >> 1, h >> 1, w >> 1, h >> 1);

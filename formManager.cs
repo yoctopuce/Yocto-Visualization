@@ -182,6 +182,7 @@ namespace YoctoVisualisation
     private void ExitTheApplication(object sender, EventArgs e)
     {
       mainForm.Terminate();
+      
     }
 
     private void deleteCurrentForm(object sender, EventArgs e)
@@ -272,6 +273,10 @@ namespace YoctoVisualisation
       {
         mainForm.Terminate();
         e.Cancel = true;
+       
+        YAPI.FreeAPI();
+        
+
       }
     }
 

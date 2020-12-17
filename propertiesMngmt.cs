@@ -351,8 +351,11 @@ namespace YoctoVisualisation
                       p.SetValue(o, colorConverter.colorFromHex(value), null);
                       break;
                     case "YoctoVisualisation.doubleNan":
-                      value = node.Attributes["value"].InnerText;
-                      p.SetValue(o, new doubleNan(value), null);
+                      //value = node.Attributes["value"].InnerText;
+                      double dvalue= (XmlFileVersion >= 2.1) ?
+                            Convert.ToDouble(node.Attributes["value"].InnerText, CultureInfo.InvariantCulture)
+                          : Convert.ToDouble(node.Attributes["value"].InnerText);
+                        p.SetValue(o, new doubleNan(dvalue), null);
                       break;
                      case "YDataRendering.xAxisPosition":
                         double xpos = XmlFileVersion >= 2.1 ?

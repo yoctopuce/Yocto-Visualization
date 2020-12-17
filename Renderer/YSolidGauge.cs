@@ -107,21 +107,21 @@ namespace YDataRendering
 
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderpen = null; redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _borderpen); redraw(); } }
 
   
 
     private Brush _bgBrush = null;
     private Color _backgroundColor1 = Color.FromArgb(255, 240, 240, 240);
-    public Color backgroundColor1 { get { return _backgroundColor1; } set { _backgroundColor1 = value; _bgBrush = null; redraw(); } }
+    public Color backgroundColor1 { get { return _backgroundColor1; } set { _backgroundColor1 = value; YDataRenderer.Destroy(ref _bgBrush); redraw(); } }
     private Color _backgroundColor2 = Color.FromArgb(255, 200, 200, 200);
-    public Color backgroundColor2 { get { return _backgroundColor2; } set { _backgroundColor2 = value; _bgBrush = null; redraw(); } }
+    public Color backgroundColor2 { get { return _backgroundColor2; } set { _backgroundColor2 = value; YDataRenderer.Destroy(ref _bgBrush ); redraw(); } }
 
 
     private double _borderThickness = 5;
     public double borderThickness { get { return _borderThickness; }
       set { if (value < 0) throw new ArgumentException("Thickness must be a positive value");
-            _borderThickness = value; _borderpen = null; _path = null; redraw(); } }
+            _borderThickness = value; YDataRenderer.Destroy(ref _borderpen); _path = null; redraw(); } }
 
     private ValueFormater _valueFormater = null;
     public ValueFormater valueFormater
@@ -180,7 +180,7 @@ namespace YDataRendering
     DrawPrameters lastDrawParameters;
 
     private DisplayMode _displayMode = DisplayMode.DISPLAY90;
-    public DisplayMode displayMode { get { return _displayMode; } set { _displayMode = value; _path = null; _bgBrush = null; redraw(); } }
+    public DisplayMode displayMode { get { return _displayMode; } set { _displayMode = value; _path = null; YDataRenderer.Destroy(ref _bgBrush); redraw(); } }
 
     private struct DrawPrameters
     {

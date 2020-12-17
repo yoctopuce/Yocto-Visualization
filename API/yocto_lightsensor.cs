@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_lightsensor.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_lightsensor.cs 42951 2020-12-14 09:43:29Z seb $
  *
  *  Implements yFindLightSensor(), the high-level API for LightSensor functions
  *
@@ -82,6 +82,7 @@ public class YLightSensor : YSensor
     public const int MEASURETYPE_INFRARED = 2;
     public const int MEASURETYPE_HIGH_RATE = 3;
     public const int MEASURETYPE_HIGH_ENERGY = 4;
+    public const int MEASURETYPE_HIGH_RESOLUTION = 5;
     public const int MEASURETYPE_INVALID = -1;
     protected int _measureType = MEASURETYPE_INVALID;
     protected ValueCallback _valueCallbackLightSensor = null;
@@ -159,8 +160,9 @@ public class YLightSensor : YSensor
      * </summary>
      * <returns>
      *   a value among <c>YLightSensor.MEASURETYPE_HUMAN_EYE</c>, <c>YLightSensor.MEASURETYPE_WIDE_SPECTRUM</c>,
-     *   <c>YLightSensor.MEASURETYPE_INFRARED</c>, <c>YLightSensor.MEASURETYPE_HIGH_RATE</c> and
-     *   <c>YLightSensor.MEASURETYPE_HIGH_ENERGY</c> corresponding to the type of light measure
+     *   <c>YLightSensor.MEASURETYPE_INFRARED</c>, <c>YLightSensor.MEASURETYPE_HIGH_RATE</c>,
+     *   <c>YLightSensor.MEASURETYPE_HIGH_ENERGY</c> and <c>YLightSensor.MEASURETYPE_HIGH_RESOLUTION</c>
+     *   corresponding to the type of light measure
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YLightSensor.MEASURETYPE_INVALID</c>.
@@ -195,8 +197,9 @@ public class YLightSensor : YSensor
      * </summary>
      * <param name="newval">
      *   a value among <c>YLightSensor.MEASURETYPE_HUMAN_EYE</c>, <c>YLightSensor.MEASURETYPE_WIDE_SPECTRUM</c>,
-     *   <c>YLightSensor.MEASURETYPE_INFRARED</c>, <c>YLightSensor.MEASURETYPE_HIGH_RATE</c> and
-     *   <c>YLightSensor.MEASURETYPE_HIGH_ENERGY</c> corresponding to the light sensor type used in the device
+     *   <c>YLightSensor.MEASURETYPE_INFRARED</c>, <c>YLightSensor.MEASURETYPE_HIGH_RATE</c>,
+     *   <c>YLightSensor.MEASURETYPE_HIGH_ENERGY</c> and <c>YLightSensor.MEASURETYPE_HIGH_RESOLUTION</c>
+     *   corresponding to the light sensor type used in the device
      * </param>
      * <para>
      * </para>

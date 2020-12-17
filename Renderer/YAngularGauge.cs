@@ -143,17 +143,17 @@ namespace YDataRendering
 
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _borderpen = null; redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _borderpen); redraw(); } }
 
     private Brush _bgBrush = null;
     private Color _backgroundColor1 = Color.FromArgb(255, 240, 240, 240);
-    public Color backgroundColor1 { get { return _backgroundColor1; } set { _backgroundColor1 = value; _bgBrush = null; redraw(); } }
+    public Color backgroundColor1 { get { return _backgroundColor1; } set { _backgroundColor1 = value; YDataRenderer.Destroy(ref _bgBrush ); redraw(); } }
     private Color _backgroundColor2 = Color.FromArgb(255, 200, 200, 200);
-    public Color backgroundColor2 { get { return _backgroundColor2; } set { _backgroundColor2 = value; _bgBrush = null; redraw(); } }
+    public Color backgroundColor2 { get { return _backgroundColor2; } set { _backgroundColor2 = value; YDataRenderer.Destroy(ref _bgBrush ); redraw(); } }
 
 
     private double _borderThickness = 5;
-    public double borderThickness { get { return _borderThickness; } set { _borderThickness = value; _borderpen = null; redraw(); } }
+    public double borderThickness { get { return _borderThickness; } set { _borderThickness = value; YDataRenderer.Destroy(ref _borderpen ); redraw(); } }
 
     private ValueFormater _valueFormater = null;
     public ValueFormater valueFormater
@@ -190,14 +190,14 @@ namespace YDataRendering
     Pen _graduationPen = null;
 
     private Color _graduationColor = Color.Black;
-    public Color graduationColor { get { return _graduationColor; } set { _graduationColor = value; _graduationPen = null; redraw(); } }
+    public Color graduationColor { get { return _graduationColor; } set { _graduationColor = value; YDataRenderer.Destroy(ref _graduationPen ); redraw(); } }
 
     private double _graduationThickness = 2;
     public double graduationThickness
     {
       get { return _graduationThickness; }
       set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-           _graduationThickness = value; _graduationPen = null; redraw(); }
+           _graduationThickness = value; YDataRenderer.Destroy(ref _graduationPen); redraw(); }
     }
 
     private double _graduationSize = 10;
@@ -250,14 +250,14 @@ namespace YDataRendering
     public Color subgraduationColor { get { return _subgraduationColor; }
       set {
         _subgraduationColor = value;
-        _subgraduationPen = null; redraw(); } }
+        YDataRenderer.Destroy(ref _subgraduationPen); redraw(); } }
 
     private double _subgraduationThickness = 1;
     public double subgraduationThickness
     {
       get { return _subgraduationThickness; }
       set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-           _subgraduationThickness = value; _subgraduationPen = null; redraw(); }
+           _subgraduationThickness = value; YDataRenderer.Destroy(ref _subgraduationPen ); redraw(); }
     }
 
     private double _subgraduationSize = 5;
@@ -305,7 +305,7 @@ namespace YDataRendering
 
     private Brush _needleBrush = null;
     private Color _needleColor = Color.Red;
-    public Color needleColor { get { return _needleColor; } set { _needleColor = value; _needleBrush = null; redraw(); } }
+    public Color needleColor { get { return _needleColor; } set { _needleColor = value; YDataRenderer.Destroy(ref _needleBrush); redraw(); } }
 
 
     private double _needleMaxSpeed = 5;
@@ -334,12 +334,12 @@ namespace YDataRendering
 
     private Pen _needleContourPen = null;
     private Color _needleContourColor = Color.DarkRed;
-    public Color needleContourColor { get { return _needleContourColor; } set { _needleContourColor = value; _needleContourPen = null; redraw(); } }
+    public Color needleContourColor { get { return _needleContourColor; } set { _needleContourColor = value; YDataRenderer.Destroy(ref _needleContourPen) ; redraw(); } }
 
     private double _needleContourThickness = 1;
     public double needleContourThickness { get { return _needleContourThickness; }
       set { if (value <= 0) throw new ArgumentException("Thickness must be a positive value");
-            _needleContourThickness = value; _needleContourPen = null; redraw();
+            _needleContourThickness = value; YDataRenderer.Destroy(ref _needleContourPen ); redraw();
       } }
 
     // public FontParams font;

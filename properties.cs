@@ -651,14 +651,14 @@ public static class sensorPrecisionTypeDescription
       set { _AngularGauge_graduationSize = value; }
     }
 
-    private double _AngularGauge_graduationOuterRadius = 98;
+    private double _AngularGauge_graduationOuterRadiusSize = 98;
     [DisplayName("Main gradation radius (%)"),
      CategoryAttribute("Gauge gradations"),
      DescriptionAttribute("Main gradation marks outer radius in percent, relative to dial radius")]
-    public double AngularGauge_graduationOuterRadius
+    public double AngularGauge_graduationOuterRadiusSize
     {
-      get { return _AngularGauge_graduationOuterRadius; }
-      set { _AngularGauge_graduationOuterRadius = value; }
+      get { return _AngularGauge_graduationOuterRadiusSize; }
+      set { _AngularGauge_graduationOuterRadiusSize = value; }
     }
 
   

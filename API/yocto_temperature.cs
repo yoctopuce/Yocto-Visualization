@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_temperature.cs 40281 2020-05-04 13:39:55Z seb $
+ *  $Id: yocto_temperature.cs 42054 2020-10-14 09:46:38Z seb $
  *
  *  Implements yFindTemperature(), the high-level API for Temperature functions
  *
@@ -529,8 +529,8 @@ public class YTemperature : YSensor
         double res100;
         List<double> tempValues = new List<double>();
         List<double> resValues = new List<double>();
-        t0 = 25.0+275.15;
-        t1 = 100.0+275.15;
+        t0 = 25.0+273.15;
+        t1 = 100.0+273.15;
         res100 = res25 * Math.Exp(beta*(1.0/t1 - 1.0/t0));
         tempValues.Clear();
         resValues.Clear();

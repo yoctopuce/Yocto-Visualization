@@ -137,13 +137,13 @@ namespace YDataRendering
     public string text { get { return _text; } set { _text = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
 
     private Color _bgColor = Color.FromArgb(255, 255, 255, 192);
-    public Color bgColor { get { return _bgColor; } set { _bgColor = value; _bgBrush = null; if (_enabled) _parentRenderer.redraw(); } }
+    public Color bgColor { get { return _bgColor; } set { _bgColor = value; YDataRenderer.Destroy(ref _bgBrush); if (_enabled) _parentRenderer.redraw(); } }
 
     private Color _borderColor = Color.Black;
-    public Color borderColor { get { return _borderColor; } set { _borderColor = value; _pen = null; if (_enabled) _parentRenderer.redraw(); } }
+    public Color borderColor { get { return _borderColor; } set { _borderColor = value; YDataRenderer.Destroy(ref _pen ); if (_enabled) _parentRenderer.redraw(); } }
 
     private double _borderthickness = 1.0;
-    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _parentRenderer.clearCachedObjects(); _pen = null; if (_enabled) _parentRenderer.redraw(); } }
+    public double borderthickness { get { return _borderthickness; } set { _borderthickness = value; _parentRenderer.clearCachedObjects(); YDataRenderer.Destroy(ref _pen ); if (_enabled) _parentRenderer.redraw(); } }
 
     private double _padding = 10;
     public double padding { get { return _padding; } set { _padding = value; _parentRenderer.clearCachedObjects(); if (_enabled) _parentRenderer.redraw(); } }
@@ -171,7 +171,7 @@ namespace YDataRendering
     {
       get
       {
-        _pen = new Pen(_borderColor, (float)_borderthickness);
+        if (_pen==null)_pen = new Pen(_borderColor, (float)_borderthickness);
         return _pen;
       }
     }
@@ -281,7 +281,7 @@ namespace YDataRendering
 
 
         private Color _color = Color.FromArgb(128, 255, 0, 0);
-        public Color color { get { return _color; } set { _color = value; _zoneBrush = null; if (visible) _parentRenderer.redraw(); } }
+        public Color color { get { return _color; } set { _color = value; YDataRenderer.Destroy(ref _zoneBrush); if (visible) _parentRenderer.redraw(); } }
 
         private bool _visible = false;
         public bool visible { get { return _visible; } set { _visible = value; _parentRenderer.redraw(); } }
@@ -466,7 +466,7 @@ namespace YDataRendering
 
     public void ResetFont(Proportional source)
     {
-      _font = null;
+      YDataRenderer.Destroy( ref _font) ;
       if (source != null) _parentRenderer.ProportionnalValueChanged(source);
     }
 
@@ -506,14 +506,14 @@ namespace YDataRendering
     public Color color
     {
       get { return _color; }
-      set { if (_color != value) { _color = value; _brush = null; _parentRenderer.redraw(); } }
+      set { if (_color != value) { _color = value; YDataRenderer.Destroy(ref _brush); _parentRenderer.redraw(); } }
     }
 
     private Nullable<Color> _alternateColor = null;
     public Nullable<Color> alternateColor
     {
       get { return _alternateColor; }
-      set { if (_alternateColor != value) { _alternateColor = value; _brush = null; _parentRenderer.redraw(); } }
+      set { if (_alternateColor != value) { _alternateColor = value; YDataRenderer.Destroy(ref _brush ); _parentRenderer.redraw(); } }
     }
 
 
@@ -569,6 +569,48 @@ namespace YDataRendering
 
   public abstract class YDataRenderer
   {
+    public static void Destroy(ref Brush b)
+    { if (b!=null)
+      {
+        b.Dispose();
+        b = null;
+
+      }
+    }
+
+    public static void Destroy(ref LinearGradientBrush b)
+    {
+      if (b != null)
+      {
+        b.Dispose();
+        b = null;
+
+      }
+    }
+
+    
+    public static void Destroy(ref Font f)
+    {
+      if (f != null)
+      {
+        f.Dispose();
+        f = null;
+
+      }
+    }
+
+
+
+    public static void Destroy(ref Pen p)
+    {
+      if (p != null)
+      {
+        p.Dispose();
+        p = null;
+
+      }
+    }
+
     private RegisterHotKeyClass _RegisKey = new RegisterHotKeyClass();
     protected int _redrawAllowed = 1;
     private int _refWidth = 1;
@@ -771,9 +813,12 @@ namespace YDataRendering
       DisableRedraw();
 
       Bitmap DrawArea = new Bitmap(w, h);
+      Image previous = UIContainer.Image;
       UIContainer.Image = DrawArea;
+      // greatly improve average memory consumption on Windows
+      // fixes a massive memory leak on Mono 6 (but libgdiplus 6.0.5 must installed)
+      if (previous != null) previous.Dispose(); 
       YGraphics g;
-
       watch.Reset();
       watch.Start();
       g = new YGraphics(DrawArea);
@@ -1757,17 +1802,35 @@ namespace YDataRendering
 #if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    public virtual void DrawString(string s, Font font, Brush brush, float x, float y) { _g.DrawString(s, font, brush, x, y); }
+    public virtual void DrawString(string s, Font font, Brush brush, float x, float y)
+    {//  Pen  p = new Pen(Color.Red, 1);
+   //   _g.DrawLine(p, x - 5, y, x + 5, y);
+   //   _g.DrawLine(p, x , y-5, x , y+5);
+
+      _g.DrawString(s, font, brush, x, y); }
 
 #if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    public virtual void DrawString(string s, Font font, Brush brush, PointF point, StringFormat format) { _g.DrawString(s, font, brush, point, format); }
+    public virtual void DrawString(string s, Font font, Brush brush, PointF point, StringFormat format)
+    {
+    //  Pen pen = new Pen(Color.Red, 1);
+    //  _g.DrawLine(pen, point.X - 5, point.Y, point.X + 5, point.Y);
+    //  _g.DrawLine(pen, point.X, point.Y - 5, point.X, point.Y + 5);
+      _g.DrawString(s, font, brush, point, format); }
 
 #if (!NET35 && !NET40)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    public virtual void DrawString(string s, Font font, Brush brush, PointF point) { _g.DrawString(s, font, brush, point); }
+    public virtual void DrawString(string s, Font font, Brush brush, PointF point)
+    {
+     // Pen pen = new Pen(Color.Red, 1);
+     // _g.DrawLine(pen, point.X - 5, point.Y, point.X + 5, point.Y);
+     // _g.DrawLine(pen, point.X, point.Y - 5, point.X, point.Y + 5);
+
+      _g.DrawString(s, font, brush, point);
+
+    }
 
 
 #if (!NET35 && !NET40)

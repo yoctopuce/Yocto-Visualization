@@ -56,10 +56,10 @@ namespace YDataRendering
     private Brush _bgBrush = null;
 
     private Color _backgroundColor1 = Color.Black;
-    public Color backgroundColor1 { get { return _backgroundColor1; } set { _backgroundColor1 = value; _bgBrush = null; redraw(); } }
+    public Color backgroundColor1 { get { return _backgroundColor1; } set { _backgroundColor1 = value; YDataRenderer.Destroy(ref _bgBrush); redraw(); } }
 
     private Color _backgroundColor2 = Color.FromArgb(255,48, 48, 48);
-    public Color backgroundColor2 { get { return _backgroundColor2; } set { _backgroundColor2 = value; _bgBrush = null; redraw(); } }
+    public Color backgroundColor2 { get { return _backgroundColor2; } set { _backgroundColor2 = value; YDataRenderer.Destroy(ref _bgBrush ); redraw(); } }
 
     private String _alternateValue = null;
     public String alternateValue  { get { return _alternateValue; } set { _alternateValue = value; redraw(); } }
