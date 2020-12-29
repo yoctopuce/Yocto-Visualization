@@ -7,9 +7,9 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.yoctopuce.yoctovisualization</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.43016</string>
+	<string>2.0.43172</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.43016</string>
+	<string>2.0.43172</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Yocto-Visualization</string>
 	<key>NSHumanReadableCopyright</key>
