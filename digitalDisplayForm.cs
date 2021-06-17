@@ -191,10 +191,7 @@ namespace YoctoVisualisation
         case "display":
           GenericProperties.copyProperty_STT(_display, prop, fullpropname, path);
           break;
-        case "DataSource":
-          manager.AjustHint("");
-          mainForm.refreshPropertiesForm();
-          break;
+      
       }
 
 

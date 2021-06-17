@@ -232,7 +232,7 @@ namespace YoctoVisualisation
                 string propname = node.Name.Substring(5);
                 string value = node.Attributes["value"].InnerText;
                 System.Reflection.PropertyInfo info = myForm.GetType().GetProperty(propname);
-                setData(info, myForm, propname, value);
+                if (info!=null) setData(info, myForm, propname, value);
 
               }
               break;

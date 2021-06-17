@@ -404,7 +404,8 @@ namespace YoctoVisualisation
     public string Form_Text
     {
       get { return _Form_Text; }
-      set { _Form_Text = value; }
+      set {
+        _Form_Text = value; }
     }
 
     public enum BordersMode
@@ -962,7 +963,9 @@ namespace YoctoVisualisation
     { ApplyAllProperties(target, NoFilter, APPLYDIRECTION.SETTINGS_TO_TARGET); }
 
     public void RefreshAllProperties(object target)
-    { ApplyAllProperties(target, NoFilter, APPLYDIRECTION.SETTINGS_FROM_TARGET); }
+    {
+      ApplyAllProperties(target, NoFilter, APPLYDIRECTION.SETTINGS_FROM_TARGET);
+    }
 
 
   

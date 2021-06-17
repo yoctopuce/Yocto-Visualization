@@ -180,7 +180,7 @@ namespace YoctoVisualisation
 
           }
         }
-        catch (Exception e) { LogManager.Log("Cannot load configuration file " + constants.configfile + ": " + e.Message); }
+       catch (Exception e) { LogManager.Log("Cannot load configuration file " + constants.configfile + ": " + e.Message); }
 
       }
       else configWindow.DefaultInit();

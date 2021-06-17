@@ -315,7 +315,7 @@ namespace YoctoVisualisation
 
     private void MarkedCaptureStarted(Marker src)
     {
-      string str = src.text != "" ? str = "Click to place the \"" + src.shortText + "\" marker." : str = "Click to place the marker.";
+      string str = src.text != "" ?  "Click to place the \"" + src.shortText + "\" marker." :  "Click to place the marker.";
       str += "\nRight-click to cancel the operation.";
       captureRunningPanel.text    = str;
       captureRunningPanel.enabled = true;

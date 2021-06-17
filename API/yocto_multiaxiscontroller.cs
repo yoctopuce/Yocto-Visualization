@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_multiaxiscontroller.cs 40281 2020-05-04 13:39:55Z seb $
+ *  $Id: yocto_multiaxiscontroller.cs 43478 2021-01-21 13:49:12Z mvuilleu $
  *
  *  Implements yFindMultiAxisController(), the high-level API for MultiAxisController functions
  *
@@ -353,7 +353,7 @@ public class YMultiAxisController : YFunction
         //may throw an exception
         retBin = this._download(url);
         res = retBin[0];
-        if (res == 49) {
+        if (res < 58) {
             if (!(res == 48)) {
                 this._throw(YAPI.DEVICE_BUSY, "Motor command pipeline is full, try again later");
                 return YAPI.DEVICE_BUSY;

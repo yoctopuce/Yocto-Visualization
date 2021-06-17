@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_quadraturedecoder.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_quadraturedecoder.cs 45292 2021-05-25 23:27:54Z mvuilleu $
  *
  *  Implements yFindQuadratureDecoder(), the high-level API for QuadratureDecoder functions
  *
@@ -77,8 +77,10 @@ public class YQuadratureDecoder : YSensor
     public const int DECODING_OFF = 0;
     public const int DECODING_ON = 1;
     public const int DECODING_INVALID = -1;
+    public const int EDGESPERCYCLE_INVALID = YAPI.INVALID_UINT;
     protected double _speed = SPEED_INVALID;
     protected int _decoding = DECODING_INVALID;
+    protected int _edgesPerCycle = EDGESPERCYCLE_INVALID;
     protected ValueCallback _valueCallbackQuadratureDecoder = null;
     protected TimedReportCallback _timedReportCallbackQuadratureDecoder = null;
     //--- (end of YQuadratureDecoder definitions)
@@ -102,6 +104,10 @@ public class YQuadratureDecoder : YSensor
         if (json_val.has("decoding"))
         {
             _decoding = json_val.getInt("decoding") > 0 ? 1 : 0;
+        }
+        if (json_val.has("edgesPerCycle"))
+        {
+            _edgesPerCycle = json_val.getInt("edgesPerCycle");
         }
         base._parseAttr(json_val);
     }
@@ -139,14 +145,14 @@ public class YQuadratureDecoder : YSensor
 
     /**
      * <summary>
-     *   Returns the increments frequency, in Hz.
+     *   Returns the cycle frequency, in Hz.
      * <para>
      * </para>
      * <para>
      * </para>
      * </summary>
      * <returns>
-     *   a floating point number corresponding to the increments frequency, in Hz
+     *   a floating point number corresponding to the cycle frequency, in Hz
      * </returns>
      * <para>
      *   On failure, throws an exception or returns <c>YQuadratureDecoder.SPEED_INVALID</c>.
@@ -226,6 +232,67 @@ public class YQuadratureDecoder : YSensor
         lock (_thisLock) {
             rest_val = (newval > 0 ? "1" : "0");
             return _setAttr("decoding", rest_val);
+        }
+    }
+
+
+    /**
+     * <summary>
+     *   Returns the edge count per full cycle configuration setting.
+     * <para>
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   an integer corresponding to the edge count per full cycle configuration setting
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YQuadratureDecoder.EDGESPERCYCLE_INVALID</c>.
+     * </para>
+     */
+    public int get_edgesPerCycle()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return EDGESPERCYCLE_INVALID;
+                }
+            }
+            res = this._edgesPerCycle;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Changes the edge count per full cycle configuration setting.
+     * <para>
+     *   Remember to call the <c>saveToFlash()</c>
+     *   method of the module if the modification must be kept.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="newval">
+     *   an integer corresponding to the edge count per full cycle configuration setting
+     * </param>
+     * <para>
+     * </para>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public int set_edgesPerCycle(int newval)
+    {
+        string rest_val;
+        lock (_thisLock) {
+            rest_val = (newval).ToString();
+            return _setAttr("edgesPerCycle", rest_val);
         }
     }
 

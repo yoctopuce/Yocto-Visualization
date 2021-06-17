@@ -268,8 +268,10 @@ namespace YoctoVisualisation
 
     public virtual void addToEditor()
     {
-      if ((mainlabel != null) && (!_parentPanel.Controls.Contains(mainlabel))) _parentPanel.Controls.Add(mainlabel);
-      if ((expandCtrl != null) && (!_parentPanel.Controls.Contains(expandCtrl))) _parentPanel.Controls.Add(expandCtrl);
+      if ((mainlabel != null) && (!_parentPanel.Controls.Contains(mainlabel)))
+        _parentPanel.Controls.Add(mainlabel);
+      if ((expandCtrl != null) && (!_parentPanel.Controls.Contains(expandCtrl)))
+        _parentPanel.Controls.Add(expandCtrl);
 
     }
 
@@ -650,23 +652,12 @@ namespace YoctoVisualisation
 
       _structRoot = dataStucture;
       List<UIElement> toExpand = new List<UIElement>();
-
-      foreach (PropertyInfo ps in dataStucture.GetType().GetProperties())
-      {
-        if (ps.CanWrite)
-        {
-
-          CustomAttributesExtractor attr = new CustomAttributesExtractor(ps);
-         
-         if (attr.available)
-          { 
-
-
-        
-
-
-
-            UIElement section = this;
+      PropertyInfo[] props = dataStucture.GetType().GetProperties();
+      foreach (PropertyInfo ps in props)
+      { if (ps.CanWrite)
+        { CustomAttributesExtractor attr = new CustomAttributesExtractor(ps);
+          if (attr.available)
+          { UIElement section = this;
             if (attr.category != "")
             {
               if (subsections.ContainsKey(attr.category)) section = subsections[attr.category];

@@ -78,7 +78,7 @@ namespace YoctoVisualisation
       {
         ExportToClipboard.Text = "Export to clipboard (2) (not available on Linux).";
         ExportToClipboard.Enabled = false;
-       
+
         ExportToPNG.Checked = true;
 
       }
@@ -90,7 +90,7 @@ namespace YoctoVisualisation
 
       new InputFieldManager(MaxDataRecordsCount, InputFieldManager.dataType.DATA_POSITIVE_INT, false, Double.NaN, Double.NaN, null);
       new InputFieldManager(MaxDataPointsCount, InputFieldManager.dataType.DATA_POSITIVE_INT, false, Double.NaN, Double.NaN, null);
-      new InputFieldManager(maxPointsPerDatalogger, InputFieldManager.dataType.DATA_INT, false,-1, Double.NaN, null);
+      new InputFieldManager(maxPointsPerDatalogger, InputFieldManager.dataType.DATA_INT, false, -1, Double.NaN, null);
 
 
 
@@ -107,30 +107,30 @@ namespace YoctoVisualisation
     }
 
     private void RemoveHub(Hub.HubType t, string fullURL)
-    {  if  (t == Hub.HubType.LOCALUSB)
-      
+    { if (t == Hub.HubType.LOCALUSB)
+
+      {
+        LogManager.Log("unRegistering  USB ");
+        YAPI.UnregisterHub("usb");
+        usbFailed.Visible = false;
+        usbOk.Visible = false;
+        return;
+      }
+      else
+      {
+        if (t == Hub.HubType.LOCALHUB)
         {
-          LogManager.Log("unRegistering  USB ");
-          YAPI.UnregisterHub("usb");
-          usbFailed.Visible = false;
-          usbOk.Visible = false;
+          LogManager.Log("unRegistering  Local VirtualHub (127.0.0.1) ");
+          YAPI.UnregisterHub("127.0.0.1");
+          hubFailed.Visible = false;
+          hubOk.Visible = false;
+          hubWaiting.Visible = false;
           return;
         }
-       else
-       {
-       if (t == Hub.HubType.LOCALHUB)
-        {
-            LogManager.Log("unRegistering  Local VirtualHub (127.0.0.1) ");
-            YAPI.UnregisterHub("127.0.0.1");
-            hubFailed.Visible = false;
-            hubOk.Visible = false;
-            hubWaiting.Visible = false;
-            return;
-          }
 
-       }
+      }
 
-      for (int i = hubList.Count-1;i>=0;i--)
+      for (int i = hubList.Count - 1; i >= 0; i--)
       {
         if (hubList[i].get_obfuscatedURL() == fullURL)
         {
@@ -138,7 +138,7 @@ namespace YoctoVisualisation
           hubList.RemoveAt(i);
           string url = h.get_obfuscatedURL();
           LogManager.Log("unRegistering " + h.get_obfuscatedURL());
-          YAPI.UnregisterHub( h.get_fullUrl());
+          YAPI.UnregisterHub(h.get_fullUrl());
           for (int j = listView1.Items.Count - 1; j >= 0; j--)
             if (listView1.Items[j].Text == url)
               listView1.Items.RemoveAt(j);
@@ -153,12 +153,12 @@ namespace YoctoVisualisation
 
 
 
-    
+
 
     private void AddHub(Hub h)
     {
       string errmsg = "";
-      if (h.hubType == Hub.HubType.LOCALUSB) 
+      if (h.hubType == Hub.HubType.LOCALUSB)
       {
         LogManager.Log("preregistering  USB ");
         if (YAPI.RegisterHub("usb", ref errmsg) != YAPI.SUCCESS)
@@ -185,7 +185,7 @@ namespace YoctoVisualisation
 
       if (h.hubType == Hub.HubType.LOCALHUB)
       {
-        LogManager.Log("preregistering  local VirtualHub (127.0.0.1)" );
+        LogManager.Log("preregistering  local VirtualHub (127.0.0.1)");
         if (YAPI.PreregisterHub("127.0.0.1", ref errmsg) != YAPI.SUCCESS)
         {
           ToolTip tt = new ToolTip();
@@ -200,7 +200,7 @@ namespace YoctoVisualisation
 
         return;
       }
-      
+
 
       ListViewItem item = listView1.Items.Add(h.get_obfuscatedURL());
       hubList.Add(h);
@@ -215,7 +215,7 @@ namespace YoctoVisualisation
         item.ImageIndex = 1;
         return;
       }
-    
+
 
 
 
@@ -228,20 +228,20 @@ namespace YoctoVisualisation
          + "  <UseVirtualHub value=\"" + (UseVirtualHub.Checked ? "TRUE" : "FALSE") + "\"/>\n"
          + "  <Hubs>\n";
       for (int i = 0; i < hubList.Count; i++)
-        res += "    "+hubList[i].XmlCode()+"\n";
+        res += "    " + hubList[i].XmlCode() + "\n";
 
       res += "  </Hubs>\n";
 
       res += "  <Colors>\n";
       List<YColor> c = ColorEdit.colorHistory;
-      for (int i = c.Count - 1; i >= 0; i--) 
-         res = res + "    <Color value=\"" + c[i].ToString() + "\"/>\n";
+      for (int i = c.Count - 1; i >= 0; i--)
+        res = res + "    <Color value=\"" + c[i].ToString() + "\"/>\n";
       res += "  </Colors>\n";
       res += "  <MemoryUsage>\n";
       res += "    <maxPointsPerGraphSerie value= \"" + constants.maxPointsPerGraphSerie.ToString() + "\"/>\n";
       res += "    <maxDataRecordsPerSensor value= \"" + constants.maxDataRecordsPerSensor.ToString() + "\"/>\n";
       res += "    <maxPointsPerDataloggerSerie value= \"" + constants.maxPointsPerDataloggerSerie.ToString() + "\"/>\n";
-      res += "    <deviceListValidity value= \"" +  YAPI.GetDeviceListValidity().ToString() + "\"/>\n";
+      res += "    <deviceListValidity value= \"" + YAPI.GetDeviceListValidity().ToString() + "\"/>\n";
       res += "  </MemoryUsage>\n";
       res += "  <Capture>\n";
       res += "    <Target value= \"" + constants.captureTarget.ToString() + "\"/>\n";
@@ -250,7 +250,7 @@ namespace YoctoVisualisation
       res += "    <Resolution value= \"" + constants.captureDPI.ToString() + "\"/>\n";
       res += "    <Folder value= \"" + System.Security.SecurityElement.Escape(constants.captureFolder) + "\"/>\n";
       res += "    <Width value= \"" + constants.captureWidth.ToString() + "\"/>\n";
-      res += "    <Height value= \"" + constants.captureHeight.ToString() + "\"/>\n";    
+      res += "    <Height value= \"" + constants.captureHeight.ToString() + "\"/>\n";
       res += "  </Capture>\n";
       res += "  <Updates>\n";
       res += "    <checkForUpdate  value = \"" + constants.checkForUpdate.ToString() + "\"/>\n";
@@ -258,7 +258,7 @@ namespace YoctoVisualisation
       res += "  </Updates>\n";
       res += "  <UI>\n";
       res += "    <VerticalDragZoom value= \"" + YGraph.VerticalDragZoomEnabled.ToString() + "\"/>\n";
-      res += "    <DbleClickContextMenu value= \"" + constants.dbleClickBringsUpContextMenu.ToString() + "\"/>\n";   
+      res += "    <DbleClickContextMenu value= \"" + constants.dbleClickBringsUpContextMenu.ToString() + "\"/>\n";
       res += "  </UI>\n";
       res += "</Config>\n";
 
@@ -272,7 +272,7 @@ namespace YoctoVisualisation
         switch (node.Name)
         {
           case "Color":
-            ColorEdit.AddColorToHistory( YColor.fromString(node.Attributes["value"].InnerText));        
+            ColorEdit.AddColorToHistory(YColor.fromString(node.Attributes["value"].InnerText));
             break;
         }
 
@@ -288,8 +288,8 @@ namespace YoctoVisualisation
         {
           case "VerticalDragZoom":
             value = false;
-            if (Boolean.TryParse(node.Attributes["value"].InnerText, out value))          
-               YGraph.VerticalDragZoomEnabled = value;                         
+            if (Boolean.TryParse(node.Attributes["value"].InnerText, out value))
+              YGraph.VerticalDragZoomEnabled = value;
             break;
 
           case "DbleClickContextMenu":
@@ -298,7 +298,7 @@ namespace YoctoVisualisation
               constants.dbleClickBringsUpContextMenu = value;
             break;
 
-           
+
 
         }
       }
@@ -309,13 +309,13 @@ namespace YoctoVisualisation
     {
       foreach (XmlNode node in memNode.ChildNodes)
       {
-       
-       
+
+
         switch (node.Name)
         {
           case "checkForUpdate":
             bool bvalue;
-            if (bool.TryParse(node.Attributes["value"].InnerText, out bvalue))  constants.checkForUpdate =  bvalue;
+            if (bool.TryParse(node.Attributes["value"].InnerText, out bvalue)) constants.checkForUpdate = bvalue;
             break;
 
           case "ignoreBuild":
@@ -328,7 +328,7 @@ namespace YoctoVisualisation
     }
 
 
-            public void InitMemoryUsageParams(XmlNode memNode)
+    public void InitMemoryUsageParams(XmlNode memNode)
     {
       foreach (XmlNode node in memNode.ChildNodes)
       {
@@ -356,12 +356,12 @@ namespace YoctoVisualisation
 
 
           case "maxPointsPerDataloggerSerie":
-               value = 0;
+            value = 0;
             if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
-               {
-                constants.maxPointsPerDataloggerSerie = value;
-                CustomYSensor.MaxLoggerRecords = value;
-              }
+            {
+              constants.maxPointsPerDataloggerSerie = value;
+              CustomYSensor.MaxLoggerRecords = value;
+            }
             break;
 
 
@@ -387,28 +387,28 @@ namespace YoctoVisualisation
         switch (node.Name)
         {
           case "Target":
-            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToClipBoard.ToString()) constants.captureTarget =YDataRenderer.CaptureTargets.ToClipBoard;
-            if ((node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToFile.ToString())||(constants.MonoRunning)) constants.captureTarget =YDataRenderer.CaptureTargets.ToFile;          
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToClipBoard.ToString()) constants.captureTarget = YDataRenderer.CaptureTargets.ToClipBoard;
+            if ((node.Attributes["value"].InnerText == YDataRenderer.CaptureTargets.ToFile.ToString()) || (constants.MonoRunning)) constants.captureTarget = YDataRenderer.CaptureTargets.ToFile;
             break;
           case "Type":
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureType.PNG.ToString()) constants.captureType = YDataRenderer.CaptureType.PNG;
-            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureType.SVG.ToString())  constants.captureType = YDataRenderer.CaptureType.SVG;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureType.SVG.ToString()) constants.captureType = YDataRenderer.CaptureType.SVG;
             break;
           case "Size":
-            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Fixed.ToString()) constants.captureSizePolicy =YDataRenderer.CaptureFormats.Fixed;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Fixed.ToString()) constants.captureSizePolicy = YDataRenderer.CaptureFormats.Fixed;
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.Keep.ToString()) constants.captureSizePolicy = YDataRenderer.CaptureFormats.Keep;
             if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.FixedWidth.ToString()) constants.captureSizePolicy = YDataRenderer.CaptureFormats.FixedWidth;
-            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.FixedHeight.ToString()) constants.captureSizePolicy =YDataRenderer.CaptureFormats.FixedHeight;
+            if (node.Attributes["value"].InnerText == YDataRenderer.CaptureFormats.FixedHeight.ToString()) constants.captureSizePolicy = YDataRenderer.CaptureFormats.FixedHeight;
             break;
           case "Resolution":
-             value = 0;
+            value = 0;
             if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
               if (value > 0) constants.captureDPI = value;
             break;
           case "Width":
             value = 0;
             if (Int32.TryParse(node.Attributes["value"].InnerText, out value))
-              if ((value >= 16) && (value <= 4096))  constants.captureWidth = value;
+              if ((value >= 16) && (value <= 4096)) constants.captureWidth = value;
             break;
           case "Height":
             value = 0;
@@ -472,16 +472,16 @@ namespace YoctoVisualisation
       DpiTextBox.Text = constants.captureDPI.ToString();
       heightUnit.Text = "px (" + (25.4 * (double)constants.captureHeight / (constants.captureDPI)).ToString("0.#") + "mm)";
       widthUnit.Text = "px (" + (25.4 * (double)constants.captureWidth / (constants.captureDPI)).ToString("0.#") + "mm)";
-   
+
 
     }
 
     public void initCaptureParameters()
     {
       ExportToClipboard.Checked = constants.captureTarget == YDataRenderer.CaptureTargets.ToClipBoard;
-    
 
-      ExportToPNG.Checked = constants.captureTarget ==YDataRenderer.CaptureTargets.ToFile;
+
+      ExportToPNG.Checked = constants.captureTarget == YDataRenderer.CaptureTargets.ToFile;
       rasterType.Checked = constants.captureType == YDataRenderer.CaptureType.PNG;
       vectorType.Checked = constants.captureType == YDataRenderer.CaptureType.SVG;
 
@@ -491,7 +491,7 @@ namespace YoctoVisualisation
       dbleClickBringsUpContextMenu.Checked = constants.dbleClickBringsUpContextMenu;
 
 
-      
+
       int n = 0;
       foreach (YDataRenderer.CaptureFormats v in Enum.GetValues(typeof(YDataRenderer.CaptureFormats)))
       {
@@ -513,12 +513,12 @@ namespace YoctoVisualisation
       UseVirtualHub.CheckedChanged += UseVirtualHub_CheckedChanged;
       useUSB.CheckedChanged += useUSB_CheckedChanged;
 
-   
+
     }
 
     public void Init(XmlNode initData)
     {
-     
+
       initdone = true;
       foreach (XmlNode node in initData.ChildNodes)
       {
@@ -553,7 +553,7 @@ namespace YoctoVisualisation
               {
 
                 AddHub(new Hub(subnode));
-              } 
+              }
             break;
         }
 
@@ -563,7 +563,7 @@ namespace YoctoVisualisation
       initCaptureParameters();
     }
 
-    
+
 
     public void NetworkArrival(YNetwork net)
     {
@@ -573,24 +573,24 @@ namespace YoctoVisualisation
       string url = net.get_module().get_url();
       bool isLocalIP;
 
-      for (int j=0;j<hubList.Count;j++)
+      for (int j = 0; j < hubList.Count; j++)
         if (hubList[j].get_connexionUrl() == url)
         {
-           for (int i = 0; i < listView1.Items.Count; i++)
+          for (int i = 0; i < listView1.Items.Count; i++)
             if (listView1.Items[i].Text == hubList[j].get_obfuscatedURL())
             {
               listView1.Items[i].ImageIndex = 2;
               listView1.Items[i].SubItems[1].Text = (loginame != "" ? loginame : netname) + " OK";
               listView1.Items[i].SubItems[2].Text = net.get_module().get_serialNumber();
-                return;
+              return;
             }
 
-         }
+        }
 
       isLocalIP = (ip == "127.0.0.1") || (ip == "0.0.0.0");
       foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
       {
-        if(nic.Supports(NetworkInterfaceComponent.IPv4))
+        if (nic.Supports(NetworkInterfaceComponent.IPv4))
         {
           IPInterfaceProperties ipinfo = nic.GetIPProperties();
           IPAddressInformationCollection ipaddr = ipinfo.AnycastAddresses;
@@ -608,7 +608,7 @@ namespace YoctoVisualisation
         VirtualHubSerial = net.get_module().get_serialNumber();
         return;
       }
-    
+
     }
 
     public void removal(string serialNumber)
@@ -666,12 +666,12 @@ namespace YoctoVisualisation
 
     private void UseVirtualHub_CheckedChanged(object sender, EventArgs e)
     {
-      if (UseVirtualHub.Checked) AddHub(new Hub(Hub.HubType.LOCALHUB)); else RemoveHub(Hub.HubType.LOCALHUB,"");
+      if (UseVirtualHub.Checked) AddHub(new Hub(Hub.HubType.LOCALHUB)); else RemoveHub(Hub.HubType.LOCALHUB, "");
     }
 
     private void useUSB_CheckedChanged(object sender, EventArgs e)
     {
-      if (useUSB.Checked) AddHub(new Hub(Hub.HubType.LOCALUSB)); else RemoveHub(Hub.HubType.LOCALUSB,"");
+      if (useUSB.Checked) AddHub(new Hub(Hub.HubType.LOCALUSB)); else RemoveHub(Hub.HubType.LOCALUSB, "");
     }
 
     public void CheckInit()
@@ -688,21 +688,21 @@ namespace YoctoVisualisation
       }
     }
 
-   
+
 
 
     private void openThisHubConfigurationPageToolStripMenuItem_Click(object sender, EventArgs e)
     {
       int lindex, hindex;
       findSelectedHub(out lindex, out hindex);
-      if (hindex>=0)
-        {
+      if (hindex >= 0)
+      {
         System.Diagnostics.Process.Start(hubList[hindex].get_consoleUrl());
 
       }
 
 
-    
+
     }
 
 
@@ -727,7 +727,7 @@ namespace YoctoVisualisation
         if (sizePolicy.SelectedIndex == n)
         {
           constants.captureSizePolicy = v;
-         
+
         }
         n++;
       }
@@ -759,13 +759,13 @@ namespace YoctoVisualisation
                      MessageBoxIcon.Warning);
 
       constants.captureFolder = targetFolder.Text;
-     
-    
 
-    
+
+
+
     }
 
-    
+
 
     private void DpiTextBox_Leave(object sender, EventArgs e)
     {
@@ -790,7 +790,7 @@ namespace YoctoVisualisation
       int value;
       if (Int32.TryParse(widthValue.Text, out value))
       {
-        if ((value >= 16) && (value <=4096))  constants.captureWidth = value;
+        if ((value >= 16) && (value <= 4096)) constants.captureWidth = value;
         else MessageBox.Show("Width must be in the 16..4096 range,\nchange will be ignored.",
                    "Parameter error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -824,8 +824,8 @@ namespace YoctoVisualisation
     private void MaxDataRecordsCount_Leave(object sender, EventArgs e)
     {
       int value;
-      if (Int32.TryParse(MaxDataRecordsCount.Text,out value) &&(value>=0))
-        
+      if (Int32.TryParse(MaxDataRecordsCount.Text, out value) && (value >= 0))
+
       {
         constants.maxDataRecordsPerSensor = value;
         CustomYSensor.MaxDataRecords = value;
@@ -839,10 +839,10 @@ namespace YoctoVisualisation
     private void MaxDataPointsCount_Leave(object sender, EventArgs e)
     {
       int value;
-      if (Int32.TryParse(MaxDataPointsCount.Text, out value)&& (value >= 0))
+      if (Int32.TryParse(MaxDataPointsCount.Text, out value) && (value >= 0))
       {
         constants.maxPointsPerGraphSerie = value;
-       DataSerie.MaxPointsPerSeries = value;
+        DataSerie.MaxPointsPerSeries = value;
       }
       else MessageBox.Show("Invalid Max Data points,\nshould be a positive integer or Zero.\nChange will be ignored. ",
                         "Parameter error", MessageBoxButtons.OK,
@@ -877,19 +877,19 @@ namespace YoctoVisualisation
     private void listView1_SelectedIndexChanged(object sender, EventArgs e)
     {
       editButton.Enabled = listView1.SelectedItems.Count > 0;
-    
+
       deleteButton.Enabled = listView1.SelectedItems.Count > 0;
-       
+
     }
 
-   private void findSelectedHub(out int lindex, out int hindex  )
+    private void findSelectedHub(out int lindex, out int hindex)
     {
-       lindex = -1;
-       hindex = -1;
-       if (listView1.SelectedItems.Count <= 0) return;
+      lindex = -1;
+      hindex = -1;
+      if (listView1.SelectedItems.Count <= 0) return;
 
-       lindex = listView1.SelectedItems[0].Index;
-       
+      lindex = listView1.SelectedItems[0].Index;
+
       {
         for (int i = hubList.Count - 1; i >= 0; i--)
         {
@@ -900,11 +900,11 @@ namespace YoctoVisualisation
     }
 
     private void editButton_Click(object sender, EventArgs e)
-    { 
+    {
       int lindex, hindex;
       findSelectedHub(out lindex, out hindex);
 
-      if (hindex>=0)
+      if (hindex >= 0)
       {
         Hub h = new Hub(Hub.HubType.REMOTEHUB, hubList[hindex].protocol, hubList[hindex].user, "",
                         hubList[hindex].addr, hubList[hindex].port, hubList[hindex].path);
@@ -918,10 +918,10 @@ namespace YoctoVisualisation
           YAPI.UnregisterHub(hubList[hindex].get_fullUrl());
           hubList[hindex] = h;
           listView1.Items[lindex].Text = h.get_obfuscatedURL();
-          listView1.Items[lindex].SubItems[1].Text="Contacting...";
+          listView1.Items[lindex].SubItems[1].Text = "Contacting...";
           listView1.Items[lindex].ImageIndex = 0;
           string errmsg = "";
-          YAPI.PreregisterHub(hubList[hindex].get_fullUrl(),ref errmsg);
+          YAPI.PreregisterHub(hubList[hindex].get_fullUrl(), ref errmsg);
 
         }
       }
@@ -932,18 +932,18 @@ namespace YoctoVisualisation
     {
       int lindex, hindex;
       findSelectedHub(out lindex, out hindex);
-      if (hindex >= 0) 
-        if (MessageBox.Show("Do you really want to remove "+ hubList[hindex].get_obfuscatedURL()+" ?",
+      if (hindex >= 0)
+        if (MessageBox.Show("Do you really want to remove " + hubList[hindex].get_obfuscatedURL() + " ?",
                           "Remove a Hub connection",
                            MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                            MessageBoxDefaultButton.Button1) == DialogResult.Yes)
         {
-        YAPI.UnregisterHub(hubList[hindex].get_fullUrl());
-        hubList.RemoveAt(hindex);
-        listView1.Items.RemoveAt(lindex);
+          YAPI.UnregisterHub(hubList[hindex].get_fullUrl());
+          hubList.RemoveAt(hindex);
+          listView1.Items.RemoveAt(lindex);
 
 
-      }
+        }
     }
 
     private void label16_Click(object sender, EventArgs e)
@@ -953,7 +953,7 @@ namespace YoctoVisualisation
 
     private void textBox1_TextChanged(object sender, EventArgs e)
     {
-     
+
     }
 
     private void label3_Click(object sender, EventArgs e)
@@ -1002,7 +1002,7 @@ namespace YoctoVisualisation
 
     private void rasterType_CheckedChanged(object sender, EventArgs e)
     {
-      constants.captureType = rasterType.Checked ? YDataRendering.YDataRenderer.CaptureType.PNG: YDataRendering.YDataRenderer.CaptureType.SVG;
+      constants.captureType = rasterType.Checked ? YDataRendering.YDataRenderer.CaptureType.PNG : YDataRendering.YDataRenderer.CaptureType.SVG;
       updateCaptureUI();
     }
   }
@@ -1012,7 +1012,13 @@ namespace YoctoVisualisation
   {
     public enum HubType { LOCALUSB, LOCALHUB, REMOTEHUB };
 
-
+    private string decrypt(string pass)
+    {try
+       {
+        return StringCipher.Decrypt(pass, constants.loginCypherPassword);
+      }
+      catch (Exception) {return"";}
+    }
     private HubType _hubType = HubType.LOCALUSB;
     public HubType hubType { get { return _hubType; } set { _hubType = value; } }
     private string _protocol = "";
@@ -1021,7 +1027,7 @@ namespace YoctoVisualisation
     public string user { get { return _user; } set { _user = value; } }
     private string _password = "";
     public string encryptedPassword { get { return _password; } set { _password = value; } }
-    public string clearPassword     { get { return (_password=="")?"":StringCipher.Decrypt(_password, constants.loginCypherPassword); }
+    public string clearPassword     { get { return (_password=="")?"": decrypt(_password); }
                                       set { _password = StringCipher.Encrypt(value, constants.loginCypherPassword); } }
 
     private string _addr = "";
@@ -1089,7 +1095,7 @@ namespace YoctoVisualisation
         if (_user != "")
         {
           fullurl = fullurl + _user;
-          if (_password != "") fullurl = fullurl + ":" + StringCipher.Decrypt(_password, constants.loginCypherPassword);
+          if (_password != "") fullurl = fullurl + ":" + decrypt(_password);
           fullurl = fullurl + "@";
         }
         fullurl = fullurl + _addr;
