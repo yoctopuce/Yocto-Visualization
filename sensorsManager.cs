@@ -268,7 +268,9 @@ namespace YoctoVisualisation
     private readonly Mutex dataMutex = new Mutex();
     bool cfgChgNotificationsSupported = false;
     bool mustReloadConfig = false;
-   // private bool _isReadOnly = false;
+    bool mustCheckForSuspicionTimeStamps = false;
+    int ignoredSuspicionTimeStampsCount = 0;
+    // private bool _isReadOnly = false;
 
     public bool isReadOnly { get { if (sensor != null) return sensor.isReadOnly(); else return true; } }
 
@@ -1112,7 +1114,31 @@ namespace YoctoVisualisation
         online = true;
         double t = M.get_endTimeUTC();
         if (firstLiveDataTimeStamp == 0) firstLiveDataTimeStamp = t;
-        //LogManager.Log(hwdName + ": timed callback " +  t.ToString("F3") + String.Format(" {0:0.000}", t));
+        // Filtering measures with inconsîstant timestamps, such bogus measures
+        // can occur after a power outage, as internet connectivity might needs a
+        // few minutes to go back after power restoration, during this lapse of time
+        // YoctoHub-ethernet have no way to sync their internal clock (no RTC).
+
+        if (constants.checkForSuspiciousTimestamps)
+        {  int y = (int)(t / 31558118.4 ) + 1970;  // sideral year = 31558118.4  seconds
+          if (mustCheckForSuspicionTimeStamps)
+          {
+            if ((y < constants.CredibleTimestampStart) || (y >= constants.CredibleTimestampEnd))
+             { ignoredSuspicionTimeStampsCount++;
+              if (ignoredSuspicionTimeStampsCount % 100 == 1)
+              {
+                if (ignoredSuspicionTimeStampsCount == 1) LogManager.Log(hwdName + ": ignoring suspicious timestamp " + t.ToString("F0") + " (Year=" + y.ToString() + ")");
+                else LogManager.Log(hwdName + ": still ignoring suspicious timestamps " + t.ToString("F0") + " (Year=" + y.ToString() + ")");
+              }
+              return;
+            }
+            if (ignoredSuspicionTimeStampsCount> 0)
+              LogManager.Log(hwdName + ":  timestamp back to normal (ignored " + ignoredSuspicionTimeStampsCount.ToString() + " measure"+(ignoredSuspicionTimeStampsCount>0?"s":"")+")");
+            ignoredSuspicionTimeStampsCount = 0;
+          }
+          else if ((y >= constants.CredibleTimestampStart) && (y < constants.CredibleTimestampEnd)) mustCheckForSuspicionTimeStamps = true;
+
+         }
 
         if (t > lastDataTimeStamp)
         {
@@ -1123,9 +1149,11 @@ namespace YoctoVisualisation
         else
         {
           consecutiveBadTimeStamp++;
-          if (consecutiveBadTimeStamp<10)
-            LogManager.Log(hwdName + ": ignoring bad timestamp ("+(lastDataTimeStamp-t).ToString("F3")+ " sec before "+lastDataSource+")");
-
+          if (consecutiveBadTimeStamp < 10)
+          {
+            LogManager.Log(hwdName + ": ignoring bad timestamp (" + (lastDataTimeStamp - t).ToString("F3") + " sec before " + lastDataSource + ")");
+             return;
+          }
         }
 
         if ((consecutiveBadTimeStamp == 0) || (consecutiveBadTimeStamp >= 10))

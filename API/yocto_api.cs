@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 45551 2021-06-14 13:51:37Z web $
+ * $Id: yocto_api.cs 46904 2021-10-25 15:34:15Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -2798,7 +2798,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "45586";
+    public const string YOCTO_API_BUILD_NO = "47397";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -4277,7 +4277,7 @@ public class YAPI
     }
 
 
-    
+
     private static void native_HubDiscoveryCallback(IntPtr serial_ptr, IntPtr url_ptr)
     {
         String serial = Marshal.PtrToStringAnsi(serial_ptr);
@@ -5168,7 +5168,8 @@ public class YAPI
      * <summary>
      *   Setup the Yoctopuce library to use modules connected on a given machine.
      * <para>
-     *   The
+     *   Idealy this
+     *   call will be made once at the begining of your application.  The
      *   parameter will determine how the API will work. Use the following values:
      * </para>
      * <para>
@@ -5208,7 +5209,9 @@ public class YAPI
      *   <c>http://username:password@address:port</c>
      * </para>
      * <para>
-     *   You can call <i>RegisterHub</i> several times to connect to several machines.
+     *   You can call <i>RegisterHub</i> several times to connect to several machines. On
+     *   the other hand, it is useless and even counterproductive to call <i>RegisterHub</i>
+     *   with to same address multiple times during the life of the application.
      * </para>
      * <para>
      * </para>
@@ -5397,15 +5400,12 @@ public class YAPI
         }
 
         res = yapiUpdateDeviceList(0, ref errmsg);
-        if (YISERR(res)) {
-            return res;
-        }
-
-        errbuffer.Length = 0;
-        res = SafeNativeMethods._yapiHandleEvents(errbuffer);
-        if (YISERR(res)) {
-            errmsg = errbuffer.ToString();
-            return res;
+        if (!YISERR(res)) {
+            errbuffer.Length = 0;
+            res = SafeNativeMethods._yapiHandleEvents(errbuffer);
+            if (YISERR(res)) {
+                errmsg = errbuffer.ToString();
+            }
         }
 
         while (_PlugEvents.Count > 0) {
@@ -5416,7 +5416,7 @@ public class YAPI
             p.invoke();
         }
 
-        return SUCCESS;
+        return res;
     }
 
 
@@ -6641,16 +6641,26 @@ public class YDataStream
         if (this._isAvg) {
             while (idx + 3 < udat.Count) {
                 dat.Clear();
-                dat.Add(this._decodeVal(udat[idx + 2] + (((udat[idx + 3]) << (16)))));
-                dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
-                dat.Add(this._decodeVal(udat[idx + 4] + (((udat[idx + 5]) << (16)))));
+                if ((udat[idx] == 65535) && (udat[idx + 1] == 65535)) {
+                    dat.Add(Double.NaN);
+                    dat.Add(Double.NaN);
+                    dat.Add(Double.NaN);
+                } else {
+                    dat.Add(this._decodeVal(udat[idx + 2] + (((udat[idx + 3]) << (16)))));
+                    dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
+                    dat.Add(this._decodeVal(udat[idx + 4] + (((udat[idx + 5]) << (16)))));
+                }
                 idx = idx + 6;
                 this._values.Add(new List<double>(dat));
             }
         } else {
             while (idx + 1 < udat.Count) {
                 dat.Clear();
-                dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
+                if ((udat[idx] == 65535) && (udat[idx + 1] == 65535)) {
+                    dat.Add(Double.NaN);
+                } else {
+                    dat.Add(this._decodeAvg(udat[idx] + (((((udat[idx + 1]) ^ (0x8000))) << (16))), 1));
+                }
                 this._values.Add(new List<double>(dat));
                 idx = idx + 2;
             }
@@ -7563,6 +7573,7 @@ public class YDataSet
         double tim;
         double itv;
         double fitv;
+        double avgv;
         double end_;
         int nCols;
         int minCol;
@@ -7613,8 +7624,9 @@ public class YDataSet
             } else {
                 end_ = tim + itv;
             }
-            if ((end_ > this._startTimeMs) && ((this._endTimeMs == 0) || (tim < this._endTimeMs))) {
-                this._measures.Add(new YMeasure(tim / 1000, end_ / 1000, dataRows[ii][minCol], dataRows[ii][avgCol], dataRows[ii][maxCol]));
+            avgv = dataRows[ii][avgCol];
+            if ((end_ > this._startTimeMs) && ((this._endTimeMs == 0) || (tim < this._endTimeMs)) && !(Double.IsNaN(avgv))) {
+                this._measures.Add(new YMeasure(tim / 1000, end_ / 1000, dataRows[ii][minCol], avgv, dataRows[ii][maxCol]));
             }
             tim = end_;
         }
@@ -14423,7 +14435,7 @@ public class YDataLogger : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the data logger, for instance
-     *   <c>RX420MA1.dataLogger</c>.
+     *   <c>LIGHTMK4.dataLogger</c>.
      * </param>
      * <returns>
      *   a <c>YDataLogger</c> object allowing you to drive the data logger.

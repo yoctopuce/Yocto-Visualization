@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_realtimeclock.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_realtimeclock.cs 45843 2021-08-04 07:51:59Z mvuilleu $
  *
  *  Implements yFindRealTimeClock(), the high-level API for RealTimeClock functions
  *
@@ -348,7 +348,7 @@ public class YRealTimeClock : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the real-time clock, for instance
-     *   <c>YHUBGSM3.realTimeClock</c>.
+     *   <c>YHUBGSM1.realTimeClock</c>.
      * </param>
      * <returns>
      *   a <c>YRealTimeClock</c> object allowing you to drive the real-time clock.

@@ -56,7 +56,7 @@ namespace YoctoVisualisation
   class constants
   {
     public static string appVersion = "2.0";
-    public static string buildVersion = "45586";
+    public static string buildVersion = "47397";
     private static string _configfile = Path.Combine(Application.UserAppDataPath, "config.xml");
     private static bool _configfileOveridden = false;
     public static int MAXRAWDATAROWS = 2000;
@@ -80,6 +80,18 @@ namespace YoctoVisualisation
     public static int captureHeight = 1024;
     public static int captureDPI = 70;
 
+    // these constants are used to filter out measures with inconsistant timestamps
+    // which would ruin Graphs rendering.
+    public static bool checkForSuspiciousTimestamps = false;
+    public const   int CredibleAppStartYear  = 2000; // if current date at start time is within this 
+    public const   int CredibleAppStartEnd   = 2038; // range, then we can activate filter
+    public static  int CredibleTimestampStart  ;
+    public static  int CredibleTimestampEnd    ;
+    private static int CredibleTimestampDelta = 10;  // +/- 5 year around app start date
+
+
+
+
     public static int maxPointsPerGraphSerie = 0;
     public static int maxPointsPerDataloggerSerie = 0;
     public static int maxDataRecordsPerSensor = 0;
@@ -92,6 +104,16 @@ namespace YoctoVisualisation
     private static bool  _MonoRunning = (Type.GetType ("Mono.Runtime") != null);
 		public static bool MonoRunning {get {return  _MonoRunning;}}
     private static string MonoMinVersion { get { return "4.0"; }} 
+
+    static constants()
+    {
+      int y = DateTime.Now.Year;
+      constants.checkForSuspiciousTimestamps = (y >= CredibleAppStartYear) && (y < CredibleAppStartEnd) ;
+      constants.CredibleTimestampStart = y - (CredibleTimestampDelta >>1);
+      constants.CredibleTimestampEnd   = y+ (CredibleTimestampDelta >> 1);
+
+  }
+
     public static string MonoVersion
     {
       get

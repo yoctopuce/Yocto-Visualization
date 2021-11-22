@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_quadraturedecoder.cs 45292 2021-05-25 23:27:54Z mvuilleu $
+ *  $Id: yocto_quadraturedecoder.cs 45843 2021-08-04 07:51:59Z mvuilleu $
  *
  *  Implements yFindQuadratureDecoder(), the high-level API for QuadratureDecoder functions
  *
@@ -341,7 +341,7 @@ public class YQuadratureDecoder : YSensor
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the quadrature decoder, for instance
-     *   <c>YPWMRX01.quadratureDecoder</c>.
+     *   <c>YMXBTN01.quadratureDecoder1</c>.
      * </param>
      * <returns>
      *   a <c>YQuadratureDecoder</c> object allowing you to drive the quadrature decoder.

@@ -67,6 +67,16 @@ namespace YDataRendering
 
   public static class TimeConverter
   {
+    private static bool use24Hformat = true;
+
+    static TimeConverter()
+     {
+      use24Hformat = CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern.IndexOf("tt")<0;
+     }
+
+   
+    
+
     private static DateTime sTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     public enum TimeReference {[Description("Absolute")] ABSOLUTE, [Description("Relative to first data")] RELATIVE };
     public static Double ToUnixTime(DateTime datetime)
@@ -267,7 +277,12 @@ namespace YDataRendering
         if (ShowSecondsTenth) res.format = ".f";
         if (ShowSeconds) res.format = "ss" + res.format;
         if (ShowMinutes) res.format = "mm" + (res.format == "" ? "" : ":") + res.format;
-        if (ShowHours) res.format = "HH" + (res.format == "" ? "\\H" : ":") + res.format;
+        if (ShowHours)
+        { if (use24Hformat)
+            res.format = "HH" + (res.format == "" ? "\\H" : ":") + res.format;
+          else
+            res.format = "h" + (res.format == "" ? "" : ":") + res.format+"tt";
+        }
         if ((res.format != "") && (ShowDays || ShowMonths)) res.format += "\n";
         if (ShowDays) res.format = res.format + "d";
         if (ShowMonths) res.format = res.format + " MMM";
