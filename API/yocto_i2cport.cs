@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_i2cport.cs 41171 2020-07-02 17:49:00Z mvuilleu $
+ *  $Id: yocto_i2cport.cs 48017 2022-01-12 08:17:52Z seb $
  *
  *  Implements yFindI2cPort(), the high-level API for I2cPort functions
  *
@@ -186,7 +186,7 @@ public class YI2cPort : YFunction
     protected string _i2cMode = I2CMODE_INVALID;
     protected ValueCallback _valueCallbackI2cPort = null;
     protected int _rxptr = 0;
-    protected byte[] _rxbuff;
+    protected byte[] _rxbuff = new byte[0];
     protected int _rxbuffptr = 0;
     //--- (end of generated code: YI2cPort definitions)
 
@@ -995,7 +995,7 @@ public class YI2cPort : YFunction
     public virtual string readLine()
     {
         string url;
-        byte[] msgbin;
+        byte[] msgbin = new byte[0];
         List<string> msgarr = new List<string>();
         int msglen;
         string res;
@@ -1053,7 +1053,7 @@ public class YI2cPort : YFunction
     public virtual List<string> readMessages(string pattern, int maxWait)
     {
         string url;
-        byte[] msgbin;
+        byte[] msgbin = new byte[0];
         List<string> msgarr = new List<string>();
         int msglen;
         List<string> res = new List<string>();
@@ -1130,7 +1130,7 @@ public class YI2cPort : YFunction
      */
     public virtual int read_avail()
     {
-        byte[] buff;
+        byte[] buff = new byte[0];
         int bufflen;
         int res;
 
@@ -1168,7 +1168,7 @@ public class YI2cPort : YFunction
     public virtual string queryLine(string query, int maxWait)
     {
         string url;
-        byte[] msgbin;
+        byte[] msgbin = new byte[0];
         List<string> msgarr = new List<string>();
         int msglen;
         string res;
@@ -1216,7 +1216,7 @@ public class YI2cPort : YFunction
     public virtual string queryHex(string hexString, int maxWait)
     {
         string url;
-        byte[] msgbin;
+        byte[] msgbin = new byte[0];
         List<string> msgarr = new List<string>();
         int msglen;
         string res;
@@ -1459,7 +1459,7 @@ public class YI2cPort : YFunction
         int val;
         string msg;
         string reply;
-        byte[] rcvbytes;
+        byte[] rcvbytes = new byte[0];
         msg = "@"+String.Format("{0:x02}",slaveAddr)+":";
         nBytes = (buff).Length;
         idx = 0;
@@ -1527,7 +1527,7 @@ public class YI2cPort : YFunction
         int val;
         string msg;
         string reply;
-        byte[] rcvbytes;
+        byte[] rcvbytes = new byte[0];
         List<int> res = new List<int>();
         msg = "@"+String.Format("{0:x02}",slaveAddr)+":";
         nBytes = values.Count;
@@ -1601,7 +1601,7 @@ public class YI2cPort : YFunction
     public virtual int writeStr(string codes)
     {
         int bufflen;
-        byte[] buff;
+        byte[] buff = new byte[0];
         int idx;
         int ch;
         buff = YAPI.DefaultEncoding.GetBytes(codes);
@@ -1657,7 +1657,7 @@ public class YI2cPort : YFunction
     public virtual int writeLine(string codes)
     {
         int bufflen;
-        byte[] buff;
+        byte[] buff = new byte[0];
         bufflen = (codes).Length;
         if (bufflen < 100) {
             return this.sendCommand("!"+codes);
@@ -1713,7 +1713,7 @@ public class YI2cPort : YFunction
     public virtual int writeHex(string hexString)
     {
         int bufflen;
-        byte[] buff;
+        byte[] buff = new byte[0];
         bufflen = (hexString).Length;
         if (bufflen < 100) {
             return this.sendCommand("+"+hexString);
@@ -1822,7 +1822,7 @@ public class YI2cPort : YFunction
     public virtual List<YI2cSnoopingRecord> snoopMessages(int maxWait)
     {
         string url;
-        byte[] msgbin;
+        byte[] msgbin = new byte[0];
         List<string> msgarr = new List<string>();
         int msglen;
         List<YI2cSnoopingRecord> res = new List<YI2cSnoopingRecord>();

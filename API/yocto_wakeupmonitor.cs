@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_wakeupmonitor.cs 45843 2021-08-04 07:51:59Z mvuilleu $
+ *  $Id: yocto_wakeupmonitor.cs 48183 2022-01-20 10:26:11Z mvuilleu $
  *
  *  Implements yFindWakeUpMonitor(), the high-level API for WakeUpMonitor functions
  *
@@ -447,7 +447,7 @@ public class YWakeUpMonitor : YFunction
      * </summary>
      * <param name="func">
      *   a string that uniquely characterizes the wake-up monitor, for instance
-     *   <c>YHUBGSM1.wakeUpMonitor</c>.
+     *   <c>YHUBGSM5.wakeUpMonitor</c>.
      * </param>
      * <returns>
      *   a <c>YWakeUpMonitor</c> object allowing you to drive the wake-up monitor.

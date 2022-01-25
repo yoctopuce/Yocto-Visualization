@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_steppermotor.cs 43478 2021-01-21 13:49:12Z mvuilleu $
+ *  $Id: yocto_steppermotor.cs 48017 2022-01-12 08:17:52Z seb $
  *
  *  Implements yFindStepperMotor(), the high-level API for StepperMotor functions
  *
@@ -1018,7 +1018,7 @@ public class YStepperMotor : YFunction
     {
         string id;
         string url;
-        byte[] retBin;
+        byte[] retBin = new byte[0];
         int res;
         id = this.get_functionId();
         id = (id).Substring( 12, 1);

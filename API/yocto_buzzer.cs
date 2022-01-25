@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_buzzer.cs 38899 2019-12-20 17:21:03Z mvuilleu $
+ *  $Id: yocto_buzzer.cs 48017 2022-01-12 08:17:52Z seb $
  *
  *  Implements yFindBuzzer(), the high-level API for Buzzer functions
  *
@@ -589,7 +589,7 @@ public class YBuzzer : YFunction
         int note;
         int num;
         int typ;
-        byte[] ascNotes;
+        byte[] ascNotes = new byte[0];
         int notesLen;
         int i;
         int ch;

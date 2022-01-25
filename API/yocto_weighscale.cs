@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_weighscale.cs 41112 2020-06-29 13:21:58Z seb $
+ *  $Id: yocto_weighscale.cs 48017 2022-01-12 08:17:52Z seb $
  *
  *  Implements yFindWeighScale(), the high-level API for WeighScale functions
  *
@@ -823,7 +823,7 @@ public class YWeighScale : YSensor
     public virtual int loadCompensationTable(int tableIndex, List<double> tempValues, List<double> compValues)
     {
         string id;
-        byte[] bin_json;
+        byte[] bin_json = new byte[0];
         List<string> paramlist = new List<string>();
         int siz;
         int idx;

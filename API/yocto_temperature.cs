@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_temperature.cs 42054 2020-10-14 09:46:38Z seb $
+ *  $Id: yocto_temperature.cs 48017 2022-01-12 08:17:52Z seb $
  *
  *  Implements yFindTemperature(), the high-level API for Temperature functions
  *
@@ -656,7 +656,7 @@ public class YTemperature : YSensor
     public virtual int loadThermistorResponseTable(List<double> tempValues, List<double> resValues)
     {
         string id;
-        byte[] bin_json;
+        byte[] bin_json = new byte[0];
         List<string> paramlist = new List<string>();
         List<double> templist = new List<double>();
         int siz;

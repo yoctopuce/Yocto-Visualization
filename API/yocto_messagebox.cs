@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_messagebox.cs 38913 2019-12-20 18:59:49Z mvuilleu $
+ * $Id: yocto_messagebox.cs 48014 2022-01-12 08:06:41Z seb $
  *
  * Implements yFindMessageBox(), the high-level API for MessageBox functions
  *
@@ -81,10 +81,10 @@ public class YSms
     protected int _alphab = 0;
     protected int _mclass = 0;
     protected string _stamp;
-    protected byte[] _udh;
-    protected byte[] _udata;
+    protected byte[] _udh = new byte[0];
+    protected byte[] _udata = new byte[0];
     protected int _npdu = 0;
-    protected byte[] _pdu;
+    protected byte[] _pdu = new byte[0];
     protected List<YSms> _parts = new List<YSms>();
     protected string _aggSig;
     protected int _aggIdx = 0;
@@ -197,7 +197,7 @@ public class YSms
      */
     public virtual string get_textData()
     {
-        byte[] isolatin;
+        byte[] isolatin = new byte[0];
         int isosize;
         int i;
         if (this._alphab == 0) {
@@ -465,9 +465,9 @@ public class YSms
      */
     public virtual int addText(string val)
     {
-        byte[] udata;
+        byte[] udata = new byte[0];
         int udatalen;
-        byte[] newdata;
+        byte[] newdata = new byte[0];
         int newdatalen;
         int i;
         if ((val).Length == 0) {
@@ -544,7 +544,7 @@ public class YSms
         int newdatalen;
         int i;
         int uni;
-        byte[] udata;
+        byte[] udata = new byte[0];
         int udatalen;
         int surrogate;
         if (this._alphab != 2) {
@@ -606,8 +606,8 @@ public class YSms
         int retcode;
         int totsize;
         YSms subsms;
-        byte[] subdata;
-        byte[] res;
+        byte[] subdata = new byte[0];
+        byte[] res = new byte[0];
         this._npdu = parts.Count;
         if (this._npdu == 0) {
             return YAPI.INVALID_ARGUMENT;
@@ -667,13 +667,13 @@ public class YSms
 
     public virtual byte[] encodeAddress(string addr)
     {
-        byte[] bytes;
+        byte[] bytes = new byte[0];
         int srclen;
         int numlen;
         int i;
         int val;
         int digit;
-        byte[] res;
+        byte[] res = new byte[0];
         bytes = YAPI.DefaultEncoding.GetBytes(addr);
         srclen = (bytes).Length;
         numlen = 0;
@@ -723,7 +723,7 @@ public class YSms
     public virtual string decodeAddress(byte[] addr, int ofs, int siz)
     {
         int addrType;
-        byte[] gsm7;
+        byte[] gsm7 = new byte[0];
         string res;
         int i;
         int rpos;
@@ -783,9 +783,9 @@ public class YSms
     {
         int explen;
         int i;
-        byte[] res;
+        byte[] res = new byte[0];
         int n;
-        byte[] expasc;
+        byte[] expasc = new byte[0];
         int v1;
         int v2;
         explen = (exp).Length;
@@ -854,7 +854,7 @@ public class YSms
                     n = n - 1;
                     v2 = 4 * res[n] + v1;
                     if (expasc[i-3] == 45) {
-                        v2 += 128;
+                        v2 = v2 + 128;
                     }
                     res[n] = (byte)(v2 & 0xff);
                 }
@@ -959,7 +959,7 @@ public class YSms
         int udlen;
         int udhsize;
         int udhlen;
-        byte[] res;
+        byte[] res = new byte[0];
         int i;
         int wpos;
         int carry;
@@ -1037,8 +1037,8 @@ public class YSms
         int mss;
         int partno;
         int partlen;
-        byte[] newud;
-        byte[] newudh;
+        byte[] newud = new byte[0];
+        byte[] newudh = new byte[0];
         YSms newpdu;
         int i;
         int wpos;
@@ -1096,11 +1096,11 @@ public class YSms
 
     public virtual int generatePdu()
     {
-        byte[] sca;
-        byte[] hdr;
-        byte[] addr;
-        byte[] stamp;
-        byte[] udata;
+        byte[] sca = new byte[0];
+        byte[] hdr = new byte[0];
+        byte[] addr = new byte[0];
+        byte[] stamp = new byte[0];
+        byte[] udata = new byte[0];
         int pdutyp;
         int pdulen;
         int i;
@@ -1447,7 +1447,7 @@ public class YMessageBox : YFunction
     protected List<YSms> _messages = new List<YSms>();
     protected bool _gsm2unicodeReady;
     protected List<int> _gsm2unicode = new List<int>();
-    protected byte[] _iso2gsm;
+    protected byte[] _iso2gsm = new byte[0];
     //--- (end of generated code: YMessageBox definitions)
 
     public YMessageBox(string func)
@@ -1836,7 +1836,7 @@ public class YMessageBox : YFunction
 
     public virtual YSms fetchPdu(int slot)
     {
-        byte[] binPdu;
+        byte[] binPdu = new byte[0];
         List<string> arrPdu = new List<string>();
         string hexPdu;
         YSms sms;
@@ -2026,7 +2026,7 @@ public class YMessageBox : YFunction
         int i;
         int gsmlen;
         int reslen;
-        byte[] resbin;
+        byte[] resbin = new byte[0];
         string resstr;
         int uni;
         if (!(this._gsm2unicodeReady)) {
@@ -2115,13 +2115,13 @@ public class YMessageBox : YFunction
 
     public virtual byte[] str2gsm(string msg)
     {
-        byte[] asc;
+        byte[] asc = new byte[0];
         int asclen;
         int i;
         int ch;
         int gsm7;
         int extra;
-        byte[] res;
+        byte[] res = new byte[0];
         int wpos;
         if (!(this._gsm2unicodeReady)) {
             this.initGsm2Unicode();
@@ -2193,8 +2193,8 @@ public class YMessageBox : YFunction
     public virtual int checkNewMessages()
     {
         string bitmapStr;
-        byte[] prevBitmap;
-        byte[] newBitmap;
+        byte[] prevBitmap = new byte[0];
+        byte[] newBitmap = new byte[0];
         int slot;
         int nslots;
         int pduIdx;

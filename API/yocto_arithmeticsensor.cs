@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_arithmeticsensor.cs 40281 2020-05-04 13:39:55Z seb $
+ *  $Id: yocto_arithmeticsensor.cs 48017 2022-01-12 08:17:52Z seb $
  *
  *  Implements yFindArithmeticSensor(), the high-level API for ArithmeticSensor functions
  *
@@ -375,7 +375,7 @@ public class YArithmeticSensor : YSensor
         string id;
         string fname;
         string content;
-        byte[] data;
+        byte[] data = new byte[0];
         string diags;
         double resval;
         id = this.get_functionId();
@@ -515,7 +515,7 @@ public class YArithmeticSensor : YSensor
     public virtual int loadAuxiliaryFunction(string name, List<double> inputValues, List<double> outputValues)
     {
         string fname;
-        byte[] defbin;
+        byte[] defbin = new byte[0];
         int siz;
 
         fname = "userMap"+name+".txt";
