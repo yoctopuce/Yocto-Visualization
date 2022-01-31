@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 48277 2022-01-24 14:50:53Z seb $
+ * $Id: yocto_api.cs 48404 2022-01-31 10:33:00Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -266,22 +266,22 @@ internal static class SafeNativeMethods
                         dll_path = assemblyDir + "\\amd64\\yapi.dll";
                         break;
                     case YAPIDLL_VERSION.MACOS32:
-                        dll_path = assemblyDir + "\\libyapi32";
+                        dll_path = assemblyDir + "/libyapi32.so";
                         break;
                     case YAPIDLL_VERSION.MACOS64:
-                        dll_path = assemblyDir + "\\libyapi64";
+                        dll_path = assemblyDir + "/libyapi64.so";
                         break;
                     case YAPIDLL_VERSION.LIN64:
-                        dll_path = assemblyDir + "\\libyapi-amd64";
+                        dll_path = assemblyDir + "/libyapi-amd64.so";
                         break;
                     case YAPIDLL_VERSION.LIN32:
-                        dll_path = assemblyDir + "\\libyapi-i386";
+                        dll_path = assemblyDir + "/libyapi-i386.so";
                         break;
                     case YAPIDLL_VERSION.LINARMHF:
-                        dll_path = assemblyDir + "\\libyapi-armhf";
+                        dll_path = assemblyDir + "/libyapi-armhf.so";
                         break;
                     case YAPIDLL_VERSION.LINAARCH64:
-                        dll_path = assemblyDir + "\\libyapi-aarch64";
+                        dll_path = assemblyDir + "/libyapi-aarch64.so";
                         break;
                 }
                 debugDll("try to load library using assembly directory("+dll_path+")");
@@ -346,11 +346,9 @@ internal static class SafeNativeMethods
 
     private static void debugDll(string line)
     {
-        /*
-        DateTime localDate = DateTime.Now;
-        string fmt = "[yyyy-MM-dd/hh:mm:ss] ";
-        System.IO.File.AppendAllText("c:\\tmp\\debugDllLoad.txt", localDate.ToString(fmt) + line + "\n");
-        */
+        if (YAPI._debugDllLoad) {
+            Console.WriteLine(line);
+        }
     }
 
 
@@ -2807,7 +2805,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "48304";
+    public const string YOCTO_API_BUILD_NO = "48405";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -2865,6 +2863,7 @@ public class YAPI
     internal static Object globalLock = new Object();
     static bool _apiInitialized = false;
     internal static YAPIContext _yapiContext = new YAPIContext();
+    internal static bool _debugDllLoad = false;
 
 
     /*
@@ -4080,6 +4079,12 @@ public class YAPI
         return path;
     }
 
+
+
+    public static void logDllLoad(bool debug)
+    {
+        _debugDllLoad = debug;
+    }
 
     /**
      * <summary>
