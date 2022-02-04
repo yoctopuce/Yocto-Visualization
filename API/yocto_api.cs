@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 48404 2022-01-31 10:33:00Z seb $
+ * $Id: yocto_api.cs 48491 2022-02-03 10:10:50Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -207,6 +207,15 @@ internal static class SafeNativeMethods
         LINAARCH64
     }
 
+    internal enum YAPIDLL_PRELOAD_TYPE
+    {
+        NONE,
+        DEFAULT,
+        ASSEMBLY,
+        ABS_CURRENT_DIR
+    }
+
+
     internal static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.WIN32;
 
     private static bool IsMacOS()
@@ -214,132 +223,190 @@ internal static class SafeNativeMethods
         return (Environment.OSVersion.Platform == PlatformID.Unix && Directory.Exists("/Applications") && Directory.Exists("/System") && Directory.Exists("/Users") && Directory.Exists("/Volumes"));
     }
 
+
+
+    /*
+     * We start with you best guess on the current platform,
+     * .
+     *
+     * Since we cannot be 100% sure of the current platform we
+     * do multiples retry following this pattern:
+     *
+     *     MACOS64
+     *         ->fallback to Mac32
+     *     LIN32_intel:
+     *         ->fallback to ARMHF
+     *     LIN64_intel:
+     *         ->fallback to AARCH64
+     *
+     *     WIN64 | MACOS32 | ARMHF |AARCH64
+     *         ->fallback to WIN32
+     *     WIN32
+     *         ->no alternate platform
+     *
+     * If the first round has not work, then we need to manually load the
+     * shared lib with either (NativeLibrary.Load or NativeMethods.LoadLibrary).
+     *
+     * Retry the same pattern with but with
+     * and the default path, then the path of the assembly (if we can find it)
+     * and finally the current directory..
+     */
+
     internal static u16 tryGetAPIVersion(ref IntPtr version, ref IntPtr dat_)
     {
         Boolean is64 = IntPtr.Size == 8;
+        YAPIDLL_PRELOAD_TYPE preloadType = YAPIDLL_PRELOAD_TYPE.NONE;
+        Boolean loaded = false;
 
-        PlatformID platform = Environment.OSVersion.Platform;
-        if (platform == PlatformID.MacOSX) {
-            if (is64) {
-                _dllVersion = YAPIDLL_VERSION.MACOS64;
-            } else {
-                _dllVersion = YAPIDLL_VERSION.MACOS32;
-            }
-        } else if (platform == PlatformID.Unix) {
-            if (IsMacOS()) {
+        while(!loaded) {
+            PlatformID platform = Environment.OSVersion.Platform;
+            if (platform == PlatformID.MacOSX) {
                 if (is64) {
                     _dllVersion = YAPIDLL_VERSION.MACOS64;
                 } else {
                     _dllVersion = YAPIDLL_VERSION.MACOS32;
                 }
+            } else if (platform == PlatformID.Unix) {
+                if (IsMacOS()) {
+                    if (is64) {
+                        _dllVersion = YAPIDLL_VERSION.MACOS64;
+                    } else {
+                        _dllVersion = YAPIDLL_VERSION.MACOS32;
+                    }
+                } else {
+                    if (is64) {
+                        _dllVersion = YAPIDLL_VERSION.LIN64;
+                    } else {
+                        _dllVersion = YAPIDLL_VERSION.LIN32;
+                    }
+                }
             } else {
                 if (is64) {
-                    _dllVersion = YAPIDLL_VERSION.LIN64;
+                    _dllVersion = YAPIDLL_VERSION.WIN64;
                 } else {
-                    _dllVersion = YAPIDLL_VERSION.LIN32;
+                    _dllVersion = YAPIDLL_VERSION.WIN32;
                 }
             }
-        } else {
-            if (is64) {
-                _dllVersion = YAPIDLL_VERSION.WIN64;
-            } else {
-                _dllVersion = YAPIDLL_VERSION.WIN32;
-            }
-        }
+            Boolean no_alternate_platform = false;
+            do
+            {
+                debugDll("Try YAPI load with " + _dllVersion + " and " + preloadType);
 
-        debugDll("Detected platform is " + _dllVersion.ToString());
+                if (preloadType != YAPIDLL_PRELOAD_TYPE.NONE) {
+                    string dir = "";
+                    switch (preloadType) {
+                        case YAPIDLL_PRELOAD_TYPE.ASSEMBLY:
+                            System.Reflection.Assembly ass = Assembly.GetEntryAssembly();
+                            if (ass != null) {
+                                dir = Path.GetDirectoryName(ass.Location);
+                                dir += Path.DirectorySeparatorChar;
+                            }
 
-        System.Reflection.Assembly ass = Assembly.GetEntryAssembly();
-        if (ass != null) {
-            string currentDirectory = Directory.GetCurrentDirectory();
-            debugDll("Current Dir is " + currentDirectory);
-            string assemblyDir = Path.GetDirectoryName(ass.Location);
-            debugDll("Assembly Dir is " + assemblyDir);
-            if (currentDirectory != assemblyDir) {
-                string dll_path;
+                            break;
+                        case YAPIDLL_PRELOAD_TYPE.ABS_CURRENT_DIR:
+                            dir = Directory.GetCurrentDirectory();
+                            dir += Path.DirectorySeparatorChar;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    string dll_path;
+                    switch (_dllVersion) {
+                        default:
+                        case YAPIDLL_VERSION.WIN32:
+                            dll_path = dir + "yapi.dll";
+                            break;
+                        case YAPIDLL_VERSION.WIN64:
+                            dll_path = dir + "amd64" + Path.DirectorySeparatorChar + "yapi.dll";
+                            break;
+                        case YAPIDLL_VERSION.MACOS32:
+                            dll_path = dir + "libyapi32.so";
+                            break;
+                        case YAPIDLL_VERSION.MACOS64:
+                            dll_path = dir + "libyapi64.so";
+                            break;
+                        case YAPIDLL_VERSION.LIN64:
+                            dll_path = dir + "libyapi-amd64.so";
+                            break;
+                        case YAPIDLL_VERSION.LIN32:
+                            dll_path = dir + "libyapi-i386.so";
+                            break;
+                        case YAPIDLL_VERSION.LINARMHF:
+                            dll_path = dir + "libyapi-armhf.so";
+                            break;
+                        case YAPIDLL_VERSION.LINAARCH64:
+                            dll_path = dir + "libyapi-aarch64.so";
+                            break;
+                    }
+
+                    try {
+                        IntPtr loadLibrary;
+#if NETCOREAPP3_0_OR_GREATER
+                        debugDll("preload library using " + dll_path + " (.Net Core)");
+                        loadLibrary = NativeLibrary.Load(dll_path);
+#else
+                    debugDll("preload library using "+dll_path+" (.Net Framework)");
+                    loadLibrary = NativeMethods.LoadLibrary(dll_path);
+#endif
+                        if (loadLibrary == IntPtr.Zero) {
+                            debugDll("Unable to preload dll with :" + dll_path);
+                        } else {
+                            debugDll("YAPI preloaded from " + dll_path);
+                        }
+                    } catch (System.EntryPointNotFoundException ex) {
+                        debugDll("Entry point not found:" + ex.Message);
+                    } catch (System.DllNotFoundException ex) {
+                        debugDll("Unable to load dll with :" + ex.Message);
+                    }
+                }
+
+                try {
+                    return _yapiGetAPIVersion(ref version, ref dat_);
+                } catch (System.DllNotFoundException ex) {
+                    debugDll(ex.ToString());
+                } catch (System.BadImageFormatException ex) {
+                    debugDll(ex.ToString());
+                }
+
                 switch (_dllVersion) {
                     default:
                     case YAPIDLL_VERSION.WIN32:
-                        dll_path = assemblyDir + "\\yapi.dll";
+                        switch (preloadType) {
+                            case YAPIDLL_PRELOAD_TYPE.NONE:
+                                preloadType = YAPIDLL_PRELOAD_TYPE.DEFAULT;
+                                break;
+                            case YAPIDLL_PRELOAD_TYPE.DEFAULT:
+                                preloadType = YAPIDLL_PRELOAD_TYPE.ASSEMBLY;
+                                break;
+                            case YAPIDLL_PRELOAD_TYPE.ASSEMBLY:
+                                preloadType = YAPIDLL_PRELOAD_TYPE.ABS_CURRENT_DIR;
+                                break;
+                            case YAPIDLL_PRELOAD_TYPE.ABS_CURRENT_DIR:
+                                throw new System.DllNotFoundException("Unable to load YAPI dynamic library");
+
+                        }
+
+                        no_alternate_platform = true;
                         break;
                     case YAPIDLL_VERSION.WIN64:
-                        dll_path = assemblyDir + "\\amd64\\yapi.dll";
-                        break;
                     case YAPIDLL_VERSION.MACOS32:
-                        dll_path = assemblyDir + "/libyapi32.so";
+                    case YAPIDLL_VERSION.LINARMHF:
+                    case YAPIDLL_VERSION.LINAARCH64:
+                        _dllVersion = YAPIDLL_VERSION.WIN32;
                         break;
                     case YAPIDLL_VERSION.MACOS64:
-                        dll_path = assemblyDir + "/libyapi64.so";
-                        break;
-                    case YAPIDLL_VERSION.LIN64:
-                        dll_path = assemblyDir + "/libyapi-amd64.so";
+                        _dllVersion = YAPIDLL_VERSION.MACOS32;
                         break;
                     case YAPIDLL_VERSION.LIN32:
-                        dll_path = assemblyDir + "/libyapi-i386.so";
+                        _dllVersion = YAPIDLL_VERSION.LINARMHF;
                         break;
-                    case YAPIDLL_VERSION.LINARMHF:
-                        dll_path = assemblyDir + "/libyapi-armhf.so";
-                        break;
-                    case YAPIDLL_VERSION.LINAARCH64:
-                        dll_path = assemblyDir + "/libyapi-aarch64.so";
+                    case YAPIDLL_VERSION.LIN64:
+                        _dllVersion = YAPIDLL_VERSION.LINAARCH64;
                         break;
                 }
-                debugDll("try to load library using assembly directory("+dll_path+")");
-                try {
-                    IntPtr loadLibrary;
-#if NETCOREAPP3_0_OR_GREATER
-                    debugDll("use NativeLibrary.Load (.Net Core)");
-                    loadLibrary = NativeLibrary.Load(dll_path);
-#else
-                    debugDll("use NativeMethods.LoadLibrary (.Net Framework)");
-                    loadLibrary = NativeMethods.LoadLibrary(dll_path);
-#endif
-                    if (loadLibrary == IntPtr.Zero) {
-                        debugDll("Unable to preload dll with :" + dll_path);
-                    } else {
-                        debugDll("YAPI preloaded from " + dll_path);
-                    }
-                } catch (System.EntryPointNotFoundException ex) {
-                    debugDll("Entry point not found:"+ex.Message);
-                } catch (System.DllNotFoundException ex) {
-                    debugDll("Unable to load dll with :" + ex.Message);
-                }
-            }
+            } while (!no_alternate_platform);
         }
-
-        bool can_retry = true;
-        do {
-            try {
-                return _yapiGetAPIVersion(ref version, ref dat_);
-            } catch (System.DllNotFoundException ex) {
-                debugDll(ex.ToString());
-            } catch (System.BadImageFormatException ex) {
-                debugDll(ex.ToString());
-            }
-
-            switch (_dllVersion) {
-                default:
-                case YAPIDLL_VERSION.WIN32:
-                    throw new System.DllNotFoundException("Unable to load YAPI dynamic library");
-                case YAPIDLL_VERSION.WIN64:
-                case YAPIDLL_VERSION.MACOS32:
-                case YAPIDLL_VERSION.LINARMHF:
-                case YAPIDLL_VERSION.LINAARCH64:
-                    _dllVersion = YAPIDLL_VERSION.WIN32;
-                    break;
-                case YAPIDLL_VERSION.MACOS64:
-                    _dllVersion = YAPIDLL_VERSION.MACOS32;
-                    break;
-                case YAPIDLL_VERSION.LIN32:
-                    _dllVersion = YAPIDLL_VERSION.LINARMHF;
-                    break;
-                case YAPIDLL_VERSION.LIN64:
-                    _dllVersion = YAPIDLL_VERSION.LINAARCH64;
-                    break;
-            }
-
-            debugDll("retry with platform " + _dllVersion.ToString());
-        } while (can_retry);
 
         return 0;
     }
@@ -2805,7 +2872,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "48405";
+    public const string YOCTO_API_BUILD_NO = "48512";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
