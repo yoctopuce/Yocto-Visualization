@@ -1706,12 +1706,25 @@ namespace YoctoVisualisation
      value = _prop.GetValue(_dataContainer, null);
       if (value is Int32)
           ((ComboBox)input).SelectedIndex = (int)value;
-     if (value is String)
-          for (int i = 0; i < ((ComboBox)input).Items.Count; i++)
-            if (((ComboBox)input).Items[i].ToString() == value.ToString())
-              if (((ComboBox)input).SelectedIndex != i)
-                ((ComboBox)input).SelectedIndex = i;
-     
+
+      
+      if (value is String)
+      {
+        Boolean found = false;
+        for (int i = 0; i < ((ComboBox)input).Items.Count; i++)
+          if (((ComboBox)input).Items[i].ToString() == value.ToString())
+          {
+            found = true;
+            if (((ComboBox)input).SelectedIndex != i)
+              ((ComboBox)input).SelectedIndex = i;
+          }
+        if ((!found)  && (value.ToString()!="")) // add unlisted values
+        {
+          ((ComboBox)input).Items.Add(value.ToString());
+          ((ComboBox)input).SelectedIndex = ((ComboBox)input).Items.Count - 1;
+
+        }
+      }
       ((ComboBox)input).SelectedValueChanged += UIElementList_SelectedValueChanged;
       checkForReadOnly();
     }

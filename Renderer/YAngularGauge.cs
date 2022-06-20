@@ -309,7 +309,7 @@ namespace YDataRendering
 
 
     private double _needleMaxSpeed = 5;
-    public double needleMaxSpeedh
+    public double needleMaxSpeed
     {
 
       get { return _needleMaxSpeed; }

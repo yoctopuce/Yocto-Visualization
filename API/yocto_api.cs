@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 48491 2022-02-03 10:10:50Z seb $
+ * $Id: yocto_api.cs 49750 2022-05-13 07:10:42Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -75,6 +75,15 @@ using System.Text;
 using System.Threading;
 
 #pragma warning disable 1591
+#if NET5_0
+#pragma warning disable 8073 // The result of the expression is always 'true' since a value of type 'IntPtr' is never equal to 'null' of type 'IntPtr?'.
+#pragma warning disable 8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable 8601 // Possible null reference assignment.
+#pragma warning disable 8603 // Possible null reference assignment.
+#pragma warning disable 8604 // Possible null reference assignment.
+#pragma warning disable 8625 // Cannot convert null literal to non-nullable reference type.
+#pragma warning disable 8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+#endif
 [Serializable]
 public class YAPI_Exception : Exception
 {
@@ -197,6 +206,7 @@ internal static class SafeNativeMethods
 
     internal enum YAPIDLL_VERSION
     {
+        NOT_INIT,
         WIN32,
         WIN64,
         MACOS32,
@@ -216,7 +226,7 @@ internal static class SafeNativeMethods
     }
 
 
-    internal static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.WIN32;
+    internal static YAPIDLL_VERSION _dllVersion = YAPIDLL_VERSION.NOT_INIT;
 
     private static bool IsMacOS()
     {
@@ -418,7 +428,6 @@ internal static class SafeNativeMethods
         }
     }
 
-
     //--- (generated code: YFunction dlldef)
     [DllImport("yapi", EntryPoint = "yapiInitAPI", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl, BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private extern static int _yapiInitAPIWIN32(int mode, StringBuilder errmsg);
@@ -438,23 +447,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiInitAPILINAARCH64(int mode, StringBuilder errmsg);
     internal static int _yapiInitAPI(int mode, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiInitAPIWIN32(mode, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiInitAPIWIN64(mode, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiInitAPIMACOS32(mode, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiInitAPIMACOS64(mode, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiInitAPILIN64(mode, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiInitAPILIN32(mode, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiInitAPILINARMHF(mode, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiInitAPILINAARCH64(mode, errmsg);
         }
     }
@@ -476,30 +492,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiFreeAPILINAARCH64();
     internal static void _yapiFreeAPI()
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiFreeAPIWIN32();
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiFreeAPIWIN64();
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiFreeAPIMACOS32();
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiFreeAPIMACOS64();
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiFreeAPILIN64();
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiFreeAPILIN32();
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiFreeAPILINARMHF();
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiFreeAPILINAARCH64();
                   return;
         }
@@ -522,30 +545,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiSetTraceFileLINAARCH64(StringBuilder tracefile);
     internal static void _yapiSetTraceFile(StringBuilder tracefile)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiSetTraceFileWIN32(tracefile);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiSetTraceFileWIN64(tracefile);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiSetTraceFileMACOS32(tracefile);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiSetTraceFileMACOS64(tracefile);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiSetTraceFileLIN64(tracefile);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiSetTraceFileLIN32(tracefile);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiSetTraceFileLINARMHF(tracefile);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiSetTraceFileLINAARCH64(tracefile);
                   return;
         }
@@ -568,30 +598,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterLogFunctionLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterLogFunction(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterLogFunctionWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterLogFunctionWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterLogFunctionMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterLogFunctionMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterLogFunctionLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterLogFunctionLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterLogFunctionLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterLogFunctionLINAARCH64(fct);
                   return;
         }
@@ -614,30 +651,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceArrivalCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceArrivalCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterDeviceArrivalCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterDeviceArrivalCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterDeviceArrivalCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterDeviceArrivalCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterDeviceArrivalCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterDeviceArrivalCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceArrivalCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterDeviceArrivalCallbackLINAARCH64(fct);
                   return;
         }
@@ -660,30 +704,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceRemovalCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceRemovalCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterDeviceRemovalCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterDeviceRemovalCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterDeviceRemovalCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterDeviceRemovalCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterDeviceRemovalCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterDeviceRemovalCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceRemovalCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterDeviceRemovalCallbackLINAARCH64(fct);
                   return;
         }
@@ -706,30 +757,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceChangeCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceChangeCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterDeviceChangeCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterDeviceChangeCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterDeviceChangeCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterDeviceChangeCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterDeviceChangeCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterDeviceChangeCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceChangeCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterDeviceChangeCallbackLINAARCH64(fct);
                   return;
         }
@@ -752,30 +810,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceConfigChangeCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceConfigChangeCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterDeviceConfigChangeCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterDeviceConfigChangeCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterDeviceConfigChangeCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterDeviceConfigChangeCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterDeviceConfigChangeCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterDeviceConfigChangeCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceConfigChangeCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterDeviceConfigChangeCallbackLINAARCH64(fct);
                   return;
         }
@@ -798,30 +863,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterFunctionUpdateCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterFunctionUpdateCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterFunctionUpdateCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterFunctionUpdateCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterFunctionUpdateCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterFunctionUpdateCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterFunctionUpdateCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterFunctionUpdateCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterFunctionUpdateCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterFunctionUpdateCallbackLINAARCH64(fct);
                   return;
         }
@@ -844,30 +916,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterTimedReportCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterTimedReportCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterTimedReportCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterTimedReportCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterTimedReportCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterTimedReportCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterTimedReportCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterTimedReportCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterTimedReportCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterTimedReportCallbackLINAARCH64(fct);
                   return;
         }
@@ -890,23 +969,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiLockDeviceCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiLockDeviceCallBack(StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiLockDeviceCallBackWIN32(errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiLockDeviceCallBackWIN64(errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiLockDeviceCallBackMACOS32(errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiLockDeviceCallBackMACOS64(errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiLockDeviceCallBackLIN64(errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiLockDeviceCallBackLIN32(errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiLockDeviceCallBackLINARMHF(errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiLockDeviceCallBackLINAARCH64(errmsg);
         }
     }
@@ -928,23 +1014,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiUnlockDeviceCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiUnlockDeviceCallBack(StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiUnlockDeviceCallBackWIN32(errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiUnlockDeviceCallBackWIN64(errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiUnlockDeviceCallBackMACOS32(errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiUnlockDeviceCallBackMACOS64(errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiUnlockDeviceCallBackLIN64(errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiUnlockDeviceCallBackLIN32(errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUnlockDeviceCallBackLINARMHF(errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiUnlockDeviceCallBackLINAARCH64(errmsg);
         }
     }
@@ -966,23 +1059,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiLockFunctionCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiLockFunctionCallBack(StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiLockFunctionCallBackWIN32(errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiLockFunctionCallBackWIN64(errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiLockFunctionCallBackMACOS32(errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiLockFunctionCallBackMACOS64(errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiLockFunctionCallBackLIN64(errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiLockFunctionCallBackLIN32(errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiLockFunctionCallBackLINARMHF(errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiLockFunctionCallBackLINAARCH64(errmsg);
         }
     }
@@ -1004,23 +1104,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiUnlockFunctionCallBackLINAARCH64(StringBuilder errmsg);
     internal static int _yapiUnlockFunctionCallBack(StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiUnlockFunctionCallBackWIN32(errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiUnlockFunctionCallBackWIN64(errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiUnlockFunctionCallBackMACOS32(errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiUnlockFunctionCallBackMACOS64(errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiUnlockFunctionCallBackLIN64(errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiUnlockFunctionCallBackLIN32(errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUnlockFunctionCallBackLINARMHF(errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiUnlockFunctionCallBackLINAARCH64(errmsg);
         }
     }
@@ -1042,23 +1149,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiRegisterHubLINAARCH64(StringBuilder rootUrl, StringBuilder errmsg);
     internal static int _yapiRegisterHub(StringBuilder rootUrl, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiRegisterHubWIN32(rootUrl, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiRegisterHubWIN64(rootUrl, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiRegisterHubMACOS32(rootUrl, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiRegisterHubMACOS64(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiRegisterHubLIN64(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiRegisterHubLIN32(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiRegisterHubLINARMHF(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiRegisterHubLINAARCH64(rootUrl, errmsg);
         }
     }
@@ -1080,23 +1194,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiPreregisterHubLINAARCH64(StringBuilder rootUrl, StringBuilder errmsg);
     internal static int _yapiPreregisterHub(StringBuilder rootUrl, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiPreregisterHubWIN32(rootUrl, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiPreregisterHubWIN64(rootUrl, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiPreregisterHubMACOS32(rootUrl, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiPreregisterHubMACOS64(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiPreregisterHubLIN64(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiPreregisterHubLIN32(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiPreregisterHubLINARMHF(rootUrl, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiPreregisterHubLINAARCH64(rootUrl, errmsg);
         }
     }
@@ -1118,30 +1239,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiUnregisterHubLINAARCH64(StringBuilder rootUrl);
     internal static void _yapiUnregisterHub(StringBuilder rootUrl)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiUnregisterHubWIN32(rootUrl);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiUnregisterHubWIN64(rootUrl);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiUnregisterHubMACOS32(rootUrl);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiUnregisterHubMACOS64(rootUrl);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiUnregisterHubLIN64(rootUrl);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiUnregisterHubLIN32(rootUrl);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiUnregisterHubLINARMHF(rootUrl);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiUnregisterHubLINAARCH64(rootUrl);
                   return;
         }
@@ -1164,23 +1292,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiUpdateDeviceListLINAARCH64(u32 force, StringBuilder errmsg);
     internal static int _yapiUpdateDeviceList(u32 force, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiUpdateDeviceListWIN32(force, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiUpdateDeviceListWIN64(force, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiUpdateDeviceListMACOS32(force, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiUpdateDeviceListMACOS64(force, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiUpdateDeviceListLIN64(force, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiUpdateDeviceListLIN32(force, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUpdateDeviceListLINARMHF(force, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiUpdateDeviceListLINAARCH64(force, errmsg);
         }
     }
@@ -1202,23 +1337,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHandleEventsLINAARCH64(StringBuilder errmsg);
     internal static int _yapiHandleEvents(StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHandleEventsWIN32(errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHandleEventsWIN64(errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHandleEventsMACOS32(errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHandleEventsMACOS64(errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHandleEventsLIN64(errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHandleEventsLIN32(errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHandleEventsLINARMHF(errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHandleEventsLINAARCH64(errmsg);
         }
     }
@@ -1240,23 +1382,30 @@ internal static class SafeNativeMethods
     private extern static u64 _yapiGetTickCountLINAARCH64();
     internal static u64 _yapiGetTickCount()
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetTickCountWIN32();
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetTickCountWIN64();
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetTickCountMACOS32();
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetTickCountMACOS64();
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetTickCountLIN64();
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetTickCountLIN32();
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetTickCountLINARMHF();
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetTickCountLINAARCH64();
         }
     }
@@ -1278,23 +1427,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiCheckLogicalNameLINAARCH64(StringBuilder name);
     internal static int _yapiCheckLogicalName(StringBuilder name)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiCheckLogicalNameWIN32(name);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiCheckLogicalNameWIN64(name);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiCheckLogicalNameMACOS32(name);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiCheckLogicalNameMACOS64(name);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiCheckLogicalNameLIN64(name);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiCheckLogicalNameLIN32(name);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiCheckLogicalNameLINARMHF(name);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiCheckLogicalNameLINAARCH64(name);
         }
     }
@@ -1317,22 +1473,22 @@ internal static class SafeNativeMethods
     internal static u16 _yapiGetAPIVersion(ref IntPtr version, ref IntPtr dat_)
     {
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetAPIVersionWIN32(ref version, ref dat_);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetAPIVersionWIN64(ref version, ref dat_);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetAPIVersionMACOS32(ref version, ref dat_);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetAPIVersionMACOS64(ref version, ref dat_);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetAPIVersionLIN64(ref version, ref dat_);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetAPIVersionLIN32(ref version, ref dat_);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetAPIVersionLINARMHF(ref version, ref dat_);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetAPIVersionLINAARCH64(ref version, ref dat_);
         }
     }
@@ -1354,23 +1510,30 @@ internal static class SafeNativeMethods
     private extern static YDEV_DESCR _yapiGetDeviceLINAARCH64(StringBuilder device_str, StringBuilder errmsg);
     internal static YDEV_DESCR _yapiGetDevice(StringBuilder device_str, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetDeviceWIN32(device_str, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetDeviceWIN64(device_str, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetDeviceMACOS32(device_str, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetDeviceMACOS64(device_str, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetDeviceLIN64(device_str, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetDeviceLIN32(device_str, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDeviceLINARMHF(device_str, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetDeviceLINAARCH64(device_str, errmsg);
         }
     }
@@ -1392,23 +1555,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetDeviceInfoLINAARCH64(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg);
     internal static int _yapiGetDeviceInfo(YDEV_DESCR d, ref yDeviceSt infos, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetDeviceInfoWIN32(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetDeviceInfoWIN64(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetDeviceInfoMACOS32(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetDeviceInfoMACOS64(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetDeviceInfoLIN64(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetDeviceInfoLIN32(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDeviceInfoLINARMHF(d, ref infos, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetDeviceInfoLINAARCH64(d, ref infos, errmsg);
         }
     }
@@ -1430,23 +1600,30 @@ internal static class SafeNativeMethods
     private extern static YFUN_DESCR _yapiGetFunctionLINAARCH64(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg);
     internal static YFUN_DESCR _yapiGetFunction(StringBuilder class_str, StringBuilder function_str, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetFunctionWIN32(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetFunctionWIN64(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetFunctionMACOS32(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetFunctionMACOS64(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetFunctionLIN64(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetFunctionLIN32(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionLINARMHF(class_str, function_str, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetFunctionLINAARCH64(class_str, function_str, errmsg);
         }
     }
@@ -1468,23 +1645,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetFunctionsByClassLINAARCH64(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
     internal static int _yapiGetFunctionsByClass(StringBuilder class_str, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetFunctionsByClassWIN32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetFunctionsByClassWIN64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetFunctionsByClassMACOS32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetFunctionsByClassMACOS64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetFunctionsByClassLIN64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetFunctionsByClassLIN32(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionsByClassLINARMHF(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetFunctionsByClassLINAARCH64(class_str, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
         }
     }
@@ -1506,23 +1690,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetFunctionsByDeviceLINAARCH64(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg);
     internal static int _yapiGetFunctionsByDevice(YDEV_DESCR device, YFUN_DESCR precFuncDesc, IntPtr buffer, int maxsize, ref int neededsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetFunctionsByDeviceWIN32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetFunctionsByDeviceWIN64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetFunctionsByDeviceMACOS32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetFunctionsByDeviceMACOS64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetFunctionsByDeviceLIN64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetFunctionsByDeviceLIN32(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionsByDeviceLINARMHF(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetFunctionsByDeviceLINAARCH64(device, precFuncDesc, buffer, maxsize, ref neededsize, errmsg);
         }
     }
@@ -1544,23 +1735,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetFunctionInfoExLINAARCH64(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg);
     internal static int _yapiGetFunctionInfoEx(YFUN_DESCR fundesc, ref YDEV_DESCR devdesc, StringBuilder serial, StringBuilder funcId, StringBuilder baseType, StringBuilder funcName, StringBuilder funcVal, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetFunctionInfoExWIN32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetFunctionInfoExWIN64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetFunctionInfoExMACOS32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetFunctionInfoExMACOS64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetFunctionInfoExLIN64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetFunctionInfoExLIN32(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetFunctionInfoExLINARMHF(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetFunctionInfoExLINAARCH64(fundesc, ref devdesc, serial, funcId, baseType, funcName, funcVal, errmsg);
         }
     }
@@ -1582,23 +1780,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestSyncStartLINAARCH64(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
     internal static int _yapiHTTPRequestSyncStart(ref YIOHDL iohdl, StringBuilder device, StringBuilder request, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestSyncStartWIN32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestSyncStartWIN64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestSyncStartMACOS32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestSyncStartMACOS64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestSyncStartLIN64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestSyncStartLIN32(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncStartLINARMHF(ref iohdl, device, request, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestSyncStartLINAARCH64(ref iohdl, device, request, ref reply, ref replysize, errmsg);
         }
     }
@@ -1620,23 +1825,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestSyncStartExLINAARCH64(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg);
     internal static int _yapiHTTPRequestSyncStartEx(ref YIOHDL iohdl, StringBuilder device, IntPtr request, int requestlen, ref IntPtr reply, ref int replysize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestSyncStartExWIN32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestSyncStartExWIN64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestSyncStartExMACOS32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestSyncStartExMACOS64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestSyncStartExLIN64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestSyncStartExLIN32(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncStartExLINARMHF(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestSyncStartExLINAARCH64(ref iohdl, device, request, requestlen, ref reply, ref replysize, errmsg);
         }
     }
@@ -1658,23 +1870,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestSyncDoneLINAARCH64(ref YIOHDL iohdl, StringBuilder errmsg);
     internal static int _yapiHTTPRequestSyncDone(ref YIOHDL iohdl, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestSyncDoneWIN32(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestSyncDoneWIN64(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestSyncDoneMACOS32(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestSyncDoneMACOS64(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestSyncDoneLIN64(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestSyncDoneLIN32(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncDoneLINARMHF(ref iohdl, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestSyncDoneLINAARCH64(ref iohdl, errmsg);
         }
     }
@@ -1696,23 +1915,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestAsyncLINAARCH64(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static int _yapiHTTPRequestAsync(StringBuilder device, IntPtr request, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestAsyncWIN32(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestAsyncWIN64(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestAsyncMACOS32(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestAsyncMACOS64(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestAsyncLIN64(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestAsyncLIN32(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestAsyncLINARMHF(device, request, callback, context, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestAsyncLINAARCH64(device, request, callback, context, errmsg);
         }
     }
@@ -1734,23 +1960,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestAsyncExLINAARCH64(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static int _yapiHTTPRequestAsyncEx(StringBuilder device, IntPtr request, int requestlen, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestAsyncExWIN32(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestAsyncExWIN64(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestAsyncExMACOS32(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestAsyncExMACOS64(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestAsyncExLIN64(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestAsyncExLIN32(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestAsyncExLINARMHF(device, request, requestlen, callback, context, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestAsyncExLINAARCH64(device, request, requestlen, callback, context, errmsg);
         }
     }
@@ -1772,23 +2005,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiHTTPRequestLINAARCH64(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg);
     internal static int _yapiHTTPRequest(StringBuilder device, StringBuilder url, StringBuilder buffer, int buffsize, ref int fullsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestWIN32(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestWIN64(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestMACOS32(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestMACOS64(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestLIN64(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestLIN32(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestLINARMHF(device, url, buffer, buffsize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestLINAARCH64(device, url, buffer, buffsize, ref fullsize, errmsg);
         }
     }
@@ -1810,23 +2050,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetDevicePathLINAARCH64(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     internal static int _yapiGetDevicePath(int devdesc, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetDevicePathWIN32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetDevicePathWIN64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetDevicePathMACOS32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetDevicePathMACOS64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetDevicePathLIN64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetDevicePathLIN32(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDevicePathLINARMHF(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetDevicePathLINAARCH64(devdesc, rootdevice, path, pathsize, ref neededsize, errmsg);
         }
     }
@@ -1848,23 +2095,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiSleepLINAARCH64(int duration_ms, StringBuilder errmsg);
     internal static int _yapiSleep(int duration_ms, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiSleepWIN32(duration_ms, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiSleepWIN64(duration_ms, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiSleepMACOS32(duration_ms, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiSleepMACOS64(duration_ms, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiSleepLIN64(duration_ms, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiSleepLIN32(duration_ms, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiSleepLINARMHF(duration_ms, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiSleepLINAARCH64(duration_ms, errmsg);
         }
     }
@@ -1886,30 +2140,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterHubDiscoveryCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterHubDiscoveryCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterHubDiscoveryCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterHubDiscoveryCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterHubDiscoveryCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterHubDiscoveryCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterHubDiscoveryCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterHubDiscoveryCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterHubDiscoveryCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterHubDiscoveryCallbackLINAARCH64(fct);
                   return;
         }
@@ -1932,23 +2193,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiTriggerHubDiscoveryLINAARCH64(StringBuilder errmsg);
     internal static int _yapiTriggerHubDiscovery(StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiTriggerHubDiscoveryWIN32(errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiTriggerHubDiscoveryWIN64(errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiTriggerHubDiscoveryMACOS32(errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiTriggerHubDiscoveryMACOS64(errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiTriggerHubDiscoveryLIN64(errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiTriggerHubDiscoveryLIN32(errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiTriggerHubDiscoveryLINARMHF(errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiTriggerHubDiscoveryLINAARCH64(errmsg);
         }
     }
@@ -1970,30 +2238,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterDeviceLogCallbackLINAARCH64(IntPtr fct);
     internal static void _yapiRegisterDeviceLogCallback(IntPtr fct)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterDeviceLogCallbackWIN32(fct);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterDeviceLogCallbackWIN64(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterDeviceLogCallbackMACOS32(fct);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterDeviceLogCallbackMACOS64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterDeviceLogCallbackLIN64(fct);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterDeviceLogCallbackLIN32(fct);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterDeviceLogCallbackLINARMHF(fct);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterDeviceLogCallbackLINAARCH64(fct);
                   return;
         }
@@ -2016,23 +2291,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetAllJsonKeysLINAARCH64(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetAllJsonKeys(StringBuilder jsonbuffer, StringBuilder out_buffer, int out_buffersize, ref int fullsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetAllJsonKeysWIN32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetAllJsonKeysWIN64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetAllJsonKeysMACOS32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetAllJsonKeysMACOS64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetAllJsonKeysLIN64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetAllJsonKeysLIN32(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetAllJsonKeysLINARMHF(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetAllJsonKeysLINAARCH64(jsonbuffer, out_buffer, out_buffersize, ref fullsize, errmsg);
         }
     }
@@ -2054,23 +2336,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiCheckFirmwareLINAARCH64(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg);
     internal static YRETCODE _yapiCheckFirmware(StringBuilder serial, StringBuilder rev, StringBuilder path, StringBuilder buffer, int buffersize, ref int fullsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiCheckFirmwareWIN32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiCheckFirmwareWIN64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiCheckFirmwareMACOS32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiCheckFirmwareMACOS64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiCheckFirmwareLIN64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiCheckFirmwareLIN32(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiCheckFirmwareLINARMHF(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiCheckFirmwareLINAARCH64(serial, rev, path, buffer, buffersize, ref fullsize, errmsg);
         }
     }
@@ -2092,23 +2381,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetBootloadersLINAARCH64(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetBootloaders(StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetBootloadersWIN32(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetBootloadersWIN64(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetBootloadersMACOS32(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetBootloadersMACOS64(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetBootloadersLIN64(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetBootloadersLIN32(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetBootloadersLINARMHF(buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetBootloadersLINAARCH64(buffer, buffersize, ref totalSize, errmsg);
         }
     }
@@ -2130,23 +2426,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiUpdateFirmwareExLINAARCH64(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg);
     internal static YRETCODE _yapiUpdateFirmwareEx(StringBuilder serial, StringBuilder firmwarePath, StringBuilder settings, int force, int startUpdate, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiUpdateFirmwareExWIN32(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiUpdateFirmwareExWIN64(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiUpdateFirmwareExMACOS32(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiUpdateFirmwareExMACOS64(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiUpdateFirmwareExLIN64(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiUpdateFirmwareExLIN32(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiUpdateFirmwareExLINARMHF(serial, firmwarePath, settings, force, startUpdate, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiUpdateFirmwareExLINAARCH64(serial, firmwarePath, settings, force, startUpdate, errmsg);
         }
     }
@@ -2168,23 +2471,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiHTTPRequestSyncStartOutOfBandLINAARCH64(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg);
     internal static YRETCODE _yapiHTTPRequestSyncStartOutOfBand(ref YIOHDL iohdl, int channel, StringBuilder device, StringBuilder request, int requestsize, ref IntPtr reply, ref int replysize, IntPtr progress_cb, IntPtr progress_ctx, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestSyncStartOutOfBandWIN32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestSyncStartOutOfBandWIN64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestSyncStartOutOfBandMACOS32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestSyncStartOutOfBandMACOS64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestSyncStartOutOfBandLIN64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestSyncStartOutOfBandLIN32(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestSyncStartOutOfBandLINARMHF(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestSyncStartOutOfBandLINAARCH64(ref iohdl, channel, device, request, requestsize, ref reply, ref replysize, progress_cb, progress_ctx, errmsg);
         }
     }
@@ -2206,23 +2516,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiHTTPRequestAsyncOutOfBandLINAARCH64(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg);
     internal static YRETCODE _yapiHTTPRequestAsyncOutOfBand(int channel, StringBuilder device, StringBuilder request, int requestsize, IntPtr callback, IntPtr context, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiHTTPRequestAsyncOutOfBandWIN32(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiHTTPRequestAsyncOutOfBandWIN64(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiHTTPRequestAsyncOutOfBandMACOS32(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiHTTPRequestAsyncOutOfBandMACOS64(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiHTTPRequestAsyncOutOfBandLIN64(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiHTTPRequestAsyncOutOfBandLIN32(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiHTTPRequestAsyncOutOfBandLINARMHF(channel, device, request, requestsize, callback, context, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiHTTPRequestAsyncOutOfBandLINAARCH64(channel, device, request, requestsize, callback, context, errmsg);
         }
     }
@@ -2244,23 +2561,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiTestHubLINAARCH64(StringBuilder url, int mstimeout, StringBuilder errmsg);
     internal static YRETCODE _yapiTestHub(StringBuilder url, int mstimeout, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiTestHubWIN32(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiTestHubWIN64(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiTestHubMACOS32(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiTestHubMACOS64(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiTestHubLIN64(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiTestHubLIN32(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiTestHubLINARMHF(url, mstimeout, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiTestHubLINAARCH64(url, mstimeout, errmsg);
         }
     }
@@ -2282,23 +2606,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiJsonGetPathLINAARCH64(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg);
     internal static int _yapiJsonGetPath(StringBuilder path, StringBuilder json_data, int json_len, ref IntPtr result, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiJsonGetPathWIN32(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiJsonGetPathWIN64(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiJsonGetPathMACOS32(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiJsonGetPathMACOS64(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiJsonGetPathLIN64(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiJsonGetPathLIN32(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiJsonGetPathLINARMHF(path, json_data, json_len, ref result, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiJsonGetPathLINAARCH64(path, json_data, json_len, ref result, errmsg);
         }
     }
@@ -2320,23 +2651,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiJsonDecodeStringLINAARCH64(StringBuilder json_data, StringBuilder output);
     internal static int _yapiJsonDecodeString(StringBuilder json_data, StringBuilder output)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiJsonDecodeStringWIN32(json_data, output);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiJsonDecodeStringWIN64(json_data, output);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiJsonDecodeStringMACOS32(json_data, output);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiJsonDecodeStringMACOS64(json_data, output);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiJsonDecodeStringLIN64(json_data, output);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiJsonDecodeStringLIN32(json_data, output);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiJsonDecodeStringLINARMHF(json_data, output);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiJsonDecodeStringLINAARCH64(json_data, output);
         }
     }
@@ -2358,23 +2696,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetSubdevicesLINAARCH64(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetSubdevices(StringBuilder serial, StringBuilder buffer, int buffersize, ref int totalSize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetSubdevicesWIN32(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetSubdevicesWIN64(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetSubdevicesMACOS32(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetSubdevicesMACOS64(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetSubdevicesLIN64(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetSubdevicesLIN32(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetSubdevicesLINARMHF(serial, buffer, buffersize, ref totalSize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetSubdevicesLINAARCH64(serial, buffer, buffersize, ref totalSize, errmsg);
         }
     }
@@ -2396,30 +2741,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiFreeMemLINAARCH64(IntPtr buffer);
     internal static void _yapiFreeMem(IntPtr buffer)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiFreeMemWIN32(buffer);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiFreeMemWIN64(buffer);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiFreeMemMACOS32(buffer);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiFreeMemMACOS64(buffer);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiFreeMemLIN64(buffer);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiFreeMemLIN32(buffer);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiFreeMemLINARMHF(buffer);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiFreeMemLINAARCH64(buffer);
                   return;
         }
@@ -2442,23 +2794,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetDevicePathExLINAARCH64(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetDevicePathEx(StringBuilder serial, StringBuilder rootdevice, StringBuilder path, int pathsize, ref int neededsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetDevicePathExWIN32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetDevicePathExWIN64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetDevicePathExMACOS32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetDevicePathExMACOS64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetDevicePathExLIN64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetDevicePathExLIN32(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDevicePathExLINARMHF(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetDevicePathExLINAARCH64(serial, rootdevice, path, pathsize, ref neededsize, errmsg);
         }
     }
@@ -2480,30 +2839,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiSetNetDevListValidityLINAARCH64(int sValidity);
     internal static void _yapiSetNetDevListValidity(int sValidity)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiSetNetDevListValidityWIN32(sValidity);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiSetNetDevListValidityWIN64(sValidity);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiSetNetDevListValidityMACOS32(sValidity);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiSetNetDevListValidityMACOS64(sValidity);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiSetNetDevListValidityLIN64(sValidity);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiSetNetDevListValidityLIN32(sValidity);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiSetNetDevListValidityLINARMHF(sValidity);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiSetNetDevListValidityLINAARCH64(sValidity);
                   return;
         }
@@ -2526,23 +2892,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetNetDevListValidityLINAARCH64();
     internal static int _yapiGetNetDevListValidity()
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetNetDevListValidityWIN32();
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetNetDevListValidityWIN64();
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetNetDevListValidityMACOS32();
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetNetDevListValidityMACOS64();
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetNetDevListValidityLIN64();
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetNetDevListValidityLIN32();
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetNetDevListValidityLINARMHF();
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetNetDevListValidityLINAARCH64();
         }
     }
@@ -2564,30 +2937,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiRegisterBeaconCallbackLINAARCH64(IntPtr beaconCallback);
     internal static void _yapiRegisterBeaconCallback(IntPtr beaconCallback)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiRegisterBeaconCallbackWIN32(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiRegisterBeaconCallbackWIN64(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiRegisterBeaconCallbackMACOS32(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiRegisterBeaconCallbackMACOS64(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiRegisterBeaconCallbackLIN64(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiRegisterBeaconCallbackLIN32(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiRegisterBeaconCallbackLINARMHF(beaconCallback);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiRegisterBeaconCallbackLINAARCH64(beaconCallback);
                   return;
         }
@@ -2610,30 +2990,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiStartStopDeviceLogCallbackLINAARCH64(StringBuilder serial, int start);
     internal static void _yapiStartStopDeviceLogCallback(StringBuilder serial, int start)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiStartStopDeviceLogCallbackWIN32(serial, start);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiStartStopDeviceLogCallbackWIN64(serial, start);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiStartStopDeviceLogCallbackMACOS32(serial, start);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiStartStopDeviceLogCallbackMACOS64(serial, start);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiStartStopDeviceLogCallbackLIN64(serial, start);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiStartStopDeviceLogCallbackLIN32(serial, start);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiStartStopDeviceLogCallbackLINARMHF(serial, start);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiStartStopDeviceLogCallbackLINAARCH64(serial, start);
                   return;
         }
@@ -2656,23 +3043,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiIsModuleWritableLINAARCH64(StringBuilder serial, StringBuilder errmsg);
     internal static int _yapiIsModuleWritable(StringBuilder serial, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiIsModuleWritableWIN32(serial, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiIsModuleWritableWIN64(serial, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiIsModuleWritableMACOS32(serial, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiIsModuleWritableMACOS64(serial, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiIsModuleWritableLIN64(serial, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiIsModuleWritableLIN32(serial, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiIsModuleWritableLINARMHF(serial, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiIsModuleWritableLINAARCH64(serial, errmsg);
         }
     }
@@ -2694,23 +3088,30 @@ internal static class SafeNativeMethods
     private extern static YRETCODE _yapiGetDLLPathLINAARCH64(StringBuilder path, int pathsize, StringBuilder errmsg);
     internal static YRETCODE _yapiGetDLLPath(StringBuilder path, int pathsize, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetDLLPathWIN32(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetDLLPathWIN64(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetDLLPathMACOS32(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetDLLPathMACOS64(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetDLLPathLIN64(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetDLLPathLIN32(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetDLLPathLINARMHF(path, pathsize, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetDLLPathLINAARCH64(path, pathsize, errmsg);
         }
     }
@@ -2732,30 +3133,37 @@ internal static class SafeNativeMethods
     private extern static void _yapiSetNetworkTimeoutLINAARCH64(int sValidity);
     internal static void _yapiSetNetworkTimeout(int sValidity)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   _yapiSetNetworkTimeoutWIN32(sValidity);
                   return;
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   _yapiSetNetworkTimeoutWIN64(sValidity);
                   return;
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   _yapiSetNetworkTimeoutMACOS32(sValidity);
                   return;
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   _yapiSetNetworkTimeoutMACOS64(sValidity);
                   return;
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   _yapiSetNetworkTimeoutLIN64(sValidity);
                   return;
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   _yapiSetNetworkTimeoutLIN32(sValidity);
                   return;
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   _yapiSetNetworkTimeoutLINARMHF(sValidity);
                   return;
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   _yapiSetNetworkTimeoutLINAARCH64(sValidity);
                   return;
         }
@@ -2778,23 +3186,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiGetNetworkTimeoutLINAARCH64();
     internal static int _yapiGetNetworkTimeout()
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiGetNetworkTimeoutWIN32();
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiGetNetworkTimeoutWIN64();
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiGetNetworkTimeoutMACOS32();
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiGetNetworkTimeoutMACOS64();
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiGetNetworkTimeoutLIN64();
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiGetNetworkTimeoutLIN32();
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiGetNetworkTimeoutLINARMHF();
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiGetNetworkTimeoutLINAARCH64();
         }
     }
@@ -2816,23 +3231,30 @@ internal static class SafeNativeMethods
     private extern static int _yapiAddUdevRulesForYoctoLINAARCH64(int force, StringBuilder errmsg);
     internal static int _yapiAddUdevRulesForYocto(int force, StringBuilder errmsg)
     {
+        if  (_dllVersion == YAPIDLL_VERSION.NOT_INIT) {
+            string version = "";
+            string date = "";
+            YAPI.apiGetAPIVersion(ref version, ref date);
+        }
         switch (_dllVersion) {
-             default:
-             case YAPIDLL_VERSION.WIN32:
+            case YAPIDLL_VERSION.NOT_INIT:
+                throw new YAPI_Exception(YAPI.NOT_INITIALIZED, "API not initialized");
+            default:
+            case YAPIDLL_VERSION.WIN32:
                   return _yapiAddUdevRulesForYoctoWIN32(force, errmsg);
-             case YAPIDLL_VERSION.WIN64:
+            case YAPIDLL_VERSION.WIN64:
                   return _yapiAddUdevRulesForYoctoWIN64(force, errmsg);
-             case YAPIDLL_VERSION.MACOS32:
+            case YAPIDLL_VERSION.MACOS32:
                   return _yapiAddUdevRulesForYoctoMACOS32(force, errmsg);
-             case YAPIDLL_VERSION.MACOS64:
+            case YAPIDLL_VERSION.MACOS64:
                   return _yapiAddUdevRulesForYoctoMACOS64(force, errmsg);
-             case YAPIDLL_VERSION.LIN64:
+            case YAPIDLL_VERSION.LIN64:
                   return _yapiAddUdevRulesForYoctoLIN64(force, errmsg);
-             case YAPIDLL_VERSION.LIN32:
+            case YAPIDLL_VERSION.LIN32:
                   return _yapiAddUdevRulesForYoctoLIN32(force, errmsg);
-             case YAPIDLL_VERSION.LINARMHF:
+            case YAPIDLL_VERSION.LINARMHF:
                   return _yapiAddUdevRulesForYoctoLINARMHF(force, errmsg);
-             case YAPIDLL_VERSION.LINAARCH64:
+            case YAPIDLL_VERSION.LINAARCH64:
                   return _yapiAddUdevRulesForYoctoLINAARCH64(force, errmsg);
         }
     }
@@ -2872,7 +3294,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "1.10";
     public const int YOCTO_API_VERSION_BCD = 0x0110;
 
-    public const string YOCTO_API_BUILD_NO = "48512";
+    public const string YOCTO_API_BUILD_NO = "50144";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -3921,7 +4343,8 @@ public class YAPI
                 }
 
                 reply = new byte[replysize];
-                if (reply.Length > 0 && preply != null) {
+                if (reply.Length > 0 && preply != null)
+                {
                     Marshal.Copy(preply, reply, 0, replysize);
                 }
 
@@ -6343,9 +6766,6 @@ public class YFirmwareUpdate
      * <summary>
      *   Returns a list of all the modules in "firmware update" mode.
      * <para>
-     *   Only devices
-     *   connected over USB are listed. For devices connected to a YoctoHub, you
-     *   must connect yourself to the YoctoHub web interface.
      * </para>
      * <para>
      * </para>
