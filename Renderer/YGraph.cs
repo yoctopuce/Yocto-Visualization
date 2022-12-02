@@ -564,10 +564,23 @@ namespace YDataRendering
     private MinMaxHandler.MinMax _valueRange;
     public MinMaxHandler.MinMax valueRange { get { return _valueRange; } }
 
+    public pointXY getlastPoint()
+    {
+     
+      if (segments.Count <= 0)
+      { 
+        pointXY res;
+        res.x = Double.NaN;
+        res.y = Double.NaN;
+        return res;
+      }
+      return segments[segments.Count - 1].data[segments[segments.Count-1].count - 1];
 
+    }
 
     public void AddPoint(pointXY p)
     {
+      
 
 
       _timeRange = MinMaxHandler.Combine(_timeRange, p.x);
@@ -2029,7 +2042,33 @@ namespace YDataRendering
       set
       {
         if (value <= 0) throw new ArgumentException("Zoom must be a positive value");
-        _initialZoom = value; max = min + initialZoom; _parentRenderer.redraw();
+        _initialZoom = value;
+        _min= _min  - (_initialZoom * _initialOffset / 100);
+        _max = _min + initialZoom; 
+        _parentRenderer.redraw();
+      }
+    }
+
+    private double _initialOffset = 0;
+    public double initialOffset
+    {
+      get { return _initialOffset; }
+      set
+      {
+        _initialOffset = value;
+        pointXY p = _parentGraph.getMostRecentPoint();
+        if (Double.IsNaN(p.x))
+        {
+          _min = _min - (_initialZoom * _initialOffset / 100);
+          _max = _min + _initialZoom; _parentRenderer.redraw();
+        }
+        else
+        {
+          double zoom = _max - _min;
+          _min = p.x - (zoom * _initialOffset / 100);
+          _max = _min + zoom;
+        }
+        _parentRenderer.redraw();
       }
     }
 
@@ -2054,7 +2093,8 @@ namespace YDataRendering
     {
       _parentGraph = parent;
        _markers = new List<Marker>();
-      min = TimeConverter.ToUnixTime(DateTime.UtcNow);
+      min = TimeConverter.ToUnixTime(DateTime.UtcNow) - (_initialZoom * initialOffset / 100);
+     
       max = min + initialZoom;
       step = 30;
     }
@@ -2284,6 +2324,28 @@ namespace YDataRendering
       Draw();
 
     }
+
+    public pointXY getMostRecentPoint()
+    {
+      pointXY res;
+      res.x = Double.NaN;
+      res.y = Double.NaN;
+
+      for (int i=0; i < _series.Count;i++)
+        if (!series[i].disabled)
+      {
+          pointXY p = series[i].getlastPoint();
+          if (!Double.IsNaN(p.x))
+          { if (Double.IsNaN(res.x)) res = p;
+            else if( p.x > res.x) res = p;
+
+          }
+      }
+
+      return res;
+
+    }
+
 
     private MinMaxHandler.MinMax _timeRange;
     public void adjustGlobalTimeRange(double x)
@@ -3228,8 +3290,15 @@ namespace YDataRendering
       {
         DateTime d = TimeConverter.FromUnixTime(t);
         if ((scale.step > 30 * 86400) && (scale.timeReference == TimeConverter.TimeReference.ABSOLUTE))  // resynchronize with the begining of the month.
-          t = TimeConverter.ToUnixTime(new DateTime(d.Year, d.Month, 1));
+        { if (scale.step >= 365 * 86400)
+          {
+            int m = d.Month;
+            t = TimeConverter.ToUnixTime(new DateTime(d.Year + (m > 5 ? 1 : 0), 1, 1));
+          }
+          else
+            t = TimeConverter.ToUnixTime(new DateTime(d.Year, d.Month, 1));
 
+        }
         if (t >= scale.min)
         {
 

@@ -477,7 +477,7 @@ namespace YoctoVisualisation
       {
         double t = measures[i].get_endTimeUTC();
       
-        if ((t>= arg.start) && (t < arg.stop)) // returned dataset might be slightly larger than what we asked for
+        if ((t>= arg.start) && (t <= arg.stop)) // returned dataset might be slightly larger than what we asked for
         {
           previewMinData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_minValue() });
           previewCurData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_averageValue() });
@@ -708,7 +708,7 @@ namespace YoctoVisualisation
           globalDataLoadProgress = 100;
           loadDone = true;
           loadFailed = false;
-          e.Cancel = true;
+          e.Cancel = true; 
           break;
         }
 
@@ -739,7 +739,7 @@ namespace YoctoVisualisation
 
       {
         double t = measures[i].get_endTimeUTC();
-        if ((t>=arg.start) && (t<arg.stop))   // trust no one!
+        if ((t>=arg.start) && (t<=arg.stop))   // trust no one!
         if ( (previewMinData.Count == 0) || (t > previewMinData[previewMinData.Count - 1].DateTime)  )        
         {
           previewMinData.Add(new TimedSensorValue { DateTime = t, Value = measures[i].get_minValue() });
@@ -1036,9 +1036,11 @@ namespace YoctoVisualisation
       if (!sensor.isOnline()) return;
 
 
-      string lfreq = sensor.get_logFrequency();
-      string rfreq = sensor.get_reportFrequency();
-
+      string olfreq = sensor.get_logFrequency();
+      string orfreq = sensor.get_reportFrequency();
+      bool readOnly = sensor.isReadOnly();
+      string lfreq = olfreq;
+      string rfreq = orfreq;
 
       YModule m = sensor.get_module();
       for (int i = 0; i < m.functionCount(); i++)
@@ -1049,29 +1051,50 @@ namespace YoctoVisualisation
       {
         if (dataLoggerFeature)
         {
-          YDataLogger dl = YDataLogger.FindDataLogger(sensor.get_module().get_serialNumber() + ".dataLogger");
-          bool dataloggerOn = dl.get_recording() != YDataLogger.RECORDING_OFF;
 
-          if ((!dataloggerOn) && (lfreq != "OFF")) { lfreq = "OFF"; mustSave = true; }
-
-          if (lfreq != "OFF") { rfreq = lfreq; sensor.set_reportFrequency(rfreq); mustSave = true; }
-          else if (rfreq == "OFF") { rfreq = "1/s"; sensor.set_reportFrequency(rfreq); mustSave = true; }
-          if (mustSave) sensor.set_logFrequency(lfreq);
-
-          if (lfreq != "OFF")
+          YDataLogger dl= YDataLogger.FindDataLogger( m.get_serialNumber() + ".dataLogger");
+          bool  dataloggerOn =  dl.get_recording() != YDataLogger.RECORDING_OFF;
+          bool  dataloggerAS =  dl.get_autoStart() != YDataLogger.AUTOSTART_OFF;
+          if (!dataloggerOn) { lfreq = "OFF"; }
+          if (lfreq != "OFF") { rfreq = lfreq; }
+          else if (rfreq == "OFF") { rfreq = "1/s"; }
+          if (lfreq != olfreq)
           {
-            dl.set_recording(YDataLogger.RECORDING_ON);
-            dl.set_autoStart(YDataLogger.AUTOSTART_ON);
+            if (readOnly) throw new Exception(this.hwdName + " is read only, cannot change its logFrequency from " + olfreq + " to " + lfreq);
+            sensor.set_logFrequency(lfreq);
             mustSave = true;
           }
-
+          if (rfreq != orfreq)
+          {
+            if (readOnly) throw new Exception(this.hwdName + " is read only, connot change its  reportFrequency from " + orfreq + " to " + rfreq);
+            sensor.set_reportFrequency(rfreq);
+            mustSave = true;
+          }
+          if (lfreq != "OFF")
+          {
+            if (!dataloggerOn)
+            {
+              if (readOnly) throw new Exception(this.hwdName + " is read only, cannot change set its  datalogger recording to ON");
+              dl.set_recording(YDataLogger.RECORDING_ON);
+            }
+            if (!dataloggerAS)
+            {
+              if (readOnly) throw new Exception(this.hwdName + " is read only, cannot change set its datalogger autostart to ON");
+              dl.set_autoStart(YDataLogger.AUTOSTART_ON);
+              mustSave = true;
+            }
+          }
         }
         else
         {
           lfreq = "OFF";
-          rfreq = sensor.get_reportFrequency();
-          if (rfreq == "OFF") { rfreq = "1/s"; sensor.set_reportFrequency(rfreq); mustSave = true; }
-
+          if (rfreq == "OFF")
+          {
+            rfreq = "1/s";
+            if (readOnly) throw new Exception(this.hwdName + " is read only, connot change is reportFrequency from OFF to " + rfreq);
+            sensor.set_reportFrequency(rfreq);
+            mustSave = true;
+          }
         }
 
 

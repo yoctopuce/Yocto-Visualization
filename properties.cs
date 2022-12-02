@@ -2438,6 +2438,16 @@ public static class sensorPrecisionTypeDescription
       set { _initialZoom = value; }
     }
 
+    private double _initialOffset = 0;
+    [
+     DisplayName("Initial Offset"),
+     DescriptionAttribute("Offset of the first data point in percentage of the viewport width. For instance a 50% value will put the first point in the middle of the viewport. This can be used to give some room for datalogger contents.")]
+    public double initialOffset
+    {
+      get { return _initialOffset; }
+      set { _initialOffset = value; }
+    }
+
 
 
     private XAxis.VrtPosition _position = XAxis.VrtPosition.BOTTOM;

@@ -582,7 +582,7 @@ namespace YoctoVisualisation
         catch (Exception )
         { }
         n2 = n1 + 1;
-        while ((n2 < dataCount - 1) && (data[n2].DateTime - data[n2 - 1].DateTime < 2 * deltaT)) n2++;
+        while ((n2 < dataCount ) && (data[n2].DateTime - data[n2 - 1].DateTime < 2 * deltaT)) n2++;
         int count = n2 - n1;
         if (count > 0)
         {
