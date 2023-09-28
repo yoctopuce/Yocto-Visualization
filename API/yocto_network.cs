@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: yocto_network.cs 48692 2022-02-24 22:30:52Z mvuilleu $
+ *  $Id: yocto_network.cs 56058 2023-08-15 07:38:35Z mvuilleu $
  *
  *  Implements yFindNetwork(), the high-level API for Network functions
  *
@@ -47,9 +47,9 @@ using System.Text;
 using YDEV_DESCR = System.Int32;
 using YFUN_DESCR = System.Int32;
 
- #pragma warning disable 1591
-    //--- (YNetwork return codes)
-    //--- (end of YNetwork return codes)
+#pragma warning disable 1591
+//--- (YNetwork return codes)
+//--- (end of YNetwork return codes)
 //--- (YNetwork dlldef)
 //--- (end of YNetwork dlldef)
 //--- (YNetwork yapiwrapper)
@@ -110,6 +110,9 @@ public class YNetwork : YFunction
     public const int CALLBACKENCODING_PRTG = 11;
     public const int CALLBACKENCODING_INFLUXDB_V2 = 12;
     public const int CALLBACKENCODING_INVALID = -1;
+    public const int CALLBACKTEMPLATE_OFF = 0;
+    public const int CALLBACKTEMPLATE_ON = 1;
+    public const int CALLBACKTEMPLATE_INVALID = -1;
     public const string CALLBACKCREDENTIALS_INVALID = YAPI.INVALID_STRING;
     public const int CALLBACKINITIALDELAY_INVALID = YAPI.INVALID_UINT;
     public const string CALLBACKSCHEDULE_INVALID = YAPI.INVALID_STRING;
@@ -135,6 +138,7 @@ public class YNetwork : YFunction
     protected string _callbackUrl = CALLBACKURL_INVALID;
     protected int _callbackMethod = CALLBACKMETHOD_INVALID;
     protected int _callbackEncoding = CALLBACKENCODING_INVALID;
+    protected int _callbackTemplate = CALLBACKTEMPLATE_INVALID;
     protected string _callbackCredentials = CALLBACKCREDENTIALS_INVALID;
     protected int _callbackInitialDelay = CALLBACKINITIALDELAY_INVALID;
     protected string _callbackSchedule = CALLBACKSCHEDULE_INVALID;
@@ -231,6 +235,10 @@ public class YNetwork : YFunction
         if (json_val.has("callbackEncoding"))
         {
             _callbackEncoding = json_val.getInt("callbackEncoding");
+        }
+        if (json_val.has("callbackTemplate"))
+        {
+            _callbackTemplate = json_val.getInt("callbackTemplate") > 0 ? 1 : 0;
         }
         if (json_val.has("callbackCredentials"))
         {
@@ -1305,6 +1313,76 @@ public class YNetwork : YFunction
 
     /**
      * <summary>
+     *   Returns the activation state of the custom template file to customize callback
+     *   format.
+     * <para>
+     *   If the custom callback template is disabled, it will be ignored even
+     *   if present on the YoctoHub.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <returns>
+     *   either <c>YNetwork.CALLBACKTEMPLATE_OFF</c> or <c>YNetwork.CALLBACKTEMPLATE_ON</c>, according to
+     *   the activation state of the custom template file to customize callback
+     *   format
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns <c>YNetwork.CALLBACKTEMPLATE_INVALID</c>.
+     * </para>
+     */
+    public int get_callbackTemplate()
+    {
+        int res;
+        lock (_thisLock) {
+            if (this._cacheExpiration <= YAPI.GetTickCount()) {
+                if (this.load(YAPI._yapiContext.GetCacheValidity()) != YAPI.SUCCESS) {
+                    return CALLBACKTEMPLATE_INVALID;
+                }
+            }
+            res = this._callbackTemplate;
+        }
+        return res;
+    }
+
+    /**
+     * <summary>
+     *   Enable the use of a template file to customize callbacks format.
+     * <para>
+     *   When the custom callback template file is enabled, the template file
+     *   will be loaded for each callback in order to build the data to post to the
+     *   server. If template file does not exist on the YoctoHub, the callback will
+     *   fail with an error message indicating the name of the expected template file.
+     *   Remember to call the <c>saveToFlash()</c> method of the module if the
+     *   modification must be kept.
+     * </para>
+     * <para>
+     * </para>
+     * </summary>
+     * <param name="newval">
+     *   either <c>YNetwork.CALLBACKTEMPLATE_OFF</c> or <c>YNetwork.CALLBACKTEMPLATE_ON</c>
+     * </param>
+     * <para>
+     * </para>
+     * <returns>
+     *   <c>YAPI.SUCCESS</c> if the call succeeds.
+     * </returns>
+     * <para>
+     *   On failure, throws an exception or returns a negative error code.
+     * </para>
+     */
+    public int set_callbackTemplate(int newval)
+    {
+        string rest_val;
+        lock (_thisLock) {
+            rest_val = (newval > 0 ? "1" : "0");
+            return _setAttr("callbackTemplate", rest_val);
+        }
+    }
+
+
+    /**
+     * <summary>
      *   Returns a hashed version of the notification callback credentials if set,
      *   or an empty string otherwise.
      * <para>
@@ -2026,8 +2104,7 @@ public class YNetwork : YFunction
         return FindNetwork(serial + "." + funcId);
     }
 
-
-
     //--- (end of YNetwork functions)
 }
 #pragma warning restore 1591
+

@@ -112,7 +112,7 @@ namespace YoctoVisualisation
         for (int i=0;i< yaxiscount;i++)
           switch(i)
           {
-            case 0: _AllowedValues.Add("1srt Y axis"); break;
+            case 0: _AllowedValues.Add("1rst Y axis"); break;
             case 1: _AllowedValues.Add("2nd Y axis"); break;
             case 2: _AllowedValues.Add("3rd Y axis"); break;
             default: _AllowedValues.Add((i+1).ToString()+"th Y axis"); break;

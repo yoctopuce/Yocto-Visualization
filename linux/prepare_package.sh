@@ -5,7 +5,7 @@
 ## monodevelop  (sudo apt-get install monodevelop)
 
 
-sudo rm -rf yoctovisualization
+rm -rf yoctovisualization
 
 mkdir --mode=755 yoctovisualization/
 mkdir --mode=755 yoctovisualization/usr/
@@ -98,11 +98,5 @@ cp  YoctoVisualization.exe.config yoctovisualization/usr/lib/Yocto-Visualization
 chmod 755 yoctovisualization/usr/lib/Yocto-Visualization/YoctoVisualization.exe
 chmod 644 yoctovisualization/usr/lib/Yocto-Visualization/YoctoVisualization.exe.config
 
-#set all file to root user
-sudo chown -R root:root yoctovisualization
-
-
-dpkg-deb --build yoctovisualization
-
-
+fakeroot dpkg-deb --build yoctovisualization
 lintian yoctovisualization.deb
