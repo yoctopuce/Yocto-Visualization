@@ -1,6 +1,6 @@
 Package: yoctovisualization
-Version: 56784
-Sections: electronics
+Version: 57097
+Depends: libc6, libusb-1.0-0
 Priority: optional
 Architecture: all
 Maintainer: Yoctopuce <dev@yoctopuce.com>
