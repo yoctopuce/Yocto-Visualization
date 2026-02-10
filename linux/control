@@ -1,5 +1,5 @@
 Package: yoctovisualization
-Version: 57762
+Version: 2.5.1234
 Depends: libc6, libusb-1.0-0
 Priority: optional
 Architecture: all

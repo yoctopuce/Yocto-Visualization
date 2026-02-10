@@ -593,7 +593,7 @@ namespace YoctoVisualisation
         if (nic.Supports(NetworkInterfaceComponent.IPv4))
         {
           IPInterfaceProperties ipinfo = nic.GetIPProperties();
-          IPAddressInformationCollection ipaddr = ipinfo.AnycastAddresses;
+          UnicastIPAddressInformationCollection ipaddr = ipinfo.UnicastAddresses;
           foreach (IPAddressInformation any in ipaddr)
           {
             if (ip == any.Address.ToString()) isLocalIP = true;

@@ -36,6 +36,8 @@ mkdir --mode=755 yoctovisualization/usr/share/icons/hicolor/scalable/apps
 
 mkdir --mode=755 yoctovisualization/usr/share/doc
 mkdir --mode=755 yoctovisualization/usr/share/doc/yoctovisualization
+mkdir --mode=755 yoctovisualization/usr/share/man
+mkdir --mode=755 yoctovisualization/usr/share/man/man1
 
 
 #mkdir yoctovisualization/etc
@@ -52,6 +54,12 @@ chmod 644 yoctovisualization/usr/share/doc/yoctovisualization/copyright
 cp changelog yoctovisualization/usr/share/doc/yoctovisualization
 gzip -n -9 yoctovisualization/usr/share/doc/yoctovisualization/changelog
 chmod 644 yoctovisualization/usr/share/doc/yoctovisualization/changelog.gz
+
+#copy manpage
+cp manpage yoctovisualization/usr/share/man/man1/Yocto-Visualization.1
+gzip -n -9 yoctovisualization/usr/share/man/man1/Yocto-Visualization.1
+chmod 644 yoctovisualization/usr/share/man/man1/Yocto-Visualization.1.gz
+
 
 #copy debian control filE
 cp control yoctovisualization/DEBIAN
