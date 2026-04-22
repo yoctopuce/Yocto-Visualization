@@ -90,7 +90,7 @@ namespace YoctoVisualisation
       LogManager.LogNoTS("-check4updates           Re-enable automatic checks for updates");
       LogManager.LogNoTS("---------------------------------------------------------------------------------");
       LogManager.Log("Current configuration file is " + constants.configfile);
-      LogManager.Log("Yocto-Visualization version is " + constants.buildVersion);
+      LogManager.Log("Yocto-Visualization build number is " + constants.buildVersion);
       LogManager.Log("Yoctopuce API version is " + YAPI.GetAPIVersion());
       LogManager.Log("Yoctopuce dynamic library path is " + YAPI.GetYAPIDllPath() );
 

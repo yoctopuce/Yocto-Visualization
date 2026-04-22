@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: yocto_api.cs 71691 2026-02-02 06:59:29Z mvuilleu $
+ * $Id: yocto_api.cs 72340 2026-03-09 13:56:18Z seb $
  *
  * High-level programming interface, common to all modules
  *
@@ -4619,7 +4619,7 @@ public class YAPI
     public const string YOCTO_API_VERSION_STR = "2.1";
     public const int YOCTO_API_VERSION_BCD = 0x0200;
 
-    public const string YOCTO_API_BUILD_NO = "71996";
+    public const string YOCTO_API_BUILD_NO = "72861";
     public const int YOCTO_DEFAULT_PORT = 4444;
     public const int YOCTO_VENDORID = 0x24e0;
     public const int YOCTO_DEVID_FACTORYBOOT = 1;
@@ -6908,7 +6908,7 @@ public class YAPI
             }
             throw;
         }
-        return  "2.1.11996 (" + version + ")";
+        return  "2.1.12861 (" + version + ")";
     }
 
     /**
@@ -11852,11 +11852,11 @@ public class YFunction
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
      * <para>
-     *   The callback is called once when it is registered, passing the current advertised value
-     *   of the function, provided that it is not an empty string.
      *   The callback is then invoked only during the execution of <c>ySleep</c> or <c>yHandleEvents</c>.
-     *   This provides control over the time when the callback is triggered. For good responsiveness, remember to call
-     *   one of these two functions periodically. To unregister a callback, pass a null pointer as argument.
+     *   This provides control over the time when the callback is triggered. For good responsiveness,
+     *   remember to call one of these two functions periodically. The callback is called once juste after beeing
+     *   registered, passing the current advertised value  of the function, provided that it is not an empty string.
+     *   To unregister a callback, pass a null pointer as argument.
      * </para>
      * <para>
      * </para>
@@ -12121,8 +12121,8 @@ public class YFunction
      *   <c>SERIAL</c>     is the serial number of the module if the module is connected or <c>"unresolved"</c>, and
      *   <c>FUNCTIONID</c> is  the hardware identifier of the function if the module is connected.
      *   For example, this method returns <c>Relay(MyCustomName.relay1)=RELAYLO1-123456.relay1</c> if the
-     *   module is already connected or <c>Relay(BadCustomeName.relay1)=unresolved</c> if the module has
-     *   not yet been connected. This method does not trigger any USB or TCP transaction and can therefore be used in
+     *   module is connected or <c>Relay(BadCustomeName.relay1)=unresolved</c> if the module is
+     *   not connected. This method does not trigger any USB or TCP transaction and can therefore be used in
      *   a debugger.
      * </para>
      * <para>
@@ -13474,11 +13474,11 @@ public class YModule : YFunction
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
      * <para>
-     *   The callback is called once when it is registered, passing the current advertised value
-     *   of the function, provided that it is not an empty string.
      *   The callback is then invoked only during the execution of <c>ySleep</c> or <c>yHandleEvents</c>.
-     *   This provides control over the time when the callback is triggered. For good responsiveness, remember to call
-     *   one of these two functions periodically. To unregister a callback, pass a null pointer as argument.
+     *   This provides control over the time when the callback is triggered. For good responsiveness,
+     *   remember to call one of these two functions periodically. The callback is called once juste after beeing
+     *   registered, passing the current advertised value  of the function, provided that it is not an empty string.
+     *   To unregister a callback, pass a null pointer as argument.
      * </para>
      * <para>
      * </para>
@@ -16178,11 +16178,11 @@ public class YSensor : YFunction
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
      * <para>
-     *   The callback is called once when it is registered, passing the current advertised value
-     *   of the function, provided that it is not an empty string.
      *   The callback is then invoked only during the execution of <c>ySleep</c> or <c>yHandleEvents</c>.
-     *   This provides control over the time when the callback is triggered. For good responsiveness, remember to call
-     *   one of these two functions periodically. To unregister a callback, pass a null pointer as argument.
+     *   This provides control over the time when the callback is triggered. For good responsiveness,
+     *   remember to call one of these two functions periodically. The callback is called once juste after beeing
+     *   registered, passing the current advertised value  of the function, provided that it is not an empty string.
+     *   To unregister a callback, pass a null pointer as argument.
      * </para>
      * <para>
      * </para>
@@ -17374,11 +17374,11 @@ public class YDataLogger : YFunction
      * <summary>
      *   Registers the callback function that is invoked on every change of advertised value.
      * <para>
-     *   The callback is called once when it is registered, passing the current advertised value
-     *   of the function, provided that it is not an empty string.
      *   The callback is then invoked only during the execution of <c>ySleep</c> or <c>yHandleEvents</c>.
-     *   This provides control over the time when the callback is triggered. For good responsiveness, remember to call
-     *   one of these two functions periodically. To unregister a callback, pass a null pointer as argument.
+     *   This provides control over the time when the callback is triggered. For good responsiveness,
+     *   remember to call one of these two functions periodically. The callback is called once juste after beeing
+     *   registered, passing the current advertised value  of the function, provided that it is not an empty string.
+     *   To unregister a callback, pass a null pointer as argument.
      * </para>
      * <para>
      * </para>
